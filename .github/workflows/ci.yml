@@ -87,7 +87,7 @@ jobs:
           --health-timeout 5s
           --health-retries 12
     env:
-      DATABASE_URL: postgresql://hotel:hotel_ci_pass@localhost:5432/hotel_erp?schema=public
+      DATABASE_URL: postgresql://hotel:hotel_ci_pass@localhost:5432/hotel_erp
       BACKUP_PASSPHRASE: ci_backup_passphrase_test
       BACKUP_DIR: /tmp/ci-backups
       BACKUP_KEEP_DAYS: 30

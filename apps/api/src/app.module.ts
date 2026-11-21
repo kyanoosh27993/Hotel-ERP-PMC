@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { PrismaService } from './prisma.service';
+import { PrismaModule } from './prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { PermissionsGuard } from './iam/permissions.guard';
@@ -19,6 +19,7 @@ import { MetricsController } from './health/metrics.controller';
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [] }),
     ThrottlerModule.forRoot([{ limit: 300, ttl: 60_000 }]),
+    PrismaModule,
     AuthModule,
     OutboxModule,
     AccountingModule,
@@ -27,7 +28,6 @@ import { MetricsController } from './health/metrics.controller';
   ],
   controllers: [HealthController, MetricsController, IntegrationController],
   providers: [
-    PrismaService,
     AttendanceSimAdapter,
     IntegrationHubService,
     // ترتیب گاردها: ابتدا احراز هویت سپس مجوز
