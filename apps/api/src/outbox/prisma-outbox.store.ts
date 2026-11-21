@@ -22,17 +22,19 @@ export class PrismaOutboxStore implements OutboxStoreLike {
   constructor(private readonly prisma: PrismaService) {}
 
   async claimBatch(limit: number): Promise<ClaimedEvent[]> {
+    // ستون‌ها camelCase هستند (@map فقط روی جدول، نه ستون‌ها) — نام‌ها در RETURNING مستعار می‌شوند
     const rows = await this.prisma.$queryRaw<RawClaimRow[]>`
       UPDATE outbox_events
       SET attempts = attempts + 1
       WHERE id IN (
         SELECT id FROM outbox_events
-        WHERE published_at IS NULL AND next_attempt_at <= now()
-        ORDER BY created_at
+        WHERE "publishedAt" IS NULL AND "nextAttemptAt" <= now()
+        ORDER BY "createdAt"
         LIMIT ${limit}
         FOR UPDATE SKIP LOCKED
       )
-      RETURNING id, event_name, aggregate, producer, version, idempotency_key, payload, created_at
+      RETURNING id, "eventName" AS event_name, aggregate, producer, version,
+                "idempotencyKey" AS idempotency_key, payload, "createdAt" AS created_at
     `;
     return rows.map((r) => ({
       id: r.id,

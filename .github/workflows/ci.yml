@@ -97,14 +97,17 @@ jobs:
         run: |
           cp .env.example .env
           docker compose config -q
-      - name: Backup → verify → wipe → restore round-trip
+      - name: Backup → verify → wipe → restore round-trip (in postgres:16 container for tool parity)
         run: |
           chmod +x infrastructure/backup/*.sh
-          sudo apt-get update -qq && sudo apt-get install -y -qq postgresql-client-16
-          echo "pg_dump: $(pg_dump --version)"   # باید هم‌تراز سرور ۱۶ باشد (SET transaction_timeout فقط در ۱۷)
           psql "$DATABASE_URL" -c 'CREATE TABLE ci_probe(id int primary key); INSERT INTO ci_probe VALUES (42);'
-          infrastructure/backup/backup.sh
+          docker run --rm --network host -v /tmp:/tmp -v "$PWD":/app -w /app \
+            -e DATABASE_URL -e BACKUP_PASSPHRASE -e BACKUP_DIR=/tmp/ci-backups \
+            postgres:16-alpine sh -c "apk add -q --no-cache openssl >/dev/null && sh infrastructure/backup/backup.sh"
           psql "$DATABASE_URL" -c 'DROP TABLE ci_probe;'
-          infrastructure/backup/restore.sh "$(ls /tmp/ci-backups/*.enc | head -1)"
+          BK="$(ls /tmp/ci-backups/*.enc | head -1)"
+          docker run --rm --network host -v /tmp:/tmp -v "$PWD":/app -w /app \
+            -e DATABASE_URL -e BACKUP_PASSPHRASE \
+            postgres:16-alpine sh -c "apk add -q --no-cache openssl >/dev/null && sh infrastructure/backup/restore.sh $BK"
           COUNT=$(psql "$DATABASE_URL" -tAc 'SELECT count(*) FROM ci_probe;')
           [ "$COUNT" = "1" ] && echo "restore round-trip OK (probe=42)" || { echo "restore FAILED"; exit 1; }
