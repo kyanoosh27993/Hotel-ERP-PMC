@@ -12,6 +12,7 @@ import { PrismaService } from '../../src/prisma.service';
 import { OutboxPublisher } from '../../src/outbox/outbox.publisher';
 import { JournalService } from '../../src/accounting/journal.service';
 import { AttendanceSimAdapter } from '../../src/integration/integration-hub.service';
+import { AllExceptionsFilter } from '../../src/common/all-exceptions.filter';
 import { ConflictException } from '@nestjs/common';
 
 process.env.JWT_ACCESS_SECRET ??= 'e2e-access-secret-change-me';
@@ -59,6 +60,8 @@ beforeAll(async () => {
   app = moduleRef.createNestApplication();
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }));
+  // همان خط‌لوله main.ts — شکل استاندارد خطا { error: { code, message } }
+  app.useGlobalFilters(new AllExceptionsFilter());
   await app.init();
   prisma = app.get(PrismaService);
   publisher = app.get(OutboxPublisher);

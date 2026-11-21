@@ -45,8 +45,9 @@ export class ReservationService {
     const total = mulRial(roomType.baseRateRials, nights);
 
     return this.prisma.$transaction(async (tx) => {
-      // قفل مشورتی روی roomTypeId — دو تراکنش هم‌زمان سری می‌شوند (Race-safe)
-      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${input.roomTypeId}))`;
+      // قفل مشورتی روی roomTypeId — دو تراکنش هم‌زمان سری می‌شوند (Race-safe).
+      // خروجی boolean تا Prisma بتواند deserialize کند (تابع اصلی void برمی‌گرداند).
+      await tx.$queryRaw`SELECT true AS locked FROM (SELECT pg_advisory_xact_lock(hashtext(${input.roomTypeId})) AS l) t`;
 
       const overlapping = await tx.reservation.count({
         where: {
