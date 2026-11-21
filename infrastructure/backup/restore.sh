@@ -7,6 +7,9 @@ set -euo pipefail
 : "${BACKUP_PASSPHRASE:?BACKUP_PASSPHRASE is required}"
 TARGET="${1:?usage: restore.sh <file.sql.gz.enc>}"
 
+# پارامترهای اضافه (مثل ?schema=public مخصوص Prisma) برای psql نامعتبرند
+LIBPQ_URL="${DATABASE_URL%%\?*}"
+
 [ -f "$TARGET" ] || { echo "file not found: $TARGET"; exit 1; }
 
 # صحت‌سنجی checksum اگر موجود باشد
@@ -16,6 +19,6 @@ if [ -f "$TARGET.sha256" ]; then
 fi
 
 openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -pass "pass:${BACKUP_PASSPHRASE}" -in "$TARGET" \
-  | gunzip | psql "$DATABASE_URL" --single-transaction --set ON_ERROR_STOP=1
+  | gunzip | psql "$LIBPQ_URL" --single-transaction --set ON_ERROR_STOP=1
 
 echo "restore ok: $TARGET"

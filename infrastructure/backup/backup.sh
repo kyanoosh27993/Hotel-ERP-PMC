@@ -9,11 +9,14 @@ set -euo pipefail
 BACKUP_DIR="${BACKUP_DIR:-./backups}"
 KEEP_DAYS="${BACKUP_KEEP_DAYS:-30}"
 
+# پارامترهای اضافه (مثل ?schema=public مخصوص Prisma) برای ابزارهای libpq نامعتبرند
+LIBPQ_URL="${DATABASE_URL%%\?*}"
+
 mkdir -p "$BACKUP_DIR"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 TARGET="$BACKUP_DIR/hotel_erp_${STAMP}.sql.gz.enc"
 
-pg_dump "$DATABASE_URL" --no-owner --no-privileges | gzip -9 \
+pg_dump "$LIBPQ_URL" --no-owner --no-privileges | gzip -9 \
   | openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt -pass "pass:${BACKUP_PASSPHRASE}" \
   -out "$TARGET"
 

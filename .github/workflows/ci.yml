@@ -57,6 +57,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --no-audit --no-fund
+      - name: Build shared + contracts (type declarations needed by e2e ts-jest)
+        run: npm run build -w packages/shared && npm run build -w packages/contracts
       - name: Prisma generate
         run: npm run prisma:generate -w apps/api
       - name: Migrate deploy (validates migration SQL)
