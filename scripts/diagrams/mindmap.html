@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #FFFFFF; font-family: 'FreeSans', 'FreeSerif', sans-serif; direction: ltr; }
+#mindmap { padding: 60px; display: inline-block; min-width: 100%; position: relative; }
+#mindmap > svg.lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+
+/* ── گره‌ها (متن فارسی راست‌به‌چپ داخل گره) ── */
+.root-node {
+  direction: rtl; color: white; font-size: 21px; font-weight: 700;
+  padding: 20px 30px; border-radius: 12px; white-space: nowrap; flex-shrink: 0;
+  align-self: center; text-align: center; line-height: 1.7;
+  background: linear-gradient(135deg, #1E3A5F, #2D4A6F);
+  box-shadow: 0 4px 12px rgba(30,58,95,0.25);
+}
+.branch-node {
+  direction: rtl; font-size: 15px; font-weight: 600;
+  padding: 10px 20px; border-radius: 8px;
+  white-space: nowrap; flex-shrink: 0; border: 2px solid;
+}
+.sub-node {
+  direction: rtl; font-size: 13px; font-weight: 500;
+  padding: 7px 14px; border-radius: 6px;
+  white-space: nowrap; flex-shrink: 0; border: 1.5px solid; background: #F8FAFC;
+}
+.leaf {
+  direction: rtl; font-size: 13px; font-weight: 400; color: #475569;
+  padding: 4px 12px; background: #FAFAFA;
+  border-radius: 12px; border: 1px solid #E5E7EB;
+  white-space: nowrap; line-height: 1.6; width: fit-content;
+}
+
+/* ── چیدمان دوطرفه ── */
+.lr-tree { display: flex; align-items: center; gap: 0; position: relative; }
+.lr-tree .root-node { margin: 0 60px; }
+.sub-branch { display: flex; align-items: flex-start; gap: 0; }
+.left-branches { display: flex; flex-direction: column; gap: 18px; }
+.left-branch { display: flex; align-items: flex-start; flex-direction: row-reverse; gap: 0; }
+.left-branch .children { display: flex; flex-direction: column; gap: 6px; margin-right: 48px; align-items: flex-end; padding-right: 16px; }
+.left-branch .sub-branch { flex-direction: row-reverse; }
+.left-branch .sub-branch .children { gap: 5px; margin-right: 40px; margin-left: 0; align-items: flex-end; }
+.right-branches { display: flex; flex-direction: column; gap: 18px; }
+.right-branch { display: flex; align-items: flex-start; gap: 0; }
+.right-branch .children { display: flex; flex-direction: column; gap: 6px; margin-left: 48px; align-items: flex-start; padding-left: 16px; }
+.right-branch .sub-branch .children { gap: 5px; margin-left: 40px; align-items: flex-start; }
+
+/* ── رنگ شاخه‌ها ── */
+.c-blue { background: #EFF6FF; border-color: #3B82F6; color: #1E40AF; }
+.c-green { background: #F0FDF4; border-color: #10B981; color: #065F46; }
+.c-amber { background: #FFF7ED; border-color: #F59E0B; color: #92400E; }
+.c-purple { background: #F5F3FF; border-color: #8B5CF6; color: #5B21B6; }
+.c-red { background: #FEF2F2; border-color: #EF4444; color: #991B1B; }
+.c-cyan { background: #ECFEFF; border-color: #06B6D4; color: #155E75; }
+.c-teal { background: #F0FDFA; border-color: #14B8A6; color: #134E4A; }
+</style>
+</head>
+<body>
+<div id="mindmap">
+  <div class="lr-tree">
+
+    <div class="left-branches">
+      <div class="left-branch">
+        <div class="branch-node c-green">بک آفیس</div>
+        <div class="children">
+          <div class="leaf">حسابداری دوطرفه</div>
+          <div class="leaf">انبار چندلایه و انبارگردانی</div>
+          <div class="leaf">کاست کنترل و فرمول تولید</div>
+          <div class="leaf">بهای تمام‌شده و قیمت‌گذاری</div>
+          <div class="leaf">حقوق و منابع انسانی</div>
+          <div class="leaf">دارایی ثابت و استهلاک</div>
+          <div class="leaf">مؤدیان و مالیات‌ها</div>
+          <div class="leaf">داشبورد و گزارش‌های نقش‌محور</div>
+        </div>
+      </div>
+      <div class="left-branch">
+        <div class="branch-node c-purple">هوش مصنوعی</div>
+        <div class="children">
+          <div class="leaf">دستیار مدیر هتل</div>
+          <div class="leaf">سندزنی از اکسل / عکس / PDF</div>
+          <div class="leaf">پیش‌بینی تقاضا و اشغال</div>
+          <div class="leaf">هشدار ناهنجاری مالی</div>
+          <div class="leaf">قیمت‌گذاری هوشمند</div>
+        </div>
+      </div>
+      <div class="left-branch">
+        <div class="branch-node c-red">امنیت</div>
+        <div class="children">
+          <div class="leaf">OWASP ASVS 5.0 و Zero Trust</div>
+          <div class="leaf">MFA و هش Argon2id</div>
+          <div class="leaf">Audit Trail تغییرناپذیر</div>
+          <div class="leaf">رمزنگاری در انتقال و ذخیره</div>
+          <div class="leaf">RBAC + ABAC جزئی</div>
+        </div>
+      </div>
+      <div class="left-branch">
+        <div class="branch-node c-blue">قوانین ۱۴۰۵</div>
+        <div class="children">
+          <div class="leaf">قانون تجارت و دفاتر</div>
+          <div class="leaf">مالیات مستقیم و حقوق</div>
+          <div class="leaf">مالیات بر ارزش افزوده</div>
+          <div class="leaf">پایانه‌ها و سامانه مؤدیان</div>
+          <div class="leaf">قانون کار و بیمه</div>
+          <div class="leaf">مقررات گردشگری و هتلداری</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="root-node">برنامه جامع ۰ تا ۱۰۰<br>نرم‌افزار هتلداری یکپارچه<br><span style="font-size:14px;font-weight:400;color:#B8C4D4">Hotel ERP / PMS</span></div>
+
+    <div class="right-branches">
+      <div class="right-branch">
+        <div class="branch-node c-blue">فاز ۰ — اسناد و تحلیل</div>
+        <div class="children">
+          <div class="leaf">منشور پروژه (Charter)</div>
+          <div class="leaf">BRD و نیازمندی‌ها</div>
+          <div class="leaf">معماری سیستم و ماژول‌ها</div>
+          <div class="leaf">مدل داده و ERD</div>
+          <div class="leaf">مشخصات API و قراردادها</div>
+          <div class="leaf">طراحی UI/UX دوزبانه</div>
+          <div class="leaf">رجیستر ریسک</div>
+        </div>
+      </div>
+      <div class="right-branch">
+        <div class="branch-node c-teal">فاز ۱ — هسته و زیرساخت</div>
+        <div class="children">
+          <div class="leaf">NestJS + PostgreSQL</div>
+          <div class="leaf">احراز هویت و مجوزها</div>
+          <div class="leaf">دوزبانگی و تقویم شمسی</div>
+          <div class="leaf">حسابرسی و ردپای تغییرات</div>
+          <div class="leaf">Docker و CI/CD</div>
+          <div class="leaf">OpenAPI نسخه‌دار</div>
+          <div class="leaf">ریال با عدد صحیح</div>
+        </div>
+      </div>
+      <div class="right-branch">
+        <div class="branch-node c-amber">فرانت آفیس</div>
+        <div class="children">
+          <div class="leaf">پذیرش و مدیریت اتاق</div>
+          <div class="leaf">رزرواسیون و کانال OTA</div>
+          <div class="leaf">صندوق، درگاه و پوز</div>
+          <div class="leaf">رستوران POS + PDA + KDS</div>
+          <div class="leaf">خانه‌داری و لاندری</div>
+          <div class="leaf">تشریفات و سالن همایش</div>
+          <div class="leaf">فروشگاه و فروشگاه اینترنتی</div>
+          <div class="leaf">خدمات جانبی و پارکینگ</div>
+        </div>
+      </div>
+      <div class="right-branch">
+        <div class="branch-node c-cyan">یکپارچگی‌های خارجی</div>
+        <div class="children">
+          <div class="leaf">درگاه بانکی و پوز</div>
+          <div class="leaf">سامانه مؤدیان</div>
+          <div class="leaf">ساعت‌زنی (A5)</div>
+          <div class="leaf">کانال‌های فروش آنلاین</div>
+          <div class="leaf">قفل هوشمند و کی‌کارت</div>
+          <div class="leaf">سنسور دمای سردخانه</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script>
+function drawAllLines() {
+  const map = document.getElementById('mindmap');
+  if (!map) { console.error('no #mindmap'); return; }
+  const cRect = map.getBoundingClientRect();
+  const old = map.querySelector('svg.lines');
+  if (old) old.remove();
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.classList.add('lines');
+  svg.setAttribute('width', cRect.width);
+  svg.setAttribute('height', cRect.height);
+  svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;z-index:1;';
+  let lineCount = 0;
+  function rel(el) {
+    const r = el.getBoundingClientRect();
+    return { cx: r.left - cRect.left + r.width/2, cy: r.top - cRect.top + r.height/2,
+             left: r.left - cRect.left, right: r.right - cRect.left };
+  }
+  function drawLine(x1, y1, x2, y2, color, width) {
+    const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    l.setAttribute('x1', Math.round(x1)); l.setAttribute('y1', Math.round(y1));
+    l.setAttribute('x2', Math.round(x2)); l.setAttribute('y2', Math.round(y2));
+    l.setAttribute('stroke', color); l.setAttribute('stroke-width', width);
+    l.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(l); lineCount++;
+  }
+  const lineStyles = [
+    { color: '#64748B', width: 2.5 }, { color: '#94A3B8', width: 2 },
+    { color: '#A8B4C2', width: 1.5 }, { color: '#B8C2CC', width: 1.2 },
+    { color: '#CBD5E1', width: 1 },
+  ];
+  function getLineStyle(depth) { return lineStyles[Math.min(depth, lineStyles.length - 1)]; }
+  function connect(parentEl, childEls, color, width, dir) {
+    if (!childEls.length) return;
+    const p = rel(parentEl);
+    const startX = dir === 'left' ? p.left : p.right;
+    const startY = p.cy;
+    if (childEls.length === 1) {
+      const c = rel(childEls[0]);
+      const endX = dir === 'left' ? c.right : c.left;
+      const midY = Math.round((startY + c.cy) / 2);
+      drawLine(startX, midY, endX, midY, color, width);
+      return;
+    }
+    let closestEdge;
+    if (dir === 'left') closestEdge = Math.max(...childEls.map(ch => rel(ch).right));
+    else closestEdge = Math.min(...childEls.map(ch => rel(ch).left));
+    const childClearance = 16;
+    const midpoint = startX + (closestEdge - startX) / 2;
+    const midFromChild = dir === 'left' ? closestEdge + childClearance : closestEdge - childClearance;
+    const midX = dir === 'left' ? Math.min(midpoint, midFromChild) : Math.max(midpoint, midFromChild);
+    drawLine(startX, startY, midX, startY, color, width);
+    const allCYs = childEls.map(ch => rel(ch).cy);
+    const minY = Math.min(startY, ...allCYs), maxY = Math.max(startY, ...allCYs);
+    drawLine(midX, minY, midX, maxY, color, width);
+    childEls.forEach(ch => {
+      const c = rel(ch);
+      const endX = dir === 'left' ? c.right : c.left;
+      drawLine(midX, c.cy, endX, c.cy, color, width);
+    });
+  }
+  const NODE_SEL = '.branch-node, .sub-node, .leaf, .deep-node';
+  const CONTAINER_SEL = ':scope > .children, :scope > .leaf-group, :scope > .deep-group';
+  function processChildren(parentNodeEl, containerEl, depth, dir) {
+    if (!containerEl) return;
+    const childNodeEls = [];
+    for (const wrapper of containerEl.children) {
+      const nodeEl = wrapper.matches?.(NODE_SEL) ? wrapper : wrapper.querySelector(NODE_SEL);
+      if (nodeEl) childNodeEls.push(nodeEl);
+    }
+    if (!childNodeEls.length) return;
+    const style = getLineStyle(depth);
+    connect(parentNodeEl, childNodeEls, style.color, style.width, dir);
+    for (const wrapper of containerEl.children) {
+      const nodeEl = wrapper.matches?.(NODE_SEL) ? wrapper : wrapper.querySelector(NODE_SEL);
+      if (!nodeEl) continue;
+      wrapper.querySelectorAll(CONTAINER_SEL).forEach(nc => processChildren(nodeEl, nc, depth + 1, dir));
+    }
+  }
+  const rootNode = map.querySelector('.root-node');
+  const rp = rel(rootNode);
+  [['.left-branches > .left-branch', 'left'], ['.right-branches > .right-branch', 'right']].forEach(([sel, dir]) => {
+    const branches = map.querySelectorAll(sel);
+    const bNodes = [];
+    branches.forEach(b => { const n = b.querySelector('.branch-node'); if (n) bNodes.push(n); });
+    if (bNodes.length) connect(rootNode, bNodes, lineStyles[0].color, lineStyles[0].width, dir);
+    branches.forEach(b => {
+      const n = b.querySelector('.branch-node');
+      if (n) processChildren(n, b.querySelector(':scope > .children'), 1, dir);
+    });
+  });
+  map.insertBefore(svg, map.firstChild);
+  console.log('Drew ' + lineCount + ' lines');
+}
+window.addEventListener('load', () => setTimeout(drawAllLines, 300));
+</script>
+</body>
+</html>

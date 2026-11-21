@@ -35,6 +35,29 @@
 | --- | --- | --- |
 | v0.1 | ۱۴۰۵/۰۹/۰۱ | هسته + حقوق + داشبورد AI + قوانین |
 
+### نشست ۲۱ نوامبر ۲۰۲۶ (۱۴۰۵/۰۹/۳۰) — برنامه ۰ تا ۱۰۰ و تکمیل فاز ۰
+- **سند مشاوره جدید کارفرما** (upload/low.txt) کامل تحلیل شد: ۷ رقیب (باضافه Hotelogix و Infor HMS)،
+  قابلیت‌های عرضی ۷گانه (Cash Flow، BI، Document Workflow، Digital Signature، Disaster Recovery،
+  Offline Operation، API Marketplace)، فناوری‌های جدید (OpenTelemetry+Grafana، Sentry، Jest+Playwright،
+  OCR+PDF Parser، نقشه)، ساختار سلسله‌مراتبی انبار، Recipe Versioning، ۱۴ فیلد سند مالی،
+  متادیتای ۱۲گانه قانون، ۵ فلوچارت Mermaid روابط، مدل داده و ۱۲ قاعده، ۲۲ اپ اندرویدی/Adapter.
+- **برنامه اجرایی ۰ تا ۱۰۰** تولید و در حافظه دائمی ذخیره شد:
+  `docs/20-master-workplan/WORKPLAN-0-100.md` — ۱۴ فاز (۰–۱۳)، ~۷۵ تسک شناسه‌دار (F0-T1…F13-T6)
+  با خروجی/وابستگی/معیار پذیرش، ۲۴ قلم جدید سند مشاوره نگاشت‌شده، ۱۲ نقطه عطف (M0…M12)،
+  پروتکل ثابت هر فاز (شروع→اجرا→تست→تحویل→دروازه→ثبت حافظه).
+- **گرافیک‌ها:** نقشه ذهنی ۸شاخه (فاز۰/فاز۱/فرانت/بک/یکپارچگی/AI/امنیت/قوانین — ~۶۰ گره، ۸۰ اتصال)
+  + دیاگرام روابط اجزا ۵لایه/۱۶گام → `docs/20-master-workplan/assets/{mindmap,relations}.png`
+  (سورس: scripts/diagrams/*.html + render.py — قابل بازتولید).
+- **اسناد فاز ۰ تکمیل شد:** docs/01-project-charter/CHARTER.md (+رجیستر ریسک ۸گانه)،
+  docs/02-business-requirements/BRD.md (۲۴+۵ ماژول فرانت، ۱۴ بک، ماتریس ردیابی، الگوهای ۷ رقیب)،
+  docs/03-system-architecture/ARCHITECTURE.md (۵ فلوچارت Mermaid + قواعد Outbox/Adapter)،
+  docs/04-database-design/DATA-MODEL.md (ER + ۱۲ قاعده + ۱۴ فیلد سند)،
+  docs/05-api-specification/API-SPEC.md (نسخه‌دار/Idempotency/خطاها)، docs/06-ui-ux/UI-UX.md.
+- **تحویل کارفرما:** سند docx «برنامه اجرایی ۰ تا ۱۰۰» + دو گرافیک در download/ و کپی در
+  docs/20-master-workplan/. دروازه M0: تأیید کارفرما بر اسناد.
+- **وضعیت دروازه:** فاز ۰ کامل — پس از تأیید کارفرما، فاز ۱ (زیرساخت NestJS+PostgreSQL+CI طبق
+  تسک‌های F1-T1 تا F1-T9) شروع می‌شود.
+
 ### کارهای باقی‌مانده فاز جاری (فاز بعدی: شروع بلافاصله)
 - [ ] تکمیل اسناد تحلیل/معماری docs/01 تا docs/06 (شرط ۱ روش فازبندی — پیش از ماژول‌های جدید)
 - [ ] زیرساخت هسته اصلی طبق پشته قرارداد (NestJS + PostgreSQL + Docker + OpenAPI) — شرط ۲ روش فازبندی

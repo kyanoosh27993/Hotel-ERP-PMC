@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --text: #111827; --text-sub: #6B7280; --border: #E5E7EB;
+}
+body { background: #FFFFFF; font-family: 'FreeSans', 'FreeSerif', sans-serif; color: var(--text); -webkit-font-smoothing: antialiased; }
+#root { width: fit-content; min-width: 900px; max-width: 1080px; margin: 0 auto; padding: 48px 40px; direction: rtl; }
+
+.flow-title { font-size: 23px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+.flow-subtitle { font-size: 13.5px; color: var(--text-sub); text-align: center; margin-bottom: 36px; }
+
+.phase-group { background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px 24px; margin-bottom: 0; }
+.phase-title { font-size: 16.5px; font-weight: 700; padding: 10px 16px; border-radius: 8px; margin-bottom: 14px; }
+.phase-desc { font-size: 12.5px; color: #64748B; margin: -8px 0 12px; padding-right: 6px; }
+.phase-steps { display: flex; flex-direction: column; gap: 8px; padding-right: 10px; }
+.phase-step {
+  direction: rtl; font-size: 14px; font-weight: 400; color: var(--text);
+  padding: 9px 14px; background: white; border-radius: 6px;
+  border: 1px solid var(--border); line-height: 1.7;
+}
+.phase-step b { font-weight: 600; }
+.step-num {
+  display: inline-block; width: 23px; height: 23px; line-height: 23px; text-align: center;
+  border-radius: 50%; font-size: 12px; font-weight: 600; margin-left: 9px;
+}
+.arrow { text-align: center; color: #94A3B8; font-size: 26px; margin: 10px 0; line-height: 1; }
+.arrow small { display: block; font-size: 11.5px; color: #94A3B8; margin-top: 2px; }
+
+/* طرح B خنثی + آبی پیش‌رونده (۵ فاز) */
+.phase-1 .phase-title { background: #F8FAFC; color: #334155; border-right: 4px solid #94A3B8; }
+.phase-1 .step-num { background: #F1F5F9; color: #475569; }
+.phase-2 .phase-title { background: #F1F5F9; color: #334155; border-right: 4px solid #7B8FA3; }
+.phase-2 .step-num { background: #E2E8F0; color: #475569; }
+.phase-3 .phase-title { background: #E8EDF3; color: #2D4156; border-right: 4px solid #6B809A; }
+.phase-3 .step-num { background: #DBEAFE; color: #2D4156; }
+.phase-4 .phase-title { background: #E2E8F0; color: #283C52; border-right: 4px solid #5B7590; }
+.phase-4 .step-num { background: #D0D9E4; color: #283C52; }
+.phase-5 .phase-title { background: #DAE1EB; color: #23364D; border-right: 4px solid #4B6A87; }
+.phase-5 .step-num { background: #C7D2E0; color: #23364D; }
+
+.note-card {
+  margin-top: 26px; background: #FFFFFF; border: 1.5px dashed #C7D2E0;
+  border-radius: 10px; padding: 14px 20px; font-size: 12.5px; color: #475569; line-height: 1.9;
+}
+.note-card b { color: #283C52; }
+</style>
+</head>
+<body>
+<div id="root">
+  <div class="flow-title">روابط اجزای برنامه — جریان یکپارچه داده و پول</div>
+  <div class="flow-subtitle">از رزرو مهمان تا سند حسابداری و گزارش مدیریت، بدون ورود مجدد داده (ترسیم بر پایه بخش ۵ سند کارفرما)</div>
+
+  <div class="phase-group phase-1">
+    <div class="phase-title">۱) مشتری و رزرو</div>
+    <div class="phase-steps">
+      <div class="phase-step"><span class="step-num">۱</span><b>کانال‌های ورودی:</b> موتور رزرو آنلاین سایت، OTAها، تلفنی و حضوری، کیوسک سلف‌سرویس</div>
+      <div class="phase-step"><span class="step-num">۲</span><b>رزرواسیون:</b> کنترل ظرفیت و نرخ، رزرو گروهی، پیش‌پرداخت و ضمانت</div>
+      <div class="phase-step"><span class="step-num">۳</span><b>پذیرش:</b> تخصیص اتاق، ثبت ورود، شناسنامه اقامت دیجیتال با امضا</div>
+    </div>
+  </div>
+  <div class="arrow">↓<small>ReservationConfirmed → GuestCheckedIn</small></div>
+
+  <div class="phase-group phase-2">
+    <div class="phase-title">۲) خدمات و فروش (فرانت آفیس)</div>
+    <div class="phase-steps">
+      <div class="phase-step"><span class="step-num">۴</span><b>رستوران:</b> سفارش PDA/اندروید → POS → نمایشگر آشپزخانه (KDS) → تحویل</div>
+      <div class="phase-step"><span class="step-num">۵</span><b>سایر خدمات:</b> خانه‌داری، لاندری، تشریفات، فروشگاه، پارکینگ، تاکسی، اینترنت مهمان</div>
+      <div class="phase-step"><span class="step-num">۶</span><b>فولیو و صندوق:</b> شارژ خودکار همه خدمات به حساب مهمان، تسویه نقد/کارت/انتقالی (درگاه و پوز)</div>
+    </div>
+  </div>
+  <div class="arrow">↓<small>ChargePosted · OrderServed · FolioSettled</small></div>
+
+  <div class="phase-group phase-3">
+    <div class="phase-title">۳) مواد، انبار و بهای تمام‌شده</div>
+    <div class="phase-steps">
+      <div class="phase-step"><span class="step-num">۷</span><b>درخواست و خرید:</b> درخواست بخش‌ها ← گردش تأیید ← سفارش خرید ← رسید کالا ← کنترل کیفیت (تطبیق سه‌طرفه)</div>
+      <div class="phase-step"><span class="step-num">۸</span><b>انبار چندلایه:</b> مرکزی (غذایی/غیرغذایی/یخچال/سردخانه)، شارژ کد کاست، ضایعات، تجهیزات</div>
+      <div class="phase-step"><span class="step-num">۹</span><b>فرمول و کاست کنترل:</b> مصرف خودکار از دستور ساخت (Recipe)، نسخه‌بندی فرمول، کنترل نسخ و انحراف</div>
+      <div class="phase-step"><span class="step-num">۱۰</span><b>بهای تمام‌شده و قیمت‌گذاری:</b> هزینه استاندارد در برابر واقعی، قیمت فروش پیشنهادی از روی حاشیه هدف</div>
+    </div>
+  </div>
+  <div class="arrow">↓<small>GoodsIssued · RecipeCostCalculated</small></div>
+
+  <div class="phase-group phase-4">
+    <div class="phase-title">۴) حسابداری مرکزی و انطباق قانونی</div>
+    <div class="phase-steps">
+      <div class="phase-step"><span class="step-num">۱۱</span><b>موتور سند خودکار:</b> هر رویداد عملیاتی طبق قواعد از پیش تعریف‌شده، سند دوطرفه می‌سازد (اتمیک و دارای ردپا)</div>
+      <div class="phase-step"><span class="step-num">۱۲</span><b>دفاتر و صورت‌های مالی:</b> دفتر روزنامه/کل/معین، مراکز هزینه و سود، قفل دوره، تراز و سود و زیان</div>
+      <div class="phase-step"><span class="step-num">۱۳</span><b>انطباق ایران:</b> صورتحساب الکترونیکی و ارسال به سامانه مؤدیان، ارزش افزوده، معاملات فصلی، لیست‌های حقوق و بیمه</div>
+    </div>
+  </div>
+  <div class="arrow">↓<small>JournalEntryPosted · InvoiceIssued</small></div>
+
+  <div class="phase-group phase-5">
+    <div class="phase-title">۵) هوشمندی، کنترل و گزارش</div>
+    <div class="phase-steps">
+      <div class="phase-step"><span class="step-num">۱۴</span><b>داشبوردهای نقش‌محور:</b> مدیرعامل (اشغال، درآمد، سود)، مدیر مالی (بانک، مطالبات، مغایرت POS)، رستوران و خانه‌داری</div>
+      <div class="phase-step"><span class="step-num">۱۵</span><b>لایه هوش مصنوعی:</b> گزارش تلفیقی با استناد به داده، سندزنی از اکسل/عکس/PDF تا پیش‌نویس، پیش‌بینی و هشدار</div>
+      <div class="phase-step"><span class="step-num">۱۶</span><b>کنترل و حسابرسی:</b> حسابرسی شبانه خودکار، هشدار ناهنجاری، Audit Trail تغییرناپذیر همه اسناد</div>
+    </div>
+  </div>
+
+  <div class="note-card">
+    <b>قاعده معماری:</b> هر ماژول عملیات خود را ثبت می‌کند و اسناد حسابداری فقط از «موتور مرکزی سند» و بر پایه رویدادهای دامنه‌ای (با الگوی Outbox) تولید می‌شوند؛ شناسه مرجع مشترک بین فروش و مصرف، کل زنجیره را قابل ردیابی می‌کند.
+  </div>
+</div>
+</body>
+</html>
