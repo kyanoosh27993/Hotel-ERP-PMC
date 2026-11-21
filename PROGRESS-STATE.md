@@ -96,7 +96,14 @@
 - **باگ‌های پیدا/رفع‌شده در تست‌ها:** assertRial نوع نامعتبر، ترتیب صحت‌سنجی ممیز شناور،
   `throw;` نامجاز در TS، next.config.ts→mjs (Next 14)، انتظار نادرست تست مهر ۱۴۰۵ (اعتدال
   پاییز = ۲۳ سپتامبر) — الگوریتم تقویم صحیح بود.
-- **در انتظار:** سبز شدن CI در گیت‌هاب → لینک‌ها + دروازه M1 (تست کارفرما).
+- **CI سبز شد (run 44957575792، ۲۱ نوامبر):** هر سه job موفق — quality (lint+build+unit)،
+  e2e 16/16 با PostgreSQL واقعی، infra (compose + بکاپ/بازیابی round-trip). باگ‌های مسیر CI که
+  رفع شدند: prisma generate در job بیلد، DI سراسری PrismaService (PrismaModule)، شکل خطای e2e
+  (فیلتر استاندارد در اپ تست)، void advisory lock (SELECT true FROM (...))، camelCase ستون‌ها در
+  claimBatch، UUID موتور سیستمی (createdById=null)، هم‌ترازی pg_dump 16 (round-trip داخل کانتینر
+  postgres:16-alpine). دیباگ e2e محلی با Postgres embedded (scripts/local-pg.mjs، پورت 5433).
+- **دروازه M1 — تحویل به کارفرما برای تست:** راهنمای تست در فایل فاز ۱ گیت‌هاب
+  (README-phase1-test.md). پس از تأیید، فاز ۲/۳ (تکمیل حقوق و داشبوردها) ادامه می‌یابد.
 
 ### کارهای باقی‌مانده فاز جاری (فاز بعدی: شروع بلافاصله)
 - [x] تکمیل اسناد تحلیل/معماری docs/01 تا docs/06 (شرط ۱ روش فازبندی) — نشست تکمیلی ۱
