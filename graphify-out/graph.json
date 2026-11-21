@@ -1,0 +1,221 @@
+{
+ "generated": true,
+ "root": "/home/z/my-project/hotel-erp",
+ "files": [
+  {
+   "path": "AI_DEVELOPMENT_RULES.md",
+   "lines": 94,
+   "bytes": 9374,
+   "desc": "قوانین ۲۰گانه مالک + چک‌لیست انطباق (قانون ۱۹)"
+  },
+  {
+   "path": "CHANGELOG.md",
+   "lines": 13,
+   "bytes": 1136,
+   "desc": ""
+  },
+  {
+   "path": "PHASES.md",
+   "lines": 49,
+   "bytes": 4620,
+   "desc": "فازبندی و وضعیت فازها (قانون ۱۸)"
+  },
+  {
+   "path": "PROGRESS-STATE.md",
+   "lines": 51,
+   "bytes": 4793,
+   "desc": "حافظه پایدار بین نشست‌ها"
+  },
+  {
+   "path": "README.md",
+   "lines": 44,
+   "bytes": 2448,
+   "desc": ""
+  },
+  {
+   "path": "apps/web/assets/css/main.css",
+   "lines": 195,
+   "bytes": 10602,
+   "desc": "استایل RTL، سه تم، ریسپانسیو موبایل"
+  },
+  {
+   "path": "apps/web/assets/js/app.js",
+   "lines": 105,
+   "bytes": 4155,
+   "desc": "شل برنامه: سایدبار، نوار بالا، ساعت شمسی، روتر",
+   "functions": [
+    "el",
+    "moduleCalendar",
+    "boot",
+    "go",
+    "closeMobile",
+    "tick"
+   ]
+  },
+  {
+   "path": "apps/web/assets/js/data-table.js",
+   "lines": 196,
+   "bytes": 8324,
+   "desc": "جدول استاندارد: جستجو/سورت/فیلتر/سطر جمع (قانون ۱۲)",
+   "functions": [
+    "createDataTable",
+    "val",
+    "filtered",
+    "sorted",
+    "build",
+    "buildBody"
+   ]
+  },
+  {
+   "path": "apps/web/assets/js/jalali.js",
+   "lines": 239,
+   "bytes": 11060,
+   "desc": "موتور تقویم شمسی + ویجت انتخاب تاریخ (قانون ۲)",
+   "functions": [
+    "div",
+    "mod",
+    "jalCal",
+    "g2d",
+    "d2g",
+    "j2d",
+    "d2j",
+    "el",
+    "render"
+   ]
+  },
+  {
+   "path": "apps/web/assets/js/laws-params.js",
+   "lines": 59,
+   "bytes": 3903,
+   "desc": "پارامترهای قانونی ۱۴۰۵ منبع‌دار (قانون ۱۶)",
+   "functions": []
+  },
+  {
+   "path": "apps/web/assets/js/modules/dashboard.js",
+   "lines": 170,
+   "bytes": 9487,
+   "desc": "داشبورد مدیر AI: گزارش روزانه + تحلیل (قانون ۱۷)",
+   "functions": [
+    "el",
+    "barChart",
+    "analyze",
+    "seedReports"
+   ]
+  },
+  {
+   "path": "apps/web/assets/js/modules/payroll.js",
+   "lines": 357,
+   "bytes": 18250,
+   "desc": "UI حقوق: پرسنل/قرارداد/احکام/محاسبه/لیست‌ها",
+   "functions": [
+    "el",
+    "renderTabs",
+    "activate",
+    "exportCsv",
+    "printTable",
+    "listTab",
+    "showRun",
+    "personForm"
+   ]
+  },
+  {
+   "path": "apps/web/assets/js/modules/settings.js",
+   "lines": 130,
+   "bytes": 6454,
+   "desc": "تنظیمات تم/فونت/پارامتر قانونی/بک‌آپ",
+   "functions": [
+    "el"
+   ]
+  },
+  {
+   "path": "apps/web/assets/js/num.js",
+   "lines": 64,
+   "bytes": 3306,
+   "desc": "اعداد دوزبانه، پول ریال/تومان، shrink-to-fit (قوانین ۱۳،۱۴)",
+   "functions": []
+  },
+  {
+   "path": "apps/web/assets/js/payroll-engine.js",
+   "lines": 84,
+   "bytes": 4688,
+   "desc": "موتور محاسبه حقوق + لیست‌های مالیات/بیمه/بانک (فاز ۲)",
+   "functions": []
+  },
+  {
+   "path": "apps/web/assets/js/store.js",
+   "lines": 48,
+   "bytes": 3499,
+   "desc": "حافظه داده localStorage + بک‌آپ/بازیابی",
+   "functions": [
+    "persist"
+   ]
+  },
+  {
+   "path": "apps/web/assets/js/themes.js",
+   "lines": 78,
+   "bytes": 4258,
+   "desc": "۳ تم + فونت جدا متن/عدد (قانون ۱۱)",
+   "functions": [
+    "save",
+    "apply"
+   ]
+  },
+  {
+   "path": "apps/web/index.html",
+   "lines": 24,
+   "bytes": 993,
+   "desc": "شل HTML و ترتیب بارگذاری اسکریپت‌ها"
+  },
+  {
+   "path": "docs/11-iran-compliance/IRAN-LAWS.md",
+   "lines": 95,
+   "bytes": 8071,
+   "desc": "کتابخانه قوانین ایران با نقشه دسترسی سریع"
+  },
+  {
+   "path": "docs/18-module-references/hoteldashboard-notes.md",
+   "lines": 32,
+   "bytes": 2454,
+   "desc": ""
+  },
+  {
+   "path": "docs/18-module-references/payroll-releases-notes.md",
+   "lines": 37,
+   "bytes": 2875,
+   "desc": ""
+  },
+  {
+   "path": "graphify-out/graph.json",
+   "lines": 209,
+   "bytes": 4529,
+   "desc": ""
+  },
+  {
+   "path": "graphify-out/map.md",
+   "lines": 30,
+   "bytes": 2589,
+   "desc": ""
+  },
+  {
+   "path": "scripts/generate-map.py",
+   "lines": 78,
+   "bytes": 4300,
+   "desc": ""
+  },
+  {
+   "path": "scripts/watch-map.sh",
+   "lines": 16,
+   "bytes": 762,
+   "desc": ""
+  },
+  {
+   "path": "tests/run-tests.js",
+   "lines": 86,
+   "bytes": 5044,
+   "desc": "",
+   "functions": [
+    "t"
+   ]
+  }
+ ]
+}

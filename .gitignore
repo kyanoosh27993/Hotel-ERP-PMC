@@ -1,0 +1,6 @@
+# artifacts
+node_modules/
+*.log
+.DS_Store
+/tmp/
+# نقشه graphify خروجی تولیدی است ولی برای حفظ حافظه کامیت می‌شود (قوانین ۳،۴،۵)
