@@ -1,0 +1,23 @@
+{
+  "name": "@hotel-erp/web-next",
+  "version": "0.2.0",
+  "private": true,
+  "description": "وب کلاینت Next.js — فاز ۱: شل دوزبانه EN/RTL + اتصال به API هسته",
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "next lint || eslint \"app/**/*.tsx\" \"app/**/*.ts\" --max-warnings 0"
+  },
+  "dependencies": {
+    "next": "^14.2.8",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.5.4"
+  }
+}

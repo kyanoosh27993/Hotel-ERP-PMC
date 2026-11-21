@@ -3,4 +3,12 @@ node_modules/
 *.log
 .DS_Store
 /tmp/
+dist/
+build/
+.next/
+coverage/
+backups/
+*.tsbuildinfo
+.env
+.env.local
 # نقشه graphify خروجی تولیدی است ولی برای حفظ حافظه کامیت می‌شود (قوانین ۳،۴،۵)

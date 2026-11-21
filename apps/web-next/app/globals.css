@@ -1,0 +1,6 @@
+/* globals.css — شل فاز ۱؛ تم‌ها در فازهای بعد از v0.1 منتقل می‌شوند */
+:root { color-scheme: light; }
+html, body { margin: 0; padding: 0; background: #F8FAFC; color: #111827; }
+.rtl { text-align: right; }
+.ltr { text-align: left; }
+code { background: #E2E8F0; padding: 0 4px; border-radius: 4px; }

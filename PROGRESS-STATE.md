@@ -58,10 +58,50 @@
 - **وضعیت دروازه:** فاز ۰ کامل — پس از تأیید کارفرما، فاز ۱ (زیرساخت NestJS+PostgreSQL+CI طبق
   تسک‌های F1-T1 تا F1-T9) شروع می‌شود.
 
+### نشست ۲۱ نوامبر ۲۰۲۶ (تکمیلی ۲) — فاز ۱: هسته نرم‌افزاری کامل (F1-T1…T9)
+- **دروازه M0** تأیید کارفرما دریافت شد؛ فاز ۱ طبق WORKPLAN-0-100 اجرا شد.
+  📌 دستور جدید کارفرما: تحویل‌ها فقط در گیت‌هاب + لینک در گفتگو (خروجی در download نگذار).
+- **مونوریپو npm workspaces:** `packages/shared` (money ریال-BigInt، jalali پورت تأییدشده v0.1 با
+  کبیسه ۱۴۰۳، i18n EN پیش‌فرض/FA-RTL)، `packages/contracts` (نام‌گذاری رویدادها + پاکت استاندارد +
+  درگاه‌های سرویس نسخه‌دار)، `apps/api` (NestJS 10)، `apps/web-next` (Next 14 شل دوزبانه standalone).
+  apps/web قبلی v0.1 دست‌نخورده و ۳۲/۳۲ تست سبز.
+- **Prisma/PostgreSQL (F1-T4):** schema هسته کامل (users/roles/permissions، refresh_tokens،
+  audit_logs تغییرناپذیر، outbox_events/inbox_events، room_types/rooms/reservations،
+  pos_outlets/orders، accounts/journal_entries+lines/fiscal_periods/event_journal_rules) —
+  ریال BigInt (قاعده ۷)، UUID db-generated؛ مهاجرت `20260621000000_core` (۳۸۸ سطر) تولید+validate؛
+  seed: ماتریس نقش‌ها (حسابدار بدون تأیید/تأییدکننده بدون ثبت)، ۴ کاربر نمونه، ۱۱ حساب، دوره‌های
+  مالی (ماه گذشته LOCKED)، اتاق‌ها/اوتلت، قواعد نگاشت رویداد→سند پارامتریک.
+- **Auth (F1-T3):** Argon2id (@node-rs)؛ access 15min + refresh چرخشی با SHA-256 hash و
+  تشخیص استفاده مجدد→ابطال کل زنجیره؛ TOTP نقش‌های حساس؛ گاردهای سراسری
+  JwtAuthGuard→PermissionsGuard + @Public؛ Throttler (login 10/min)؛ audit برای LOGIN/شکست/MFA.
+- **Outbox (F1-T2):** enqueue در همان $transaction؛ ناشر با FOR UPDATE SKIP LOCKED + backoff
+  نمایی + unref timer؛ مصرف‌کنندگان تکرارپذیر (inbox_events کلید=شناسه رویداد). PoCها:
+  رزرو Race-safe (pg_advisory_xact_lock + هم‌پوشانی بازه) → هم‌زمانی دقیقاً یک 201/یک 409؛
+  POS (مالیات permille صحیح) → رویداد → سند دوطرفه خودکار متوازن (1101/4102/2201) از قاعده
+  پارامتریک؛ replay idempotencyKey بدون سند دوم؛ سناریوی کرش: ثبت بدون انتشار → publishOnce →
+  سند دقیقاً یک‌بار.
+- **مالی:** تأیید فقط با مجوز approver و خودتأییری ممنوع؛ برگشت با سند معکوس+دلیل؛ قفل دوره
+  (ثبت در LOCKED → 409)؛ سند نامتوازن → رد؛ شماره سند JV-YYYY-000001.
+- **Integration Hub (F1-T6):** رجیستری Adapter + Adapter شبیه‌سازی‌شده ساعت‌زنی (healthy/degraded،
+  صف آفلاین بدون گم‌شدن داده) + /integrations endpoints.
+- **رصد (F1-T7):** OpenTelemetry sdk (فقط با endpoint)، Sentry (فقط با DSN)، /metrics Prometheus
+  (uptime/db_up/outbox_pending)؛ otel-collector + Prometheus + Grafana provisioning در compose
+  پروفایل observability.
+- **بکاپ/DR (F1-T8):** backup.sh (pg_dump|gzip|AES-256-CBC PBKDF2 200k + SHA256 + rotate) و
+  restore.sh اتمیک + docs/16-deployment/DR-RUNBOOK.md (جدول آزمون فصلی) + round-trip در CI.
+- **CI (F1-T9):** .github/workflows/ci.yml — jobهای quality (lint+build+unit)، e2e (postgres
+  service + migrate deploy + seed + e2e پذیرش)، infra (compose config + بکاپ/بازیابی round-trip).
+- **تست‌ها:** shared 16/16 ✓، api unit 25/25 ✓، e2e ۱۴ سناریو (فقط با DB — در CI)؛
+  dev-start و چک‌لیست پایان تسک در docs/16-deployment/DEV-START.md.
+- **باگ‌های پیدا/رفع‌شده در تست‌ها:** assertRial نوع نامعتبر، ترتیب صحت‌سنجی ممیز شناور،
+  `throw;` نامجاز در TS، next.config.ts→mjs (Next 14)، انتظار نادرست تست مهر ۱۴۰۵ (اعتدال
+  پاییز = ۲۳ سپتامبر) — الگوریتم تقویم صحیح بود.
+- **در انتظار:** سبز شدن CI در گیت‌هاب → لینک‌ها + دروازه M1 (تست کارفرما).
+
 ### کارهای باقی‌مانده فاز جاری (فاز بعدی: شروع بلافاصله)
-- [ ] تکمیل اسناد تحلیل/معماری docs/01 تا docs/06 (شرط ۱ روش فازبندی — پیش از ماژول‌های جدید)
-- [ ] زیرساخت هسته اصلی طبق پشته قرارداد (NestJS + PostgreSQL + Docker + OpenAPI) — شرط ۲ روش فازبندی
-- [ ] GitHub Actions workflow (CI: تست خودکار + lint + بیلد نقشه)
+- [x] تکمیل اسناد تحلیل/معماری docs/01 تا docs/06 (شرط ۱ روش فازبندی) — نشست تکمیلی ۱
+- [x] زیرساخت هسته اصلی طبق پشته قرارداد (NestJS + PostgreSQL + Docker + OpenAPI) — نشست تکمیلی ۲
+- [x] GitHub Actions workflow (CI: تست خودکار + lint + بیلد) — ci.yml
 - [ ] تقویم شمسی: رویدادهای مناسبت‌های سال ۱۴۰۵+ (ثبت JSON پارامتریک) — تمدید تا ۱۵۰۰ به‌صورت
       fixed Holidays + محاسبات قمری با الگوریتم تقویم هجری قمری
 - [ ] ماژول حقوق: اتصال مستقیم فرمول‌ها به docs/11-iran-compliance (پله دقیق مالیات حقوق ۱۴۰۵

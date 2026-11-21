@@ -1,0 +1,356 @@
+// schema.prisma — هسته فاز ۱ (قواعد ۱۲گانه سند ۰۴)
+// ریال = BigInt صحیح (قاعده ۷) | UUID پایه (قاعده ۱) | اسناد مالی حذف فیزیکی ندارند (قاعده ۳)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── IAM ─────────────────────────
+
+model User {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username     String   @unique
+  passwordHash String
+  fullName     String
+  email        String?  @unique
+  mfaSecret    String?
+  mfaEnabled   Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  roles         UserRole[]
+  refreshTokens RefreshToken[]
+  auditLogs     AuditLog[]     @relation("AuditActor")
+  createdEntries JournalEntry[] @relation("EntryCreator")
+  approvedEntries JournalEntry[] @relation("EntryApprover")
+
+  @@map("users")
+}
+
+model Role {
+  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String  @unique // admin | accountant | approver | front_desk | ...
+  displayNameEn  String
+  displayNameFa  String
+  sensitiveMfa   Boolean @default(false) // ورود این نقش نیاز به MFA دارد
+
+  users       UserRole[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code          String @unique
+  descriptionEn String
+  descriptionFa String
+
+  roles RolePermission[]
+
+  @@map("permissions")
+}
+
+model UserRole {
+  userId    String @db.Uuid
+  roleId    String @db.Uuid
+  assignedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  roleId String @db.Uuid
+  permissionId String @db.Uuid
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+model RefreshToken {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String    @db.Uuid
+  tokenHash  String    @unique // SHA-256 — توکن خام هرگز ذخیره نمی‌شود
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  replacedById String? @db.Uuid
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ───────────────────────── حسابرسی (تغییرناپذیر) ─────────────────────────
+
+model AuditLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String?  @db.Uuid
+  action    String // LOGIN | LOGIN_FAILED | CREATE | UPDATE | APPROVE | REVERSE | ...
+  entity    String
+  entityId  String?
+  beforeJson Json?
+  afterJson  Json?
+  reason    String?
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User? @relation("AuditActor", fields: [userId], references: [id])
+
+  @@index([entity, entityId])
+  @@index([userId])
+  @@map("audit_logs")
+}
+
+// ───────────────────────── Outbox / Inbox ─────────────────────────
+
+model OutboxEvent {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventName      String
+  aggregate      String
+  producer       String
+  version        Int       @default(1)
+  idempotencyKey String    @unique
+  payload        Json
+  createdAt      DateTime  @default(now())
+  publishedAt    DateTime?
+  attempts       Int       @default(0)
+  nextAttemptAt  DateTime  @default(now())
+  lastError      String?
+
+  @@index([publishedAt, nextAttemptAt])
+  @@map("outbox_events")
+}
+
+model InboxEvent {
+  idempotencyKey String   @id
+  eventName      String
+  processedAt    DateTime @default(now())
+  resultJson     Json?
+
+  @@map("inbox_events")
+}
+
+// ───────────────────────── رزرو و اتاق (PoC) ─────────────────────────
+
+model RoomType {
+  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code           String  @unique
+  nameEn         String
+  nameFa         String
+  capacity       Int     @default(2)
+  baseRateRials  BigInt
+
+  rooms        Room[]
+  reservations Reservation[]
+
+  @@map("room_types")
+}
+
+model Room {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code       String  @unique
+  roomTypeId String  @db.Uuid
+  floor      Int     @default(1)
+  status     RoomStatus @default(AVAILABLE)
+
+  roomType RoomType @relation(fields: [roomTypeId], references: [id])
+
+  @@map("rooms")
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  DIRTY
+  OUT_OF_SERVICE
+
+  @@map("room_status")
+}
+
+model Reservation {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code           String   @unique // RSV-<jy>-<seq>
+  roomTypeId     String   @db.Uuid
+  guestName      String
+  checkIn        DateTime @db.Date
+  checkOut       DateTime @db.Date
+  nights         Int
+  totalRials     BigInt
+  status         ReservationStatus @default(CONFIRMED)
+  idempotencyKey String   @unique
+  createdById    String?  @db.Uuid
+  createdAt      DateTime @default(now())
+  cancelledAt    DateTime?
+
+  roomType RoomType @relation(fields: [roomTypeId], references: [id])
+
+  @@index([roomTypeId, checkIn, checkOut, status])
+  @@map("reservations")
+}
+
+enum ReservationStatus {
+  CONFIRMED
+  CANCELLED
+  CHECKED_IN
+  CHECKED_OUT
+
+  @@map("reservation_status")
+}
+
+// ───────────────────────── POS (PoC) ─────────────────────────
+
+model PosOutlet {
+  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code   String @unique
+  nameEn String
+  nameFa String
+
+  orders PosOrder[]
+
+  @@map("pos_outlets")
+}
+
+model PosOrder {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code           String   @unique // ORD-<jy>-<seq>
+  outletId       String   @db.Uuid
+  totalRials     BigInt
+  taxRials       BigInt
+  status         String   @default("SERVED")
+  linesJson      Json
+  folioId        String?  @db.Uuid
+  idempotencyKey String   @unique
+  servedById     String?  @db.Uuid
+  servedAt       DateTime @default(now())
+
+  outlet PosOutlet @relation(fields: [outletId], references: [id])
+
+  @@map("pos_orders")
+}
+
+// ───────────────────────── حسابداری هسته ─────────────────────────
+
+model Account {
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code       String  @unique
+  nameEn     String
+  nameFa     String
+  type       AccountType
+  isSensitive Boolean @default(false) // ویرایش فقط با مجوز sensitive_accounts.edit
+  parentCode String?
+
+  lines JournalLine[]
+
+  @@map("accounts")
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+
+  @@map("account_type")
+}
+
+model FiscalPeriod {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code      String   @unique // مثال: 1405-09
+  startDate DateTime @db.Date
+  endDate   DateTime @db.Date
+  status    FiscalPeriodStatus @default(OPEN)
+  lockedAt  DateTime?
+
+  entries JournalEntry[]
+
+  @@map("fiscal_periods")
+}
+
+enum FiscalPeriodStatus {
+  OPEN
+  LOCKED
+
+  @@map("fiscal_period_status")
+}
+
+model JournalEntry {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entryNo      String   @unique // JV-1405-000001
+  entryDate    DateTime @db.Date
+  postingDate  DateTime @db.Date
+  periodId     String?  @db.Uuid
+  description  String
+  status       JournalStatus @default(DRAFT)
+  sourceModule String
+  sourceRef    String
+  sourceEventId String? @db.Uuid
+  reversedByEntryId String? @db.Uuid
+  createdById  String?  @db.Uuid
+  approvedById String?  @db.Uuid
+  approvedAt   DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  period     FiscalPeriod? @relation(fields: [periodId], references: [id])
+  createdBy  User?         @relation("EntryCreator", fields: [createdById], references: [id])
+  approvedBy User?         @relation("EntryApprover", fields: [approvedById], references: [id])
+  lines      JournalLine[]
+
+  @@index([sourceModule, sourceRef])
+  @@index([status])
+  @@map("journal_entries")
+}
+
+enum JournalStatus {
+  DRAFT
+  POSTED
+  REVERSED
+
+  @@map("journal_status")
+}
+
+model JournalLine {
+  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entryId        String  @db.Uuid
+  lineNo         Int
+  accountCode    String
+  debitRials     BigInt  @default(0)
+  creditRials    BigInt  @default(0)
+  costCenterCode String?
+
+  entry   JournalEntry @relation(fields: [entryId], references: [id], onDelete: Restrict)
+  account Account      @relation(fields: [accountCode], references: [code])
+
+  @@index([entryId])
+  @@map("journal_lines")
+}
+
+// ───────────────────────── موتور سند خودکار (نگاشت رویداد←سند، پارامتریک) ─────────────────────────
+
+model EventJournalRule {
+  id               String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ruleId           String  @unique // res_confirmed | pos_served ...
+  eventName        String  @unique
+  descriptionFa    String
+  linesJson        Json // [{accountCode, side: 'debit'|'credit', amountKind: 'total'|'tax'|'net'}]
+  isActive         Boolean @default(true)
+
+  @@map("event_journal_rules")
+}

@@ -1,0 +1,181 @@
+import { Body, ConflictException, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { IsArray, IsInt, IsOptional, IsString, MaxLength, Min, MinLength, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { RequirePermissions } from '../iam/permissions.guard';
+import { PERMISSIONS } from '../iam/permissions';
+import { JournalService } from './journal.service';
+import { PrismaService } from '../prisma.service';
+import { AuthenticatedRequest } from '../common/authenticated.request';
+export class CreateDraftEntryDto {
+  @IsString()
+  @MinLength(4)
+  @MaxLength(500)
+  description!: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DraftLineDto)
+  lines!: DraftLineDto[];
+}
+
+export class DraftLineDto {
+  @IsString()
+  @MaxLength(32)
+  accountCode!: string;
+
+  @IsInt()
+  @Min(0)
+  debit!: number;
+
+  @IsInt()
+  @Min(0)
+  credit!: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(32)
+  costCenter?: string;
+}
+
+export class ReverseDto {
+  @IsString()
+  @MinLength(5)
+  @MaxLength(500)
+  reason!: string;
+}
+
+@ApiTags('accounting')
+@ApiBearerAuth()
+@Controller('journal-entries')
+export class AccountingController {
+  constructor(private readonly journal: JournalService, private readonly prisma: PrismaService) {}
+
+  /** ثبت پیش‌نویس سند — حسابدار (طبق ماتریس: ثبت پیش‌نویس ✓ / تأیید ✗) */
+  @RequirePermissions(PERMISSIONS.JOURNAL_CREATE_DRAFT)
+  @Post()
+  async createDraft(@Body() dto: CreateDraftEntryDto, @Req() req: AuthenticatedRequest) {
+    const created = await this.prisma.$transaction(async (tx) => {
+      const entryDate = new Date();
+      const year = entryDate.getUTCFullYear();
+      const last = await tx.journalEntry.findFirst({
+        where: { entryNo: { startsWith: `JV-${year}-` } },
+        orderBy: { entryNo: 'desc' },
+        select: { entryNo: true },
+      });
+      const seq = last ? Number(last.entryNo.split('-')[2]) + 1 : 1;
+      const entryNo = `JV-${year}-${String(seq).padStart(6, '0')}`;
+
+      const period = await tx.fiscalPeriod.findFirst({
+        where: { startDate: { lte: entryDate }, endDate: { gte: entryDate } },
+      });
+      if (period && period.status === 'LOCKED') {
+        throw new ConflictException({ code: 'BUSINESS_RULE', message: `Fiscal period ${period.code} is locked` });
+      }
+
+      const entry = await tx.journalEntry.create({
+        data: {
+          entryNo,
+          entryDate,
+          postingDate: entryDate,
+          periodId: period?.id ?? null,
+          description: dto.description,
+          status: 'DRAFT',
+          sourceModule: 'accounting',
+          sourceRef: `manual:${req.user.username}`,
+          createdById: req.user.id,
+          lines: {
+            create: dto.lines.map((l, i) => ({
+              lineNo: i + 1,
+              accountCode: l.accountCode,
+              debitRials: BigInt(l.debit),
+              creditRials: BigInt(l.credit),
+              costCenterCode: l.costCenter ?? null,
+            })),
+          },
+        },
+        include: { lines: true },
+      });
+
+      await tx.auditLog.create({
+        data: { userId: req.user.id, action: 'JOURNAL_DRAFT_CREATED', entity: 'JournalEntry', entityId: entry.id },
+      });
+
+      return {
+        id: entry.id,
+        entryNo: entry.entryNo,
+        status: entry.status,
+        lines: entry.lines.map((l) => ({
+          accountCode: l.accountCode,
+          debit: l.debitRials.toString(),
+          credit: l.creditRials.toString(),
+        })),
+      };
+    });
+
+    return { data: created };
+  }
+
+  /** تأیید سند — فقط نقش تأییدکننده؛ خودتأییری ممنوع (قواعد مالی) */
+  @RequirePermissions(PERMISSIONS.JOURNAL_APPROVE)
+  @Post(':id/approve')
+  async approve(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    const perms = await this.permissionSet(req);
+    const result = await this.journal.approveEntry(id, req.user.id, perms);
+    return { data: result };
+  }
+
+  /** برگشت سند قطعی با دلیل — سند اصلی حفظ می‌شود */
+  @RequirePermissions(PERMISSIONS.JOURNAL_REVERSE)
+  @Post(':id/reverse')
+  async reverse(@Param('id') id: string, @Body() dto: ReverseDto, @Req() req: AuthenticatedRequest) {
+    const result = await this.journal.reverseEntry(id, req.user.id, dto.reason);
+    return { data: result };
+  }
+
+  @RequirePermissions(PERMISSIONS.JOURNAL_VIEW)
+  @Get()
+  async list(@Query('status') status?: string, @Query('limit') limit?: string) {
+    const take = Math.min(Number(limit ?? 50), 200);
+    const entries = await this.prisma.journalEntry.findMany({
+      where: status ? { status: status as never } : undefined,
+      orderBy: { createdAt: 'desc' },
+      take,
+      include: { lines: true },
+    });
+    return {
+      data: entries.map((e) => ({
+        id: e.id,
+        entryNo: e.entryNo,
+        status: e.status,
+        description: e.description,
+        sourceModule: e.sourceModule,
+        sourceRef: e.sourceRef,
+        lines: e.lines.map((l) => ({
+          accountCode: l.accountCode,
+          debit: l.debitRials.toString(),
+          credit: l.creditRials.toString(),
+        })),
+      })),
+      meta: { count: entries.length },
+    };
+  }
+
+  /** قفل/بازگشایی دوره — مجوز period.lock */
+  @RequirePermissions(PERMISSIONS.PERIOD_LOCK)
+  @Post('periods/:code/lock')
+  async lockPeriod(@Param('code') code: string, @Req() req: AuthenticatedRequest) {
+    const result = await this.journal.setPeriodLock(code, true, req.user.id);
+    return { data: result };
+  }
+
+  private async permissionSet(req: AuthenticatedRequest): Promise<Set<string>> {
+    const userRoles = await this.prisma.userRole.findMany({
+      where: { userId: req.user.id },
+      include: { role: { include: { permissions: { include: { permission: true } } } } },
+    });
+    const set = new Set<string>();
+    for (const ur of userRoles) for (const rp of ur.role.permissions) set.add(rp.permission.code);
+    return set;
+  }
+}
