@@ -18,6 +18,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --no-audit --no-fund
+      - name: Prisma generate (required for API build)
+        run: npm run prisma:generate -w apps/api
       - name: Lint
         run: npm run lint
       - name: Build (shared → contracts → api)
