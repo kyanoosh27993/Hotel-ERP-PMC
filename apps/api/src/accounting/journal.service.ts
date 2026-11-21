@@ -106,7 +106,8 @@ export class JournalService {
           sourceModule: meta.sourceModule,
           sourceRef: meta.sourceRef,
           sourceEventId: meta.sourceEventId ?? null,
-          createdById: meta.createdByUserId,
+          // موتور سیستمی کاربر DB نیست — createdById null و منبع در sourceModule/sourceRef
+          createdById: meta.createdByUserId === SYSTEM_ENGINE_USER ? null : meta.createdByUserId,
           lines: {
             create: lines.map((l, i) => ({
               lineNo: i + 1,
