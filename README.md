@@ -17,7 +17,8 @@ python3 -m http.server 8080
 ```
 hotel-erp/
 ├── README.md  ← همین فایل
-├── AI_DEVELOPMENT_RULES.md  ← قوانین ۲۰گانه مالک + قواعد AI (الزام همیشگی)
+├── AI_DEVELOPMENT_MASTER_RULES.md  ← قرارداد توسعه با هوش مصنوعی (۱۰ بخش — الزامی برای هر AI)
+├── AI_DEVELOPMENT_RULES.md  ← قوانین ۲۰گانه مالک + قواعد AI + روش فازبندی ۷ ماده‌ای
 ├── PHASES.md  ← نقشه راه اجرایی و فازبندی
 ├── PROGRESS-STATE.md  ← حافظه پایدار بین نشست‌ها
 ├── CHANGELOG.md
@@ -33,8 +34,10 @@ hotel-erp/
 
 ## قوانین حاکم بر توسعه
 
-مطالعه الزامی: [AI_DEVELOPMENT_RULES.md](AI_DEVELOPMENT_RULES.md) — هر اصلاح باید چک‌لیست
-انطباق آن را کامل کند. قوانین ایران در [docs/11-iran-compliance/IRAN-LAWS.md](docs/11-iran-compliance/IRAN-LAWS.md).
+مطالعه الزامی: [AI_DEVELOPMENT_MASTER_RULES.md](AI_DEVELOPMENT_MASTER_RULES.md) (قرارداد توسعه
+با هوش مصنوعی در ریشه پروژه) و [AI_DEVELOPMENT_RULES.md](AI_DEVELOPMENT_RULES.md) (قوانین ۲۰گانه
++ روش فازبندی ۷ ماده‌ای) — هر اصلاح باید چک‌لیست انطباق را کامل کند. قوانین ایران در
+[docs/11-iran-compliance/IRAN-LAWS.md](docs/11-iran-compliance/IRAN-LAWS.md).
 
 ## ماژول‌های فعال فعلی (v0.1)
 

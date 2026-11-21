@@ -4,11 +4,12 @@
 
 | مسیر | خطوط | توضیح |
 | --- | --- | --- |
-| `AI_DEVELOPMENT_RULES.md` | 94 | قوانین ۲۰گانه مالک + چک‌لیست انطباق (قانون ۱۹) |
-| `CHANGELOG.md` | 13 | - |
-| `PHASES.md` | 49 | فازبندی و وضعیت فازها (قانون ۱۸) |
-| `PROGRESS-STATE.md` | 51 | حافظه پایدار بین نشست‌ها |
-| `README.md` | 44 | - |
+| `AI_DEVELOPMENT_MASTER_RULES.md` | 105 | قرارداد توسعه با هوش مصنوعی (۱۰ بخش — الزامی برای هر AI) |
+| `AI_DEVELOPMENT_RULES.md` | 113 | قوانین ۲۰گانه مالک + روش فازبندی ۷ ماده‌ای + چک‌لیست انطباق |
+| `CHANGELOG.md` | 21 | - |
+| `PHASES.md` | 68 | فازبندی و وضعیت فازها (قانون ۱۸) |
+| `PROGRESS-STATE.md` | 62 | حافظه پایدار بین نشست‌ها |
+| `README.md` | 47 | - |
 | `apps/web/assets/css/main.css` | 195 | استایل RTL، سه تم، ریسپانسیو موبایل |
 | `apps/web/assets/js/app.js` | 105 | شل برنامه: سایدبار، نوار بالا، ساعت شمسی، روتر |
 | `apps/web/assets/js/data-table.js` | 196 | جدول استاندارد: جستجو/سورت/فیلتر/سطر جمع (قانون ۱۲) |
@@ -25,8 +26,9 @@
 | `docs/11-iran-compliance/IRAN-LAWS.md` | 95 | کتابخانه قوانین ایران با نقشه دسترسی سریع |
 | `docs/18-module-references/hoteldashboard-notes.md` | 32 | - |
 | `docs/18-module-references/payroll-releases-notes.md` | 37 | - |
-| `graphify-out/graph.json` | 209 | - |
-| `graphify-out/map.md` | 30 | - |
-| `scripts/generate-map.py` | 78 | - |
+| `docs/Hotel_ERP_Master_Roadmap_FA.md` | 877 | - |
+| `graphify-out/graph.json` | 221 | - |
+| `graphify-out/map.md` | 32 | - |
+| `scripts/generate-map.py` | 79 | - |
 | `scripts/watch-map.sh` | 16 | - |
 | `tests/run-tests.js` | 86 | - |

@@ -3,33 +3,39 @@
  "root": "/home/z/my-project/hotel-erp",
  "files": [
   {
+   "path": "AI_DEVELOPMENT_MASTER_RULES.md",
+   "lines": 105,
+   "bytes": 4115,
+   "desc": "قرارداد توسعه با هوش مصنوعی (۱۰ بخش — الزامی برای هر AI)"
+  },
+  {
    "path": "AI_DEVELOPMENT_RULES.md",
-   "lines": 94,
-   "bytes": 9374,
-   "desc": "قوانین ۲۰گانه مالک + چک‌لیست انطباق (قانون ۱۹)"
+   "lines": 113,
+   "bytes": 11516,
+   "desc": "قوانین ۲۰گانه مالک + روش فازبندی ۷ ماده‌ای + چک‌لیست انطباق"
   },
   {
    "path": "CHANGELOG.md",
-   "lines": 13,
-   "bytes": 1136,
+   "lines": 21,
+   "bytes": 1959,
    "desc": ""
   },
   {
    "path": "PHASES.md",
-   "lines": 49,
-   "bytes": 4620,
+   "lines": 68,
+   "bytes": 6351,
    "desc": "فازبندی و وضعیت فازها (قانون ۱۸)"
   },
   {
    "path": "PROGRESS-STATE.md",
-   "lines": 51,
-   "bytes": 4793,
+   "lines": 62,
+   "bytes": 6106,
    "desc": "حافظه پایدار بین نشست‌ها"
   },
   {
    "path": "README.md",
-   "lines": 44,
-   "bytes": 2448,
+   "lines": 47,
+   "bytes": 2822,
    "desc": ""
   },
   {
@@ -185,21 +191,27 @@
    "desc": ""
   },
   {
+   "path": "docs/Hotel_ERP_Master_Roadmap_FA.md",
+   "lines": 877,
+   "bytes": 48650,
+   "desc": ""
+  },
+  {
    "path": "graphify-out/graph.json",
-   "lines": 209,
-   "bytes": 4529,
+   "lines": 221,
+   "bytes": 4716,
    "desc": ""
   },
   {
    "path": "graphify-out/map.md",
-   "lines": 30,
-   "bytes": 2589,
+   "lines": 32,
+   "bytes": 2664,
    "desc": ""
   },
   {
    "path": "scripts/generate-map.py",
-   "lines": 78,
-   "bytes": 4300,
+   "lines": 79,
+   "bytes": 4465,
    "desc": ""
   },
   {
