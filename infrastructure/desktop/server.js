@@ -81,7 +81,9 @@ async function deElevateIfNeeded() {
   const nodeExe = process.execPath;
   const serverJs = path.join(__dirname, 'server.js');
   const inner = `set "HOTELERP_DEELEVATED=1"&& set "HOTELERP_DATA_DIR=${DATA_DIR}"&& set "HOTELERP_PORT=${PORT}"&& set "SEED_ADMIN_PASSWORD=${SEED_PASSWORD}"&& "${nodeExe}" "${serverJs}"`;
-  const child = spawn('runas', ['/trustlevel:0x20000', `cmd.exe /c ${inner}`], { stdio: 'ignore' });
+  const child = spawn('runas', ['/trustlevel:0x20000', `cmd.exe /c ${inner}`], { stdio: ['ignore', 'pipe', 'pipe'] });
+  child.stdout.on('data', (d) => logStream.write('[runas] ' + d));
+  child.stderr.on('data', (d) => logStream.write('[runas-err] ' + d));
   child.on('error', (e) => fatal(new Error('runas ناموفق بود: ' + e.message)));
   const baseUrl = `http://localhost:${PORT}`;
   try {
