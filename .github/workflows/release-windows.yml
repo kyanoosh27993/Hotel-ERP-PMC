@@ -42,7 +42,7 @@ jobs:
           mkdir -p infrastructure/desktop/payload/api infrastructure/desktop/payload/web infrastructure/desktop/payload/node infrastructure/desktop/out
           cp -r apps/api/dist infrastructure/desktop/payload/api/dist
           cp -r apps/api/prisma infrastructure/desktop/payload/api/prisma
-          cp -r apps/web infrastructure/desktop/payload/web
+          cp -r apps/web/. infrastructure/desktop/payload/web/
           cp infrastructure/desktop/server.js infrastructure/desktop/payload/server.js
           cp infrastructure/desktop/run-server.cmd infrastructure/desktop/payload/run-server.cmd
           mkdir -p infrastructure/desktop/payload/api/node_modules/@hotel-erp/shared infrastructure/desktop/payload/api/node_modules/@hotel-erp/contracts infrastructure/desktop/payload/api/node_modules/@hotel-erp/payroll
