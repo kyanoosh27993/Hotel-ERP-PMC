@@ -34,6 +34,38 @@
 | نسخه | تاریخ | تغییرات |
 | --- | --- | --- |
 | v0.1 | ۱۴۰۵/۰۹/۰۱ | هسته + حقوق + داشبورد AI + قوانین |
+| v0.4.0 | ۱۴۰۵/۰۹/۰۱ | exe ویندوز (pkg) + APK اندروید — exe روی دستگاه کارفرما باز نمی‌شد |
+| v0.5.0 | ۱۴۰۵/۰۹/۰۱ | فاز ۴ کامل (PMS) + نصب‌کنندهٔ فارسی NSIS با لوگو + smoke-test ویندوزی در CI |
+
+### نشست ۲۲ نوامبر ۲۰۲۶ (چهارم) — فاز ۴ کامل (PMS) + نصب‌کنندهٔ فارسی v0.5.0
+- **درخواست کارفرما:** فاز بعدی ساخته شود؛ exe قبلی «به محض باز شدن بسته می‌شد» — باید مطمئن
+  شویم exe درست کار می‌کند؛ لوگوی سپر و ترازو در آیکون برنامه/نصب‌کننده؛ نصب کاملاً فارسی.
+- **فاز ۴ (F4-T1…T3 + T7 + T8) — ماژول PMS:** Room.hkStatus/Note + Reservation.source/groupName/
+  adults/children + WaitlistEntry + Stay/StayRoom (اقامت چنداتاقه) + NightAuditRun؛ مهاجرت
+  20261122145850_pms_core؛ مجوزهای reservation.view / room.update / stay.checkin / stay.checkout /
+  housekeeping.update / nightaudit.run + نقش خانه‌دار؛ گارد «یکی از» (RequireAnyPermissions)؛
+  ظرفیت واقعی بدون Overbooking (هم‌پوشانی‌ها < تعداد اتاق نوع، با قفل مشورتی)؛ قواعد: اشغال فقط
+  از مسیر پذیرش، اتاق نانظافت پذیرش نمی‌شود، خروج → DIRTY، نظافت CLEAN → AVAILABLE؛ فاکتور اتاق
+  در خروج (نرخ × شب)؛ حسابرسی شبانه با استثنا + ۴۰۹ در اجرای دوباره؛ رویدادهای pms.stay.* با Outbox.
+- **آشتی دو پیاده‌سازی فاز ۴:** جلسهٔ قبل فاز ۴ ناقص با ماژول rooms/desktop پوش شده بود؛ نسخهٔ کامل
+  PMS جانشین شد (src/rooms، src/desktop، src/seed، مهاجرت قدیمی و rooms.js حذف — در تاریخ گیت محفوظ)؛
+  auth.service روی hash-wasm باقی ماند (PHC سازگار با argon2 در seed)؛ تست رقابتی core به PoC برگشت.
+- **e2e محلی ۴۱/۴۱ (۲۸ قبلی + ۱۳ فاز ۴) + unit ۲۵/۲۵ + lint ✓** — README-phase4-test.md (دروازهٔ M4).
+- **رفع اشکال exe (طرح جدید):** نسخهٔ pkg حذف؛ به‌جای آن infrastructure/desktop/server.js
+  (نود واقعی + node_modules بومی ویندوز): initdb خودکار در %APPDATA%\HotelERP، migrate deploy،
+  seed (Admin@Hotel1 مطابق INSTALL)، API + شل وب روی WEB_DIR، بازکردن مرورگر، **لاگ فایل با چرخش ۲۰تایی
+  + هر خطا → پیام فارسی + پنجره باز می‌ماند (هیچ‌گاه بسته‌شدن بی‌صدا)**؛ run-server.cmd با pause.
+  Smoke-test کامل روی لینوکس: health + login + نقشه ۱۵ اتاق + سرو وب ✓.
+- **نصب‌کنندهٔ فارسی:** NSIS 3.11 پرتابل (scripts/nsis-portable، بدون root) با زبان Farsi + MUI2؛
+  لوگو در آیکون (app.ico چندسایزی) + هدر (header.bmp) + خوش‌آمد عمودی (welcome.bmp)؛ DetailPrint فارسی
+  هر مرحله؛ میان‌بر دسکتاپ/استارت با آیکون لوگو؛ آن‌اینستالر فارسی؛ قانون فایروال اختیاری؛ HotelERP.exe
+  لانچر (NSIS، آیکون لوگو، silent). هر دو .nsi روی لینوکس کامپایل و PE خروجی تأیید شد.
+- **CI ویندوزی (release-windows.yml):** روی تگ v* روی windows-latest بسته را مونتاژ (node.exe پرتابل،
+  node_modules بومی ویندوز، embedded-postgres@18.7.0-beta.19، seed کامپایل‌شده)، NSIS با choco، سپس
+  **smoke-test واقعی روی ویندوز**: بوت کامل (pg+migrate+seed+API+وب) + login + نقشهٔ PMS + وب →
+  فقط در صورت سبزی، Setup.exe به Release الصاق می‌شود.
+- **لوگو در اندروید:** apps/mobile از تگ بازیابی + versionName 0.5.0؛ mipmap (legacy/round/foreground
+  اندپتیو با پس‌زمینهٔ #0A1A30) + اسپلش پورت/لند از scripts/make_icons.py (cairosvg+PIL).
 
 - **نتیجه نهایی:** Release v0.4.0 با دو دارایی: Hotel-ERP-Windows.exe (۱۷۷MB، آپلود API)
   + Hotel-ERP-Android.apk (خروجی ورک‌فلو، ~اندازه debug) — وضعیت ورک‌فلو APK سبز.
