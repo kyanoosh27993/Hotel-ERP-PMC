@@ -67,7 +67,25 @@
 - **لوگو در اندروید:** apps/mobile از تگ بازیابی + versionName 0.5.0؛ mipmap (legacy/round/foreground
   اندپتیو با پس‌زمینهٔ #0A1A30) + اسپلش پورت/لند از scripts/make_icons.py (cairosvg+PIL).
 
-- **نتیجه نهایی:** Release v0.4.0 با دو دارایی: Hotel-ERP-Windows.exe (۱۷۷MB، آپلود API)
+- **نتیجهٔ نهایی v0.5.0 (پس از ۱۲ تکرار CI):** Release سبز با **Hotel-ERP-Setup.exe (۶۵MB، نصب‌کنندهٔ فارسی)**
+  + **Hotel-ERP-Android.apk (۳.۹MB، آیکون‌های لوگو)** — هر دو به‌صورت خودکار به Release الصاق شدند؛
+  یادداشت انتشار فارسی با اسکریپت scripts/release_notes_v050.py.
+  **پنج ایراد واقعی که smoke-test ویندوزی گرفت و رفع شد (درس‌های کلیدی برای هر نسخهٔ دسکتاپ):**
+  1. PostgreSQL زیر حساب Administrator اجرا نمی‌شود → تشخیص با whoami /groups (S-1-16-12288) و
+     اجرا از طریق **وظیفهٔ زمان‌بندی‌شدهٔ schtasks /rl LIMITED** + گارد فرزند HOTELERP_DEELEVATED
+     (runas /trustlevel در runner اثر نکرد و حلقهٔ spawn می‌سازد!)؛ والد ناظر: health-poll + بازکردن مرورگر.
+  2. runBin فقط روی رویداد «exit» resolve شود نه «close» — postgresِ daemon **دستگیرهٔ pipeی pg_ctl را
+     به ارث می‌برد** و close هرگز نمی‌آید (علت reject(undefined) کتابخانهٔ embedded-postgres).
+  3. initdb روی ویندوز با locale سیستم (WIN1252) خوشه می‌سازد و متن فارسی خطای 22P05 می‌گیرد →
+     initdb مستقیم با `--encoding=UTF8 --locale=C --auth=trust` (باینری‌های @embedded-postgres بدون wrapper).
+  4. کلاینت Prisma در payload باید `prisma generate` شود وگرنه seed/API خطای
+     "@prisma/client did not initialize yet" می‌دهند.
+  5. `cp -r apps/web payload/web` وقتی payload/web از قبل موجود است محتوا را در web/web تودرتو
+     می‌کند → کپی محتوا با `apps/web/.`؛ همچنین NSIS ویندوزی در دستور File فقط بک‌اسلش می‌پذیرد.
+  سنجه‌های پاس‌شده روی ویندوز واقعی: HEALTH + LOGIN (frontdesk/Admin@Hotel1) + PMS MAP (۱۵ اتاق/۳ طبقه)
+  + WEB SHELL (شل با ماژول پذیرش) — و e2e محلی ۴۱/۴۱ + unit ۲۵/۲۵ + lint در هر تکرار.
+
+- **نتیجه نهایی v0.4.0:** Release v0.4.0 با دو دارایی: Hotel-ERP-Windows.exe (۱۷۷MB، آپلود API)
   + Hotel-ERP-Android.apk (خروجی ورک‌فلو، ~اندازه debug) — وضعیت ورک‌فلو APK سبز.
   دو اشکال مسیر APK در runner: مسیر gradlew (باید از داخل android/ صدا زده شود) و
   Java 21 لازم برای sourceCompatibility capacitor-android — هر دو در ورک‌فلو اصلاح شد.
