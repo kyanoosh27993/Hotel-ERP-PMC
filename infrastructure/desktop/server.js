@@ -157,6 +157,23 @@ function run(cmd, args, opts = {}) {
   });
 }
 
+// ── باینری‌های PostgreSQL (از @embedded-postgres/<platform>) — کنترل مستقیم با لاگ کامل ──
+const PG_PLATFORM = IS_WIN ? 'windows-x64' : 'linux-x64';
+const PG_BIN_DIR = path.join(API_DIR, 'node_modules', '@embedded-postgres', PG_PLATFORM, 'native', 'bin');
+function pgBin(name) { return path.join(PG_BIN_DIR, IS_WIN ? name + '.exe' : name); }
+function runBin(name, args, extraEnv = {}) {
+  return new Promise((resolve) => {
+    const out = [], err = [];
+    let p;
+    try { p = spawn(pgBin(name), args, { env: { ...process.env, ...extraEnv }, shell: false, windowsHide: true }); }
+    catch (e) { resolve({ code: -1, stdout: '', stderr: 'spawn failed: ' + e.message }); return; }
+    p.stdout.on('data', (d) => { out.push(d); logStream.write('[' + name + '] ' + d); });
+    p.stderr.on('data', (d) => { err.push(d); logStream.write('[' + name + '!] ' + d); });
+    p.on('error', (e) => resolve({ code: -1, stdout: Buffer.concat(out).toString(), stderr: 'spawn error: ' + e.message }));
+    p.on('close', (code) => resolve({ code, stdout: Buffer.concat(out).toString(), stderr: Buffer.concat(err).toString() }));
+  });
+}
+
 function freePort(start) {
   return new Promise((resolve) => {
     const tryPort = (p) => {
@@ -221,31 +238,32 @@ async function main() {
       log('خوشهٔ دیتابیس موجود است — از اجرای قبل ادامه می‌دهیم');
     } else { throw e; }
   }
-  // start با دو تلاش + گزارش کامل خطا و لاگ pg_ctl
+  // شروع مستقیم با pg_ctl (به‌جای pg.start که در خروج زودهنگام postgres، reject بی‌پیام می‌زد)
+  // -l logfile: خطای واقعی postgres را ثبت می‌کند؛ -w: تا آماده‌شدن صبر می‌کند.
+  const pgLog = path.join(PG_DIR, 'pg-server.log');
   let started = false;
   for (let attempt = 1; attempt <= 2 && !started; attempt += 1) {
-    try {
-      await pg.start();
-      started = true;
-    } catch (e) {
-      const detail = e instanceof Error && (e.message || e.stack)
-        ? (e.stack || e.message)
-        : JSON.stringify(e, Object.getOwnPropertyNames(e ?? {}), 1) + ' [' + (e?.constructor?.name ?? typeof e) + ']';
-      log(`pg.start تلاش ${attempt} ناموفق: ${detail}`);
-      try {
-        for (const cand of ['logfile', 'logfile.txt', path.join(LOG_DIR, 'pg.log')]) {
-          const lf = path.join(PG_DIR, cand);
-          if (fs.existsSync(lf)) log(`pg logfile (${cand}) tail: ` + fs.readFileSync(lf, 'utf8').slice(-1200));
-        }
-      } catch (e2) { /* خواندن لاگ حیاتی نیست */ }
-      if (attempt < 2) await new Promise((r) => setTimeout(r, 3000));
-      else throw new Error('شروع PostgreSQL ناموفق ماند: ' + detail);
+    const r = await runBin('pg_ctl', ['-D', PG_DIR, '-l', pgLog, '-w', '-o', `-p ${pgPort}`, 'start'], { PGPASSWORD: 'hotel_local_pass', PGUSER: 'hotel' });
+    if (r.code === 0) { started = true; log('PostgreSQL روی پورت ' + pgPort + ' بالا آمد'); }
+    else {
+      log(`pg_ctl تلاش ${attempt} ناموفق (کد ${r.code}): ${String(r.stderr).trim().slice(-400)}`);
+      try { if (fs.existsSync(pgLog)) log('pg log tail: ' + fs.readFileSync(pgLog, 'utf8').slice(-1500)); } catch (e2) { /* خواندن لاگ حیاتی نیست */ }
+      if (attempt < 2) await new Promise((r2) => setTimeout(r2, 3000));
+      else throw new Error('شروع PostgreSQL ناموفق ماند — لاگ: ' + pgLog);
     }
   }
-  try {
-    await pg.createDatabase('hotel_erp');
-    log('پایگاه داده hotel_erp ساخته شد');
-  } catch (e) { log('پایگاه داده موجود است'); }
+  // توقف تمیز هنگام خروج برنامه
+  const stopPg = () => { runBin('pg_ctl', ['-D', PG_DIR, '-m', 'fast', 'stop']).catch(() => {}); };
+  process.on('SIGINT', () => { stopPg(); process.exit(0); });
+  process.on('SIGTERM', () => { stopPg(); process.exit(0); });
+
+  // ساخت پایگاه داده با کلاینت pg (به دیتابیس پیش‌فرض postgres وصل می‌شویم)
+  const pgLib = require(path.join(API_DIR, 'node_modules', 'pg'));
+  const adminCli = new pgLib.Client({ host: '127.0.0.1', port: pgPort, user: 'hotel', password: 'hotel_local_pass', database: 'postgres' });
+  await adminCli.connect();
+  try { await adminCli.query('CREATE DATABASE hotel_erp OWNER hotel'); log('پایگاه داده hotel_erp ساخته شد'); }
+  catch (e) { log('پایگاه داده hotel_erp موجود است (' + String(e.message).slice(-120) + ')'); }
+  await adminCli.end();
 
   process.env.DATABASE_URL = `postgresql://hotel:hotel_local_pass@localhost:${pgPort}/hotel_erp?schema=public`;
   process.env.PORT = String(port);
