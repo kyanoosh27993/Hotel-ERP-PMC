@@ -6,7 +6,7 @@
  * ۴) seed در صورت خالی بودن کاربران
  * ۵) اجرای API + وب روی http://localhost:3000 و بازکردن مرورگر
  */
-import { spawn, type ChildProcess } from 'child_process';
+import { spawn } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
@@ -26,7 +26,6 @@ const PG_PORT = Number(process.env.HOTEL_PG_PORT ?? 5437);
 const PG_USER = 'hotel';
 const PG_PASS = 'hotel_local';
 
-let pgProcess: ChildProcess | null = null;
 
 function log(msg: string): void {
   // eslint-disable-next-line no-console
@@ -136,7 +135,6 @@ async function startPostgres(pgBin: string): Promise<void> {
     child.on('close', (code) => (code === 0 ? resolve() : reject(new Error(`pg_ctl start failed (${code})`))));
     child.on('error', reject);
   });
-  pgProcess = child; // pg_ctl پس از راه‌اندازی خروج می‌شود؛ postgres جدا اجراست — زیر با stop می‌آوریم
 }
 
 async function waitReady(): Promise<void> {
