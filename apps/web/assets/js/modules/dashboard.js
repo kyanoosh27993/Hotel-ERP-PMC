@@ -96,9 +96,128 @@
     Store.push('dailyReports', { date: today, time: Jalali.formatTime(new Date()), module: 'انبار', kind: 'گزارش مصرف', metrics: { 'رسید': 5, 'حواله': 9 }, note: 'کالای بحرانی: مرغ (۲ روز موجودی).' });
   }
 
+
+  /* ── پنل زنده از API (فاز ۳ — F3-T1…T3): همه اعداد از کوئری واقعی سرور ── */
+  var API_BASE_KEY = 'hotel-erp-api-base';
+  var TOKEN_KEY = 'hotel-erp-token';
+  function apiBase() { return localStorage.getItem(API_BASE_KEY) || 'http://localhost:3000/api/v1'; }
+  function apiToken() { return localStorage.getItem(TOKEN_KEY) || ''; }
+
+  function kpiCard(label, value) {
+    var card = el('div', 'kpi');
+    card.appendChild(el('div', 'kpi-label fit', label));
+    card.appendChild(el('div', 'kpi-value fit', value));
+    return card;
+  }
+  function rial(x) { return Num.fmt(x, Themes.displayLang()) + ' ریال'; }
+
+  /** گرفتن یک داشبورد از سرور — خروجی: داده یا null با پیام خطا */
+  function fetchDash(name, status) {
+    return fetch(apiBase() + '/dashboards/' + name, { headers: { Authorization: 'Bearer ' + apiToken() } })
+      .then(function (r) {
+        if (r.status === 403) throw new Error('مجوز مشاهده این پنل را ندارید (۴۰۳)');
+        if (!r.ok) throw new Error('پاسخ نامعتبر سرور: ' + r.status);
+        return r.json();
+      })
+      .then(function (j) { status.textContent = ''; return j.data; })
+      .catch(function (e) {
+        status.textContent = 'پنل «' + name + '»: ' + (e.message || 'خطا') + ' — توکن/آدرس API را بررسی کنید';
+        return null;
+      });
+  }
+
+  function renderLive(root) {
+    var panel = el('div', 'panel');
+    panel.appendChild(el('h3', null, 'پنل زنده سرور — KPI از کوئری واقعی (فاز ۳)'));
+    var row = el('div', 'live-controls');
+    row.style.display = 'flex'; row.style.gap = '8px'; row.style.flexWrap = 'wrap'; row.style.margin = '8px 0';
+    var baseIn = el('input', 'input'); baseIn.value = apiBase(); baseIn.placeholder = 'آدرس API';
+    var tokIn = el('input', 'input'); tokIn.value = apiToken(); tokIn.placeholder = 'توکن JWT'; tokIn.type = 'password';
+    var btn = el('button', 'btn', 'بارگذاری پنل‌ها');
+    row.appendChild(baseIn); row.appendChild(tokIn); row.appendChild(btn);
+    panel.appendChild(row);
+    var status = el('div', 'muted', 'مقادیر از GET /dashboards/{ceo,finance,restaurant,housekeeping} خوانده می‌شود — هیچ عددی هاردکد نیست.');
+    panel.appendChild(status);
+    var host = el('div', 'live-host');
+    panel.appendChild(host);
+    root.appendChild(panel);
+
+    btn.addEventListener('click', function () {
+      localStorage.setItem(API_BASE_KEY, baseIn.value.trim());
+      localStorage.setItem(TOKEN_KEY, tokIn.value.trim());
+      load();
+    });
+
+    function load() {
+      host.textContent = '';
+      var ceoP = fetchDash('ceo', status);
+      var finP = fetchDash('finance', status);
+      var restP = fetchDash('restaurant', status);
+      var hkP = fetchDash('housekeeping', status);
+      Promise.all([ceoP, finP, restP, hkP]).then(function (res) {
+        var ceo = res[0], fin = res[1], rest = res[2], hk = res[3];
+
+        if (ceo) {
+          var sec = el('div'); sec.appendChild(el('h4', null, 'مدیرعامل — ' + ceo.asOf));
+          var kr = el('div', 'kpi-row');
+          kr.appendChild(kpiCard('اشغال امروز (٪)', Num.fmt(ceo.occupancy.pct, 'fa')));
+          kr.appendChild(kpiCard('اتاق اشغال‌شده / کل', Num.fmt(ceo.occupancy.occupiedUnits, 'fa') + ' / ' + Num.fmt(ceo.occupancy.totalRooms, 'fa')));
+          kr.appendChild(kpiCard('درآمد امروز', rial(ceo.revenueTodayRials)));
+          kr.appendChild(kpiCard('درآمد ماه (شمسی)', rial(ceo.revenueMonthRials)));
+          kr.appendChild(kpiCard('سود ماه (درآمد−هزینه)', rial(ceo.profitMonthRials)));
+          kr.appendChild(kpiCard('جریان نقد ماه', rial(ceo.cashFlowMonthRials)));
+          kr.appendChild(kpiCard('مانده صندوق+بانک', rial(ceo.cashBalanceRials)));
+          sec.appendChild(kr);
+          host.appendChild(sec);
+        }
+        if (fin) {
+          var sec2 = el('div'); sec2.appendChild(el('h4', null, 'مدیر مالی — ' + fin.asOf));
+          var kr2 = el('div', 'kpi-row');
+          fin.cashBoxes.forEach(function (c) { kr2.appendChild(kpiCard('صندوق ' + c.code, rial(c.balanceRials))); });
+          fin.bankAccounts.forEach(function (c) { kr2.appendChild(kpiCard(c.nameFa + ' ' + c.code, rial(c.balanceRials))); });
+          kr2.appendChild(kpiCard('مطالبات مهمانان (۱۲۰۱)', rial(fin.receivablesRials)));
+          kr2.appendChild(kpiCard('پرداختنی تأمین‌کنندگان (۲۱۰۱)', rial(fin.payablesRials)));
+          kr2.appendChild(kpiCard('اسناد پیش‌نویس (ثبت‌نشده)', Num.fmt(fin.unpostedDrafts, 'fa')));
+          sec2.appendChild(kr2);
+          if (fin.staleItems && fin.staleItems.length) {
+            var warn = el('ul', 'note-list');
+            fin.staleItems.forEach(function (w) { warn.appendChild(el('li', null, '⚠️ ' + w.messageFa)); });
+            sec2.appendChild(warn);
+          } else {
+            sec2.appendChild(el('p', 'muted', 'هشدار اقلام معلق: موردی یافت نشد ✓'));
+          }
+          host.appendChild(sec2);
+        }
+        if (rest) {
+          var sec3 = el('div'); sec3.appendChild(el('h4', null, 'رستوران — ' + rest.asOf));
+          var kr3 = el('div', 'kpi-row');
+          kr3.appendChild(kpiCard('سفارش امروز', Num.fmt(rest.todayOrders, 'fa')));
+          kr3.appendChild(kpiCard('فروش امروز', rial(rest.todaySalesRials)));
+          kr3.appendChild(kpiCard('خالص فروش', rial(rest.todayNetRials)));
+          kr3.appendChild(kpiCard('ارزش افزوده امروز', rial(rest.todayTaxRials)));
+          kr3.appendChild(kpiCard('میانگین فاکتور', rial(rest.avgTicketRials)));
+          sec3.appendChild(kr3);
+          sec3.appendChild(el('p', 'muted', 'ضایعات: ' + rest.waste.note));
+          host.appendChild(sec3);
+        }
+        if (hk) {
+          var sec4 = el('div'); sec4.appendChild(el('h4', null, 'خانه‌داری — ' + hk.asOf));
+          var kr4 = el('div', 'kpi-row');
+          hk.roomsByStatus.forEach(function (r2) { kr4.appendChild(kpiCard(r2.labelFa, Num.fmt(r2.count, 'fa'))); });
+          kr4.appendChild(kpiCard('ورودی امروز', Num.fmt(hk.arrivalsToday, 'fa')));
+          kr4.appendChild(kpiCard('خروجی امروز', Num.fmt(hk.departuresToday, 'fa')));
+          sec4.appendChild(kr4);
+          host.appendChild(sec4);
+        }
+        Num.fitAll(host);
+      });
+    }
+  }
+
   Modules.dashboard = {
     title: 'داشبورد مدیر AI',
     render: function (root) {
+      renderLive(root);
       seedReports();
       root.appendChild(el('h2', null, 'داشبورد مدیریتی — تحلیل هوش مصنوعی آفلاین'));
       root.appendChild(el('p', 'muted', 'مدیر (AI) گزارش روزانه بخش‌ها (کارمندان) را دریافت، تجزیه‌وتحلیل و به‌صورت KPI و پیشنهاد بهبود ارائه می‌کند.'));

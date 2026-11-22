@@ -533,3 +533,167 @@ describe('فاز ۲ — حقوق و دستمزد (F2-T1…T4)', () => {
     expect(recalc.status).toBe(409);
   });
 });
+
+describe('فاز ۳ — داشبوردها (F3-T1…T3 — همه اعداد از کوئری واقعی)', () => {
+  const iso = (d: Date): string => d.toISOString().slice(0, 10);
+  const today = new Date();
+  const todayStr = iso(today);
+  const plusDays = (n: number): string => iso(new Date(today.getTime() + n * 24 * 3600 * 1000));
+
+  const ceoOf = async (): Promise<Record<string, unknown>> => {
+    const r = await request(app.getHttpServer())
+      .get('/api/v1/dashboards/ceo')
+      .set('Authorization', `Bearer ${await login('admin', true)}`);
+    expect(r.status).toBe(200);
+    return r.body.data;
+  };
+  const financeOf = async (): Promise<Record<string, unknown>> => {
+    const r = await request(app.getHttpServer())
+      .get('/api/v1/dashboards/finance')
+      .set('Authorization', `Bearer ${await login('accountant', true)}`);
+    expect(r.status).toBe(200);
+    return r.body.data;
+  };
+
+  it('ماتریس دسترسی پنل‌ها: پذیرش/حسابدار CEO را نمی‌بینند؛ حسابدار مالی ✓؛ حسابدار رستوران ✗', async () => {
+    const fdCeo = await request(app.getHttpServer())
+      .get('/api/v1/dashboards/ceo')
+      .set('Authorization', `Bearer ${await login('frontdesk', false)}`);
+    expect(fdCeo.status).toBe(403);
+    const accCeo = await request(app.getHttpServer())
+      .get('/api/v1/dashboards/ceo')
+      .set('Authorization', `Bearer ${await login('accountant', true)}`);
+    expect(accCeo.status).toBe(403); // نمونه الزامی قرارداد: حسابدار داشبورد مدیرعامل ندارد
+    const accFin = await request(app.getHttpServer())
+      .get('/api/v1/dashboards/finance')
+      .set('Authorization', `Bearer ${await login('accountant', true)}`);
+    expect(accFin.status).toBe(200);
+    const accRest = await request(app.getHttpServer())
+      .get('/api/v1/dashboards/restaurant')
+      .set('Authorization', `Bearer ${await login('accountant', true)}`);
+    expect(accRest.status).toBe(403);
+    const fdHk = await request(app.getHttpServer())
+      .get('/api/v1/dashboards/housekeeping')
+      .set('Authorization', `Bearer ${await login('frontdesk', false)}`);
+    expect(fdHk.status).toBe(200);
+  });
+
+  it('F3-T1 مدیرعامل: رزرو امروز → دلتای درآمد روز/ماه و اشغال دقیقاً برابر رزرو', async () => {
+    const before = await ceoOf();
+    const rt = await prisma.roomType.findFirstOrThrow({ where: { code: 'STD' } });
+    const rsv = await request(app.getHttpServer())
+      .post('/api/v1/reservations')
+      .set('Authorization', `Bearer ${await login('frontdesk', false)}`)
+      .send({
+        roomTypeId: rt.id,
+        guestName: 'Dash Ceo Guest',
+        checkInDate: todayStr,
+        checkOutDate: plusDays(2),
+        idempotencyKey: 'e2e-rsv-d3',
+      });
+    expect(rsv.status).toBe(201);
+    const reservation = await prisma.reservation.findUniqueOrThrow({ where: { id: rsv.body.data.reservationId } });
+    await drainOutbox();
+
+    const after = await ceoOf();
+    expect(BigInt(after.revenueTodayRials as string) - BigInt(before.revenueTodayRials as string)).toBe(reservation.totalRials);
+    expect(BigInt(after.revenueMonthRials as string) - BigInt(before.revenueMonthRials as string)).toBe(reservation.totalRials);
+    expect((after.occupancy as { occupiedUnits: number }).occupiedUnits).toBe(
+      (before.occupancy as { occupiedUnits: number }).occupiedUnits + 1,
+    );
+    // تاریخ گزارش شمسی است (قوانین ۱۳/۱۴)
+    expect(after.asOf).toMatch(/۱۴۰۵|1405/);
+  });
+
+  it('F3-T3 رستوران: سفارش امروز → دلتای فروش/تعداد دقیق؛ CEO درآمد = رزرو + خالص فروش', async () => {
+    const restBefore = await request(app.getHttpServer())
+      .get('/api/v1/dashboards/restaurant')
+      .set('Authorization', `Bearer ${await login('frontdesk', false)}`);
+    expect(restBefore.status).toBe(200);
+    const ceoBefore = await ceoOf();
+
+    const outlet = await prisma.posOutlet.findUniqueOrThrow({ where: { code: 'REST-MAIN' } });
+    const order = await request(app.getHttpServer())
+      .post('/api/v1/pos/orders')
+      .set('Authorization', `Bearer ${await login('frontdesk', false)}`)
+      .send({
+        outletId: outlet.id,
+        lines: [
+          { itemName: 'Dash Kabab', qty: 1, unitPriceRials: 900_000 },
+          { itemName: 'Dash Tea', qty: 2, unitPriceRials: 50_000 },
+        ],
+        taxRatePermille: 90,
+        idempotencyKey: 'e2e-pos-d3',
+      });
+    expect(order.status).toBe(201);
+    await drainOutbox();
+
+    const restAfter = await request(app.getHttpServer())
+      .get('/api/v1/dashboards/restaurant')
+      .set('Authorization', `Bearer ${await login('frontdesk', false)}`);
+    const b = restBefore.body.data;
+    const a = restAfter.body.data;
+    // 900000 + 2×50000 = 1,000,000 — مالیات ۹۰‰ = 90,000
+    expect(a.todayOrders - b.todayOrders).toBe(1);
+    expect(BigInt(a.todaySalesRials) - BigInt(b.todaySalesRials)).toBe(1_000_000n);
+    expect(BigInt(a.todayNetRials) - BigInt(b.todayNetRials)).toBe(910_000n);
+    expect(a.waste.note).toContain('فاز ۷'); // KPI ضایعات صادقانه صفر واقعی است
+
+    const ceoAfter = await ceoOf();
+    // دلتای درآمد امروز = فقط خالص فروش ۹۱۰٬۰۰۰ (۴۱۰۲) — رزرو قبلاً در ceoBefore شمرده شده
+    expect(
+      BigInt(ceoAfter.revenueTodayRials as string) - BigInt(ceoBefore.revenueTodayRials as string),
+    ).toBe(910_000n);
+  });
+
+  it('F3-T2 مالی: مطالبات/صندوق دلتای دقیق؛ سند پیش‌نویس معلق >۷ روز → هشدار اقلام معلق', async () => {
+    const finBefore = await financeOf();
+    const staleDate = new Date(today.getTime() - 10 * 24 * 3600 * 1000);
+    await prisma.journalEntry.create({
+      data: {
+        entryNo: 'JV-TEST-STALE-1',
+        entryDate: staleDate,
+        postingDate: staleDate,
+        description: 'stale draft for e2e',
+        status: 'DRAFT',
+        sourceModule: 'manual',
+        sourceRef: 'e2e-stale',
+        lines: {
+          create: [
+            { lineNo: 1, accountCode: '1101', debitRials: 77_000n, creditRials: 0n },
+            { lineNo: 2, accountCode: '4101', debitRials: 0n, creditRials: 77_000n },
+          ],
+        },
+      },
+    });
+
+    const finAfter = await financeOf();
+    expect((finAfter.staleItems as Array<{ entryNo: string }>).map((s) => s.entryNo)).toContain('JV-TEST-STALE-1');
+    expect(finAfter.alertsCount).toBe((finAfter.staleItems as unknown[]).length);
+    expect((finAfter.staleItems as Array<{ messageFa: string }>)[0].messageFa).toContain('معلق');
+    // صندوق/مطالبات: مقادیر رشته‌ای ریال — کوئری واقعی
+    expect(typeof (finAfter.cashBoxes as Array<{ balanceRials: string }>)[0].balanceRials).toBe('string');
+    expect(typeof finAfter.receivablesRials).toBe('string');
+    // این تست هیچ بدهکار مطالبات جدیدی نمی‌سازد (پیش‌نویس معلق قطعی نیست) → مطالبات تغییری نمی‌کند
+    expect(BigInt(finAfter.receivablesRials as string)).toBe(BigInt(finBefore.receivablesRials as string));
+    // اثبات کوئری واقعی: مطالبات = جمع رزروهای مؤثر (همه CONFIRMED بدون تسویه)
+    const confirmed = await prisma.reservation.findMany({ where: { status: 'CONFIRMED' }, select: { totalRials: true } });
+    const expectedReceivables = confirmed.reduce((acc, r) => acc + r.totalRials, 0n);
+    expect(BigInt(finAfter.receivablesRials as string)).toBe(expectedReceivables);
+  });
+
+  it('F3-T3 خانه‌داری: ورود امروز = رزرو امروز؛ وضعیت اتاق‌ها از کوئری واقعی', async () => {
+    const r = await request(app.getHttpServer())
+      .get('/api/v1/dashboards/housekeeping')
+      .set('Authorization', `Bearer ${await login('frontdesk', false)}`);
+    expect(r.status).toBe(200);
+    const hk = r.body.data;
+    const roomsCount = await prisma.room.count();
+    expect(hk.totalRooms).toBe(roomsCount);
+    const sumStatus = (hk.roomsByStatus as Array<{ count: number }>).reduce((s, x) => s + x.count, 0);
+    expect(sumStatus).toBe(roomsCount);
+    expect(hk.arrivalsToday).toBeGreaterThanOrEqual(1);
+    const std = (hk.occupancyByType as Array<{ roomType: string; occupied: number }>).find((t) => t.occupied > 0);
+    expect(std).toBeTruthy();
+  });
+});
