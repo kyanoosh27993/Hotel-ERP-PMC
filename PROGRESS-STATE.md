@@ -3,7 +3,43 @@
 > این فایل مرجع حافظه بین نشست‌هاست. اگر حافظه ماشین مجازی ریست شد، از این فایل و
 > PHASES.md و AI_DEVELOPMENT_RULES.md ادامه بده.
 
-## وضعیت جاری — نسخه v0.1 (تاریخ شمسی ثبت: ۱۴۰۵/۰۹/۰۱)
+## وضعیت جاری — نسخه v0.6.0 (موج ۱: فاز ۵ + فاز ۱۰) — ۱۴۰۵/۰۹/۰۱ (2026-11-22)
+
+### کارهای انجام‌شده در نشست موج ۱ (پرسش مالک: «همه فازها با هم؟» → پلان موجی موازی)
+1. **پلان موجی در PHASES.md ثبت شد** (تصمیم مالک مبنی بر اجرای همه در صورت حفظ دقت):
+   رد big-bang به دلیل اسکیمای مشترک/قرارداد واحد؛ اجرای موج‌های موازی. موج ۱ همین نشست اجرا شد.
+2. **فاز ۵ — خزانه‌داری کامل** (docs/08-back-office/PHASE5-TREASURY.md): مهاجرت
+   `20261123000000_treasury_phase5` (cash_accounts/cashier_shifts/cash_transactions/
+   bank_statement_lines/reconciliation_runs)، ماژول treasury با شیفت و مغایرت،
+   Idempotency (کلید تکراری = replay)، ابطال، مغایرت‌گیری دو قاعده‌ای، شارژ فولیو،
+   نقش cashier + ۵ مجوز؛ رویداد treasury.transaction.posted → سند دوطرفه با کد حساب
+   کل از payload و طرف مقابل از تراکنش.
+3. **فاز ۱۰ — خانه‌داری کامل + دارایی + خدمات جانبی** (docs/08-back-office/PHASE10-...md):
+   مهاجرت `20261123010000_ops_phase10`؛ سه ماژول housekeeping/assets/ancillary؛
+   قواعد وضعیت اتاق (پایان نظافت DIRTY→AVAILABLE)، گردش کار تعمیرات، لاندری upsert اقلام،
+   جامانده با تحویل؛ استهلاک خط مستقیم با منع (asset,period) تکراری و سقف تا اسقاط؛
+   خدمات جانبی با مالیات basis point (گرد به نزدیک‌ترین ریال) و شارژ فولیو + برگشت در لغو؛
+   رویدادهای housekeeping.task.completed / maintenance.request.created /
+   assets.depreciation.posted / ancillary.order.confirmed.
+4. **مصرف‌کننده سند خودکار گسترش یافت** (accounting/event-journal-consumer.ts): ۳ هندلر جدید
+   با خطوط پویا از پرونده دارایی/صندوق/کاتالوگ — الگوی EventJournalRule برای رویدادهای با
+   حساب ثابت حفظ شد.
+5. **شل وب:** ۴ پنل RTL جدید (treasury.js، housekeepingops.js، assets.js، ancillary.js) + منو.
+6. **seed:** کاربر cashier، حساب‌های ۱۵۰۱/۱۵۰۲/۴۱۰۳/۵۲۰۱، صندوق‌های CH-01/CH-02/BN-01،
+   ۴ قلم لاندری، ۷ خدمت جانبی.
+7. **تست:** unit ۳۴/۳۴ (ریاضی شیفت/استهلاک/مالیات) + e2e ۵۳/۵۳ — ۱۲ سناریوی پذیرش موج ۱
+   (F5-T1…T5، F10-T1…T6 + ماتریس مجوز) روی PostgreSQL واقعی (embedded ۱۶).
+8. **دروازهٔ M5/M10:** README-phase5-10-test.md — منتظر تست کارفرما.
+
+### درس‌های فنی موج ۱ (برای نشست‌های بعد)
+- کنترلرهای NestJS با پریفیکس سراسری `api/v1` نباید مسیر را دوباره بیاورند (۴۰۴ می‌شود).
+- پاسخ HTTP هرگز رکورد خام Prisma با BigInt نباشد — نگاشت صریح به Number (خطای JSON.stringify).
+- رویدادها فقط با `EVENT_NAMES.xxx` از @hotel-erp/contracts مصرف می‌شوند (export مستقیم وجود ندارد).
+- seed باید با env کامل (MFA_TEST_SECRET و ...) اجرا شود وگرنه MFA e2e می‌شکند.
+- embedded PG قدیمی روی ۵۴۳۳ می‌ماند (data dir /tmp/hotel-pgdata) — قبل از اجرای e2e محلی
+  چک شود که کدام instance در حال سرویس است (scripts/local-pg-e2e.mjs پورت ۵۴۳۳).
+
+## وضعیت قبلی — نسخه v0.1 (تاریخ شمسی ثبت: ۱۴۰۵/۰۹/۰۱)
 
 ### کارهای انجام‌شده در این نشست
 1. **اتصال گیت‌هاب** با کلید مالک (scopes: repo, workflow) — کاربر `kyanoosh27993` تأیید شد.

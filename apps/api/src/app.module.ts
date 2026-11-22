@@ -13,6 +13,10 @@ import { PosModule } from './pos/pos.module';
 import { PayrollModule } from './payroll/payroll.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { PmsModule } from './pms/pms.module';
+import { TreasuryModule } from './treasury/treasury.module';
+import { HousekeepingModule } from './housekeeping/housekeeping.module';
+import { AssetsModule } from './assets/assets.module';
+import { AncillaryModule } from './ancillary/ancillary.module';
 import { IntegrationHubService, AttendanceSimAdapter } from './integration/integration-hub.service';
 import { IntegrationController } from './integration/integration.controller';
 import { HealthController } from './health/health.controller';
@@ -31,6 +35,10 @@ import { MetricsController } from './health/metrics.controller';
     PayrollModule,
     DashboardModule,
     PmsModule,
+    TreasuryModule,
+    HousekeepingModule,
+    AssetsModule,
+    AncillaryModule,
   ],
   controllers: [HealthController, MetricsController, IntegrationController],
   providers: [

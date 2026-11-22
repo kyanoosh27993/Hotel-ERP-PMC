@@ -174,6 +174,11 @@ model Room {
 
   roomType RoomType @relation(fields: [roomTypeId], references: [id])
   stayRooms StayRoom[]
+  tasks RoomTask[]
+  inspections RoomInspection[]
+  maintenanceRequests MaintenanceRequest[]
+  lostFound LostAndFound[]
+  fixedAssets FixedAsset[]
 
   @@index([status, hkStatus])
   @@map("rooms")
@@ -289,6 +294,8 @@ model Stay {
 
   reservation Reservation? @relation(fields: [reservationId], references: [id])
   rooms StayRoom[]
+  cashTransactions CashTransaction[]
+  ancillaryOrders AncillaryOrder[]
 
   @@index([status, plannedCheckOut])
   @@map("stays")
@@ -586,4 +593,454 @@ model PayrollSlip {
 
   @@unique([runId, employeeId])
   @@map("payroll_slips")
+}
+
+// ───────────────────────── فاز ۵ — صندوق، پرداخت و خزانه‌داری (نقشه ۷.۲) ─────────────────────────
+
+model CashAccount {
+  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code          String @unique // CH-01 صندوق پذیرش، BN-01 بانک ملت…
+  nameEn        String
+  nameFa        String
+  kind          CashAccountKind
+  glAccountCode String // حساب کل متصل (۱۱۰۱ صندوق / ۱۱۰۲ بانک) — بدون FK، با seed کنترل می‌شود
+  active        Boolean @default(true)
+  createdAt     DateTime @default(now())
+
+  shifts         CashierShift[]
+  transactions   CashTransaction[]
+  statementLines BankStatementLine[]
+  reconciliations ReconciliationRun[]
+
+  @@map("cash_accounts")
+}
+
+enum CashAccountKind {
+  CASH_DRAWER
+  BANK
+
+  @@map("cash_account_kind")
+}
+
+model CashierShift {
+  id                String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code              String  @unique // SHF-<jy>-<seq>
+  cashAccountId     String  @db.Uuid
+  businessDate      DateTime @db.Date
+  openingFloatRials BigInt  @default(0)
+  countedRials      BigInt?
+  varianceRials     BigInt?
+  status            CashShiftStatus @default(OPEN)
+  note              String?
+  openedById        String? @db.Uuid
+  openedAt          DateTime @default(now())
+  closedAt          DateTime?
+
+  cashAccount CashAccount       @relation(fields: [cashAccountId], references: [id])
+  transactions CashTransaction[]
+
+  @@index([cashAccountId, status])
+  @@map("cashier_shifts")
+}
+
+enum CashShiftStatus {
+  OPEN
+  CLOSED
+
+  @@map("cash_shift_status")
+}
+
+model CashTransaction {
+  id                  String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  txnNo               String @unique // TXN-<jy>-<seq>
+  cashAccountId       String @db.Uuid
+  shiftId             String? @db.Uuid
+  kind                CashTxnKind
+  method              CashTxnMethod
+  amountRials         BigInt // همیشه مثبت؛ جهت با kind
+  traceNo             String? // شناسه پیگیری بانک/درگاه
+  counterGlAccountCode String? // حساب طرف مقابل (پیش‌فرض از seed)
+  stayId              String? @db.Uuid // شارژ فولیوی اقامت
+  payerName           String?
+  note                String?
+  businessDate        DateTime @db.Date
+  status              CashTxnStatus @default(POSTED)
+  idempotencyKey      String @unique
+  createdById         String? @db.Uuid
+  createdAt           DateTime @default(now())
+
+  cashAccount CashAccount  @relation(fields: [cashAccountId], references: [id])
+  shift       CashierShift? @relation(fields: [shiftId], references: [id])
+  stay        Stay?         @relation(fields: [stayId], references: [id])
+
+  @@index([cashAccountId, businessDate])
+  @@index([kind, status])
+  @@map("cash_transactions")
+}
+
+enum CashTxnKind {
+  RECEIPT
+  PAYMENT
+  TRANSFER
+  REFUND
+  ADJUSTMENT
+
+  @@map("cash_txn_kind")
+}
+
+enum CashTxnMethod {
+  CASH
+  CARD
+  TRANSFER
+  ONLINE
+
+  @@map("cash_txn_method")
+}
+
+enum CashTxnStatus {
+  POSTED
+  VOID
+
+  @@map("cash_txn_status")
+}
+
+model BankStatementLine {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cashAccountId  String   @db.Uuid
+  valueDate      DateTime @db.Date
+  externalRef    String // شماره سند بانک
+  description    String
+  debitRials     BigInt   @default(0)
+  creditRials    BigInt   @default(0)
+  matchedTxnId   String?  @db.Uuid
+  matchedAt      DateTime?
+  createdById    String?  @db.Uuid
+  createdAt      DateTime @default(now())
+
+  cashAccount CashAccount @relation(fields: [cashAccountId], references: [id])
+
+  @@unique([cashAccountId, externalRef])
+  @@index([cashAccountId, valueDate])
+  @@map("bank_statement_lines")
+}
+
+model ReconciliationRun {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cashAccountId  String   @db.Uuid
+  runDate        DateTime @db.Date
+  matchedCount   Int      @default(0)
+  unmatchedCount Int      @default(0)
+  note           String?
+  closedById     String?  @db.Uuid
+  closedAt       DateTime @default(now())
+
+  cashAccount CashAccount @relation(fields: [cashAccountId], references: [id])
+
+  @@index([cashAccountId, runDate])
+  @@map("reconciliation_runs")
+}
+
+// ───────────────────────── فاز ۱۰ — خانه‌داری، لاندری و تعمیرات (نقشه ۷.۴) ─────────────────────────
+
+model RoomTask {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomId       String   @db.Uuid
+  kind         RoomTaskKind
+  status       RoomTaskStatus @default(PENDING)
+  priority     TaskPriority @default(NORMAL)
+  assigneeId   String?  @db.Uuid
+  scheduledDate DateTime @db.Date
+  startedAt    DateTime?
+  doneAt       DateTime?
+  note         String?
+  createdById  String?  @db.Uuid
+  createdAt    DateTime @default(now())
+
+  room Room @relation(fields: [roomId], references: [id])
+
+  @@index([roomId, status])
+  @@index([scheduledDate, status])
+  @@map("room_tasks")
+}
+
+enum RoomTaskKind {
+  CLEANING
+  TURNDOWN
+  INSPECTION
+  MAINTENANCE_FOLLOWUP
+
+  @@map("room_task_kind")
+}
+
+enum RoomTaskStatus {
+  PENDING
+  IN_PROGRESS
+  DONE
+  CANCELED
+
+  @@map("room_task_status")
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+
+  @@map("task_priority")
+}
+
+model RoomInspection {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomId         String   @db.Uuid
+  taskId         String?  @db.Uuid
+  passed         Boolean
+  score          Int?
+  issuesJson     Json?
+  inspectedById  String?  @db.Uuid
+  inspectedAt    DateTime @default(now())
+
+  room Room @relation(fields: [roomId], references: [id])
+
+  @@index([roomId, inspectedAt])
+  @@map("room_inspections")
+}
+
+model MaintenanceRequest {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  requestNo      String   @unique // MNT-<jy>-<seq>
+  roomId         String?  @db.Uuid
+  assetId        String?  @db.Uuid
+  title          String
+  description    String
+  priority       TaskPriority @default(NORMAL)
+  status         MaintenanceStatus @default(OPEN)
+  reportedById   String?  @db.Uuid
+  assigneeId     String?  @db.Uuid
+  openedAt       DateTime @default(now())
+  closedAt       DateTime?
+  resolutionNote String?
+  costRials      BigInt?
+
+  room       Room?        @relation(fields: [roomId], references: [id])
+  asset      FixedAsset?  @relation(fields: [assetId], references: [id])
+
+  @@index([status, priority])
+  @@map("maintenance_requests")
+}
+
+enum MaintenanceStatus {
+  OPEN
+  ASSIGNED
+  IN_PROGRESS
+  DONE
+  CANCELED
+
+  @@map("maintenance_status")
+}
+
+model LinenItem {
+  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code   String @unique
+  nameEn String
+  nameFa String
+  unit   String @default("عدد")
+  active Boolean @default(true)
+
+  movements LaundryMovement[]
+
+  @@map("linen_items")
+}
+
+model LaundryBatch {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code       String   @unique // LDY-<jy>-<seq>
+  direction  LaundryDirection
+  status     LaundryStatus @default(OPEN)
+  openedAt   DateTime @default(now())
+  closedAt   DateTime?
+  openedById String?  @db.Uuid
+
+  movements LaundryMovement[]
+
+  @@map("laundry_batches")
+}
+
+enum LaundryDirection {
+  OUT_WASH
+  IN_RETURN
+
+  @@map("laundry_direction")
+}
+
+enum LaundryStatus {
+  OPEN
+  CLOSED
+
+  @@map("laundry_status")
+}
+
+model LaundryMovement {
+  id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  batchId      String @db.Uuid
+  linenItemId  String @db.Uuid
+  qty          Int
+  recordedById String? @db.Uuid
+  recordedAt   DateTime @default(now())
+
+  batch LaundryBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  item  LinenItem    @relation(fields: [linenItemId], references: [id])
+
+  @@unique([batchId, linenItemId])
+  @@map("laundry_movements")
+}
+
+model LostAndFound {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code            String   @unique // LNF-<jy>-<seq>
+  roomId          String   @db.Uuid
+  itemDesc        String
+  foundAt         DateTime @default(now())
+  storageLocation String
+  status          LostFoundStatus @default(STORED)
+  returnedTo      String?
+  returnedAt      DateTime?
+  note            String?
+  foundById       String?  @db.Uuid
+
+  room Room @relation(fields: [roomId], references: [id])
+
+  @@map("lost_and_founds")
+}
+
+enum LostFoundStatus {
+  STORED
+  RETURNED
+  DISPOSED
+
+  @@map("lost_found_status")
+}
+
+// ───────────────────────── فاز ۱۰ — دارایی ثابت (نقشه ۷.۸) ─────────────────────────
+
+model FixedAsset {
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assetCode              String   @unique // FA-<seq>
+  nameEn                 String
+  nameFa                 String
+  category               String // FUN | ELE | VEH | FUR | IT | OTHER
+  acquiredAt             DateTime @db.Date
+  costRials              BigInt
+  salvageRials           BigInt   @default(0)
+  usefulLifeMonths       Int
+  method                 DepreciationMethod @default(STRAIGHT_LINE)
+  glAssetAccountCode     String // ۱۵۰۱ دارایی ثابت
+  glAccDepAccountCode    String // ۱۵۰۲ استهلاک انباشته
+  glDepExpenseAccountCode String // ۵۲۰۱ هزینه استهلاک
+  roomId                 String?  @db.Uuid
+  status                 AssetStatus @default(ACTIVE)
+  note                   String?
+  createdById            String?  @db.Uuid
+  createdAt              DateTime @default(now())
+
+  room                Room?                  @relation(fields: [roomId], references: [id])
+  depreciations       AssetDepreciation[]
+  maintenanceRequests MaintenanceRequest[]
+
+  @@map("fixed_assets")
+}
+
+enum DepreciationMethod {
+  STRAIGHT_LINE
+
+  @@map("depreciation_method")
+}
+
+enum AssetStatus {
+  ACTIVE
+  TRANSFERRED
+  SOLD
+  SCRAPPED
+
+  @@map("asset_status")
+}
+
+model AssetDepreciation {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assetId         String   @db.Uuid
+  periodCode      String   // '1405-09'
+  amountRials     BigInt
+  accumulatedRials BigInt
+  journalEntryNo  String?
+  postedAt        DateTime @default(now())
+  idempotencyKey  String   @unique
+
+  asset FixedAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, periodCode])
+  @@map("asset_depreciations")
+}
+
+// ───────────────────────── فاز ۱۰ — خدمات جانبی (نقشه ۷.۱۰) ─────────────────────────
+
+model AncillaryService {
+  id                 String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code               String  @unique // SVC-PHONE، SVC-PARKING…
+  nameEn             String
+  nameFa             String
+  category           AncillaryCategory
+  unitPriceRials     BigInt
+  taxRateBps         Int     @default(900) // ۹٪ ارزش افزوده بر حسب basis point
+  glRevenueAccountCode String // ۴۱۰۳ درآمد خدمات جانبی
+  active             Boolean @default(true)
+  createdAt          DateTime @default(now())
+
+  orders AncillaryOrder[]
+
+  @@map("ancillary_services")
+}
+
+enum AncillaryCategory {
+  PHONE
+  PARKING
+  TAXI
+  POOL
+  INTERNET
+  SHOP
+  CEREMONY
+  OTHER
+
+  @@map("ancillary_category")
+}
+
+model AncillaryOrder {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderNo       String   @unique // SVC-<jy>-<seq>
+  serviceId     String   @db.Uuid
+  quantity      Int
+  unitPriceRials BigInt
+  netRials      BigInt
+  taxRials      BigInt
+  totalRials    BigInt
+  stayId        String?  @db.Uuid // شارژ فولیوی اقامت
+  guestName     String?
+  status        AncillaryOrderStatus @default(CONFIRMED)
+  servedAt      DateTime @default(now())
+  servedById    String?  @db.Uuid
+  idempotencyKey String  @unique
+  note          String?
+
+  service AncillaryService @relation(fields: [serviceId], references: [id])
+  stay    Stay?            @relation(fields: [stayId], references: [id])
+
+  @@index([serviceId, servedAt])
+  @@map("ancillary_orders")
+}
+
+enum AncillaryOrderStatus {
+  CONFIRMED
+  CHARGED
+  CANCELED
+
+  @@map("ancillary_order_status")
 }

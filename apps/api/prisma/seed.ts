@@ -53,6 +53,8 @@ async function main() {
     { username: 'approver', fullName: 'Financial Approver', role: 'approver' },
     { username: 'frontdesk', fullName: 'Front Desk Staff', role: 'front_desk' },
     { username: 'housekeeper', fullName: 'Housekeeping Staff', role: 'housekeeper' },
+    // موج ۱ — فاز ۵: صندوق‌دار
+    { username: 'cashier', fullName: 'Cashier (Front Desk Cash)', role: 'cashier' },
   ];
   for (const u of users) {
     const user = await prisma.user.upsert({
@@ -215,6 +217,74 @@ async function main() {
     },
   });
 
+  // ── موج ۱ — فاز ۵: حساب‌های کل دارایی ثابت و خدمات جانبی ──
+  const wave1Accounts: Array<{ code: string; nameEn: string; nameFa: string; type: 'ASSET' | 'REVENUE' | 'EXPENSE' }> = [
+    { code: '1501', nameEn: 'Fixed Assets', nameFa: 'دارایی ثابت', type: 'ASSET' },
+    { code: '1502', nameEn: 'Accumulated Depreciation', nameFa: 'استهلاک انباشته', type: 'ASSET' },
+    { code: '4103', nameEn: 'Ancillary Services Revenue', nameFa: 'درآمد خدمات جانبی', type: 'REVENUE' },
+    { code: '5201', nameEn: 'Depreciation Expense', nameFa: 'هزینه استهلاک', type: 'EXPENSE' },
+  ];
+  for (const a of wave1Accounts) {
+    await prisma.account.upsert({
+      where: { code: a.code },
+      update: { nameEn: a.nameEn, nameFa: a.nameFa, type: a.type },
+      create: { code: a.code, nameEn: a.nameEn, nameFa: a.nameFa, type: a.type },
+    });
+  }
+
+  // ── موج ۱ — فاز ۵: صندوق‌ها و حساب بانکی پیش‌فرض ──
+  const cashAccounts: Array<{ code: string; nameEn: string; nameFa: string; kind: 'CASH_DRAWER' | 'BANK'; gl: string }> = [
+    { code: 'CH-01', nameEn: 'Front Desk Drawer', nameFa: 'صندوق پذیرش', kind: 'CASH_DRAWER', gl: '1101' },
+    { code: 'CH-02', nameEn: 'Restaurant Drawer', nameFa: 'صندوق رستوران', kind: 'CASH_DRAWER', gl: '1101' },
+    { code: 'BN-01', nameEn: 'Main Bank Account', nameFa: 'حساب بانکی اصلی', kind: 'BANK', gl: '1102' },
+  ];
+  for (const c of cashAccounts) {
+    await prisma.cashAccount.upsert({
+      where: { code: c.code },
+      update: { nameEn: c.nameEn, nameFa: c.nameFa, glAccountCode: c.gl },
+      create: { code: c.code, nameEn: c.nameEn, nameFa: c.nameFa, kind: c.kind, glAccountCode: c.gl },
+    });
+  }
+
+  // ── موج ۱ — فاز ۱۰: اقلام لاندری و کاتالوگ خدمات جانبی ──
+  const linen: Array<[string, string, string, string]> = [
+    ['LIN-BED', 'Bed Sheet', 'ملحفه تخت', 'عدد'],
+    ['LIN-TOWEL', 'Towel', 'حوله', 'عدد'],
+    ['LIN-PILLOW', 'Pillowcase', 'روبالشی', 'عدد'],
+    ['LIN-DOVET', 'Duvet Cover', 'روتختی', 'عدد'],
+  ];
+  for (const [code, en, fa, unit] of linen) {
+    await prisma.linenItem.upsert({
+      where: { code },
+      update: { nameEn: en, nameFa: fa, unit },
+      create: { code, nameEn: en, nameFa: fa, unit },
+    });
+  }
+  const services: Array<{ code: string; en: string; fa: string; cat: import('@prisma/client').AncillaryCategory; price: number }> = [
+    { code: 'SVC-PHONE', en: 'Telephone Calls', fa: 'تلفن', cat: 'PHONE', price: 250_000 },
+    { code: 'SVC-PARKING', en: 'Parking', fa: 'پارکینگ', cat: 'PARKING', price: 1_500_000 },
+    { code: 'SVC-TAXI', en: 'Taxi Service', fa: 'تاکسی سرویس', cat: 'TAXI', price: 3_000_000 },
+    { code: 'SVC-POOL', en: 'Pool & Spa Access', fa: 'مجموعه آبی و اسپا', cat: 'POOL', price: 8_000_000 },
+    { code: 'SVC-WIFI', en: 'Premium Internet', fa: 'اینترنت پرسرعت ویژه', cat: 'INTERNET', price: 2_000_000 },
+    { code: 'SVC-SHOP', en: 'Mini Shop', fa: 'فروشگاه', cat: 'SHOP', price: 1_000_000 },
+    { code: 'SVC-CEREMONY', en: 'Ceremonies & Banquet', fa: 'تشریفات و بنگاه', cat: 'CEREMONY', price: 50_000_000 },
+  ];
+  for (const s of services) {
+    await prisma.ancillaryService.upsert({
+      where: { code: s.code },
+      update: { nameEn: s.en, nameFa: s.fa, unitPriceRials: BigInt(s.price) },
+      create: {
+        code: s.code,
+        nameEn: s.en,
+        nameFa: s.fa,
+        category: s.cat,
+        unitPriceRials: BigInt(s.price),
+        taxRateBps: 900,
+        glRevenueAccountCode: '4103',
+      },
+    });
+  }
+
   // ── داده نمونه پرسنل (F2-T1: مهاجرت ۱۰ نفر) + حکم تأییدشده هر یک ──
   const employeeNames: Array<[string, string, boolean, number]> = [
     ['علی', 'محمدی', true, 2],
@@ -277,7 +347,7 @@ async function main() {
   }
 
   // eslint-disable-next-line no-console
-  console.log('✅ seed complete: roles/permissions/users/accounts/periods/rooms/outlet/rules/payroll');
+  console.log('✅ seed complete: roles/permissions/users/accounts/periods/rooms/outlet/rules/payroll/cash-accounts/linen/ancillary (wave-1)');
 }
 
 main()

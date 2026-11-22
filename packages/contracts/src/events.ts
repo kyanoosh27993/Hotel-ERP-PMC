@@ -18,6 +18,18 @@ export const EVENT_NAMES = {
   STAY_CHECKED_IN: 'pms.stay.checked_in',
   /** فاز ۴ — مهمان تسویه و خارج شد */
   STAY_CHECKED_OUT: 'pms.stay.checked_out',
+  // ── موج ۱ — فاز ۵ (صندوق، پرداخت و خزانه‌داری) ──
+  /** تراکنش خزانه (دریافت/پرداخت/انتقال/برگشت/اصلاح) قطعی شد */
+  TREASURY_TRANSACTION_POSTED: 'treasury.transaction.posted',
+  // ── موج ۱ — فاز ۱۰ (خانه‌داری، تعمیرات، دارایی، خدمات جانبی) ──
+  /** وظیفهٔ خانه‌داری انجام شد */
+  HOUSEKEEPING_TASK_COMPLETED: 'housekeeping.task.completed',
+  /** درخواست تعمیر ثبت شد */
+  MAINTENANCE_REQUEST_CREATED: 'maintenance.request.created',
+  /** سند استهلاک دارایی ثابت دوره ثبت شد */
+  ASSET_DEPRECIATION_POSTED: 'assets.depreciation.posted',
+  /** سفارش خدمت جانبی تأیید و شارژ شد */
+  ANCILLARY_ORDER_CONFIRMED: 'ancillary.order.confirmed',
 } as const;
 
 export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];

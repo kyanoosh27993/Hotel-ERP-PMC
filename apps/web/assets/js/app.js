@@ -35,6 +35,10 @@
   var NAV = [
     { id: 'dashboard', title: 'داشبورد مدیر AI', icon: '▦' },
     { id: 'rooms', title: 'نقشه اتاق (فاز ۴)', icon: '🛏' },
+    { id: 'treasury', title: 'خزانه‌داری و صندوق (فاز ۵)', icon: '💰' },
+    { id: 'housekeepingops', title: 'خانه‌داری و تعمیرات (فاز ۱۰)', icon: '🧹' },
+    { id: 'assets', title: 'دارایی ثابت (فاز ۱۰)', icon: '🏛️' },
+    { id: 'ancillary', title: 'خدمات جانبی (فاز ۱۰)', icon: '🛎' },
     { id: 'calendar', title: 'تقویم شمسی', icon: '📅' },
     { id: 'payroll', title: 'حقوق و دستمزد', icon: '₪' },
     { id: 'settings', title: 'تنظیمات', icon: '⚙' }
@@ -59,7 +63,7 @@
       nav.appendChild(b);
     });
     sidebar.appendChild(nav);
-    var ver = el('div', 'sidebar-ver', 'نسخه ۰.۱ — فارسی/RTL');
+    var ver = el('div', 'sidebar-ver', 'نسخه ۰.۶ — فارسی/RTL');
     sidebar.appendChild(ver);
 
     var main = el('main', 'main');
