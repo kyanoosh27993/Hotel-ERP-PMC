@@ -58,6 +58,9 @@ jobs:
           node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('../../../../apps/api/package.json','utf8'));fs.writeFileSync('package.json',JSON.stringify({name:'hotel-erp-runtime',version:'0.5.0',private:true,dependencies:p.dependencies},null,2))"
           npm install --omit=dev --no-audit --no-fund
           npm install --no-save --no-audit --no-fund embedded-postgres@18.7.0-beta.19 prisma@5.22.0
+          # تولید کلاینت Prisma داخل payload (بدون این، seed و API خطای
+          # "@prisma/client did not initialize yet" می‌دهند)
+          node node_modules/prisma/build/index.js generate --schema prisma/schema.prisma
 
       - name: Download portable node.exe
         run: |
