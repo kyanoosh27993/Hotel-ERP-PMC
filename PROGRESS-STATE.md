@@ -35,6 +35,19 @@
 | --- | --- | --- |
 | v0.1 | ۱۴۰۵/۰۹/۰۱ | هسته + حقوق + داشبورد AI + قوانین |
 
+### نشست ۲۲ نوامبر ۲۰۲۶ (دوم) — اصلاح CI + فاز ۴: اتاق/رزرو/پذیرش (F4-T1…T3)
+- گزارش کارفرما: «ورک‌فلو گیت‌هاب خطا دارد» → ۶ اجرای قرمز بازمانده از اشکال‌زدایی دیروز حذف شد
+  (API حذف run، همه ۲۰۴)؛ نام ورک‌فلو → «Phases 1–3»، concurrency cancel-in-progress، badge در README.
+  اجرای بعدی سبز ✓ — صفحه Actions اکنون کاملاً سبز.
+- **فاز ۴:** مهاجرت phase4_rooms_waitlist (units/source/ratePerNightRials/roomId/checkedIn/Out +
+  WaitlistEntry + Room.note)؛ مجوز room.manage؛ ماژول rooms (نقشه + تغییر وضعیت لحظه‌ای،
+  OUT_OF_SERVICE بدون دلیل→۴۰۰، حسابرسی ROOM_STATUS_CHANGED)؛ reservation.service بازنویسی
+  (ظرفیت واقعی ≠OUT_OF_SERVICE × جمع units هم‌پوشان، گروهی تا ۲۰، چک‌این تخصیص خودکار→OCCUPIED،
+  چک‌اوت→DIRTY، لیست انتظار add/list/convert/cancel)؛ داشبورد ظرفیت فعال لحظه‌ای؛ شل وب ماژول نقشه اتاق.
+- باگ‌های مسیر e2e: JUN بدون اتاق در seed، آلودگی اجرای قبل (TRUNCATE + waitlist_entries، id مستقیم)،
+  totalRooms = ظرفیت فعال؛ تست concurrent قدیمی با دو ۸واحدی سازگار شد.
+- نتیجه: e2e ۳۳/۳۳، unit ۵۸/۵۸، lint صفر — README-phase4-test.md (۱۰ سناریو، دروازه M4).
+
 ### نشست ۲۲ نوامبر ۲۰۲۶ (تکمیلی) — فاز ۳: داشبوردهای مدیریتی (F3-T1…T3)
 - کارفرما ابتدا پرسید «از سورس‌های ارسالی استفاده شده؟» — پاسخ مستند با مدرک داده شد:
   payroll-releases → فرمول mizan_include_seniority و ضریب‌ها در packages/payroll؛
