@@ -28,10 +28,11 @@ jobs:
       - name: Install workspace deps
         run: npm ci --no-audit --no-fund
 
-      - name: Build shared/contracts/api (Windows-native Prisma + Argon2 engines)
+      - name: Build shared/contracts/payroll/api (Windows-native Prisma + Argon2 engines)
         run: |
           npm run build -w packages/shared
           npm run build -w packages/contracts
+          npm run build -w packages/payroll
           npm run prisma:generate -w apps/api
           npm run build -w apps/api
 
@@ -44,9 +45,10 @@ jobs:
           cp -r apps/web infrastructure/desktop/payload/web
           cp infrastructure/desktop/server.js infrastructure/desktop/payload/server.js
           cp infrastructure/desktop/run-server.cmd infrastructure/desktop/payload/run-server.cmd
-          mkdir -p infrastructure/desktop/payload/api/node_modules/@hotel-erp/shared infrastructure/desktop/payload/api/node_modules/@hotel-erp/contracts
+          mkdir -p infrastructure/desktop/payload/api/node_modules/@hotel-erp/shared infrastructure/desktop/payload/api/node_modules/@hotel-erp/contracts infrastructure/desktop/payload/api/node_modules/@hotel-erp/payroll
           cp -r packages/shared/dist packages/shared/package.json infrastructure/desktop/payload/api/node_modules/@hotel-erp/shared/
           cp -r packages/contracts/dist packages/contracts/package.json infrastructure/desktop/payload/api/node_modules/@hotel-erp/contracts/
+          cp -r packages/payroll/dist packages/payroll/package.json infrastructure/desktop/payload/api/node_modules/@hotel-erp/payroll/
           # compile seed (ts-node نخواهیم داشت — JS کامپایل‌شده)
           npx tsc apps/api/prisma/seed.ts apps/api/src/iam/permissions.ts --outDir infrastructure/desktop/payload/api/seed --module commonjs --target es2020 --esModuleInterop --skipLibCheck --moduleResolution node
 
