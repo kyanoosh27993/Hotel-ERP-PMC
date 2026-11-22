@@ -158,6 +158,7 @@ model RoomType {
 
   rooms        Room[]
   reservations Reservation[]
+  waitlist     WaitlistEntry[]
 
   @@map("room_types")
 }
@@ -168,8 +169,10 @@ model Room {
   roomTypeId String  @db.Uuid
   floor      Int     @default(1)
   status     RoomStatus @default(AVAILABLE)
+  note       String? // دلیل خارج از سرویس / تعمیرات
 
   roomType RoomType @relation(fields: [roomTypeId], references: [id])
+  reservations Reservation[]
 
   @@map("rooms")
 }
@@ -191,14 +194,21 @@ model Reservation {
   checkIn        DateTime @db.Date
   checkOut       DateTime @db.Date
   nights         Int
+  units          Int      @default(1) // رزرو گروهی: تعداد واحد از همین نوع
+  source         String   @default("PHONE") // PHONE / WALK_IN / ONLINE / OTA
+  ratePerNightRials BigInt? // تعرفه ویژه — خالی = نرخ پایه نوع اتاق
   totalRials     BigInt
   status         ReservationStatus @default(CONFIRMED)
+  roomId         String?  @db.Uuid // تخصیص در چک‌این
+  checkedInAt    DateTime?
+  checkedOutAt   DateTime?
   idempotencyKey String   @unique
   createdById    String?  @db.Uuid
   createdAt      DateTime @default(now())
   cancelledAt    DateTime?
 
   roomType RoomType @relation(fields: [roomTypeId], references: [id])
+  room     Room?    @relation(fields: [roomId], references: [id])
 
   @@index([roomTypeId, checkIn, checkOut, status])
   @@map("reservations")
@@ -211,6 +221,33 @@ enum ReservationStatus {
   CHECKED_OUT
 
   @@map("reservation_status")
+}
+
+model WaitlistEntry {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  guestName   String
+  phone       String?
+  roomTypeId  String   @db.Uuid
+  fromDate    DateTime @db.Date
+  toDate      DateTime @db.Date
+  units       Int      @default(1)
+  status      WaitlistStatus @default(WAITING)
+  convertedReservationId String? @db.Uuid
+  note        String?
+  createdAt   DateTime @default(now())
+
+  roomType RoomType @relation(fields: [roomTypeId], references: [id])
+
+  @@index([status, fromDate, toDate])
+  @@map("waitlist_entries")
+}
+
+enum WaitlistStatus {
+  WAITING
+  CONVERTED
+  CANCELLED
+
+  @@map("waitlist_status")
 }
 
 // ───────────────────────── POS (PoC) ─────────────────────────

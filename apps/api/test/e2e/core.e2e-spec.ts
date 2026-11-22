@@ -69,7 +69,7 @@ beforeAll(async () => {
   journal = app.get(JournalService);
 
   await prisma.$executeRawUnsafe(
-    `TRUNCATE "reservations","pos_orders","outbox_events","inbox_events","journal_entries","journal_lines","audit_logs","refresh_tokens","payroll_runs","payroll_slips" CASCADE`,
+    `TRUNCATE "reservations","pos_orders","outbox_events","inbox_events","journal_entries","journal_lines","audit_logs","refresh_tokens","payroll_runs","payroll_slips","waitlist_entries" CASCADE`,
   );
   // پاکسازی هدفمند داده تست فاز ۲ برای idempotency (داده seed پرسنل حفظ می‌شود)
   // نکته: Prisma در هر فراخوانی خام فقط یک دستور می‌پذیرد
@@ -174,6 +174,7 @@ describe('فاز ۱ — هسته', () => {
 
   it('رزرو هم‌زمان روی همان نوع اتاق: دقیقاً یکی موفق و یکی 409 (Race-safe)', async () => {
     const auth = `Bearer ${await login('frontdesk', false)}`;
+    // فاز ۴: ظرفیت واقعی = ۱۵ اتاق STD؛ دو رزرو هم‌زمانِ ۸ واحدی → ۱۶ > ۱۵ → دقیقاً یکی ۴۰۹
     const make = (key: string) =>
       request(app.getHttpServer())
         .post('/api/v1/reservations')
@@ -183,6 +184,7 @@ describe('فاز ۱ — هسته', () => {
           guestName: 'Concurrent Guest',
           checkInDate: '2026-12-10',
           checkOutDate: '2026-12-12',
+          units: 8,
           idempotencyKey: key,
         });
     const [a, b] = await Promise.allSettled([make('e2e-rsv-c1'), make('e2e-rsv-c2')]);
@@ -689,11 +691,221 @@ describe('فاز ۳ — داشبوردها (F3-T1…T3 — همه اعداد ا�
     expect(r.status).toBe(200);
     const hk = r.body.data;
     const roomsCount = await prisma.room.count();
-    expect(hk.totalRooms).toBe(roomsCount);
-    const sumStatus = (hk.roomsByStatus as Array<{ count: number }>).reduce((s, x) => s + x.count, 0);
+    // فاز ۴: ظرفیت فعال = اتاق‌های خارج از سرویس‌نشده (تعمیرات لحظه‌ای روی اشغال اثر دارد)
+    const activeRooms = await prisma.room.count({ where: { status: { not: 'OUT_OF_SERVICE' } } });
+    expect(hk.totalRooms).toBe(activeRooms);
+    const sumStatus = (hk.roomsByStatus as Array<{ count: number }>).reduce((acc, x) => acc + x.count, 0);
     expect(sumStatus).toBe(roomsCount);
     expect(hk.arrivalsToday).toBeGreaterThanOrEqual(1);
     const std = (hk.occupancyByType as Array<{ roomType: string; occupied: number }>).find((t) => t.occupied > 0);
     expect(std).toBeTruthy();
+  });
+});
+
+describe('فاز ۴ — نقشه اتاق، ظرفیت واقعی، چک‌این/چک‌اوت، لیست انتظار (F4-T1…T3)', () => {
+  const iso = (d: Date): string => d.toISOString().slice(0, 10);
+  const today = new Date();
+  const plusDays = (n: number): string => iso(new Date(today.getTime() + n * 24 * 3600 * 1000));
+  const fd = async () => `Bearer ${await login('frontdesk', false)}`;
+
+  it('F4-T1 نقشه اتاق: فهرست با فیلتر + تغییر وضعیت لحظه‌ای (تعمیرات با دلیل) + حسابرسی', async () => {
+    const auth = await fd();
+    const list = await request(app.getHttpServer()).get('/api/v1/rooms').set('Authorization', auth);
+    expect(list.status).toBe(200);
+    expect(list.body.data.length).toBe(await prisma.room.count());
+    const room = list.body.data[0];
+
+    const dirty = await request(app.getHttpServer())
+      .patch(`/api/v1/rooms/${room.id}/status`)
+      .set('Authorization', auth)
+      .send({ status: 'DIRTY' });
+    expect(dirty.status).toBe(200);
+    expect(dirty.body.data.status).toBe('DIRTY');
+
+    // خارج از سرویس بدون دلیل → ممنوع؛ با دلیل → ثبت + حسابرسی
+    const noNote = await request(app.getHttpServer())
+      .patch(`/api/v1/rooms/${room.id}/status`)
+      .set('Authorization', auth)
+      .send({ status: 'OUT_OF_SERVICE' });
+    expect(noNote.status).toBe(400);
+    const oos = await request(app.getHttpServer())
+      .patch(`/api/v1/rooms/${room.id}/status`)
+      .set('Authorization', auth)
+      .send({ status: 'OUT_OF_SERVICE', note: 'نقاشی و تعویض فرش' });
+    expect(oos.status).toBe(200);
+    const audits = await prisma.auditLog.findMany({ where: { entity: 'Room', entityId: room.id, action: 'ROOM_STATUS_CHANGED' } });
+    expect(audits.length).toBeGreaterThanOrEqual(2);
+
+    // حسابدار اجازه تغییر وضعیت ندارد (ماتریس)
+    const acc = await request(app.getHttpServer())
+      .patch(`/api/v1/rooms/${room.id}/status`)
+      .set('Authorization', `Bearer ${await login('accountant', true)}`)
+      .send({ status: 'AVAILABLE' });
+    expect(acc.status).toBe(403);
+  });
+
+  it('F4-T1 لحظه‌ای: اتاق خارج از سرویس → ظرفیت رزرو همان لحظه کم می‌شود (بدون Overbooking)', async () => {
+    const auth = await fd();
+    const rt = await prisma.roomType.findFirstOrThrow({ where: { code: 'STD' } });
+    const before = await request(app.getHttpServer())
+      .get('/api/v1/dashboards/ceo').set('Authorization', `Bearer ${await login('admin', true)}`);
+    const capBefore = (before.body.data.occupancy.byType as Array<{ roomType: string; total: number }>).find((t) => t.roomType.includes('استاندارد'));
+
+    // یک اتاق دیگر را خارج از سرویس می‌کنیم
+    const freeRoom = await prisma.room.findFirstOrThrow({ where: { roomTypeId: rt.id, status: 'AVAILABLE' }, orderBy: { code: 'asc' } });
+    await request(app.getHttpServer())
+      .patch(`/api/v1/rooms/${freeRoom.id}/status`)
+      .set('Authorization', auth)
+      .send({ status: 'OUT_OF_SERVICE', note: 'e2e تعمیر' });
+
+    const after = await request(app.getHttpServer())
+      .get('/api/v1/dashboards/ceo').set('Authorization', `Bearer ${await login('admin', true)}`);
+    const capAfter = (after.body.data.occupancy.byType as Array<{ roomType: string; total: number }>).find((t) => t.roomType.includes('استاندارد'));
+    expect((capAfter?.total ?? 0) + 1).toBe(capBefore?.total ?? 0);
+
+    // برگرداندن اتاق به سرویس
+    await request(app.getHttpServer())
+      .patch(`/api/v1/rooms/${freeRoom.id}/status`)
+      .set('Authorization', auth)
+      .send({ status: 'AVAILABLE' });
+  });
+
+  it('F4-T2 رزرو گروهی با تعرفه ویژه + ظرفیت: ۱۰ واحد ✓ / ۱۰ واحد دیگر → ۴۰۹', async () => {
+    const auth = await fd();
+    const rt = await prisma.roomType.findFirstOrThrow({ where: { code: 'STD' } });
+    const g1 = await request(app.getHttpServer())
+      .post('/api/v1/reservations')
+      .set('Authorization', auth)
+      .send({
+        roomTypeId: rt.id,
+        guestName: 'Group Tour A',
+        checkInDate: '2027-01-10',
+        checkOutDate: '2027-01-13',
+        units: 10,
+        source: 'WALK_IN',
+        ratePerNightRials: '2000000',
+        idempotencyKey: 'e2e-group-a',
+      });
+    expect(g1.status).toBe(201);
+    const rsv = await prisma.reservation.findUniqueOrThrow({ where: { id: g1.body.data.reservationId } });
+    expect(rsv.source).toBe('WALK_IN');
+    expect(rsv.units).toBe(10);
+    // ۳ شب × ۱۰ واحد × ۲٬۰۰۰٬۰۰۰ = ۶۰٬۰۰۰٬۰۰۰
+    expect(rsv.totalRials).toBe(60_000_000n);
+
+    const g2 = await request(app.getHttpServer())
+      .post('/api/v1/reservations')
+      .set('Authorization', auth)
+      .send({
+        roomTypeId: rt.id,
+        guestName: 'Group Tour B',
+        checkInDate: '2027-01-10',
+        checkOutDate: '2027-01-13',
+        units: 10,
+        source: 'PHONE',
+        idempotencyKey: 'e2e-group-b',
+      });
+    expect(g2.status).toBe(409); // ۱۰+۱۰ > ۱۵ → بدون Overbooking
+  });
+
+  it('F4-T3 چک‌این با تخصیص خودکار → اتاق OCCUPIED؛ چک‌اوت → اتاق DIRTY + داشبورد لحظه‌ای', async () => {
+    const auth = await fd();
+    const rt = await prisma.roomType.findFirstOrThrow({ where: { code: 'STD' } });
+    const rsv = await request(app.getHttpServer())
+      .post('/api/v1/reservations')
+      .set('Authorization', auth)
+      .send({
+        roomTypeId: rt.id,
+        guestName: 'Walkin Guest P4',
+        checkInDate: plusDays(0),
+        checkOutDate: plusDays(2),
+        source: 'WALK_IN',
+        idempotencyKey: 'e2e-p4-ci',
+      });
+    expect(rsv.status).toBe(201);
+    const rid = rsv.body.data.reservationId;
+
+    // حسابدار اجازه چک‌این ندارد
+    const accCi = await request(app.getHttpServer())
+      .post(`/api/v1/reservations/${rid}/check-in`)
+      .set('Authorization', `Bearer ${await login('accountant', true)}`);
+    expect(accCi.status).toBe(403);
+
+    const ci = await request(app.getHttpServer())
+      .post(`/api/v1/reservations/${rid}/check-in`)
+      .set('Authorization', auth);
+    expect(ci.status).toBe(201);
+    expect(ci.body.data.status).toBe('CHECKED_IN');
+    expect(ci.body.data.assignedRooms.length).toBe(1);
+    const roomCode = ci.body.data.assignedRooms[0] as string;
+
+    const room = await prisma.room.findUniqueOrThrow({ where: { code: roomCode } });
+    expect(room.status).toBe('OCCUPIED');
+
+    // داشبورد خانه‌داری همین لحظه اتاق اشغال را نشان می‌دهد (کوئری واقعی)
+    const hk = await request(app.getHttpServer())
+      .get('/api/v1/dashboards/housekeeping')
+      .set('Authorization', auth);
+    const occ = (hk.body.data.roomsByStatus as Array<{ status: string; count: number }>).find((x) => x.status === 'OCCUPIED');
+    expect(occ?.count ?? 0).toBeGreaterThanOrEqual(1);
+
+    // چک‌اوت → DIRTY
+    const co = await request(app.getHttpServer())
+      .post(`/api/v1/reservations/${rid}/check-out`)
+      .set('Authorization', auth);
+    expect(co.status).toBe(201);
+    expect(co.body.data.roomStatus).toBe('DIRTY');
+    const roomAfter = await prisma.room.findUniqueOrThrow({ where: { code: roomCode } });
+    expect(roomAfter.status).toBe('DIRTY');
+
+    // چک‌اوت دوباره → خطا
+    const co2 = await request(app.getHttpServer())
+      .post(`/api/v1/reservations/${rid}/check-out`)
+      .set('Authorization', auth);
+    expect(co2.status).toBe(409);
+  });
+
+  it('F4-T2 لیست انتظار: ثبت → تبدیل به رزرو واقعی → لغو مورد دیگر', async () => {
+    const auth = await fd();
+    // JUN در seed اتاقی ندارد (ظرفیت صفر) — لیست انتظار روی STD با ظرفیت واقعی ۱۵
+    const rt = await prisma.roomType.findFirstOrThrow({ where: { code: 'STD' } });
+    const add = await request(app.getHttpServer())
+      .post('/api/v1/waiting-list')
+      .set('Authorization', auth)
+      .send({
+        guestName: 'Waitlist Guest ۱',
+        phone: '09121234567',
+        roomTypeId: rt.id,
+        fromDate: '2027-02-01',
+        toDate: '2027-02-03',
+        note: 'درخواست تلفنی',
+      });
+    expect(add.status).toBe(201);
+
+    const list = await request(app.getHttpServer()).get('/api/v1/waiting-list').set('Authorization', auth);
+    expect(list.status).toBe(200);
+    const mine = (list.body.data as Array<Record<string, unknown>>).find((x) => x.id === add.body.data.id);
+    expect(mine?.status).toBe('WAITING');
+    expect(mine?.roomTypeFa).toBeTruthy(); // کوئری واقعی با نام فارسی نوع اتاق
+
+    const conv = await request(app.getHttpServer())
+      .post(`/api/v1/waiting-list/${add.body.data.id}/convert`)
+      .set('Authorization', auth);
+    expect(conv.status).toBe(201);
+    expect(conv.body.data.waitlistStatus).toBe('CONVERTED');
+    const wEntry = await prisma.waitlistEntry.findUniqueOrThrow({ where: { id: add.body.data.id } });
+    expect(wEntry.convertedReservationId).toBeTruthy();
+
+    // مورد دوم برای لغو
+    const add2 = await request(app.getHttpServer())
+      .post('/api/v1/waiting-list')
+      .set('Authorization', auth)
+      .send({ guestName: 'Waitlist Guest ۲', roomTypeId: rt.id, fromDate: '2027-02-05', toDate: '2027-02-06' });
+    expect(add2.status).toBe(201);
+    const cancel = await request(app.getHttpServer())
+      .patch(`/api/v1/waiting-list/${add2.body.data.id}/cancel`)
+      .set('Authorization', auth);
+    expect(cancel.status).toBe(200);
+    expect(cancel.body.data.status).toBe('CANCELLED');
   });
 });

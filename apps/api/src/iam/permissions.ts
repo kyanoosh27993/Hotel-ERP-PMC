@@ -14,6 +14,7 @@ export const PERMISSIONS = {
   PERIOD_LOCK: 'period.lock',
   RESERVATION_CREATE: 'reservation.create',
   ROOM_VIEW: 'room.view',
+  ROOM_MANAGE: 'room.manage',
   POS_ORDER_CREATE: 'pos.order.create',
   INTEGRATIONS_VIEW: 'integrations.view',
   DASHBOARD_CEO_VIEW: 'dashboard.ceo.view',
@@ -39,6 +40,7 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   { code: PERMISSIONS.PERIOD_LOCK, en: 'Lock/unlock fiscal periods', fa: 'قفل/بازگشایی دوره مالی' },
   { code: PERMISSIONS.RESERVATION_CREATE, en: 'Create reservations', fa: 'ثبت رزرو' },
   { code: PERMISSIONS.ROOM_VIEW, en: 'View rooms', fa: 'مشاهده اتاق‌ها' },
+  { code: PERMISSIONS.ROOM_MANAGE, en: 'Change room status / check-in / check-out', fa: 'تغییر وضعیت اتاق، چک‌این و چک‌اوت' },
   { code: PERMISSIONS.POS_ORDER_CREATE, en: 'Create POS orders', fa: 'ثبت سفارش POS' },
   { code: PERMISSIONS.INTEGRATIONS_VIEW, en: 'View integrations', fa: 'مشاهده یکپارچگی‌ها' },
   { code: PERMISSIONS.DASHBOARD_CEO_VIEW, en: 'View CEO dashboard', fa: 'مشاهده داشبورد مدیرعامل' },
@@ -94,6 +96,6 @@ export const ROLE_MATRIX: Record<
     en: 'Front Desk',
     fa: 'پذیرش',
     sensitiveMfa: false,
-    permissions: [PERMISSIONS.RESERVATION_CREATE, PERMISSIONS.ROOM_VIEW, PERMISSIONS.POS_ORDER_CREATE],
+    permissions: [PERMISSIONS.RESERVATION_CREATE, PERMISSIONS.ROOM_VIEW, PERMISSIONS.ROOM_MANAGE, PERMISSIONS.POS_ORDER_CREATE],
   },
 };

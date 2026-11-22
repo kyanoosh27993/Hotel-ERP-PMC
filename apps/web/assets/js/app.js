@@ -34,6 +34,7 @@
 
   var NAV = [
     { id: 'dashboard', title: 'داشبورد مدیر AI', icon: '▦' },
+    { id: 'rooms', title: 'نقشه اتاق (فاز ۴)', icon: '🛏' },
     { id: 'calendar', title: 'تقویم شمسی', icon: '📅' },
     { id: 'payroll', title: 'حقوق و دستمزد', icon: '₪' },
     { id: 'settings', title: 'تنظیمات', icon: '⚙' }

@@ -110,7 +110,8 @@ export class DashboardService {
   private async occupancyToday(day: PeriodRange) {
     const [types, rooms, reservations] = await Promise.all([
       this.prisma.roomType.findMany({ select: { id: true, nameFa: true } }),
-      this.prisma.room.groupBy({ by: ['roomTypeId'], _count: { _all: true } }),
+      // ظرفیت واقعی = اتاق‌های خارج از سرویس‌نشده (تعمیرات لحظه‌ای ظرفیت را کم می‌کند)
+      this.prisma.room.groupBy({ by: ['roomTypeId'], where: { status: { not: 'OUT_OF_SERVICE' } }, _count: { _all: true } }),
       this.prisma.reservation.groupBy({
         by: ['roomTypeId'],
         where: { status: 'CONFIRMED', checkIn: { lt: day.end }, checkOut: { gt: day.start } },
