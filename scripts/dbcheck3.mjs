@@ -1,0 +1,11 @@
+import pgPkg from 'pg';
+const {Client}=pgPkg;
+const c=new Client({connectionString:'postgresql://hotel:hotel_ci_pass@localhost:5433/hotel_erp'});
+await c.connect();
+const ob=await c.query(`select "eventName", count(*)::int from outbox_events where "eventName" like 'inventory%' or "eventName" like 'restaurant%' group by 1`);
+console.log('outbox relevant:',JSON.stringify(ob.rows));
+const mv=await c.query(`select direction, count(*)::int, sum("valueRials")::text as v from stock_movements where "refModule"='restaurant' group by 1`);
+console.log('restaurant movements:',JSON.stringify(mv.rows));
+const beef=await c.query(`select code, "qtyOnHand"::text, "avgCostRials"::text from stock_items where code in ('STK-BEEF','STK-RICE')`);
+console.log('beef/rice:',JSON.stringify(beef.rows));
+await c.end();

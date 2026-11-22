@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma.service';
 import { OutboxService } from '../outbox/outbox.service';
 import { EVENT_NAMES } from '@hotel-erp/contracts';
 import { addRials, mulRial } from '@hotel-erp/shared';
+import { nextDocSeq } from '../common/doc-seq';
 
 export interface ServeLineInput {
   itemName: string;
@@ -48,7 +49,7 @@ export class PosService {
     const { total, tax } = PosService.computeTotals(input.lines, input.taxRatePermille);
 
     return this.prisma.$transaction(async (tx) => {
-      const seq = (await tx.posOrder.count()) + 1;
+      const seq = await nextDocSeq(tx, 'pos_order');
       const orderNo = `ORD-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`;
 
       const order = await tx.posOrder.create({

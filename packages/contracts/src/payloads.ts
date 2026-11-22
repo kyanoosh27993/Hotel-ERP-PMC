@@ -25,6 +25,14 @@ export interface PosOrderServedPayload {
   folioId: string | null;
 }
 
+export interface NightAuditPostedPayload {
+  /** شب مورد شارژ (YYYY-MM-DD) */
+  businessDate: string;
+  /** جمع شارژ شب (ریال) — بدهکار ۱۲۰۱ */
+  chargedRials: number;
+  stays: Array<{ stayCode: string; roomCode: string; rateRials: number }>;
+}
+
 export interface PayrollRunApprovedPayload {
   runId: string;
   periodCode: string; // '1405-09'

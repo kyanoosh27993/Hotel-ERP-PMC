@@ -9,6 +9,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { EVENT_NAMES, type PosOrderServedPayload, type RestaurantOrderServedPayload, type KitchenTicketCreatedPayload } from '@hotel-erp/contracts';
 import { OutboxService } from '../outbox/outbox.service';
 import { PrismaService } from '../prisma.service';
+import { nextDocSeq } from '../common/doc-seq';
 
 const OPEN_ITEM_STATUSES = new Set(['NEW', 'SENT_TO_KITCHEN', 'PREPARING', 'READY', 'SERVED']);
 
@@ -194,7 +195,7 @@ export class RestaurantService {
         stayId = stay.id;
       }
 
-      const seq = (await tx.restaurantOrder.count()) + 1;
+      const seq = await nextDocSeq(tx, 'rest_order');
       const order = await tx.restaurantOrder.create({
         data: {
           orderNo: `RORD-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`,
@@ -249,15 +250,18 @@ export class RestaurantService {
   }
 
   private async recalcTotals(tx: import('@prisma/client').Prisma.TransactionClient, orderId: string) {
-    const order = await tx.restaurantOrder.findUnique({ where: { id: orderId }, include: { items: true } });
+    // include نرخ مالیاتی هر قلم — بدون N+1 در حلقه
+    const order = await tx.restaurantOrder.findUnique({
+      where: { id: orderId },
+      include: { items: { include: { menuItem: { select: { taxRateBps: true } } } } },
+    });
     if (!order) throw new NotFoundException('سفارش یافت نشد');
     let subtotal = 0n;
     let taxSum = 0n;
     for (const it of order.items) {
       if (!OPEN_ITEM_STATUSES.has(it.status)) continue;
       subtotal += it.lineNetRials;
-      const mi = await tx.menuItem.findUnique({ where: { id: it.menuItemId } });
-      taxSum += (it.lineNetRials * BigInt(mi?.taxRateBps ?? 900)) / 10000n;
+      taxSum += (it.lineNetRials * BigInt(it.menuItem?.taxRateBps ?? 900)) / 10000n;
     }
     const net = subtotal - order.discountRials;
     const tax = this.discountedTax(subtotal, taxSum, net);
@@ -310,7 +314,7 @@ export class RestaurantService {
         data: { status: 'SENT_TO_KITCHEN', sentAt: new Date() },
       });
 
-      const seq = (await tx.kitchenTicket.count()) + 1;
+      const seq = await nextDocSeq(tx, 'kitchen_ticket');
       const ticket = await tx.kitchenTicket.create({
         data: {
           ticketNo: `KDS-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`,

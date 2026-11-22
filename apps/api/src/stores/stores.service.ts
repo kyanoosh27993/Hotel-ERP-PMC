@@ -14,6 +14,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { OutboxService } from '../outbox/outbox.service';
 import { PrismaService } from '../prisma.service';
+import { nextDocSeq } from '../common/doc-seq';
 
 type Tx = Prisma.TransactionClient;
 
@@ -245,7 +246,7 @@ export class StoresService implements OnModuleInit {
       if (!w) throw new NotFoundException('انبار یافت نشد');
       const open = await tx.stockCount.findFirst({ where: { warehouseId: w.id, status: 'OPEN' } });
       if (open) throw new BadRequestException('شمارش باز روی این انبار وجود دارد');
-      const seq = (await tx.stockCount.count()) + 1;
+      const seq = await nextDocSeq(tx, 'stock_count');
       const count = await tx.stockCount.create({
         data: {
           countNo: `CNT-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`,

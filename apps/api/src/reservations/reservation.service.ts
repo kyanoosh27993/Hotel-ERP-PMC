@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma.service';
 import { OutboxService } from '../outbox/outbox.service';
 import { EVENT_NAMES } from '@hotel-erp/contracts';
 import { mulRial } from '@hotel-erp/shared';
+import { nextDocSeq } from '../common/doc-seq';
 
 export interface ConfirmInput {
   roomTypeId: string;
@@ -61,7 +62,7 @@ export class ReservationService {
         throw new ConflictException({ code: 'CONFLICT', message: 'Room is not available for the requested range' });
       }
 
-      const seq = (await tx.reservation.count()) + 1;
+      const seq = await nextDocSeq(tx, 'reservation');
       const code = `RSV-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`;
 
       const reservation = await tx.reservation.create({

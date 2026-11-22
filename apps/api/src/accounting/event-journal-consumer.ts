@@ -15,6 +15,7 @@ import {
   type GrnReceivedPayload,
   type InventoryAdjustmentPostedPayload,
   type InventoryConsumptionPostedPayload,
+  type NightAuditPostedPayload,
 } from '@hotel-erp/contracts';
 import { JournalService, SYSTEM_ENGINE_USER } from './journal.service';
 import { OutboxService } from '../outbox/outbox.service';
@@ -49,6 +50,31 @@ export class EventJournalConsumer implements OnModuleInit {
     this.outbox.on(EVENT_NAMES.GRN_RECEIVED, (e) => this.handleGrnReceived(e));
     this.outbox.on(EVENT_NAMES.INVENTORY_ADJUSTMENT_POSTED, (e) => this.handleInventoryAdjustment(e));
     this.outbox.on(EVENT_NAMES.INVENTORY_CONSUMPTION_POSTED, (e) => this.handleInventoryConsumption(e));
+    // شارژ شب حسابرسی شبانه → بدهکار حساب مهمان / بستانکار درآمد اتاق
+    this.outbox.on(EVENT_NAMES.NIGHT_AUDIT_POSTED, (e) => this.handleNightAuditPosted(e));
+  }
+
+  /** pms.night_audit.posted → سند شارژ شب: بدهکار ۱۲۰۱ / بستانکار ۴۱۰۱ */
+  private async handleNightAuditPosted(envelope: EventEnvelope): Promise<void> {
+    const payload = envelope.payload as unknown as NightAuditPostedPayload;
+    const amount = BigInt(payload.chargedRials);
+    if (amount <= 0n) return;
+    const lines = [
+      { accountCode: '1201', debitRials: amount, creditRials: 0n },
+      { accountCode: '4101', debitRials: 0n, creditRials: amount },
+    ];
+    await this.journal.postEntryFromEvent(
+      envelope.idempotencyKey,
+      lines,
+      {
+        description: `Auto: night audit room charge ${payload.businessDate}`,
+        sourceModule: 'pms',
+        sourceRef: payload.businessDate,
+        sourceEventId: envelope.eventId,
+        createdByUserId: SYSTEM_ENGINE_USER,
+      },
+    );
+    this.logger.log(`journal posted for night audit ${payload.businessDate} (${payload.chargedRials})`);
   }
 
   /** booking.reservation.confirmed → بدهکار حساب مهمان / بستانکار درآمد اتاق */

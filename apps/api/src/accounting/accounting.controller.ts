@@ -1,9 +1,10 @@
-import { Body, ConflictException, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
+import { BadRequestException, Body, ConflictException, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { IsArray, IsInt, IsOptional, IsString, MaxLength, Min, MinLength, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { RequirePermissions } from '../iam/permissions.guard';
 import { PERMISSIONS } from '../iam/permissions';
+import { nextDocSeq } from '../common/doc-seq';
 import { JournalService } from './journal.service';
 import { PrismaService } from '../prisma.service';
 import { AuthenticatedRequest } from '../common/authenticated.request';
@@ -55,15 +56,23 @@ export class AccountingController {
   @RequirePermissions(PERMISSIONS.JOURNAL_CREATE_DRAFT)
   @Post()
   async createDraft(@Body() dto: CreateDraftEntryDto, @Req() req: AuthenticatedRequest) {
+    // قاعدهٔ مالی: حتی پیش‌نویس هم باید متوازن باشد — سند کج قابل تأیید نیست
+    const totalDebit = dto.lines.reduce((a, l) => a + BigInt(l.debit), 0n);
+    const totalCredit = dto.lines.reduce((a, l) => a + BigInt(l.credit), 0n);
+    if (totalDebit !== totalCredit) {
+      throw new BadRequestException({
+        code: 'BUSINESS_RULE',
+        message: 'سند متوازن نیست — جمع بدهکار و بستانکار برابر نیست',
+        details: { totalDebit: totalDebit.toString(), totalCredit: totalCredit.toString() },
+      });
+    }
+    if (dto.lines.length < 2) {
+      throw new BadRequestException({ code: 'BUSINESS_RULE', message: 'سند حداقل دو سطر نیاز دارد' });
+    }
     const created = await this.prisma.$transaction(async (tx) => {
       const entryDate = new Date();
       const year = entryDate.getUTCFullYear();
-      const last = await tx.journalEntry.findFirst({
-        where: { entryNo: { startsWith: `JV-${year}-` } },
-        orderBy: { entryNo: 'desc' },
-        select: { entryNo: true },
-      });
-      const seq = last ? Number(last.entryNo.split('-')[2]) + 1 : 1;
+      const seq = await nextDocSeq(tx, 'journal');
       const entryNo = `JV-${year}-${String(seq).padStart(6, '0')}`;
 
       const period = await tx.fiscalPeriod.findFirst({

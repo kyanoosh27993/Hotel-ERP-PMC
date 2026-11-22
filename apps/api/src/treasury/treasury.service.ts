@@ -9,6 +9,7 @@ import type { CashTxnKind, CashTxnMethod } from '@prisma/client';
 import { EVENT_NAMES, type TreasuryTransactionPostedPayload } from '@hotel-erp/contracts';
 import { OutboxService } from '../outbox/outbox.service';
 import { PrismaService } from '../prisma.service';
+import { nextDocSeq } from '../common/doc-seq';
 
 /** جهت جریان وجه هر نوع تراکنش (مبلغ همیشه مثبت ذخیره می‌شود) */
 const INFLOW_KINDS: ReadonlySet<CashTxnKind> = new Set(['RECEIPT', 'TRANSFER', 'ADJUSTMENT']);
@@ -48,7 +49,7 @@ export class TreasuryService {
     if (open) throw new ConflictException(`شیفت باز ${open.code} روی این صندوق وجود دارد — ابتدا ببندید`);
 
     return this.prisma.$transaction(async (tx) => {
-      const seq = (await tx.cashierShift.count()) + 1;
+      const seq = await nextDocSeq(tx, 'shift');
       const shift = await tx.cashierShift.create({
         data: {
           code: `SHF-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`,
@@ -140,7 +141,7 @@ export class TreasuryService {
         if (!stay || stay.status !== 'OPEN') throw new BadRequestException('اقامت باز برای شارژ فولیو یافت نشد');
       }
 
-      const seq = (await tx.cashTransaction.count()) + 1;
+      const seq = await nextDocSeq(tx, 'cash_txn');
       const row = await tx.cashTransaction.create({
         data: {
           txnNo: `TXN-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`,

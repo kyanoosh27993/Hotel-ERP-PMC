@@ -9,6 +9,7 @@ import type { AncillaryCategory } from '@prisma/client';
 import { EVENT_NAMES, type AncillaryOrderConfirmedPayload } from '@hotel-erp/contracts';
 import { OutboxService } from '../outbox/outbox.service';
 import { PrismaService } from '../prisma.service';
+import { nextDocSeq } from '../common/doc-seq';
 
 @Injectable()
 export class AncillaryService {
@@ -93,7 +94,7 @@ export class AncillaryService {
       const tax = (net * BigInt(service.taxRateBps) + 5000n) / 10000n;
       const total = net + tax;
 
-      const seq = (await tx.ancillaryOrder.count()) + 1;
+      const seq = await nextDocSeq(tx, 'anc_order');
       const row = await tx.ancillaryOrder.create({
         data: {
           orderNo: `SVC-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`,

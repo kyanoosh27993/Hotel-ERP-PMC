@@ -13,6 +13,7 @@ import {
 } from '@hotel-erp/contracts';
 import { OutboxService } from '../outbox/outbox.service';
 import { PrismaService } from '../prisma.service';
+import { nextDocSeq } from '../common/doc-seq';
 
 @Injectable()
 export class HousekeepingService {
@@ -201,7 +202,7 @@ export class HousekeepingService {
       if (input.roomCode && !room) throw new NotFoundException('اتاق یافت نشد');
       const asset = input.assetCode ? await tx.fixedAsset.findUnique({ where: { assetCode: input.assetCode } }) : null;
       if (input.assetCode && !asset) throw new NotFoundException('دارایی یافت نشد');
-      const seq = (await tx.maintenanceRequest.count()) + 1;
+      const seq = await nextDocSeq(tx, 'maintenance');
       const req = await tx.maintenanceRequest.create({
         data: {
           requestNo: `MNT-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`,
@@ -282,7 +283,7 @@ export class HousekeepingService {
 
   async openLaundryBatch(input: { direction: 'OUT_WASH' | 'IN_RETURN'; userId?: string }) {
     return this.prisma.$transaction(async (tx) => {
-      const seq = (await tx.laundryBatch.count()) + 1;
+      const seq = await nextDocSeq(tx, 'laundry');
       const batch = await tx.laundryBatch.create({
         data: {
           code: `LDY-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`,
@@ -353,7 +354,7 @@ export class HousekeepingService {
     return this.prisma.$transaction(async (tx) => {
       const room = await tx.room.findUnique({ where: { code: input.roomCode } });
       if (!room) throw new NotFoundException('اتاق یافت نشد');
-      const seq = (await tx.lostAndFound.count()) + 1;
+      const seq = await nextDocSeq(tx, 'lostfound');
       const row = await tx.lostAndFound.create({
         data: {
           code: `LNF-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`,

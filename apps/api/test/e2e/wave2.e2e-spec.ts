@@ -441,8 +441,14 @@ describe('فاز ۶ — رستوران، آشپزخانه و کاست کنترل
     const po = await request(app.getHttpServer())
       .post('/api/v1/procurement/orders').set('Authorization', auth(tokens.storekeeper))
       .send({ supplierCode: 'SUP-001', items: [{ stockItemCode: 'STK-RICE', qty: 1, unitCostRials: 100 }] });
-    // storekeeper PROC_MANAGE ندارد → حتی ساخت PO هم ۴۰۳ است
-    expect(po.status).toBe(403);
+    // جداسازی وظایف: انباردار با procurement.create می‌تواند ثبت کند اما تأیید نمی‌کند
+    expect(po.status).toBe(201);
+
+    const cannotApprove = await request(app.getHttpServer())
+      .post(`/api/v1/procurement/orders/${po.body.id}/approve`).set('Authorization', auth(tokens.storekeeper))
+      .send({});
+    // storekeeper PROC_MANAGE ندارد → تأیید ۴۰۳ است
+    expect(cannotApprove.status).toBe(403);
 
     const chefPo = await request(app.getHttpServer())
       .post('/api/v1/procurement/orders').set('Authorization', auth(tokens.chef))

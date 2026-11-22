@@ -133,7 +133,7 @@ export class ProcurementController {
   }
 
   @Post('requisitions')
-  @RequirePermissions(PERMISSIONS.PROC_MANAGE)
+  @RequirePermissions(PERMISSIONS.PROC_CREATE)
   createRequisition(@Body() dto: CreateRequisitionDto, @Req() req: AuthenticatedRequest) {
     return this.svc.createRequisition({ ...dto, userId: req.user.id });
   }
@@ -151,7 +151,7 @@ export class ProcurementController {
   }
 
   @Post('orders')
-  @RequirePermissions(PERMISSIONS.PROC_MANAGE)
+  @RequirePermissions(PERMISSIONS.PROC_CREATE)
   createPurchaseOrder(@Body() dto: CreatePoDto, @Req() req: AuthenticatedRequest) {
     return this.svc.createPurchaseOrder({ ...dto, userId: req.user.id });
   }

@@ -16,7 +16,7 @@ export class HealthController {
     return {
       status: db ? 'ok' : 'degraded',
       db: db ? 'up' : 'down',
-      version: '0.2.0',
+      version: '0.7.0',
     };
   }
 }

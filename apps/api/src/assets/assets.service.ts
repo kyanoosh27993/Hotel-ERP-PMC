@@ -8,6 +8,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { EVENT_NAMES, type AssetDepreciationPostedPayload } from '@hotel-erp/contracts';
 import { OutboxService } from '../outbox/outbox.service';
 import { PrismaService } from '../prisma.service';
+import { nextDocSeq } from '../common/doc-seq';
 
 const PERIOD_RE = /^\d{4}-\d{2}$/; // '1405-09'
 
@@ -43,7 +44,7 @@ export class AssetsService {
         if (!room) throw new NotFoundException('اتاق یافت نشد');
         roomId = room.id;
       }
-      const seq = (await tx.fixedAsset.count()) + 1;
+      const seq = await nextDocSeq(tx, 'asset');
       const asset = await tx.fixedAsset.create({
         data: {
           assetCode: `FA-${String(seq).padStart(5, '0')}`,

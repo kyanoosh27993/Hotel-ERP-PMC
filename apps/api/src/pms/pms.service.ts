@@ -9,6 +9,7 @@ import { OutboxService } from '../outbox/outbox.service';
 import { EVENT_NAMES } from '@hotel-erp/contracts';
 import { mulRial } from '@hotel-erp/shared';
 import { ReservationService } from '../reservations/reservation.service';
+import { nextDocSeq } from '../common/doc-seq';
 
 export interface PmsReservationInput {
   roomTypeId: string;
@@ -141,7 +142,7 @@ export class PmsService {
       if (overlapping >= roomsOfType) {
         throw new ConflictException({ code: 'CONFLICT', message: `Room type capacity exhausted (${roomsOfType} rooms) for the requested range` });
       }
-      const seq = (await tx.reservation.count()) + 1;
+      const seq = await nextDocSeq(tx, 'reservation');
       const code = `RSV-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`;
       const reservation = await tx.reservation.create({
         data: {
@@ -304,7 +305,7 @@ export class PmsService {
         }
       }
 
-      const seq = (await tx.stay.count()) + 1;
+      const seq = await nextDocSeq(tx, 'stay');
       const code = `STY-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`;
       const guestName = reservation?.guestName ?? input.guestName ?? '';
       const stay = await tx.stay.create({
@@ -431,48 +432,95 @@ export class PmsService {
 
   // ───────── F4-T8: حسابرسی شبانه ─────────
 
+  /**
+   * حسابرسی شبانه — با شارژ بهای اتاق (نقشه ۷.۱): هر اقامت باز به‌ازای هر اتاق اشغالش
+   * یک شب هزینه می‌شود (نرخ رزرو یا نرخ پایهٔ نوع اتاق) → فولیو + رویداد پولی سند.
+   */
   async nightAudit(businessDate: string, closedByUserId: string) {
     const exists = await this.prisma.nightAuditRun.findUnique({ where: { businessDate: new Date(`${businessDate}T00:00:00Z`) } });
     if (exists) throw new ConflictException({ code: 'CONFLICT', message: `Night audit for ${businessDate} already ran` });
 
     const date = new Date(`${businessDate}T00:00:00Z`);
-    const openStays = await this.prisma.stay.findMany({ where: { status: 'OPEN' }, select: { code: true } });
-    const dirtyRooms = await this.prisma.room.findMany({
-      where: { OR: [{ status: 'DIRTY' }, { hkStatus: 'DIRTY' }, { hkStatus: 'IN_PROGRESS' }] },
-      select: { code: true },
-    });
-    const arrivals = await this.prisma.reservation.findMany({
-      where: { checkIn: date, status: 'CONFIRMED' },
-      select: { code: true, guestName: true },
-    });
+    return this.prisma.$transaction(async (tx) => {
+      const openStays = await tx.stay.findMany({
+        where: { status: 'OPEN' },
+        include: {
+          rooms: { include: { room: { include: { roomType: true } } } },
+        },
+      });
 
-    const exceptions = {
-      openStays: openStays.map((s) => s.code),
-      dirtyRooms: dirtyRooms.map((r) => r.code),
-      arrivalsNotCheckedIn: arrivals.map((a) => `${a.code} — ${a.guestName}`),
-    };
-    const hasExceptions = openStays.length > 0 || dirtyRooms.length > 0 || arrivals.length > 0;
+      // شارژ شب: نرخ هر اتاق اشغال هر اقامت باز — یک شب به‌ازای این شب‌گردی
+      // (نرخ توافقی سطر اقامت در اولویت؛ وگرنه نرخ پایهٔ نوع اتاق)
+      let totalCharged = 0n;
+      const charges: Array<{ stayCode: string; roomCode: string; rateRials: number }> = [];
+      for (const stay of openStays) {
+        let stayCharge = 0n;
+        for (const sr of stay.rooms) {
+          const rate = BigInt(sr.rateOverrideRials ?? sr.room.roomType.baseRateRials);
+          stayCharge += rate;
+          charges.push({ stayCode: stay.code, roomCode: sr.room.code, rateRials: Number(rate) });
+        }
+        if (stayCharge > 0n) {
+          await tx.stay.update({ where: { id: stay.id }, data: { folioRials: { increment: stayCharge } } });
+          totalCharged += stayCharge;
+        }
+      }
 
-    const run = await this.prisma.nightAuditRun.create({
-      data: {
-        businessDate: date,
-        status: hasExceptions ? 'WITH_EXCEPTIONS' : 'OK',
-        openStays: openStays.length,
-        dirtyRooms: dirtyRooms.length,
-        arrivalsNotCheckedIn: arrivals.length,
-        exceptions: exceptions as unknown as import('@prisma/client').Prisma.InputJsonValue,
-        closedById: closedByUserId === 'system:engine' ? null : closedByUserId,
-      },
+      const dirtyRooms = await tx.room.findMany({
+        where: { OR: [{ status: 'DIRTY' }, { hkStatus: 'DIRTY' }, { hkStatus: 'IN_PROGRESS' }] },
+        select: { code: true },
+      });
+      const arrivals = await tx.reservation.findMany({
+        where: { checkIn: date, status: 'CONFIRMED' },
+        select: { code: true, guestName: true },
+      });
+
+      const exceptions = {
+        openStays: openStays.map((s) => s.code),
+        dirtyRooms: dirtyRooms.map((r) => r.code),
+        arrivalsNotCheckedIn: arrivals.map((a) => `${a.code} — ${a.guestName}`),
+      };
+      const hasExceptions = openStays.length > 0 || dirtyRooms.length > 0 || arrivals.length > 0;
+
+      const run = await tx.nightAuditRun.create({
+        data: {
+          businessDate: date,
+          status: hasExceptions ? 'WITH_EXCEPTIONS' : 'OK',
+          openStays: openStays.length,
+          dirtyRooms: dirtyRooms.length,
+          arrivalsNotCheckedIn: arrivals.length,
+          exceptions: exceptions as unknown as import('@prisma/client').Prisma.InputJsonValue,
+          closedById: closedByUserId === 'system:engine' ? null : closedByUserId,
+        },
+      });
+
+      // رویداد پولی شارژ شب → سند خودکار (بدهکار حساب مهمان / بستانکار درآمد اتاق)
+      if (totalCharged > 0n) {
+        await this.outbox.enqueue(tx, {
+          eventName: EVENT_NAMES.NIGHT_AUDIT_POSTED,
+          aggregate: 'night_audit',
+          idempotencyKey: `pms.night.${businessDate}`,
+          payload: {
+            businessDate,
+            chargedRials: Number(totalCharged),
+            stays: charges,
+          } as unknown as Record<string, unknown>,
+          producer: 'pms',
+        });
+      }
+
+      return {
+        id: run.id,
+        businessDate,
+        status: run.status,
+        openStays: run.openStays,
+        dirtyRooms: run.dirtyRooms,
+        arrivalsNotCheckedIn: run.arrivalsNotCheckedIn,
+        chargedRials: Number(totalCharged),
+        charges,
+        exceptions,
+      };
     });
-    return {
-      id: run.id,
-      businessDate,
-      status: run.status,
-      openStays: run.openStays,
-      dirtyRooms: run.dirtyRooms,
-      arrivalsNotCheckedIn: run.arrivalsNotCheckedIn,
-      exceptions,
-    };
   }
 
   async listNightAudits() {

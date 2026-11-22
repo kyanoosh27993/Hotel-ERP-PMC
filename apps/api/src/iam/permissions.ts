@@ -55,6 +55,7 @@ export const PERMISSIONS = {
   POS_DISCOUNT: 'pos.discount',
   // موج ۲ — فاز ۷: خرید، انبار و کاست کنترل
   PROC_VIEW: 'procurement.view',
+  PROC_CREATE: 'procurement.create',
   PROC_MANAGE: 'procurement.manage',
   PROC_RECEIVE: 'procurement.receive',
   STORES_VIEW: 'stores.view',
@@ -115,6 +116,7 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   { code: PERMISSIONS.POS_DISCOUNT, en: 'Apply order discount', fa: 'اعمال تخفیف سفارش' },
   // موج ۲ — فاز ۷
   { code: PERMISSIONS.PROC_VIEW, en: 'View suppliers, POs and receipts', fa: 'مشاهده تأمین‌کنندگان، سفارش‌ها و رسیدها' },
+  { code: PERMISSIONS.PROC_CREATE, en: 'Create requisitions and purchase orders', fa: 'ثبت درخواست و سفارش خرید' },
   { code: PERMISSIONS.PROC_MANAGE, en: 'Manage requisitions and purchase orders', fa: 'مدیریت درخواست و سفارش خرید' },
   { code: PERMISSIONS.PROC_RECEIVE, en: 'Record goods receipts', fa: 'ثبت رسید خرید' },
   { code: PERMISSIONS.STORES_VIEW, en: 'View stock items and movements', fa: 'مشاهده اقلام و گردش انبار' },
@@ -174,8 +176,9 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.TREASURY_VOID,
       PERMISSIONS.ASSET_VIEW,
       PERMISSIONS.ASSET_DEPRECIATE,
-      // موج ۲ — فاز ۷ (تأیید خرید)
+      // موج ۲ — فاز ۷ (تأیید خرید + ثبت سفارش)
       PERMISSIONS.PROC_VIEW,
+      PERMISSIONS.PROC_CREATE,
       PERMISSIONS.PROC_MANAGE,
       PERMISSIONS.STORES_VIEW,
     ],
@@ -252,6 +255,7 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.STORES_MANAGE,
       PERMISSIONS.STORES_COUNT,
       PERMISSIONS.PROC_VIEW,
+      PERMISSIONS.PROC_CREATE,
       PERMISSIONS.PROC_RECEIVE,
     ],
   },

@@ -14,6 +14,7 @@ import { Prisma } from '@prisma/client';
 import { OutboxService } from '../outbox/outbox.service';
 import { PrismaService } from '../prisma.service';
 import { StoresService } from '../stores/stores.service';
+import { nextDocSeq } from '../common/doc-seq';
 
 @Injectable()
 export class ProcurementService {
@@ -62,7 +63,7 @@ export class ProcurementService {
   }) {
     if (!input.items.length) throw new BadRequestException('درخواست بدون قلم مجاز نیست');
     return this.prisma.$transaction(async (tx) => {
-      const seq = (await tx.purchaseRequisition.count()) + 1;
+      const seq = await nextDocSeq(tx, 'req');
       const req = await tx.purchaseRequisition.create({
         data: {
           reqNo: `REQ-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`,
@@ -154,7 +155,7 @@ export class ProcurementService {
       const tax = taxSum;
       const total = subtotal + tax;
 
-      const seq = (await tx.purchaseOrder.count()) + 1;
+      const seq = await nextDocSeq(tx, 'po');
       const po = await tx.purchaseOrder.create({
         data: {
           poNo: `PO-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`,
@@ -262,7 +263,7 @@ export class ProcurementService {
       if (!po) throw new NotFoundException('سفارش خرید یافت نشد');
       if (po.status !== 'APPROVED' && po.status !== 'PARTIAL') throw new BadRequestException('رسید فقط روی سفارش تأییدشده ثبت می‌شود');
 
-      const seq = (await tx.goodsReceipt.count()) + 1;
+      const seq = await nextDocSeq(tx, 'grn');
       const grn = await tx.goodsReceipt.create({
         data: {
           grnNo: `GRN-${new Date().getUTCFullYear()}-${String(seq).padStart(6, '0')}`,

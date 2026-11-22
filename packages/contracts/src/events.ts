@@ -18,6 +18,8 @@ export const EVENT_NAMES = {
   STAY_CHECKED_IN: 'pms.stay.checked_in',
   /** فاز ۴ — مهمان تسویه و خارج شد */
   STAY_CHECKED_OUT: 'pms.stay.checked_out',
+  /** حسابرسی شبانه — بهای اتاق شب به فولیو اقامت‌های باز شارژ شد (پولی) */
+  NIGHT_AUDIT_POSTED: 'pms.night_audit.posted',
   // ── موج ۱ — فاز ۵ (صندوق، پرداخت و خزانه‌داری) ──
   /** تراکنش خزانه (دریافت/پرداخت/انتقال/برگشت/اصلاح) قطعی شد */
   TREASURY_TRANSACTION_POSTED: 'treasury.transaction.posted',
