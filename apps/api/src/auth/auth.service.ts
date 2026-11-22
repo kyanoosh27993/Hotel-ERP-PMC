@@ -5,7 +5,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { createHash, randomUUID } from 'node:crypto';
-import { hash, verify } from '@node-rs/argon2';
+import { randomBytes } from 'crypto';
+import { argon2id, argon2Verify } from 'hash-wasm';
 import { authenticator } from 'otplib';
 import { PrismaService } from '../prisma.service';
 
@@ -25,12 +26,25 @@ export class AuthService {
 
   /* ── گذرواژه ── */
 
+  /** Argon2id با پارامترهای OWASP — خروجی PHC استاندارد (سازگار با اعداد قبلی) */
   async hashPassword(plain: string): Promise<string> {
-    return hash(plain); // @node-rs/argon2 → Argon2id پیش‌فرض
+    return argon2id({
+      password: plain,
+      salt: randomBytes(16),
+      parallelism: 1,
+      iterations: 3,
+      memorySize: 19456,
+      hashLength: 32,
+      outputType: 'encoded',
+    });
   }
 
   async verifyPassword(digest: string, plain: string): Promise<boolean> {
-    return verify(digest, plain);
+    try {
+      return await argon2Verify({ password: plain, hash: digest });
+    } catch {
+      return false; // هش ناسازگار/خراب → عدم تطابق
+    }
   }
 
   /* ── ورود ── */

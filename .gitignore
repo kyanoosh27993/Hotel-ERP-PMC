@@ -12,3 +12,14 @@ backups/
 .env
 .env.local
 # نقشه graphify خروجی تولیدی است ولی برای حفظ حافظه کامیت می‌شود (قوانین ۳،۴،۵)
+
+# نسخه دسکتاپ — خروجی‌های بیلد محلی
+apps/api/desktop-assets/
+apps/api/dist-desktop/
+apps/api/vendor-dist/
+apps/mobile/node_modules/
+apps/mobile/android/.gradle/
+apps/mobile/android/**/build/
+apps/mobile/android/local.properties
+apps/mobile/android/.idea/
+apps/mobile/android/capacitor-cordova-android-plugins/

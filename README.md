@@ -2,6 +2,15 @@
 
 [![CI](https://github.com/kyanoosh27993/Hotel-ERP-PMC/actions/workflows/ci.yml/badge.svg)](https://github.com/kyanoosh27993/Hotel-ERP-PMC/actions/workflows/ci.yml)
 
+## 📦 دانلود نسخه قابل نصب (تست)
+
+| نسخه | فایل | راهنما |
+|---|---|---|
+| ویندوز (بدون نصب — PostgreSQL جاسازی‌شده) | [Hotel-ERP-Windows.exe](https://github.com/kyanoosh27993/Hotel-ERP-PMC/releases/latest) | [راهنمای ویندوز](docs/INSTALL-WINDOWS-FA.md) |
+| اندروید (APK — اتصال به سرور LAN) | [Hotel-ERP-Android.apk](https://github.com/kyanoosh27993/Hotel-ERP-PMC/releases/latest) | [راهنمای اندروید](docs/INSTALL-ANDROID-FA.md) |
+
+کاربران تست: `admin` / `Admin@Hotel1` (و `frontdesk`, `accountant`, `approver` — همان گذرواژه)
+
 نسخه: v0.1 | بازار هدف: هتل‌های ایران | RTL فارسی/انگلیسی | تقویم هجری شمسی
 
 ## اجرای هسته برنامه (بدون نیاز به build)

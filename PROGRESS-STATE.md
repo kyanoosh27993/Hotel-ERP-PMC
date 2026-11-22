@@ -35,6 +35,24 @@
 | --- | --- | --- |
 | v0.1 | ۱۴۰۵/۰۹/۰۱ | هسته + حقوق + داشبورد AI + قوانین |
 
+### نشست ۲۲ نوامبر ۲۰۲۶ (سوم) — نسخه‌های قابل نصب: exe ویندوز + APK اندروید (درخواست کارفرما)
+- **exe ویندوز** (`Hotel-ERP-Windows.exe` ~۱۷۷MB، pkg/yao node22-win-x64 + GZip):
+  bootstrap دسکتاپ در apps/api/src/desktop/bootstrap.ts — استخراج assets از snapshot،
+  PostgreSQL جاسازی‌شده (initdb/pg_ctl، پورت ۵۴۳۷)، مهاجرت‌ها با pg simple-query
+  (جدول _desktop_migrations)، seed در صورت خالی بودن، سرو وب + API روی :3000، بازکردن مرورگر.
+  دارایی‌ها با scripts/collect-desktop-assets.js (وب + مهاجرت‌ها + موتورهای Prisma
+  native+windows از binaryTargets + باینری PG دو پلتفرم؛ تیربال ویندوزی از vendor-dist چون
+  npm روی لینوکس نصب نمی‌کند).
+- سازگاری‌ها: argon2 → **hash-wasm** (WASM خالص) در auth.service و seed تا exe native نداشته باشد
+  (PHC سازگار)؛ seed به src/seed/seed.ts با runSeed(prisma, {disableSensitiveMfa}) — نسخه دسکتاپ
+  MFA خاموش، CLI seed و e2e ماتریس دست‌نخورده؛ main.ts سرو استاتیک وب قبل از listen فقط با DESKTOP_WEB_DIR.
+- **تأیید واقعی**: باینری لینوکسی همزاد (همان کد) اجرا شد — initdb/مهاجرت/seed/API/وب،
+  health + login + rooms 15 + PATCH وضعیت + رزرو + چک‌این خودکار اتاق + داشبورد فارسی ✓.
+- **APK اندروید**: apps/mobile (Capacitor 7، webDir ../web، androidScheme http،
+  usesCleartextTraffic)؛ ورک‌فلو release-apk.yml روی تگ v* — build در runner گیت‌هاب
+  (Android SDK آماده)، خروجی به Release الصاق می‌شود.
+- Release v0.4.0: exe (آپلود API) + apk (خروجی ورک‌فلو) + docs/INSTALL-WINDOWS-FA.md و INSTALL-ANDROID-FA.md.
+
 ### نشست ۲۲ نوامبر ۲۰۲۶ (دوم) — اصلاح CI + فاز ۴: اتاق/رزرو/پذیرش (F4-T1…T3)
 - گزارش کارفرما: «ورک‌فلو گیت‌هاب خطا دارد» → ۶ اجرای قرمز بازمانده از اشکال‌زدایی دیروز حذف شد
   (API حذف run، همه ۲۰۴)؛ نام ورک‌فلو → «Phases 1–3»، concurrency cancel-in-progress، badge در README.

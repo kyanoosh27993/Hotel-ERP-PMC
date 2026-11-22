@@ -10,6 +10,7 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/all-exceptions.filter';
 import { startTelemetry } from './telemetry/instrumentation';
 import { config as loadEnv } from 'dotenv';
+import * as express from 'express';
 
 async function bootstrap() {
   loadEnv();
@@ -34,6 +35,13 @@ async function bootstrap() {
     .build();
   const doc = SwaggerModule.createDocument(app, swaggerCfg);
   SwaggerModule.setup('docs', app, doc);
+
+  // نسخه دسکتاپ: وب استاتیک قبل از روتر Nest (درخواست‌های API به Nest می‌رسند، بقیه به وب)
+  if (process.env.DESKTOP_WEB_DIR) {
+    const expressApp = app.getHttpAdapter().getInstance() as { use: (...args: unknown[]) => void };
+    expressApp.use(express.static(process.env.DESKTOP_WEB_DIR));
+    logger.log(`web UI: ${process.env.DESKTOP_WEB_DIR}`);
+  }
 
   const port = Number(process.env.PORT ?? 3000);
   await app.listen(port, '0.0.0.0');

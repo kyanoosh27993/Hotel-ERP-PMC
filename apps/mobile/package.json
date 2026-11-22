@@ -1,0 +1,17 @@
+{
+  "name": "@hotel-erp/mobile",
+  "version": "0.4.0",
+  "private": true,
+  "description": "شل اندروید Hotel ERP — WebView روی وب‌شل استاتیک",
+  "devDependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/cli": "^7.0.0"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.0.0"
+  },
+  "scripts": {
+    "cap:sync": "cap sync android",
+    "apk:debug": "cd android && ./gradlew assembleDebug"
+  }
+}
