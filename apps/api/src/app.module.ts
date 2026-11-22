@@ -9,7 +9,6 @@ import { PermissionsGuard } from './iam/permissions.guard';
 import { OutboxModule } from './outbox/outbox.module';
 import { AccountingModule } from './accounting/accounting.module';
 import { ReservationsModule } from './reservations/reservations.module';
-import { RoomsModule } from './rooms/rooms.module';
 import { PosModule } from './pos/pos.module';
 import { PayrollModule } from './payroll/payroll.module';
 import { DashboardModule } from './dashboard/dashboard.module';
@@ -28,7 +27,6 @@ import { MetricsController } from './health/metrics.controller';
     OutboxModule,
     AccountingModule,
     ReservationsModule,
-    RoomsModule,
     PosModule,
     PayrollModule,
     DashboardModule,

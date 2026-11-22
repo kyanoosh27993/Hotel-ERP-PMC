@@ -3,7 +3,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  binaryTargets = ["native", "windows"]
 }
 
 datasource db {
@@ -159,7 +158,7 @@ model RoomType {
 
   rooms        Room[]
   reservations Reservation[]
-  waitlist     WaitlistEntry[]
+  waitlistEntries WaitlistEntry[]
 
   @@map("room_types")
 }
@@ -170,11 +169,13 @@ model Room {
   roomTypeId String  @db.Uuid
   floor      Int     @default(1)
   status     RoomStatus @default(AVAILABLE)
-  note       String? // دلیل خارج از سرویس / تعمیرات
+  hkStatus   HousekeepingStatus @default(CLEAN) // F4-T7 وضعیت نظافت
+  note       String? // یادداشت تعمیر/نگهداری (F4-T1)
 
   roomType RoomType @relation(fields: [roomTypeId], references: [id])
-  reservations Reservation[]
+  stayRooms StayRoom[]
 
+  @@index([status, hkStatus])
   @@map("rooms")
 }
 
@@ -187,6 +188,15 @@ enum RoomStatus {
   @@map("room_status")
 }
 
+enum HousekeepingStatus {
+  CLEAN
+  DIRTY
+  IN_PROGRESS
+  INSPECTED
+
+  @@map("housekeeping_status")
+}
+
 model Reservation {
   id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   code           String   @unique // RSV-<jy>-<seq>
@@ -195,21 +205,20 @@ model Reservation {
   checkIn        DateTime @db.Date
   checkOut       DateTime @db.Date
   nights         Int
-  units          Int      @default(1) // رزرو گروهی: تعداد واحد از همین نوع
-  source         String   @default("PHONE") // PHONE / WALK_IN / ONLINE / OTA
-  ratePerNightRials BigInt? // تعرفه ویژه — خالی = نرخ پایه نوع اتاق
   totalRials     BigInt
   status         ReservationStatus @default(CONFIRMED)
-  roomId         String?  @db.Uuid // تخصیص در چک‌این
-  checkedInAt    DateTime?
-  checkedOutAt   DateTime?
   idempotencyKey String   @unique
   createdById    String?  @db.Uuid
   createdAt      DateTime @default(now())
   cancelledAt    DateTime?
 
   roomType RoomType @relation(fields: [roomTypeId], references: [id])
-  room     Room?    @relation(fields: [roomId], references: [id])
+  source   ReservationSource @default(PHONE) // F4-T2 کانال رزرو
+  groupName String?
+  adults   Int @default(1)
+  children Int @default(0)
+  note     String?
+  stays    Stay[]
 
   @@index([roomTypeId, checkIn, checkOut, status])
   @@map("reservations")
@@ -224,31 +233,107 @@ enum ReservationStatus {
   @@map("reservation_status")
 }
 
+enum ReservationSource {
+  PHONE
+  WALK_IN
+  ONLINE
+  OTA
+
+  @@map("reservation_source")
+}
+
+// ─────────────────── فاز ۴ — PMS: لیست انتظار، اقامت، حسابرسی شبانه ───────────────────
+
 model WaitlistEntry {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  guestName   String
-  phone       String?
-  roomTypeId  String   @db.Uuid
-  fromDate    DateTime @db.Date
-  toDate      DateTime @db.Date
-  units       Int      @default(1)
-  status      WaitlistStatus @default(WAITING)
-  convertedReservationId String? @db.Uuid
-  note        String?
-  createdAt   DateTime @default(now())
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  guestName  String
+  phone      String?
+  roomTypeId String   @db.Uuid
+  fromDate   DateTime @db.Date
+  toDate     DateTime @db.Date
+  status     WaitlistStatus @default(WAITING)
+  note       String?
+  createdById String? @db.Uuid
+  createdAt  DateTime @default(now())
 
   roomType RoomType @relation(fields: [roomTypeId], references: [id])
 
-  @@index([status, fromDate, toDate])
+  @@index([status, fromDate])
   @@map("waitlist_entries")
 }
 
 enum WaitlistStatus {
   WAITING
-  CONVERTED
+  OFFERED
+  BOOKED
   CANCELLED
 
   @@map("waitlist_status")
+}
+
+model Stay {
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code            String  @unique // STY-<yyyy>-<seq>
+  reservationId   String? @db.Uuid
+  guestName       String
+  adults          Int     @default(1)
+  children        Int     @default(0)
+  status          StayStatus @default(OPEN)
+  checkInAt       DateTime @default(now())
+  plannedCheckOut DateTime @db.Date
+  actualCheckOutAt DateTime?
+  folioRials      BigInt  @default(0) // جمع شارژ اتاق در خروج
+  idempotencyKey  String  @unique
+  createdById     String? @db.Uuid
+  createdAt       DateTime @default(now())
+
+  reservation Reservation? @relation(fields: [reservationId], references: [id])
+  rooms StayRoom[]
+
+  @@index([status, plannedCheckOut])
+  @@map("stays")
+}
+
+enum StayStatus {
+  OPEN
+  CLOSED
+
+  @@map("stay_status")
+}
+
+model StayRoom {
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  stayId   String  @db.Uuid
+  roomId   String  @db.Uuid
+  rateOverrideRials BigInt? // نرخ توافقی گروهی؛ null = نرخ پایه نوع اتاق
+
+  stay Stay @relation(fields: [stayId], references: [id])
+  room Room  @relation(fields: [roomId], references: [id])
+
+  @@unique([stayId, roomId])
+  @@index([roomId])
+  @@map("stay_rooms")
+}
+
+model NightAuditRun {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  businessDate DateTime @db.Date @unique
+  status       AuditStatus @default(OK)
+  openStays    Int      @default(0)
+  dirtyRooms   Int      @default(0)
+  arrivalsNotCheckedIn Int @default(0)
+  exceptions   Json
+  closedAt     DateTime @default(now())
+  closedById   String?  @db.Uuid
+
+  @@map("night_audit_runs")
+}
+
+enum AuditStatus {
+  OK
+  WITH_EXCEPTIONS
+
+  @@map("audit_status")
 }
 
 // ───────────────────────── POS (PoC) ─────────────────────────

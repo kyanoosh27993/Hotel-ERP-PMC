@@ -14,7 +14,6 @@ export const PERMISSIONS = {
   PERIOD_LOCK: 'period.lock',
   RESERVATION_CREATE: 'reservation.create',
   ROOM_VIEW: 'room.view',
-  ROOM_MANAGE: 'room.manage',
   POS_ORDER_CREATE: 'pos.order.create',
   INTEGRATIONS_VIEW: 'integrations.view',
   DASHBOARD_CEO_VIEW: 'dashboard.ceo.view',
@@ -25,6 +24,13 @@ export const PERMISSIONS = {
   PAYROLL_VIEW: 'payroll.view',
   PAYROLL_CALCULATE: 'payroll.calculate',
   PAYROLL_APPROVE: 'payroll.approve',
+  // فاز ۴ — PMS: نقشه اتاق، رزرو، پذیرش، خانه‌داری، حسابرسی شبانه
+  RESERVATION_VIEW: 'reservation.view',
+  ROOM_UPDATE: 'room.update',
+  STAY_CHECKIN: 'stay.checkin',
+  STAY_CHECKOUT: 'stay.checkout',
+  HOUSEKEEPING_UPDATE: 'housekeeping.update',
+  NIGHT_AUDIT_RUN: 'nightaudit.run',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -40,7 +46,6 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   { code: PERMISSIONS.PERIOD_LOCK, en: 'Lock/unlock fiscal periods', fa: 'قفل/بازگشایی دوره مالی' },
   { code: PERMISSIONS.RESERVATION_CREATE, en: 'Create reservations', fa: 'ثبت رزرو' },
   { code: PERMISSIONS.ROOM_VIEW, en: 'View rooms', fa: 'مشاهده اتاق‌ها' },
-  { code: PERMISSIONS.ROOM_MANAGE, en: 'Change room status / check-in / check-out', fa: 'تغییر وضعیت اتاق، چک‌این و چک‌اوت' },
   { code: PERMISSIONS.POS_ORDER_CREATE, en: 'Create POS orders', fa: 'ثبت سفارش POS' },
   { code: PERMISSIONS.INTEGRATIONS_VIEW, en: 'View integrations', fa: 'مشاهده یکپارچگی‌ها' },
   { code: PERMISSIONS.DASHBOARD_CEO_VIEW, en: 'View CEO dashboard', fa: 'مشاهده داشبورد مدیرعامل' },
@@ -50,6 +55,13 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   { code: PERMISSIONS.PAYROLL_VIEW, en: 'View payroll runs and lists', fa: 'مشاهده دوره‌های حقوق و لیست‌ها' },
   { code: PERMISSIONS.PAYROLL_CALCULATE, en: 'Calculate payroll runs', fa: 'محاسبه دوره حقوق' },
   { code: PERMISSIONS.PAYROLL_APPROVE, en: 'Approve payroll runs and decisions', fa: 'تأیید احکام و دوره حقوق' },
+  // فاز ۴ — PMS
+  { code: PERMISSIONS.RESERVATION_VIEW, en: 'View reservations and waitlist', fa: 'مشاهده رزروها و لیست انتظار' },
+  { code: PERMISSIONS.ROOM_UPDATE, en: 'Update room status and maintenance', fa: 'تغییر وضعیت اتاق و تعمیرات' },
+  { code: PERMISSIONS.STAY_CHECKIN, en: 'Check guests in', fa: 'ثبت ورود مهمان (پذیرش)' },
+  { code: PERMISSIONS.STAY_CHECKOUT, en: 'Check guests out', fa: 'ثبت خروج مهمان (تسویه)' },
+  { code: PERMISSIONS.HOUSEKEEPING_UPDATE, en: 'Update housekeeping status', fa: 'به‌روزرسانی وضعیت نظافت اتاق' },
+  { code: PERMISSIONS.NIGHT_AUDIT_RUN, en: 'Run night audit', fa: 'اجرای حسابرسی شبانه' },
 ];
 
 /** ماتریس نقش‌ها — مرجع واحد ماتریس دسترسی */
@@ -96,6 +108,21 @@ export const ROLE_MATRIX: Record<
     en: 'Front Desk',
     fa: 'پذیرش',
     sensitiveMfa: false,
-    permissions: [PERMISSIONS.RESERVATION_CREATE, PERMISSIONS.ROOM_VIEW, PERMISSIONS.ROOM_MANAGE, PERMISSIONS.POS_ORDER_CREATE],
+    permissions: [
+      PERMISSIONS.RESERVATION_CREATE,
+      PERMISSIONS.RESERVATION_VIEW,
+      PERMISSIONS.ROOM_VIEW,
+      PERMISSIONS.ROOM_UPDATE,
+      PERMISSIONS.STAY_CHECKIN,
+      PERMISSIONS.STAY_CHECKOUT,
+      PERMISSIONS.POS_ORDER_CREATE,
+      PERMISSIONS.NIGHT_AUDIT_RUN,
+    ],
+  },
+  housekeeper: {
+    en: 'Housekeeping',
+    fa: 'خانه‌داری',
+    sensitiveMfa: false,
+    permissions: [PERMISSIONS.ROOM_VIEW, PERMISSIONS.HOUSEKEEPING_UPDATE],
   },
 };

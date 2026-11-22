@@ -12,9 +12,7 @@
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\" --max-warnings 0",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
-    "db:seed": "prisma db seed",
-    "desktop:collect": "node scripts/collect-desktop-assets.js",
-    "desktop:build": "npm run build && npm run prisma:generate && npm run desktop:collect && pkg dist/desktop/bootstrap.js --config package.json --out-path dist-desktop/"
+    "db:seed": "prisma db seed"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -55,13 +53,5 @@
     "ts-jest": "^29.2.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
-  },
-  "pkg": {
-    "scripts": [
-      "dist/**/*.js"
-    ],
-    "assets": [
-      "desktop-assets/**/*"
-    ]
   }
 }
