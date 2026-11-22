@@ -30,6 +30,20 @@ export const EVENT_NAMES = {
   ASSET_DEPRECIATION_POSTED: 'assets.depreciation.posted',
   /** سفارش خدمت جانبی تأیید و شارژ شد */
   ANCILLARY_ORDER_CONFIRMED: 'ancillary.order.confirmed',
+  // ── موج ۲ — فاز ۶ (رستوران، POS و آشپزخانه) ──
+  /** سفارش رستوران سرو شد — زنجیرهٔ مصرف انبار (غیرپولی) */
+  RESTAURANT_ORDER_SERVED: 'restaurant.order.served',
+  /** بلیت آشپزخانه ایجاد شد (غیرپولی — تغذیهٔ KDS/گزارش) */
+  KITCHEN_TICKET_CREATED: 'restaurant.kitchen_ticket.created',
+  // ── موج ۲ — فاز ۷ (خرید، انبار و کاست کنترل) ──
+  /** سفارش خرید تأیید شد (غیرپولی — تعهد خرید) */
+  PURCHASE_ORDER_APPROVED: 'procurement.po.approved',
+  /** رسید خرید قطعی شد — بدهی تأمین‌کننده + موجودی (پولی) */
+  GRN_RECEIVED: 'procurement.grn.received',
+  /** اصلاح موجودی انبارگردانی قطعی شد (پولی) */
+  INVENTORY_ADJUSTMENT_POSTED: 'inventory.adjustment.posted',
+  /** مصرف مواد به بهای میانگین قطعی شد — COGS (پولی) */
+  INVENTORY_CONSUMPTION_POSTED: 'inventory.consumption.posted',
 } as const;
 
 export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];

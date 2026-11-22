@@ -3,7 +3,42 @@
 > این فایل مرجع حافظه بین نشست‌هاست. اگر حافظه ماشین مجازی ریست شد، از این فایل و
 > PHASES.md و AI_DEVELOPMENT_RULES.md ادامه بده.
 
-## وضعیت جاری — نسخه v0.6.0 (موج ۱: فاز ۵ + فاز ۱۰) — ۱۴۰۵/۰۹/۰۱ (2026-11-22)
+## وضعیت جاری — نسخه v0.7.0 (موج ۲: فاز ۶ + فاز ۷) — ۱۴۰۵/۰۹/۰۳ (2026-11-22)
+
+### کارهای انجام‌شده در نشست موج ۲
+1. **بازیابی ریپو:** sandbox به snapshot فاز ۳ برگشته بود؛ شاخه محلی با `git pull --ff-only`
+   به origin/main (v0.6.0) بازگردانده شد — remote مرجع حقیقت. درس: پس از بازیابی sandbox
+   همیشه `git fetch && git log origin/main` چک شود.
+2. **فاز ۶ — رستوران/KDS** (docs/08-back-office/PHASE6-RESTAURANT-POS.md): مهاجرت
+   `20261124000000_restaurant_phase6` (dining areas/tables, menu, recipes+lines, orders+items
+   قلم‌محور، kitchen tickets)؛ سفارش Idempotent با snapshot نرخ؛ KDS فقط chef؛ تخفیف فقط
+   pos.discount با بازمحاسبهٔ مالیات نسبت به پایه؛ لغو قلم با دلیل؛ روم‌سرویس شارژ فولیو؛
+   رویدادهای non-money: restaurant.order.served (زنجیرهٔ مصرف) + kitchen_ticket.created؛
+   ارتقای handlePosOrderServed: folioId → بدهکار ۱۲۰۱.
+3. **فاز ۷ — خرید/انبار/کاست کنترل** (docs/08-back-office/PHASE7-...md): مهاجرت
+   `20261123180000_procurement_stores_phase7` (قبل از فاز ۶ چون recipe_lines FK دارد!)؛
+   warehouses/stock_items/stock_movements (تنها منبع موجودی) + suppliers/requisitions/
+   PO/GRN/counts؛ **میانگین موزون** با تبدیل واحد خرید→مصرف در GRN؛ allowNegative فقط
+   مصرف رسپی؛ زنجیرهٔ مصرف: consumeForOrder (consumer در stores.service) → گردش OUT →
+   رویداد پولی inventory.consumption.posted → سند COGS؛ شمارش با variance → ADJUST +
+   سند ۵۱۰۴/۱۳۰۱؛ نقش‌های chef/storekeeper.
+4. **seed همگام‌سازی کامل ماتریس RBAC** — rolePermissions خارج ماتریس حذف می‌شوند (باگ
+   e2e: مجوز KDS باقی‌مانده در DB از seed قبلی → ۲۰۱ به‌جای ۴۰۳).
+5. **تست:** unit ۴۲/۴۲ + e2e ۶۷/۶۷ (۴ suite) — سناریوهای موج ۲: GRN دو مرحله‌ای با سند،
+   سرو با مصرف رسپی و COGS، شمارش با کسری، روم‌سرویس ۱۲۰۱، مجوزها.
+6. **شل وب:** سه پنل جدید (restaurant.js با بورد KDS، procurement.js، stores.js) — ۱۲ ماژول.
+7. **دروازهٔ M6/M7:** README-phase6-7-test.md — منتظر تست کارفرما.
+
+### درس‌های فنی موج ۲
+- ترتیب مهاجرت‌ها: FK بین‌فازی (recipe_lines→stock_items) یعنی مهاجرت انبار باید قبل از رستوران
+  اجرا شود (پیشوند زمانی کمتر).
+- qtyPerPortion رسپی در «واحد مصرف» است — ضریب تبدیل فقط در GRN اعمال می‌شود (دوبار ضرب =
+  مصرف ۱۰۰۰ برابر!).
+-PermissionsGuard از DB می‌خواند؛ تغییر ماتریس در کد بدون seed همگام اثر ندارد.
+- hash-wasm وابستگی auth است — پس از بازیابی sandbox، npm install لازم است.
+- embedded PG بین نشست‌ها می‌میرد؛ scripts/local-pg-e2e.mjs (پورت ۵۴۳۳، data /tmp/hotel-e2e-pg).
+
+## وضعیت قبلی — نسخه v0.6.0 (موج ۱: فاز ۵ + فاز ۱۰) — ۱۴۰۵/۰۹/۰۱ (2026-11-22)
 
 ### کارهای انجام‌شده در نشست موج ۱ (پرسش مالک: «همه فازها با هم؟» → پلان موجی موازی)
 1. **پلان موجی در PHASES.md ثبت شد** (تصمیم مالک مبنی بر اجرای همه در صورت حفظ دقت):

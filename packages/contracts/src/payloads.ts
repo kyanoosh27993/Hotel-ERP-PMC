@@ -115,3 +115,81 @@ export interface AncillaryOrderConfirmedPayload {
   /** پیوند اقامت در صورت شارژ اتاق */
   stayCode: string | null;
 }
+
+// ───────────────────────── موج ۲ — فاز ۶ (رستوران) ─────────────────────────
+
+export interface RestaurantOrderServedPayload {
+  orderId: string;
+  orderNo: string;
+  outletCode: string;
+  /** DINE_IN | TAKEAWAY | ROOM_SERVICE */
+  mode: string;
+  /** پیوند اقامت در روم‌سرویس */
+  stayCode: string | null;
+  lines: Array<{
+    orderItemId: string;
+    menuItemCode: string;
+    /** null = سیاست مصرف مشخص (مصرف انبار نمی‌شود) */
+    recipeCode: string | null;
+    qty: number;
+  }>;
+}
+
+export interface KitchenTicketCreatedPayload {
+  ticketId: string;
+  ticketNo: string;
+  orderId: string;
+  orderNo: string;
+  tableLabel: string | null;
+  items: Array<{ name: string; qty: number; note: string | null }>;
+}
+
+// ───────────────────────── موج ۲ — فاز ۷ (خرید/انبار/کاست کنترل) ─────────────────────────
+
+export interface PurchaseOrderApprovedPayload {
+  poId: string;
+  poNo: string;
+  supplierCode: string;
+  /** جمع کل PO به ریال */
+  totalRials: number;
+  lines: Array<{ stockItemCode: string; qty: number; unitCostRials: number }>;
+}
+
+export interface GrnReceivedPayload {
+  grnId: string;
+  grnNo: string;
+  poNo: string;
+  supplierCode: string;
+  /** حساب ledger تأمین‌کننده (پیش‌فرض ۲۱۰۱) */
+  supplierLedgerCode: string;
+  /** جمع خالص کالا (ریال) — بدهکار ۱۳۰۱ */
+  netRials: number;
+  /** مالیات خرید (ریال) — بدهکار ۲۲۰۴ */
+  taxRials: number;
+  /** جمع بدهی به تأمین‌کننده (ریال) */
+  totalRials: number;
+  lines: Array<{ stockItemCode: string; qty: number; unitCostRials: number }>;
+}
+
+export interface InventoryAdjustmentPostedPayload {
+  countId: string;
+  countNo: string;
+  warehouseCode: string;
+  /** ارزش کسری (ریال) — بدهکار ۵۱۰۴ */
+  lossRials: number;
+  /** ارزش اضافه (ریال) — بستانکار ۵۱۰۴ */
+  gainRials: number;
+}
+
+export interface InventoryConsumptionPostedPayload {
+  orderId: string;
+  orderNo: string;
+  /** جمع ارزش مصرف به بهای میانگین (ریال) — بدهکار ۵۱۰۱ */
+  consumedRials: number;
+  lines: Array<{
+    stockItemCode: string;
+    qty: number;
+    unitCostRials: number;
+    valueRials: number;
+  }>;
+}

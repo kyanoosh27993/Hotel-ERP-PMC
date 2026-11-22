@@ -12,6 +12,9 @@ import {
   type TreasuryTransactionPostedPayload,
   type AssetDepreciationPostedPayload,
   type AncillaryOrderConfirmedPayload,
+  type GrnReceivedPayload,
+  type InventoryAdjustmentPostedPayload,
+  type InventoryConsumptionPostedPayload,
 } from '@hotel-erp/contracts';
 import { JournalService, SYSTEM_ENGINE_USER } from './journal.service';
 import { OutboxService } from '../outbox/outbox.service';
@@ -42,6 +45,10 @@ export class EventJournalConsumer implements OnModuleInit {
     this.outbox.on(EVENT_NAMES.TREASURY_TRANSACTION_POSTED, (e) => this.handleTreasuryTransaction(e));
     this.outbox.on(EVENT_NAMES.ASSET_DEPRECIATION_POSTED, (e) => this.handleAssetDepreciation(e));
     this.outbox.on(EVENT_NAMES.ANCILLARY_ORDER_CONFIRMED, (e) => this.handleAncillaryOrder(e));
+    // موج ۲ — فاز ۷ (خرید/انبار/کاست کنترل)
+    this.outbox.on(EVENT_NAMES.GRN_RECEIVED, (e) => this.handleGrnReceived(e));
+    this.outbox.on(EVENT_NAMES.INVENTORY_ADJUSTMENT_POSTED, (e) => this.handleInventoryAdjustment(e));
+    this.outbox.on(EVENT_NAMES.INVENTORY_CONSUMPTION_POSTED, (e) => this.handleInventoryConsumption(e));
   }
 
   /** booking.reservation.confirmed → بدهکار حساب مهمان / بستانکار درآمد اتاق */
@@ -71,7 +78,11 @@ export class EventJournalConsumer implements OnModuleInit {
     this.logger.log(`journal posted for reservation ${payload.reservationId}`);
   }
 
-  /** pos.order.served → بدهکار صندوق / بستانکار درآمد + بستانکار مالیات ارزش افزوده */
+  /**
+   * pos.order.served → سند سه‌خطی فروش:
+   * بدهکار صندوق (۱۱۰۱) در فروش نقدی یا حساب مهمان (۱۲۰۱) در شارژ اتاق/روم‌سرویس؛
+   * بستانکار درآمد رستوران + بستانکار مالیات ارزش افزوده.
+   */
   private async handlePosOrderServed(envelope: EventEnvelope): Promise<void> {
     const payload = envelope.payload as unknown as PosOrderServedPayload;
     const rule = await this.loadRule(EVENT_NAMES.POS_ORDER_SERVED);
@@ -82,9 +93,11 @@ export class EventJournalConsumer implements OnModuleInit {
     const net = subRials(total, tax);
     const amountFor = (kind: RuleLine['amountKind']): bigint =>
       kind === 'total' ? total : kind === 'tax' ? tax : net;
+    // شارژ اتاق/روم‌سرویس: بدهکار از صندوق به حساب دریافتنی مهمان تغییر می‌کند
+    const debitAccountOverride = payload.folioId ? '1201' : null;
 
     const lines = rule.map((l) => ({
-      accountCode: l.accountCode,
+      accountCode: debitAccountOverride && l.side === 'debit' ? debitAccountOverride : l.accountCode,
       debitRials: l.side === 'debit' ? amountFor(l.amountKind) : 0n,
       creditRials: l.side === 'credit' ? amountFor(l.amountKind) : 0n,
     }));
@@ -256,6 +269,90 @@ export class EventJournalConsumer implements OnModuleInit {
       },
     );
     this.logger.log(`journal posted for ancillary order ${payload.orderNo}`);
+  }
+
+  /**
+   * procurement.grn.received → سند رسید خرید:
+   * بدهکار موجودی مواد (۱۳۰۱) + بدهکار مالیات خرید (۲۲۰۴) / بستانکار تأمین‌کننده (کد ledger).
+   * تراز: net + tax = total ✓
+   */
+  private async handleGrnReceived(envelope: EventEnvelope): Promise<void> {
+    const payload = envelope.payload as unknown as GrnReceivedPayload;
+    const net = BigInt(payload.netRials);
+    const tax = BigInt(payload.taxRials);
+    const total = BigInt(payload.totalRials);
+    const lines = [
+      { accountCode: '1301', debitRials: net, creditRials: 0n },
+      { accountCode: '2204', debitRials: tax, creditRials: 0n },
+      { accountCode: payload.supplierLedgerCode, debitRials: 0n, creditRials: total },
+    ];
+    await this.journal.postEntryFromEvent(
+      envelope.idempotencyKey,
+      lines,
+      {
+        description: `Auto: GRN ${payload.grnNo} from ${payload.supplierCode} (PO ${payload.poNo})`,
+        sourceModule: 'procurement',
+        sourceRef: payload.grnId,
+        sourceEventId: envelope.eventId,
+        createdByUserId: SYSTEM_ENGINE_USER,
+      },
+    );
+    this.logger.log(`journal posted for GRN ${payload.grnNo}`);
+  }
+
+  /**
+   * inventory.adjustment.posted → سند اصلاحی انبارگردانی:
+   * کسری: بدهکار هزینهٔ مغایرت (۵۱۰۴) / بستانکار موجودی؛ اضافه: عکس آن.
+   */
+  private async handleInventoryAdjustment(envelope: EventEnvelope): Promise<void> {
+    const payload = envelope.payload as unknown as InventoryAdjustmentPostedPayload;
+    const loss = BigInt(payload.lossRials);
+    const gain = BigInt(payload.gainRials);
+    const lines: Array<{ accountCode: string; debitRials: bigint; creditRials: bigint }> = [];
+    if (loss > 0n) {
+      lines.push({ accountCode: '5104', debitRials: loss, creditRials: 0n });
+      lines.push({ accountCode: '1301', debitRials: 0n, creditRials: loss });
+    }
+    if (gain > 0n) {
+      lines.push({ accountCode: '1301', debitRials: gain, creditRials: 0n });
+      lines.push({ accountCode: '5104', debitRials: 0n, creditRials: gain });
+    }
+    if (lines.length === 0) return;
+    await this.journal.postEntryFromEvent(
+      envelope.idempotencyKey,
+      lines,
+      {
+        description: `Auto: stock count ${payload.countNo} (${payload.warehouseCode}) loss=${payload.lossRials} gain=${payload.gainRials}`,
+        sourceModule: 'stores',
+        sourceRef: payload.countId,
+        sourceEventId: envelope.eventId,
+        createdByUserId: SYSTEM_ENGINE_USER,
+      },
+    );
+    this.logger.log(`journal posted for stock count ${payload.countNo}`);
+  }
+
+  /** inventory.consumption.posted → سند COGS: بدهکار بهای فروش (۵۱۰۱) / بستانکار موجودی (۱۳۰۱) */
+  private async handleInventoryConsumption(envelope: EventEnvelope): Promise<void> {
+    const payload = envelope.payload as unknown as InventoryConsumptionPostedPayload;
+    const amount = BigInt(payload.consumedRials);
+    if (amount <= 0n) return;
+    const lines = [
+      { accountCode: '5101', debitRials: amount, creditRials: 0n },
+      { accountCode: '1301', debitRials: 0n, creditRials: amount },
+    ];
+    await this.journal.postEntryFromEvent(
+      envelope.idempotencyKey,
+      lines,
+      {
+        description: `Auto: recipe consumption ${payload.orderNo}`,
+        sourceModule: 'stores',
+        sourceRef: payload.orderId,
+        sourceEventId: envelope.eventId,
+        createdByUserId: SYSTEM_ENGINE_USER,
+      },
+    );
+    this.logger.log(`journal posted for consumption ${payload.orderNo}`);
   }
 
   private async loadRule(eventName: string): Promise<RuleLine[] | null> {

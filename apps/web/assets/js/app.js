@@ -39,6 +39,9 @@
     { id: 'housekeepingops', title: 'خانه‌داری و تعمیرات (فاز ۱۰)', icon: '🧹' },
     { id: 'assets', title: 'دارایی ثابت (فاز ۱۰)', icon: '🏛️' },
     { id: 'ancillary', title: 'خدمات جانبی (فاز ۱۰)', icon: '🛎' },
+    { id: 'restaurant', title: 'رستوران و آشپزخانه (فاز ۶)', icon: '🍽️' },
+    { id: 'procurement', title: 'خرید و تدارکات (فاز ۷)', icon: '🚚' },
+    { id: 'stores', title: 'انبار و کاست کنترل (فاز ۷)', icon: '📦' },
     { id: 'calendar', title: 'تقویم شمسی', icon: '📅' },
     { id: 'payroll', title: 'حقوق و دستمزد', icon: '₪' },
     { id: 'settings', title: 'تنظیمات', icon: '⚙' }
@@ -63,7 +66,7 @@
       nav.appendChild(b);
     });
     sidebar.appendChild(nav);
-    var ver = el('div', 'sidebar-ver', 'نسخه ۰.۶ — فارسی/RTL');
+    var ver = el('div', 'sidebar-ver', 'نسخه ۰.۷ — فارسی/RTL');
     sidebar.appendChild(ver);
 
     var main = el('main', 'main');

@@ -3,7 +3,7 @@
  * درخت حساب، دوره‌های مالی، انواع اتاق و اوتلت، قواعد نگاشت رویداد→سند.
  * اجرا: npm run db:seed -w apps/api
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { hash } from '@node-rs/argon2';
 import { PERMISSIONS, PERMISSION_CATALOG, ROLE_MATRIX } from '../src/iam/permissions';
 
@@ -21,7 +21,8 @@ async function main() {
   const allPermissions = await prisma.permission.findMany();
   const permByCode = new Map(allPermissions.map((p) => [p.code, p.id]));
 
-  // ── نقش‌ها + ماتریس ──
+  // ── نقش‌ها + ماتریس (همگام‌سازی کامل: مجوزهای خارج ماتریس حذف می‌شوند) ──
+  const expectedPairs = new Set<string>();
   for (const [name, def] of Object.entries(ROLE_MATRIX)) {
     const role = await prisma.role.upsert({
       where: { name },
@@ -31,10 +32,20 @@ async function main() {
     for (const code of def.permissions) {
       const permissionId = permByCode.get(code);
       if (!permissionId) throw new Error(`Unknown permission in matrix: ${code}`);
+      expectedPairs.add(`${role.id}:${permissionId}`);
       await prisma.rolePermission.upsert({
         where: { roleId_permissionId: { roleId: role.id, permissionId } },
         update: {},
         create: { roleId: role.id, permissionId },
+      });
+    }
+  }
+  // حذف تخصیص‌هایی که دیگر در ماتریس نیستند (مثلاً نقش تغییر یافته در نسخهٔ جدید)
+  const allRolePerms = await prisma.rolePermission.findMany({ select: { roleId: true, permissionId: true } });
+  for (const rp of allRolePerms) {
+    if (!expectedPairs.has(`${rp.roleId}:${rp.permissionId}`)) {
+      await prisma.rolePermission.delete({
+        where: { roleId_permissionId: { roleId: rp.roleId, permissionId: rp.permissionId } },
       });
     }
   }
@@ -55,6 +66,9 @@ async function main() {
     { username: 'housekeeper', fullName: 'Housekeeping Staff', role: 'housekeeper' },
     // موج ۱ — فاز ۵: صندوق‌دار
     { username: 'cashier', fullName: 'Cashier (Front Desk Cash)', role: 'cashier' },
+    // موج ۲ — فاز ۶/۷: آشپزخانه (KDS) و انباردار
+    { username: 'chef', fullName: 'Kitchen / KDS', role: 'chef' },
+    { username: 'storekeeper', fullName: 'Storekeeper', role: 'storekeeper' },
   ];
   for (const u of users) {
     const user = await prisma.user.upsert({
@@ -285,6 +299,146 @@ async function main() {
     });
   }
 
+  // ── موج ۲ — فاز ۶/۷: حساب‌های انبار، انبارها، اقلام، تأمین‌کننده، رسپی، منو، میزها ──
+  const wave2Accounts: Array<{ code: string; nameEn: string; nameFa: string; type: 'ASSET' | 'EXPENSE' }> = [
+    { code: '1301', nameEn: 'Inventory', nameFa: 'موجودی مواد و کالا', type: 'ASSET' },
+    { code: '2204', nameEn: 'Prepaid VAT (Purchases)', nameFa: 'مالیات بر ارزش افزوده خرید', type: 'ASSET' },
+    { code: '5104', nameEn: 'Stock Variance / Waste Expense', nameFa: 'هزینه مغایرت و ضایعات انبار', type: 'EXPENSE' },
+  ];
+  for (const a of wave2Accounts) {
+    await prisma.account.upsert({
+      where: { code: a.code },
+      update: { nameEn: a.nameEn, nameFa: a.nameFa, type: a.type },
+      create: { code: a.code, nameEn: a.nameEn, nameFa: a.nameFa, type: a.type },
+    });
+  }
+
+  const warehouses: Array<[string, string, string]> = [
+    ['WH-FOOD', 'Main Food Store', 'انبار اصلی غذایی'],
+    ['WH-COLD', 'Cold Room', 'سردخانه'],
+    ['WH-KITCHEN', 'Kitchen Charge Store', 'انبار شارژ آشپزخانه'],
+    ['WH-BEV', 'Beverage Store', 'انبار نوشیدنی'],
+    ['WH-HK', 'Housekeeping Store', 'انبار ملزومات خانه‌داری'],
+    ['WH-EQUIP', 'Equipment Store', 'انبار تجهیزات'],
+  ];
+  for (const [code, en, fa] of warehouses) {
+    await prisma.warehouse.upsert({
+      where: { code },
+      update: { nameEn: en, nameFa: fa },
+      create: { code, nameEn: en, nameFa: fa },
+    });
+  }
+
+  const stockItems: Array<{ code: string; en: string; fa: string; cat: string; up: string; uc: string; conv: number; min: number; wh: string; neg: boolean }> = [
+    { code: 'STK-BEEF', en: 'Lamb Beef', fa: 'گوشت گوسفندی', cat: 'MEAT', up: 'کیلوگرم', uc: 'گرم', conv: 1000, min: 3000, wh: 'WH-COLD', neg: false },
+    { code: 'STK-RICE', en: 'Rice', fa: 'برنج', cat: 'GRAIN', up: 'کیلوگرم', uc: 'گرم', conv: 1000, min: 5000, wh: 'WH-FOOD', neg: false },
+    { code: 'STK-SODA', en: 'Soft Drink', fa: 'نوشابه', cat: 'BEVERAGE', up: 'عدد', uc: 'عدد', conv: 1, min: 24, wh: 'WH-BEV', neg: true },
+    { code: 'STK-DETERS', en: 'Detergent', fa: 'مایع ظرفشویی', cat: 'CHEMICAL', up: 'گالن', uc: 'لیتر', conv: 4, min: 10, wh: 'WH-HK', neg: false },
+  ];
+  for (const s of stockItems) {
+    await prisma.stockItem.upsert({
+      where: { code: s.code },
+      update: { nameEn: s.en, nameFa: s.fa },
+      create: {
+        code: s.code,
+        nameEn: s.en,
+        nameFa: s.fa,
+        category: s.cat,
+        unitPurchase: s.up,
+        unitConsumption: s.uc,
+        conversionFactor: new Prisma.Decimal(s.conv),
+        minQty: new Prisma.Decimal(s.min),
+        warehouse: { connect: { code: s.wh } },
+        allowNegative: s.neg,
+      },
+    });
+  }
+
+  const suppliers: Array<[string, string, string]> = [
+    ['SUP-001', 'Protein Supplier Co.', 'شرکت تأمین پروتئین'],
+    ['SUP-002', 'Beverage Distribution', 'پخش نوشیدنی'],
+  ];
+  for (const [code, en, fa] of suppliers) {
+    await prisma.supplier.upsert({
+      where: { code },
+      update: { nameEn: en, nameFa: fa },
+      create: { code, nameEn: en, nameFa: fa, phone: '021-00000000', ledgerCode: '2101' },
+    });
+  }
+
+  const recipes: Array<{ code: string; en: string; fa: string; v: number; lines: Array<[string, number]> }> = [
+    { code: 'RCP-KABAB', en: 'Chelo Kabab', fa: 'چلوکباب', v: 1, lines: [['STK-BEEF', 300], ['STK-RICE', 250]] },
+    { code: 'RCP-RICE', en: 'Steamed Rice', fa: 'برنج سفید', v: 1, lines: [['STK-RICE', 300]] },
+  ];
+  for (const r of recipes) {
+    await prisma.recipe.upsert({
+      where: { code: r.code },
+      update: { nameEn: r.en, nameFa: r.fa },
+      create: { code: r.code, nameEn: r.en, nameFa: r.fa, version: r.v, yieldPortions: 1 },
+    });
+    const recipe = await prisma.recipe.findUniqueOrThrow({ where: { code: r.code } });
+    for (const [stk, qty] of r.lines) {
+      const item = await prisma.stockItem.findUniqueOrThrow({ where: { code: stk } });
+      await prisma.recipeLine.upsert({
+        where: { recipeId_stockItemId: { recipeId: recipe.id, stockItemId: item.id } },
+        update: { qtyPerPortion: new Prisma.Decimal(qty) },
+        create: { recipeId: recipe.id, stockItemId: item.id, qtyPerPortion: new Prisma.Decimal(qty) },
+      });
+    }
+  }
+
+  const menuCats: Array<[string, string, string, number]> = [
+    ['MCAT-MAIN', 'Main Dishes', 'خوراک اصلی', 1],
+    ['MCAT-BEV', 'Beverages', 'نوشیدنی', 2],
+  ];
+  for (const [code, en, fa, sort] of menuCats) {
+    await prisma.menuCategory.upsert({
+      where: { code },
+      update: { nameEn: en, nameFa: fa },
+      create: { code, nameEn: en, nameFa: fa, sortOrder: sort },
+    });
+  }
+
+  const menuItems: Array<{ code: string; cat: string; en: string; fa: string; price: number; recipe?: string }> = [
+    { code: 'MI-KABAB', cat: 'MCAT-MAIN', en: 'Chelo Kabab', fa: 'چلوکباب', price: 4_500_000, recipe: 'RCP-KABAB' },
+    { code: 'MI-RICE', cat: 'MCAT-MAIN', en: 'Steamed Rice', fa: 'برنج سفید', price: 1_800_000, recipe: 'RCP-RICE' },
+    { code: 'MI-SODA', cat: 'MCAT-BEV', en: 'Soft Drink', fa: 'نوشابه', price: 500_000 },
+  ];
+  for (const m of menuItems) {
+    const cat = await prisma.menuCategory.findUniqueOrThrow({ where: { code: m.cat } });
+    let recipeId: string | null = null;
+    if (m.recipe) {
+      recipeId = (await prisma.recipe.findUniqueOrThrow({ where: { code: m.recipe } })).id;
+    }
+    await prisma.menuItem.upsert({
+      where: { code: m.code },
+      update: { nameEn: m.en, nameFa: m.fa, priceRials: BigInt(m.price), recipeId },
+      create: {
+        code: m.code,
+        categoryId: cat.id,
+        nameEn: m.en,
+        nameFa: m.fa,
+        priceRials: BigInt(m.price),
+        taxRateBps: 900,
+        recipeId,
+      },
+    });
+  }
+
+  const outlet = await prisma.posOutlet.findUniqueOrThrow({ where: { code: 'REST-MAIN' } });
+  let area = await prisma.diningArea.findFirst({ where: { outletId: outlet.id, nameFa: 'سالن اصلی' } });
+  if (!area) {
+    area = await prisma.diningArea.create({ data: { outletId: outlet.id, nameEn: 'Main Hall', nameFa: 'سالن اصلی' } });
+  }
+  for (let i = 1; i <= 6; i += 1) {
+    const code = `T${i}`;
+    await prisma.diningTable.upsert({
+      where: { code },
+      update: { seats: 4 },
+      create: { areaId: area.id, code, seats: 4 },
+    });
+  }
+
   // ── داده نمونه پرسنل (F2-T1: مهاجرت ۱۰ نفر) + حکم تأییدشده هر یک ──
   const employeeNames: Array<[string, string, boolean, number]> = [
     ['علی', 'محمدی', true, 2],
@@ -347,7 +501,7 @@ async function main() {
   }
 
   // eslint-disable-next-line no-console
-  console.log('✅ seed complete: roles/permissions/users/accounts/periods/rooms/outlet/rules/payroll/cash-accounts/linen/ancillary (wave-1)');
+  console.log('✅ seed complete: roles/users/accounts/periods/rooms/rules/payroll/cash-accounts/linen/ancillary (wave-1) + warehouses/stock/recipes/menu/tables/suppliers (wave-2)');
 }
 
 main()

@@ -17,6 +17,9 @@ import { TreasuryModule } from './treasury/treasury.module';
 import { HousekeepingModule } from './housekeeping/housekeeping.module';
 import { AssetsModule } from './assets/assets.module';
 import { AncillaryModule } from './ancillary/ancillary.module';
+import { RestaurantModule } from './restaurant/restaurant.module';
+import { ProcurementModule } from './procurement/procurement.module';
+import { StoresModule } from './stores/stores.module';
 import { IntegrationHubService, AttendanceSimAdapter } from './integration/integration-hub.service';
 import { IntegrationController } from './integration/integration.controller';
 import { HealthController } from './health/health.controller';
@@ -39,6 +42,9 @@ import { MetricsController } from './health/metrics.controller';
     HousekeepingModule,
     AssetsModule,
     AncillaryModule,
+    RestaurantModule,
+    StoresModule,
+    ProcurementModule,
   ],
   controllers: [HealthController, MetricsController, IntegrationController],
   providers: [

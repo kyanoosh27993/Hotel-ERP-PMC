@@ -48,6 +48,18 @@ export const PERMISSIONS = {
   ASSET_MANAGE: 'asset.manage',
   ASSET_DEPRECIATE: 'asset.depreciate',
   ANCILLARY_ORDER: 'ancillary.order',
+  // موج ۲ — فاز ۶: رستوران، POS و آشپزخانه
+  RESTAURANT_VIEW: 'restaurant.view',
+  RESTAURANT_ORDER: 'restaurant.order',
+  RESTAURANT_KDS: 'restaurant.kds',
+  POS_DISCOUNT: 'pos.discount',
+  // موج ۲ — فاز ۷: خرید، انبار و کاست کنترل
+  PROC_VIEW: 'procurement.view',
+  PROC_MANAGE: 'procurement.manage',
+  PROC_RECEIVE: 'procurement.receive',
+  STORES_VIEW: 'stores.view',
+  STORES_MANAGE: 'stores.manage',
+  STORES_COUNT: 'stores.count',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -96,6 +108,18 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   { code: PERMISSIONS.ASSET_MANAGE, en: 'Register/transfer/dispose assets', fa: 'ثبت/انتقال/اسقاط دارایی' },
   { code: PERMISSIONS.ASSET_DEPRECIATE, en: 'Run depreciation for a period', fa: 'ثبت استهلاک دوره' },
   { code: PERMISSIONS.ANCILLARY_ORDER, en: 'Confirm ancillary service orders', fa: 'ثبت سفارش خدمات جانبی' },
+  // موج ۲ — فاز ۶
+  { code: PERMISSIONS.RESTAURANT_VIEW, en: 'View tables, menu and orders', fa: 'مشاهده میزها، منو و سفارش‌ها' },
+  { code: PERMISSIONS.RESTAURANT_ORDER, en: 'Open/serve restaurant orders', fa: 'باز کردن و سرو سفارش رستوران' },
+  { code: PERMISSIONS.RESTAURANT_KDS, en: 'Update kitchen tickets', fa: 'به‌روزرسانی بلیت‌های آشپزخانه' },
+  { code: PERMISSIONS.POS_DISCOUNT, en: 'Apply order discount', fa: 'اعمال تخفیف سفارش' },
+  // موج ۲ — فاز ۷
+  { code: PERMISSIONS.PROC_VIEW, en: 'View suppliers, POs and receipts', fa: 'مشاهده تأمین‌کنندگان، سفارش‌ها و رسیدها' },
+  { code: PERMISSIONS.PROC_MANAGE, en: 'Manage requisitions and purchase orders', fa: 'مدیریت درخواست و سفارش خرید' },
+  { code: PERMISSIONS.PROC_RECEIVE, en: 'Record goods receipts', fa: 'ثبت رسید خرید' },
+  { code: PERMISSIONS.STORES_VIEW, en: 'View stock items and movements', fa: 'مشاهده اقلام و گردش انبار' },
+  { code: PERMISSIONS.STORES_MANAGE, en: 'Adjust stock and transfers', fa: 'اصلاح موجودی و انتقال انبار' },
+  { code: PERMISSIONS.STORES_COUNT, en: 'Run stock counts', fa: 'اجرای انبارگردانی' },
 ];
 
 /** ماتریس نقش‌ها — مرجع واحد ماتریس دسترسی */
@@ -128,6 +152,10 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.TREASURY_RECONCILE,
       PERMISSIONS.ASSET_VIEW,
       PERMISSIONS.ANCILLARY_ORDER,
+      // موج ۲ — فاز ۶/۷
+      PERMISSIONS.RESTAURANT_VIEW,
+      PERMISSIONS.PROC_VIEW,
+      PERMISSIONS.STORES_VIEW,
     ],
   },
   approver: {
@@ -146,6 +174,10 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.TREASURY_VOID,
       PERMISSIONS.ASSET_VIEW,
       PERMISSIONS.ASSET_DEPRECIATE,
+      // موج ۲ — فاز ۷ (تأیید خرید)
+      PERMISSIONS.PROC_VIEW,
+      PERMISSIONS.PROC_MANAGE,
+      PERMISSIONS.STORES_VIEW,
     ],
   },
   front_desk: {
@@ -168,6 +200,9 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.ANCILLARY_ORDER,
       PERMISSIONS.MAINTENANCE_REPORT,
       PERMISSIONS.LOSTFOUND_MANAGE,
+      // موج ۲ — فاز ۶ (گارسون/پذیرش — بلیت آشپزخانه فقط مشاهده)
+      PERMISSIONS.RESTAURANT_VIEW,
+      PERMISSIONS.RESTAURANT_ORDER,
     ],
   },
   housekeeper: {
@@ -193,6 +228,31 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.TREASURY_VIEW,
       PERMISSIONS.TREASURY_TXN_CREATE,
       PERMISSIONS.TREASURY_SHIFT_MANAGE,
+      PERMISSIONS.RESTAURANT_VIEW,
+    ],
+  },
+  chef: {
+    en: 'Kitchen (KDS)',
+    fa: 'آشپزخانه',
+    sensitiveMfa: false,
+    permissions: [
+      PERMISSIONS.RESTAURANT_VIEW,
+      PERMISSIONS.RESTAURANT_KDS,
+      // موج ۲ — فاز ۷: مصرف/ضایعات آشپزخانه
+      PERMISSIONS.STORES_VIEW,
+      PERMISSIONS.STORES_MANAGE,
+    ],
+  },
+  storekeeper: {
+    en: 'Storekeeper',
+    fa: 'انباردار',
+    sensitiveMfa: false,
+    permissions: [
+      PERMISSIONS.STORES_VIEW,
+      PERMISSIONS.STORES_MANAGE,
+      PERMISSIONS.STORES_COUNT,
+      PERMISSIONS.PROC_VIEW,
+      PERMISSIONS.PROC_RECEIVE,
     ],
   },
 };
