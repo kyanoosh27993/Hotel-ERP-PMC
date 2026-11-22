@@ -43,7 +43,12 @@ try {
 
 /** پایان ایمن: پیام فارسی + لاگ + انتظار برای Enter (پنجره بسته نمی‌شود) */
 function fatal(err) {
-  const msg = err && (err.stack || err.message) ? (err.stack || err.message) : String(err ?? 'خطای ناشناخته');
+  let msg;
+  if (err instanceof Error && (err.stack || err.message)) msg = err.stack || err.message;
+  else {
+    try { msg = JSON.stringify(err, Object.getOwnPropertyNames(err ?? {}), 1) + ' [' + (err?.constructor?.name ?? typeof err) + ']'; }
+    catch (e) { msg = String(err); }
+  }
   log('FATAL: ' + msg);
   console.error('\n⛔ خطا در اجرای برنامه — جزئیات کامل در فایل لاگ ذخیره شد:');
   console.error('   ' + LOG_FILE);
@@ -216,7 +221,27 @@ async function main() {
       log('خوشهٔ دیتابیس موجود است — از اجرای قبل ادامه می‌دهیم');
     } else { throw e; }
   }
-  await pg.start();
+  // start با دو تلاش + گزارش کامل خطا و لاگ pg_ctl
+  let started = false;
+  for (let attempt = 1; attempt <= 2 && !started; attempt += 1) {
+    try {
+      await pg.start();
+      started = true;
+    } catch (e) {
+      const detail = e instanceof Error && (e.message || e.stack)
+        ? (e.stack || e.message)
+        : JSON.stringify(e, Object.getOwnPropertyNames(e ?? {}), 1) + ' [' + (e?.constructor?.name ?? typeof e) + ']';
+      log(`pg.start تلاش ${attempt} ناموفق: ${detail}`);
+      try {
+        for (const cand of ['logfile', 'logfile.txt', path.join(LOG_DIR, 'pg.log')]) {
+          const lf = path.join(PG_DIR, cand);
+          if (fs.existsSync(lf)) log(`pg logfile (${cand}) tail: ` + fs.readFileSync(lf, 'utf8').slice(-1200));
+        }
+      } catch (e2) { /* خواندن لاگ حیاتی نیست */ }
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 3000));
+      else throw new Error('شروع PostgreSQL ناموفق ماند: ' + detail);
+    }
+  }
   try {
     await pg.createDatabase('hotel_erp');
     log('پایگاه داده hotel_erp ساخته شد');
