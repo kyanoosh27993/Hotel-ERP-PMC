@@ -99,6 +99,9 @@ jobs:
           if (-not $ok) {
             Get-Content "$env:RUNNER_TEMP\smoke-out.log","$env:RUNNER_TEMP\smoke-err.log" -ErrorAction SilentlyContinue | Select-Object -Last 40
             Get-ChildItem "$env:RUNNER_TEMP\smoke-data\logs" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "--- $($_.Name) ---"; Get-Content $_.FullName -ErrorAction SilentlyContinue | Select-Object -Last 35 }
+            Write-Host "--- pg-server.log ---"; Get-Content "$env:RUNNER_TEMP\smoke-data\pgdata\pg-server.log" -ErrorAction SilentlyContinue | Select-Object -Last 25
+            Write-Host "--- boot.cmd ---"; Get-Content "$env:RUNNER_TEMP\smoke-data\boot.cmd" -ErrorAction SilentlyContinue
+            Write-Host "--- schtasks status ---"; schtasks /query /tn "HotelERP Limited Run" /v /fo list 2>$null | Select-Object -Last 12
             taskkill /PID $($p.Id) /T /F 2>$null
             Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force
             throw "Server did not become healthy on real Windows"

@@ -29,7 +29,8 @@ fs.mkdirSync(LOG_DIR, { recursive: true });
 
 // ── لاگر: کنسول + فایل (چرخش: حداکثر ۲۰ فایل) ──
 const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-const LOG_FILE = path.join(LOG_DIR, `run-${stamp}.log`);
+// لاگ فرزندِ اجرای محدود جدا از والد — خواناتر در دیاگ
+const LOG_FILE = path.join(LOG_DIR, `run-${stamp}${process.env.HOTELERP_DEELEVATED === '1' ? '-child' : ''}.log`);
 const logStream = fs.createWriteStream(LOG_FILE, { flags: 'a' });
 function log(msg) {
   const line = `[${new Date().toISOString()}] ${msg}`;
@@ -164,13 +165,32 @@ function pgBin(name) { return path.join(PG_BIN_DIR, IS_WIN ? name + '.exe' : nam
 function runBin(name, args, extraEnv = {}) {
   return new Promise((resolve) => {
     const out = [], err = [];
+    let settled = false;
     let p;
     try { p = spawn(pgBin(name), args, { env: { ...process.env, ...extraEnv }, shell: false, windowsHide: true }); }
     catch (e) { resolve({ code: -1, stdout: '', stderr: 'spawn failed: ' + e.message }); return; }
+    const finish = (code) => {
+      if (settled) return;
+      settled = true;
+      // مهلت کوتاه برای رسیدن خروجی باقی‌مانده، سپس بستن pipeها تا حلقهٔ رویداد آزاد بماند
+      setTimeout(() => {
+        try { p.stdout && p.stdout.destroy(); } catch (e1) { /* بسته شده */ }
+        try { p.stderr && p.stderr.destroy(); } catch (e2) { /* بسته شده */ }
+        resolve({ code, stdout: Buffer.concat(out).toString(), stderr: Buffer.concat(err).toString() });
+      }, 250);
+    };
     p.stdout.on('data', (d) => { out.push(d); logStream.write('[' + name + '] ' + d); });
     p.stderr.on('data', (d) => { err.push(d); logStream.write('[' + name + '!] ' + d); });
-    p.on('error', (e) => resolve({ code: -1, stdout: Buffer.concat(out).toString(), stderr: 'spawn error: ' + e.message }));
-    p.on('close', (code) => resolve({ code, stdout: Buffer.concat(out).toString(), stderr: Buffer.concat(err).toString() }));
+    p.on('error', (e) => {
+      if (settled) return;
+      settled = true;
+      resolve({ code: -1, stdout: Buffer.concat(out).toString(), stderr: 'spawn error: ' + e.message });
+    });
+    // نکتهٔ حیاتی ویندوز: postgresِ daemon دستگیرهٔ pipeی pg_ctl را به ارث می‌برد؛
+    // رویداد «close» (منتظر بسته‌شدن stdio) هرگز نمی‌آید — فقط «exit».
+    p.on('exit', (code) => finish(code ?? -1));
+    // شبکهٔ ایمنی: اگر ۹۰ ثانیه نتیجه نیامد، با کد -2 رزولو کن
+    setTimeout(() => finish(-2), 90_000).unref();
   });
 }
 
@@ -259,7 +279,7 @@ async function main() {
 
   // ساخت پایگاه داده با کلاینت pg (به دیتابیس پیش‌فرض postgres وصل می‌شویم)
   const pgLib = require(path.join(API_DIR, 'node_modules', 'pg'));
-  const adminCli = new pgLib.Client({ host: '127.0.0.1', port: pgPort, user: 'hotel', password: 'hotel_local_pass', database: 'postgres' });
+  const adminCli = new pgLib.Client({ host: '127.0.0.1', port: pgPort, user: 'hotel', password: 'hotel_local_pass', database: 'postgres', connectionTimeoutMillis: 15000 });
   await adminCli.connect();
   try { await adminCli.query('CREATE DATABASE hotel_erp OWNER hotel'); log('پایگاه داده hotel_erp ساخته شد'); }
   catch (e) { log('پایگاه داده hotel_erp موجود است (' + String(e.message).slice(-120) + ')'); }
@@ -280,7 +300,7 @@ async function main() {
   // ── ۳) داده اولیه (فقط اگر کاربر admin وجود نداشته باشد) ──
   step('۳/۴ دادهٔ اولیه (کاربران و اتاق‌های نمونه — در صورت نیاز)');
   const { Client } = require(path.join(API_DIR, 'node_modules', 'pg'));
-  const probe = new Client({ connectionString: process.env.DATABASE_URL });
+  const probe = new Client({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 15000 });
   await probe.connect();
   const hasAdmin = await probe.query(`SELECT 1 FROM "users" WHERE "username"='admin' LIMIT 1`);
   await probe.end();
