@@ -18,6 +18,12 @@ export const PERMISSIONS = {
   INTEGRATIONS_VIEW: 'integrations.view',
   DASHBOARD_CEO_VIEW: 'dashboard.ceo.view',
   AUDIT_VIEW: 'audit.view',
+  // فاز ۲ — حقوق و دستمزد
+  PERSONNEL_VIEW: 'personnel.view',
+  PERSONNEL_EDIT: 'personnel.edit',
+  PAYROLL_VIEW: 'payroll.view',
+  PAYROLL_CALCULATE: 'payroll.calculate',
+  PAYROLL_APPROVE: 'payroll.approve',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -37,6 +43,11 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   { code: PERMISSIONS.INTEGRATIONS_VIEW, en: 'View integrations', fa: 'مشاهده یکپارچگی‌ها' },
   { code: PERMISSIONS.DASHBOARD_CEO_VIEW, en: 'View CEO dashboard', fa: 'مشاهده داشبورد مدیرعامل' },
   { code: PERMISSIONS.AUDIT_VIEW, en: 'View audit logs', fa: 'مشاهده لاگ حسابرسی' },
+  { code: PERMISSIONS.PERSONNEL_VIEW, en: 'View personnel records', fa: 'مشاهده پرونده پرسنلی' },
+  { code: PERMISSIONS.PERSONNEL_EDIT, en: 'Create/edit personnel and decisions', fa: 'ثبت/ویرایش پرسنل و احکام' },
+  { code: PERMISSIONS.PAYROLL_VIEW, en: 'View payroll runs and lists', fa: 'مشاهده دوره‌های حقوق و لیست‌ها' },
+  { code: PERMISSIONS.PAYROLL_CALCULATE, en: 'Calculate payroll runs', fa: 'محاسبه دوره حقوق' },
+  { code: PERMISSIONS.PAYROLL_APPROVE, en: 'Approve payroll runs and decisions', fa: 'تأیید احکام و دوره حقوق' },
 ];
 
 /** ماتریس نقش‌ها — مرجع واحد ماتریس دسترسی */
@@ -60,6 +71,10 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.JOURNAL_EDIT_DRAFT,
       PERMISSIONS.JOURNAL_SUBMIT,
       PERMISSIONS.AUDIT_VIEW,
+      PERMISSIONS.PERSONNEL_VIEW,
+      PERMISSIONS.PERSONNEL_EDIT,
+      PERMISSIONS.PAYROLL_VIEW,
+      PERMISSIONS.PAYROLL_CALCULATE,
     ],
   },
   approver: {
@@ -71,6 +86,8 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.JOURNAL_APPROVE,
       PERMISSIONS.JOURNAL_REVERSE,
       PERMISSIONS.AUDIT_VIEW,
+      PERMISSIONS.PAYROLL_VIEW,
+      PERMISSIONS.PAYROLL_APPROVE,
     ],
   },
   front_desk: {

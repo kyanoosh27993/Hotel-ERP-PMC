@@ -14,6 +14,7 @@ import { JournalService } from '../../src/accounting/journal.service';
 import { AttendanceSimAdapter } from '../../src/integration/integration-hub.service';
 import { AllExceptionsFilter } from '../../src/common/all-exceptions.filter';
 import { ConflictException } from '@nestjs/common';
+import { buildIranIban } from '@hotel-erp/payroll';
 
 process.env.JWT_ACCESS_SECRET ??= 'e2e-access-secret-change-me';
 process.env.MFA_TEST_SECRET ??= 'JBSWY3DPEHPK3PXPE2ETEST';
@@ -68,8 +69,12 @@ beforeAll(async () => {
   journal = app.get(JournalService);
 
   await prisma.$executeRawUnsafe(
-    `TRUNCATE "reservations","pos_orders","outbox_events","inbox_events","journal_entries","journal_lines","audit_logs","refresh_tokens" CASCADE`,
+    `TRUNCATE "reservations","pos_orders","outbox_events","inbox_events","journal_entries","journal_lines","audit_logs","refresh_tokens","payroll_runs","payroll_slips" CASCADE`,
   );
+  // پاکسازی هدفمند داده تست فاز ۲ برای idempotency (داده seed پرسنل حفظ می‌شود)
+  // نکته: Prisma در هر فراخوانی خام فقط یک دستور می‌پذیرد
+  await prisma.$executeRawUnsafe(`DELETE FROM "salary_decisions" WHERE "employeeId" IN (SELECT id FROM "employees" WHERE code = '901')`);
+  await prisma.$executeRawUnsafe(`DELETE FROM "employees" WHERE code = '901'`);
 }, 90_000);
 
 afterAll(async () => {
@@ -374,5 +379,157 @@ describe('فاز ۱ — هسته', () => {
   it('ConflictException کد استاندارد دارد', () => {
     const e = new ConflictException({ code: 'CONFLICT', message: 'x' });
     expect(e.getResponse()).toMatchObject({ code: 'CONFLICT' });
+  });
+});
+
+describe('فاز ۲ — حقوق و دستمزد (F2-T1…T4)', () => {
+  let newEmployeeId: string;
+  let newDecisionId: string;
+  let runId: string;
+
+  it('پذیرش اجازه ثبت پرسنل ندارد (ماتریس دسترسی فاز ۲)', async () => {
+    const res = await request(app.getHttpServer())
+      .post('/api/v1/payroll/employees')
+      .set('Authorization', `Bearer ${await login('frontdesk', false)}`)
+      .send({ code: '999', firstName: 'x', lastName: 'y', marital: false, dependents: 0 });
+    expect(res.status).toBe(403);
+  });
+
+  it('حسابدار: کارمند جدید + حکم پیش‌نویس ثبت می‌کند؛ شبا نامعتبر رد می‌شود', async () => {
+    const auth = `Bearer ${await login('accountant', true)}`;
+    const badIban = await request(app.getHttpServer())
+      .post('/api/v1/payroll/employees')
+      .set('Authorization', auth)
+      .send({ code: '901', firstName: 'بد', lastName: 'شبا', marital: true, dependents: 1, iban: 'IR1201700000012345678901234' });
+    expect(badIban.status).toBe(400);
+
+    const created = await request(app.getHttpServer())
+      .post('/api/v1/payroll/employees')
+      .set('Authorization', auth)
+      .send({
+        code: '901',
+        firstName: 'تست',
+        lastName: 'پذیرش',
+        marital: true,
+        dependents: 2,
+        iban: buildIranIban('0170000000012345678901'),
+      });
+    expect(created.status).toBe(201);
+    newEmployeeId = created.body.data.id;
+
+    const decision = await request(app.getHttpServer())
+      .post('/api/v1/payroll/decisions')
+      .set('Authorization', auth)
+      .send({
+        employeeId: newEmployeeId,
+        baseSalary: '210000000',
+        seniority: '5000000',
+        housing: '30000000',
+        effectiveFrom: '2025-03-21',
+        note: 'e2e decision',
+      });
+    expect(decision.status).toBe(201);
+    newDecisionId = decision.body.data.id;
+    expect(decision.body.data.status).toBe('DRAFT');
+  });
+
+  it('حسابدار اجازه تأیید حکم ندارد؛ تأییدکننده تأیید می‌کند', async () => {
+    const selfApprove = await request(app.getHttpServer())
+      .post(`/api/v1/payroll/decisions/${newDecisionId}/approve`)
+      .set('Authorization', `Bearer ${await login('accountant', true)}`);
+    expect(selfApprove.status).toBe(403);
+
+    const approve = await request(app.getHttpServer())
+      .post(`/api/v1/payroll/decisions/${newDecisionId}/approve`)
+      .set('Authorization', `Bearer ${await login('approver', true)}`);
+    expect(approve.status).toBe(201);
+    expect(approve.body.data.status).toBe('APPROVED');
+  });
+
+  it('محاسبه دوره ۱۴۰۵-۰۹: کارمندان seed + کارمند جدید = ۱۱ فیش؛ جمع فیش‌ها = جمع دوره', async () => {
+    const calc = await request(app.getHttpServer())
+      .post('/api/v1/payroll/runs')
+      .set('Authorization', `Bearer ${await login('accountant', true)}`)
+      .send({ periodCode: '1405-09' });
+    expect(calc.status).toBe(201);
+    runId = calc.body.data.id;
+    expect(calc.body.data.employeeCount).toBe(11);
+    expect(calc.body.data.status).toBe('DRAFT');
+    expect(calc.body.data.paramsVersion).toBeTruthy();
+
+    // خالص هر فیش = ناخالص − بیمه کارگر − مالیات (فرمول قرارداد روی داده API)
+    const runDetail = await request(app.getHttpServer())
+      .get(`/api/v1/payroll/runs/${runId}`)
+      .set('Authorization', `Bearer ${await login('accountant', true)}`);
+    expect(runDetail.status).toBe(200);
+    for (const s of runDetail.body.data.slips) {
+      expect(BigInt(s.net)).toBe(BigInt(s.gross) - BigInt(s.ins) - BigInt(s.tax));
+    }
+  });
+
+  it('بازمحاسبه دوره پیش‌نویس مجاز است (بدون دوباره‌سازی)', async () => {
+    const recalc = await request(app.getHttpServer())
+      .post('/api/v1/payroll/runs')
+      .set('Authorization', `Bearer ${await login('accountant', true)}`)
+      .send({ periodCode: '1405-09' });
+    expect(recalc.status).toBe(201);
+    expect(recalc.body.data.id).toBe(runId);
+    expect(recalc.body.data.employeeCount).toBe(11);
+  });
+
+  it('سه لیست رسمی: مالیات/بیمه/بانک — تعداد سطرها و تراز بیمه', async () => {
+    const auth = `Bearer ${await login('accountant', true)}`;
+    const tax = await request(app.getHttpServer()).get(`/api/v1/payroll/runs/${runId}/lists/tax`).set('Authorization', auth);
+    const ins = await request(app.getHttpServer()).get(`/api/v1/payroll/runs/${runId}/lists/insurance`).set('Authorization', auth);
+    const bank = await request(app.getHttpServer()).get(`/api/v1/payroll/runs/${runId}/lists/bank`).set('Authorization', auth);
+    expect([tax.status, ins.status, bank.status]).toEqual([200, 200, 200]);
+    expect(tax.body.data).toHaveLength(11);
+    expect(ins.body.data).toHaveLength(11);
+    expect(bank.body.data).toHaveLength(11);
+    for (const row of ins.body.data) {
+      expect(row.total).toBe(row.employee7 + row.employer23);
+    }
+    for (const row of bank.body.data) {
+      expect(row.iban).toMatch(/^IR\d{24}$/);
+    }
+    // لیست مالیات: هر سطر مالیات صحیح
+    for (const row of tax.body.data) {
+      expect(Number.isInteger(row.tax)).toBe(true);
+    }
+  });
+
+  it('حسابدار اجازه تأیید دوره ندارد؛ تأییدکننده تأیید می‌کند → سند خودکار متوازن حقوق', async () => {
+    const selfApprove = await request(app.getHttpServer())
+      .post(`/api/v1/payroll/runs/${runId}/approve`)
+      .set('Authorization', `Bearer ${await login('accountant', true)}`);
+    expect(selfApprove.status).toBe(403);
+
+    const approve = await request(app.getHttpServer())
+      .post(`/api/v1/payroll/runs/${runId}/approve`)
+      .set('Authorization', `Bearer ${await login('approver', true)}`);
+    expect(approve.status).toBe(201);
+    expect(approve.body.data.status).toBe('APPROVED');
+
+    await drainOutbox();
+
+    // سند حقوق: بدهکار 5102+5103 / بستانکار 2202+2203+2102 — متوازن و قابل ردیابی به دوره
+    const entries = await prisma.journalEntry.findMany({ where: { sourceRef: runId, sourceModule: 'payroll' }, include: { lines: true } });
+    expect(entries).toHaveLength(1);
+    const entry = entries[0];
+    const debit = entry.lines.reduce((s, l) => s + l.debitRials, 0n);
+    const credit = entry.lines.reduce((s, l) => s + l.creditRials, 0n);
+    expect(debit).toBe(credit);
+    const run = await prisma.payrollRun.findUniqueOrThrow({ where: { id: runId } });
+    expect(entry.lines.find((l) => l.accountCode === '5102')?.debitRials).toBe(run.grossRials);
+    expect(entry.lines.find((l) => l.accountCode === '2102')?.creditRials).toBe(run.netRials);
+    expect(entry.lines.find((l) => l.accountCode === '2202')?.creditRials).toBe(run.insEmployeeRials + run.insEmployerRials);
+    expect(run.journalEntryId).toBe(entry.id);
+
+    // دوره تأییدشده تغییرناپذیر: بازمحاسبه → 409
+    const recalc = await request(app.getHttpServer())
+      .post('/api/v1/payroll/runs')
+      .set('Authorization', `Bearer ${await login('accountant', true)}`)
+      .send({ periodCode: '1405-09' });
+    expect(recalc.status).toBe(409);
   });
 });

@@ -10,6 +10,7 @@ import { OutboxModule } from './outbox/outbox.module';
 import { AccountingModule } from './accounting/accounting.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { PosModule } from './pos/pos.module';
+import { PayrollModule } from './payroll/payroll.module';
 import { IntegrationHubService, AttendanceSimAdapter } from './integration/integration-hub.service';
 import { IntegrationController } from './integration/integration.controller';
 import { HealthController } from './health/health.controller';
@@ -25,6 +26,7 @@ import { MetricsController } from './health/metrics.controller';
     AccountingModule,
     ReservationsModule,
     PosModule,
+    PayrollModule,
   ],
   controllers: [HealthController, MetricsController, IntegrationController],
   providers: [

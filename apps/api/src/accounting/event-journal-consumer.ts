@@ -3,16 +3,16 @@
  * قاعده نگاشت از جدول event_journal_rules خوانده می‌شود (پارامتریک، بدون هاردکد در کد مصرف).
  */
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { EVENT_NAMES, type EventEnvelope, type ReservationConfirmedPayload, type PosOrderServedPayload } from '@hotel-erp/contracts';
+import { EVENT_NAMES, type EventEnvelope, type ReservationConfirmedPayload, type PosOrderServedPayload, type PayrollRunApprovedPayload } from '@hotel-erp/contracts';
 import { JournalService, SYSTEM_ENGINE_USER } from './journal.service';
 import { OutboxService } from '../outbox/outbox.service';
 import { PrismaService } from '../prisma.service';
-import { subRials } from '@hotel-erp/shared';
+import { subRials, addRials } from '@hotel-erp/shared';
 
 interface RuleLine {
   accountCode: string;
   side: 'debit' | 'credit';
-  amountKind: 'total' | 'tax' | 'net';
+  amountKind: 'total' | 'tax' | 'net' | 'gross' | 'insEmployee' | 'insEmployer' | 'insTotal';
 }
 
 @Injectable()
@@ -28,6 +28,7 @@ export class EventJournalConsumer implements OnModuleInit {
   onModuleInit(): void {
     this.outbox.on(EVENT_NAMES.RESERVATION_CONFIRMED, (e) => this.handleReservationConfirmed(e));
     this.outbox.on(EVENT_NAMES.POS_ORDER_SERVED, (e) => this.handlePosOrderServed(e));
+    this.outbox.on(EVENT_NAMES.PAYROLL_RUN_APPROVED, (e) => this.handlePayrollRunApproved(e));
   }
 
   /** booking.reservation.confirmed → بدهکار حساب مهمان / بستانکار درآمد اتاق */
@@ -87,6 +88,50 @@ export class EventJournalConsumer implements OnModuleInit {
       },
     );
     this.logger.log(`journal posted for POS order ${payload.orderNo}`);
+  }
+
+  /**
+   * payroll.run.approved → سند حقوق:
+   * بدهکار هزینه حقوق (ناخالص) + هزینه بیمه سهم کارفرما
+   * بستانکار بیمه پرداختنی (۳۰٪) + مالیات حقوق + حقوق پرداختنی (خالص).
+   * تراز: gross + insEmployer = insTotal + tax + net ✓
+   */
+  private async handlePayrollRunApproved(envelope: EventEnvelope): Promise<void> {
+    const payload = envelope.payload as unknown as PayrollRunApprovedPayload;
+    const rule = await this.loadRule(EVENT_NAMES.PAYROLL_RUN_APPROVED);
+    if (!rule) return;
+
+    const amounts: Record<RuleLine['amountKind'], bigint> = {
+      total: 0n,
+      tax: BigInt(payload.taxRials),
+      net: BigInt(payload.netRials),
+      gross: BigInt(payload.grossRials),
+      insEmployee: BigInt(payload.insEmployeeRials),
+      insEmployer: BigInt(payload.insEmployerRials),
+      insTotal: addRials(payload.insEmployeeRials, payload.insEmployerRials),
+    };
+
+    const lines = rule.map((l) => ({
+      accountCode: l.accountCode,
+      debitRials: l.side === 'debit' ? amounts[l.amountKind] : 0n,
+      creditRials: l.side === 'credit' ? amounts[l.amountKind] : 0n,
+    }));
+
+    const result = await this.journal.postEntryFromEvent(
+      envelope.idempotencyKey,
+      lines,
+      {
+        description: `Auto: payroll ${payload.periodCode} (${payload.employeeCount} slips)`,
+        sourceModule: 'payroll',
+        sourceRef: payload.runId,
+        sourceEventId: envelope.eventId,
+        createdByUserId: SYSTEM_ENGINE_USER,
+      },
+    );
+
+    // پیوند دوطرفه برای ردیابی (قاعده ۱۱: هر تراکنش قابل ردیابی به منبع)
+    await this.prisma.payrollRun.update({ where: { id: payload.runId }, data: { journalEntryId: result.id } });
+    this.logger.log(`journal posted for payroll ${payload.periodCode} → ${result.entryNo}`);
   }
 
   private async loadRule(eventName: string): Promise<RuleLine[] | null> {

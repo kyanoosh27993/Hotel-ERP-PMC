@@ -354,3 +354,113 @@ model EventJournalRule {
 
   @@map("event_journal_rules")
 }
+
+// ───────────────────────── حقوق و دستمزد (فاز ۲ — F2-T1…T4) ─────────────────────────
+
+model Employee {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code        String    @unique
+  firstName   String
+  lastName    String
+  nationalId  String?   @unique
+  iban        String?
+  marital     Boolean   @default(false)
+  dependents  Int       @default(0)
+  hireDate    DateTime? @db.Date
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  decisions SalaryDecision[]
+  slips     PayrollSlip[]
+
+  @@map("employees")
+}
+
+model SalaryDecision {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId   String         @db.Uuid
+  baseSalary   BigInt
+  seniority    BigInt         @default(0)
+  housing      BigInt         @default(0)
+  effectiveFrom DateTime      @db.Date
+  status       DecisionStatus @default(DRAFT)
+  note         String?
+  createdById  String?        @db.Uuid
+  approvedById String?        @db.Uuid
+  approvedAt   DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+
+  @@index([employeeId, effectiveFrom, status])
+  @@map("salary_decisions")
+}
+
+enum DecisionStatus {
+  DRAFT
+  APPROVED
+
+  @@map("decision_status")
+}
+
+model PayrollRun {
+  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  periodCode        String           @unique // '1405-09'
+  status            PayrollRunStatus @default(DRAFT)
+  paramsVersion     String
+  grossRials        BigInt           @default(0)
+  netRials          BigInt           @default(0)
+  taxRials          BigInt           @default(0)
+  insEmployeeRials  BigInt           @default(0)
+  insEmployerRials  BigInt           @default(0)
+  employeeCount     Int              @default(0)
+  skippedJson       Json?
+  journalEntryId    String?          @db.Uuid
+  createdById       String?          @db.Uuid
+  approvedById      String?          @db.Uuid
+  approvedAt        DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  slips PayrollSlip[]
+
+  @@map("payroll_runs")
+}
+
+enum PayrollRunStatus {
+  DRAFT
+  APPROVED
+
+  @@map("payroll_run_status")
+}
+
+model PayrollSlip {
+  id             String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  runId          String @db.Uuid
+  employeeId     String @db.Uuid
+  mizanRials     BigInt @default(0)
+  dailyRials     BigInt @default(0)
+  hourlyRials    BigInt @default(0)
+  overtimeRials  BigInt @default(0)
+  nightRials     BigInt @default(0)
+  housingRials   BigInt @default(0)
+  childAllowRials BigInt @default(0)
+  absentRials    BigInt @default(0)
+  grossRials     BigInt @default(0)
+  insEmployeeRials BigInt @default(0)
+  insEmployerRials BigInt @default(0)
+  monthlyTaxableRials BigInt @default(0)
+  annualTaxableRials  BigInt @default(0)
+  taxRials       BigInt @default(0)
+  netRials       BigInt @default(0)
+  overridesJson  Json?
+  paramsVersion  String
+
+  run      PayrollRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  employee Employee   @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+
+  @@unique([runId, employeeId])
+  @@map("payroll_slips")
+}

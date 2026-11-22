@@ -1,4 +1,4 @@
-name: CI — Hotel ERP Phase 1 Core
+name: CI — Hotel ERP Core (Phases 1+2)
 
 on:
   push:
@@ -22,10 +22,10 @@ jobs:
         run: npm run prisma:generate -w apps/api
       - name: Lint
         run: npm run lint
-      - name: Build (shared → contracts → api)
-        run: npm run build -w packages/shared && npm run build -w packages/contracts && npm run build -w apps/api
+      - name: Build (shared → contracts → payroll → api)
+        run: npm run build -w packages/shared && npm run build -w packages/contracts && npm run build -w packages/payroll && npm run build -w apps/api
       - name: Unit tests
-        run: npm run test:unit -w packages/shared && npm run test:unit -w apps/api
+        run: npm run test:unit -w packages/shared && npm run test:unit -w packages/payroll && npm run test:unit -w apps/api
 
   e2e:
     name: E2E (PostgreSQL service) — core acceptance
@@ -57,15 +57,15 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --no-audit --no-fund
-      - name: Build shared + contracts (type declarations needed by e2e ts-jest)
-        run: npm run build -w packages/shared && npm run build -w packages/contracts
+      - name: Build shared + contracts + payroll (type declarations needed by e2e ts-jest)
+        run: npm run build -w packages/shared && npm run build -w packages/contracts && npm run build -w packages/payroll
       - name: Prisma generate
         run: npm run prisma:generate -w apps/api
       - name: Migrate deploy (validates migration SQL)
         run: npm run prisma:migrate -w apps/api
-      - name: Seed (roles/matrix/users/rules)
+      - name: Seed (roles/matrix/users/rules/payroll)
         run: npm run db:seed -w apps/api
-      - name: E2E tests (auth/RBAC/outbox/concurrency/POS→journal)
+      - name: E2E tests (auth/RBAC/outbox/concurrency/POS→journal/payroll→journal)
         run: npm run test:e2e -w apps/api
 
   infra:

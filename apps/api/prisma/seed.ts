@@ -174,8 +174,109 @@ async function main() {
     },
   });
 
+  // ── فاز ۲: حساب‌های حقوق (پرداختنی‌ها و هزینه بیمه کارفرما) ──
+  const payrollAccounts: Array<{ code: string; nameEn: string; nameFa: string; type: 'LIABILITY' | 'EXPENSE' }> = [
+    { code: '2102', nameEn: 'Salaries Payable', nameFa: 'حقوق پرداختنی', type: 'LIABILITY' },
+    { code: '2202', nameEn: 'Insurance Payable', nameFa: 'بیمه پرداختنی', type: 'LIABILITY' },
+    { code: '2203', nameEn: 'Payroll Tax Payable', nameFa: 'مالیات حقوق پرداختنی', type: 'LIABILITY' },
+    { code: '5103', nameEn: 'Employer Insurance Expense', nameFa: 'هزینه حق بیمه سهم کارفرما', type: 'EXPENSE' },
+  ];
+  for (const a of payrollAccounts) {
+    await prisma.account.upsert({
+      where: { code: a.code },
+      update: { nameEn: a.nameEn, nameFa: a.nameFa, type: a.type },
+      create: { code: a.code, nameEn: a.nameEn, nameFa: a.nameFa, type: a.type },
+    });
+  }
+
+  // ── قاعده سند حقوق: بدهکار هزینه حقوق + بیمه کارفرما / بستانکار بیمه + مالیات + حقوق پرداختنی ──
+  // تراز: gross + insEmployer = insTotal + tax + net
+  await prisma.eventJournalRule.upsert({
+    where: { ruleId: 'payroll_run_approved' },
+    update: { linesJson: [
+      { accountCode: '5102', side: 'debit', amountKind: 'gross' },
+      { accountCode: '5103', side: 'debit', amountKind: 'insEmployer' },
+      { accountCode: '2202', side: 'credit', amountKind: 'insTotal' },
+      { accountCode: '2203', side: 'credit', amountKind: 'tax' },
+      { accountCode: '2102', side: 'credit', amountKind: 'net' },
+    ] as unknown as import('@prisma/client').Prisma.InputJsonValue },
+    create: {
+      ruleId: 'payroll_run_approved',
+      eventName: 'payroll.run.approved',
+      descriptionFa: 'تأیید دوره حقوق: هزینه حقوق/بیمه کارفرما در برابر بیمه، مالیات و حقوق پرداختنی',
+      linesJson: [
+        { accountCode: '5102', side: 'debit', amountKind: 'gross' },
+        { accountCode: '5103', side: 'debit', amountKind: 'insEmployer' },
+        { accountCode: '2202', side: 'credit', amountKind: 'insTotal' },
+        { accountCode: '2203', side: 'credit', amountKind: 'tax' },
+        { accountCode: '2102', side: 'credit', amountKind: 'net' },
+      ] as unknown as import('@prisma/client').Prisma.InputJsonValue,
+    },
+  });
+
+  // ── داده نمونه پرسنل (F2-T1: مهاجرت ۱۰ نفر) + حکم تأییدشده هر یک ──
+  const employeeNames: Array<[string, string, boolean, number]> = [
+    ['علی', 'محمدی', true, 2],
+    ['سارا', 'کریمی', false, 0],
+    ['رضا', 'احمدی', true, 1],
+    ['مریم', 'حسینی', false, 0],
+    ['حسن', 'قاسمی', true, 3],
+    ['نرگس', 'رئیسی', true, 1],
+    ['مهدی', 'کاظمی', false, 0],
+    ['فاطمه', 'نوری', true, 2],
+    ['امیر', 'شریفی', false, 0],
+    ['زهرا', 'سلطانی', true, 1],
+  ];
+  const adminUser = await prisma.user.findUnique({ where: { username: 'admin' } });
+  /** شبا معتبر از BBAN ۲۲رقمی — همان الگوریتم mod-97 پکیج @hotel-erp/payroll (بدون وابستگی به dist) */
+  const ibanFor = (bban22: string): string => {
+    if (!/^\d{22}$/.test(bban22)) throw new Error('BBAN must be 22 digits');
+    const num = (s: string): string => s.replace(/[A-Z]/g, (ch) => String(ch.charCodeAt(0) - 55));
+    let r = 0;
+    for (const d of num(`${bban22}IR00`)) r = (r * 10 + Number(d)) % 97;
+    return `IR${String(98 - r).padStart(2, '0')}${bban22}`;
+  };
+  const baseSalaries = [220_000_000, 180_000_000, 260_000_000, 150_000_000, 320_000_000, 200_000_000, 170_000_000, 240_000_000, 160_000_000, 300_000_000];
+  for (let i = 0; i < employeeNames.length; i += 1) {
+    const [firstName, lastName, marital, dependents] = employeeNames[i];
+    const code = String(101 + i);
+    const iban = ibanFor(`01900000000000${String(i + 1).padStart(8, '0')}`);
+    const emp = await prisma.employee.upsert({
+      where: { code },
+      update: { firstName, lastName, marital, dependents, iban, active: true },
+      create: {
+        code,
+        firstName,
+        lastName,
+        marital,
+        dependents,
+        iban,
+        hireDate: new Date('2025-03-21T00:00:00Z'),
+      },
+    });
+    // حکم تأییدشده مؤثر از آغاز ۱۴۰۴ (پایه سنوات ماهانه ۵٬۰۰۰٬۰۰۰ ریال — §7 معاملات فصلی)
+    const decisionExists = await prisma.salaryDecision.findFirst({
+      where: { employeeId: emp.id, status: 'APPROVED' },
+    });
+    if (!decisionExists) {
+      await prisma.salaryDecision.create({
+        data: {
+          employeeId: emp.id,
+          baseSalary: BigInt(baseSalaries[i]),
+          seniority: BigInt(5_000_000),
+          housing: BigInt(30_000_000),
+          effectiveFrom: new Date('2025-03-21T00:00:00Z'),
+          status: 'APPROVED',
+          note: 'Seed: حکم اولیه ۱۴۰۴ — [پارامتریک تا ابلاغ حکم واقعی]',
+          approvedById: adminUser?.id ?? null,
+          approvedAt: new Date(),
+        },
+      });
+    }
+  }
+
   // eslint-disable-next-line no-console
-  console.log('✅ seed complete: roles/permissions/users/accounts/periods/rooms/outlet/rules');
+  console.log('✅ seed complete: roles/permissions/users/accounts/periods/rooms/outlet/rules/payroll');
 }
 
 main()
