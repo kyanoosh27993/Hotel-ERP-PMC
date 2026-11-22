@@ -72,22 +72,49 @@ function isWindowsAdmin() {
 }
 
 /**
- * اگر کاربر مدیر است: سرور با دسترسی محدود در پنجرهٔ جدید اجرا می‌شود
- * (runas /trustlevel:0x20000) و همین کنسول وضعیت را نمایش می‌دهد و باز می‌ماند.
+ * اگر کاربر مدیر است: سرور با دسترسی محدود اجرا می‌شود — از طریق وظیفهٔ زمان‌بندی‌شدهٔ
+ * ویندوز با /rl LIMITED (روش استاندارد کسر دسترسی؛ runas /trustlevel در برخی محیط‌ها اثر نمی‌کند).
+ * همین کنسول نقش «ناظر» را دارد: وضعیت را نشان می‌دهد، مرورگر را باز می‌کند و باز می‌ماند.
  */
 async function deElevateIfNeeded() {
+  // گارد فرزند: فرایندِ با دسترسی محدود دیگر خود را نمی‌کاهد (جلوگیری از حلقهٔ بی‌پایان)
+  if (process.env.HOTELERP_DEELEVATED === '1') {
+    log('اجرای محدود فعال (فرزند) — ادامهٔ عادی');
+    return false;
+  }
   if (!isWindowsAdmin()) return false;
-  log('اجرای زیر حساب مدیر شناسایی شد — PostgreSQL اجازهٔ اجرا نمی‌دهد؛ شروع مجدد با دسترسی محدود…');
-  const nodeExe = process.execPath;
-  const serverJs = path.join(__dirname, 'server.js');
-  const inner = `set "HOTELERP_DEELEVATED=1"&& set "HOTELERP_DATA_DIR=${DATA_DIR}"&& set "HOTELERP_PORT=${PORT}"&& set "SEED_ADMIN_PASSWORD=${SEED_PASSWORD}"&& "${nodeExe}" "${serverJs}"`;
-  const child = spawn('runas', ['/trustlevel:0x20000', `cmd.exe /c ${inner}`], { stdio: ['ignore', 'pipe', 'pipe'] });
-  child.stdout.on('data', (d) => logStream.write('[runas] ' + d));
-  child.stderr.on('data', (d) => logStream.write('[runas-err] ' + d));
-  child.on('error', (e) => fatal(new Error('runas ناموفق بود: ' + e.message)));
+  log('اجرای زیر حساب مدیر شناسایی شد — PostgreSQL اجازهٔ اجرا نمی‌دهد؛ شروع مجدد با وظیفهٔ محدود…');
+  const { spawnSync } = require('child_process');
+  const tn = 'HotelERP Limited Run';
+  const bootFile = path.join(DATA_DIR, 'boot.cmd');
+  const boot = [
+    '@echo off',
+    'set "HOTELERP_DEELEVATED=1"',
+    `set "HOTELERP_DATA_DIR=${DATA_DIR}"`,
+    `set "HOTELERP_PORT=${PORT}"`,
+    `set "SEED_ADMIN_PASSWORD=${SEED_PASSWORD}"`,
+    `"${process.execPath}" "${path.join(__dirname, 'server.js')}"`,
+  ].join('\r\n');
+  fs.writeFileSync(bootFile, boot, 'utf8');
+
+  const runSch = (args) => {
+    const r = spawnSync('schtasks', args, { encoding: 'utf8' });
+    log('[schtasks] ' + args[0] + ' → ' + String(r.stdout || '').trim().replace(/\r?\n/g, ' | ') + (r.stderr ? ' ERR: ' + String(r.stderr).trim() : ''));
+    return r.status === 0;
+  };
+  const created = runSch(['/create', '/tn', tn, '/tr', `"${bootFile}"`, '/sc', 'once', '/st', '23:59', '/rl', 'LIMITED', '/f']);
+  if (!created || !runSch(['/run', '/tn', tn])) {
+    console.error('\n⛔ ساخت وظیفهٔ اجرای محدود ناموفق بود — لاگ: ' + LOG_FILE);
+    console.error('   راه‌حل: این پنجره را با دسترسی معمولی (نه Run as administrator) باز کنید.');
+    console.error('\nبرای بستن این پنجره Enter را بزنید…');
+    process.stdin.resume();
+    process.stdin.once('data', () => process.exit(1));
+    return 'stay-open';
+  }
+
   const baseUrl = `http://localhost:${PORT}`;
   try {
-    await waitForHttp(`${baseUrl}/api/v1/health`, 240_000);
+    await waitForHttp(`${baseUrl}/api/v1/health`, 300_000);
   } catch (e) {
     console.error('\n⛔ سرور با دسترسی محدود بالا نیامد — لاگ: ' + LOG_FILE);
     console.error('   اگر این پنجره را با «Run as administrator» باز کرده‌اید، آن را معمولی باز کنید.');
@@ -98,6 +125,10 @@ async function deElevateIfNeeded() {
   }
   console.log('\n✅ برنامه اجرا شد: ' + baseUrl);
   console.log('   این پنجره را می‌توانید کوچک کنید؛ بستن سرور از پنجرهٔ برنامه.');
+  try {
+    const opener = exec(`start "" "${baseUrl}"`);
+    opener.on('error', () => {});
+  } catch (e) { /* بدون رابط گرافیکی — آدرس چاپ شد */ }
   // نگه‌داشتن کنسول تا وقتی سرور زنده است
   let fails = 0;
   while (fails < 5) {
@@ -222,17 +253,19 @@ async function main() {
   await waitForHttp(`${baseUrl}/api/v1/health`, 120_000);
   log('سرور آماده است: ' + baseUrl);
 
-  // بازکردن مرورگر — هر خطایی نباید سرور را بیندازد (در سرور بدون رابط هم امن است)
-  try {
-    if (IS_WIN) {
-      const opener = exec(`start "" "${baseUrl}"`);
-      opener.on('error', () => {});
-    } else {
-      const opener = spawn('xdg-open', [baseUrl], { stdio: 'ignore' });
-      opener.on('error', () => log('مرورگر گرافیکی یافت نشد — آدرس را دستی باز کنید: ' + baseUrl));
+  // بازکردن مرورگر — هر خطایی نباید سرور را بیندازد؛ در اجرای محدود والد مرورگر را باز می‌کند
+  if (process.env.HOTELERP_DEELEVATED !== '1') {
+    try {
+      if (IS_WIN) {
+        const opener = exec(`start "" "${baseUrl}"`);
+        opener.on('error', () => {});
+      } else {
+        const opener = spawn('xdg-open', [baseUrl], { stdio: 'ignore' });
+        opener.on('error', () => log('مرورگر گرافیکی یافت نشد — آدرس را دستی باز کنید: ' + baseUrl));
+      }
+    } catch (e) {
+      log('بازکردن مرورگر ناموفق — آدرس را دستی باز کنید: ' + baseUrl);
     }
-  } catch (e) {
-    log('بازکردن مرورگر ناموفق — آدرس را دستی باز کنید: ' + baseUrl);
   }
   console.log('\n✅ برنامه اجرا شد: ' + baseUrl);
   console.log('   کاربران: admin / frontdesk / housekeeper / accountant — گذرواژه: ' + SEED_PASSWORD);
