@@ -10,19 +10,19 @@ Unicode true
 !define APPNAME "Hotel ERP"
 !define COMPANY "Hotel ERP PMC"
 !define UNINSTKEY "HotelERP"
-!define MUI_ICON "assets/app.ico"
-!define MUI_UNICON "assets/app.ico"
+!define MUI_ICON "assets\app.ico"
+!define MUI_UNICON "assets\app.ico"
 
 Name "${APPNAME} — سامانه یکپارچه هتلداری"
-OutFile "out/Hotel-ERP-Setup.exe"
+OutFile "out\Hotel-ERP-Setup.exe"
 InstallDir "$PROGRAMFILES64\HotelERP"
 RequestExecutionLevel admin
 SetCompressor /SOLID lzma
 
 !define MUI_HEADERIMAGE
-!define MUI_HEADERIMAGE_BITMAP "assets/header.bmp"
+!define MUI_HEADERIMAGE_BITMAP "assets\header.bmp"
 !define MUI_HEADERIMAGE_RIGHT
-!define MUI_WELCOMEFINISHPAGE_BITMAP "assets/welcome.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "assets\welcome.bmp"
 !define MUI_ABORTWARNING
 
 ; ── متن‌های فارسی مراحل نصب ──
@@ -42,7 +42,7 @@ SetCompressor /SOLID lzma
 Section "نصب Hotel ERP" SecMain
   DetailPrint "در حال استخراج فایل‌های برنامه (سرور، شل وب، پایگاه دادهٔ جاسازی‌شده)…"
   SetOutPath "$INSTDIR"
-  File /r "payload/*.*"
+  File /r "payload\*.*"
   DetailPrint "استخراج کامل شد."
 
   DetailPrint "ثبت برنامه در ویندوز…"

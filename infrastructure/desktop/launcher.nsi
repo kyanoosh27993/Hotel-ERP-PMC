@@ -4,8 +4,8 @@
 ; ============================================================
 Unicode true
 
-OutFile "out/HotelERP.exe"
-Icon "assets/app.ico"
+OutFile "out\HotelERP.exe"
+Icon "assets\app.ico"
 SilentInstall silent
 Name "Hotel ERP"
 
