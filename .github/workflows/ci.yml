@@ -1,4 +1,4 @@
-name: CI — Hotel ERP Core (Phases 1+2)
+name: CI — Hotel ERP (Phases 1–3)
 
 on:
   push:
@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+
+# اجراهای هم‌زمان روی یک شاخه: فقط جدیدترین اجرا بماند تا صف قرمز نسازد
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 
 jobs:
   quality:

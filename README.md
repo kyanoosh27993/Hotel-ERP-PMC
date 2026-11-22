@@ -1,5 +1,7 @@
 # Hotel ERP — سامانه یکپارچه هتلداری (PMS + ERP + POS + BI + AI)
 
+[![CI](https://github.com/kyanoosh27993/Hotel-ERP-PMC/actions/workflows/ci.yml/badge.svg)](https://github.com/kyanoosh27993/Hotel-ERP-PMC/actions/workflows/ci.yml)
+
 نسخه: v0.1 | بازار هدف: هتل‌های ایران | RTL فارسی/انگلیسی | تقویم هجری شمسی
 
 ## اجرای هسته برنامه (بدون نیاز به build)
