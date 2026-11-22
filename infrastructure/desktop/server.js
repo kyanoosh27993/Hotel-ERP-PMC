@@ -236,27 +236,14 @@ async function main() {
 
   // ── ۱) دیتابیس جاسازی‌شده PostgreSQL ──
   step('۱/۴ پایگاه داده جاسازی‌شده (PostgreSQL embedded)');
-  // embedded-postgres بستهٔ ESM است — با import پویا بارگذاری می‌شود (سازگار با ویندوز/لینوکس)
-  const { default: EmbeddedPostgres } = await import(
-    url.pathToFileURL(path.join(API_DIR, 'node_modules', 'embedded-postgres', 'dist', 'index.js')).href
-  );
   const pgPort = await freePort(port + 1);
-  const pg = new EmbeddedPostgres({
-    databaseDir: PG_DIR,
-    user: 'hotel',
-    password: 'hotel_local_pass',
-    port: pgPort,
-    persistent: true,
-  });
-  let initialised = false;
-  try {
-    await pg.initialise();
-    initialised = true;
-    log('خوشهٔ دیتابیس ساخته شد (اجرای اول)');
-  } catch (e) {
-    if (String(e.message).includes('already exists') || fs.existsSync(path.join(PG_DIR, 'PG_VERSION'))) {
-      log('خوشهٔ دیتابیس موجود است — از اجرای قبل ادامه می‌دهیم');
-    } else { throw e; }
+  // initdb مستقیم با UTF-8 — روی ویندوز locale پیش‌فرض (WIN1252) متن فارسی را می‌شکند (خطای 22P05)
+  if (fs.existsSync(path.join(PG_DIR, 'PG_VERSION'))) {
+    log('خوشهٔ دیتابیس موجود است — از اجرای قبل ادامه می‌دهیم');
+  } else {
+    const r = await runBin('initdb', ['-D', PG_DIR, '--username=hotel', '--encoding=UTF8', '--locale=C', '--auth=trust']);
+    if (r.code !== 0) throw new Error('initdb ناموفق (کد ' + r.code + '): ' + String(r.stderr).trim().slice(-400));
+    log('خوشهٔ دیتابیس با کدگذاری UTF-8 ساخته شد (اجرای اول)');
   }
   // شروع مستقیم با pg_ctl (به‌جای pg.start که در خروج زودهنگام postgres، reject بی‌پیام می‌زد)
   // -l logfile: خطای واقعی postgres را ثبت می‌کند؛ -w: تا آماده‌شدن صبر می‌کند.
