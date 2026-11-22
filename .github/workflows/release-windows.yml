@@ -112,6 +112,7 @@ jobs:
           if ($web.Content -notmatch "frontdesk.js") { throw "web shell not served" }
           Write-Host "WEB SHELL OK"
           taskkill /PID $($p.Id) /T /F 2>$null
+          Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force
           Write-Host "SMOKE TEST PASSED — boot + login + PMS + web shell on real Windows"
 
       - name: Upload artifact (always)

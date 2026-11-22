@@ -43,7 +43,7 @@ try {
 
 /** پایان ایمن: پیام فارسی + لاگ + انتظار برای Enter (پنجره بسته نمی‌شود) */
 function fatal(err) {
-  const msg = err && err.stack ? err.stack : String(err);
+  const msg = err && (err.stack || err.message) ? (err.stack || err.message) : String(err ?? 'خطای ناشناخته');
   log('FATAL: ' + msg);
   console.error('\n⛔ خطا در اجرای برنامه — جزئیات کامل در فایل لاگ ذخیره شد:');
   console.error('   ' + LOG_FILE);
@@ -59,6 +59,55 @@ process.on('uncaughtException', fatal);
 process.on('unhandledRejection', fatal);
 
 function step(fa) { log('── ' + fa); }
+
+/** شناسایی حساب مدیر (سطح یکپارچگی High/System) — PostgreSQL زیر حساب مدیر اجرا نمی‌شود */
+function isWindowsAdmin() {
+  if (!IS_WIN) return false;
+  try {
+    const out = require('child_process').execSync('whoami /groups', { encoding: 'utf8' });
+    return out.includes('S-1-16-12288') || out.includes('S-1-16-16384');
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * اگر کاربر مدیر است: سرور با دسترسی محدود در پنجرهٔ جدید اجرا می‌شود
+ * (runas /trustlevel:0x20000) و همین کنسول وضعیت را نمایش می‌دهد و باز می‌ماند.
+ */
+async function deElevateIfNeeded() {
+  if (!isWindowsAdmin()) return false;
+  log('اجرای زیر حساب مدیر شناسایی شد — PostgreSQL اجازهٔ اجرا نمی‌دهد؛ شروع مجدد با دسترسی محدود…');
+  const nodeExe = process.execPath;
+  const serverJs = path.join(__dirname, 'server.js');
+  const inner = `set "HOTELERP_DEELEVATED=1"&& set "HOTELERP_DATA_DIR=${DATA_DIR}"&& set "HOTELERP_PORT=${PORT}"&& set "SEED_ADMIN_PASSWORD=${SEED_PASSWORD}"&& "${nodeExe}" "${serverJs}"`;
+  const child = spawn('runas', ['/trustlevel:0x20000', `cmd.exe /c ${inner}`], { stdio: 'ignore' });
+  child.on('error', (e) => fatal(new Error('runas ناموفق بود: ' + e.message)));
+  const baseUrl = `http://localhost:${PORT}`;
+  try {
+    await waitForHttp(`${baseUrl}/api/v1/health`, 240_000);
+  } catch (e) {
+    console.error('\n⛔ سرور با دسترسی محدود بالا نیامد — لاگ: ' + LOG_FILE);
+    console.error('   اگر این پنجره را با «Run as administrator» باز کرده‌اید، آن را معمولی باز کنید.');
+    console.error('\nبرای بستن این پنجره Enter را بزنید…');
+    process.stdin.resume();
+    process.stdin.once('data', () => process.exit(1));
+    return 'stay-open';
+  }
+  console.log('\n✅ برنامه اجرا شد: ' + baseUrl);
+  console.log('   این پنجره را می‌توانید کوچک کنید؛ بستن سرور از پنجرهٔ برنامه.');
+  // نگه‌داشتن کنسول تا وقتی سرور زنده است
+  let fails = 0;
+  while (fails < 5) {
+    await new Promise((r) => setTimeout(r, 3000));
+    try { const res = await fetch(`${baseUrl}/api/v1/health`); if (res.ok) fails = 0; else fails += 1; }
+    catch (e) { fails += 1; }
+  }
+  console.log('\nبرنامه بسته شد. برای بستن این پنجره Enter را بزنید…');
+  process.stdin.resume();
+  process.stdin.once('data', () => process.exit(0));
+  return 'watching';
+}
 
 function run(cmd, args, opts = {}) {
   return new Promise((resolve, reject) => {
@@ -101,6 +150,10 @@ async function main() {
   console.log('==============================================\n');
   log('data dir: ' + DATA_DIR);
   log('log file: ' + LOG_FILE);
+
+  // کاربر مدیر → اجرای محدود و نظارت (PostgreSQL زیر مدیر اجرا نمی‌شود)
+  const delev = await deElevateIfNeeded();
+  if (delev) return;
 
   const port = await freePort(PORT);
   if (port !== PORT) log(`پورت ${PORT} اشغال بود — پورت ${port} انتخاب شد`);
