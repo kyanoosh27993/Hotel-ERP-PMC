@@ -1,20 +1,30 @@
-# لوگوی Hotel ERP-PMC — سپر و ترازو
+# لوگوی Hotel ERP-PMC — سپر و ترازو (وکتور / لایه‌باز)
 
-نسخهٔ نهایی: بهترین از ۳ کاندید تولیدشده با هوش مصنوعی، انتخاب‌شده با ارزیابی خودکار مدل بینایی (امتیاز کلی ۹/۱۰ — تقارن کامل ترازو، بدون متن/حروف اضافه).
+طرح وکتوری واقعی، کاملاً مقیاس‌پذیر و قابل ویرایش. ساخته‌شده با مسیرهای تمیز SVG (نه رستری)، متقارن حول محور عمودی x=256.
 
-**طرح**: سپر نشانى (heraldic shield) با ترازوی متوازن در مرکز — طلایی روی سرمه‌ای، سبک فلت/وکتور، متقارن.
+## فایل‌های منبع (قابل ویرایش)
 
-## فایل‌ها و کاربرد
+- **`logo.svg`** — فایل اصلی وکتور با گروه‌بندی معنایی (`<g id="...">`). قابل ویرایش در Illustrator، Figma، Inkscape یا هر ویرایشگر SVG.
+- **`logo-layered.svg`** — نسخهٔ لایه‌باز با لایه‌های نام‌دار Inkscape (در منوی Layers نمایش داده می‌شود):
+  - `Ring & Frame` — حلقهٔ بیرونی و قاب داخلی سپر
+  - `Shield` — بدنهٔ سپر (گرادیان سرمه‌ای)
+  - `Scale - Post & Beam` — گوی، میلهٔ عمودی، محور لوزی‌شکل، تیر افقی ترازو
+  - `Scale - Chains & Pans` — دو زنجیر و دو کفه
+  - `Base` — پایه و پاهای ترازو
 
-| فایل | اندازه | کاربرد |
-|---|---|---|
-| `logo-2048.png` | ۲۰۴۸×۲۰۴۸ | فایل اصلی با کیفیت خیلی بالا — صفحهٔ ورود، فاکتور و اسناد رسمی، مستندات (پس‌زمینهٔ سفید) |
-| `logo-2048-transparent.png` | ۲۰۴۸×۲۰۴۸ | نسخهٔ شفاف — قرارگیری روی هر رنگ/تصویر زمینه |
-| `icon-512.png` | ۵۱۲×۵۱۲ | آیکون اصلی برنامه (اندروید/ویندوز) |
-| `icon-256.png` | ۲۵۶×۲۵۶ | آیکون فروشگاه/میان‌بر |
-| `icon-128.png` | ۱۲۸×۱۲۸ | نمایش در رابط کاربری |
-| `icon-64.png` … `icon-32.png` | ۶۴/۳۲ | favicon و اندازه‌های کوچک |
+## آیکون‌های خروجی (رندر از روی SVG)
 
-## English summary
+`icon-512 / 256 / 128 / 64 / 48 / 32` — برای اندروید، ویندوز، favicon و نمایش در رابط کاربری. همگی از روی `logo.svg` رندر شده‌اند و با وکتور کاملاً هم‌خوان هستند.
 
-Shield & scales emblem (gold on navy, flat vector style). Master 2048×2048 PNG + transparent-background version + standard app-icon sizes (512→32). Selected automatically by a vision model from 3 AI-generated candidates (overall 9/10, no garbled text).
+## پالت رنگ
+
+| نقش | رنگ |
+|---|---|
+| سپر (گرادیان) | `#1B3556` → `#0A1A30` |
+| طلایی روشن (لبه/کفه) | `#E8C870` |
+| طلایی اصلی | `#C9A24B` |
+| طلایی تیره (سایه/خط) | `#8E6B26` |
+
+## English
+
+True vector SVG emblem (heraldic shield + perfectly balanced scales), scalable and editable. `logo-layered.svg` opens with **named layers** in Inkscape/Illustrator (the editable "open-layer" source). Icon PNGs are raster exports rendered from the SVG.
