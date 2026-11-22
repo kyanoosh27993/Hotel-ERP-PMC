@@ -1,0 +1,127 @@
+name: Release — Windows Setup.exe (Hotel ERP)
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  setup-exe:
+    name: Build + smoke-test Persian installer (windows-latest)
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      NODE_VERSION_BUNDLE: v22.20.0
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install workspace deps
+        run: npm ci --no-audit --no-fund
+
+      - name: Build shared/contracts/api (Windows-native Prisma + Argon2 engines)
+        run: |
+          npm run build -w packages/shared
+          npm run build -w packages/contracts
+          npm run prisma:generate -w apps/api
+          npm run build -w apps/api
+
+      # ── مونتاژ payload ──
+      - name: Assemble payload
+        run: |
+          mkdir -p infrastructure/desktop/payload/api infrastructure/desktop/payload/web infrastructure/desktop/payload/node infrastructure/desktop/out
+          cp -r apps/api/dist infrastructure/desktop/payload/api/dist
+          cp -r apps/api/prisma infrastructure/desktop/payload/api/prisma
+          cp -r apps/web infrastructure/desktop/payload/web
+          cp infrastructure/desktop/server.js infrastructure/desktop/payload/server.js
+          cp infrastructure/desktop/run-server.cmd infrastructure/desktop/payload/run-server.cmd
+          mkdir -p infrastructure/desktop/payload/api/node_modules/@hotel-erp/shared infrastructure/desktop/payload/api/node_modules/@hotel-erp/contracts
+          cp -r packages/shared/dist packages/shared/package.json infrastructure/desktop/payload/api/node_modules/@hotel-erp/shared/
+          cp -r packages/contracts/dist packages/contracts/package.json infrastructure/desktop/payload/api/node_modules/@hotel-erp/contracts/
+          # compile seed (ts-node نخواهیم داشت — JS کامپایل‌شده)
+          npx tsc apps/api/prisma/seed.ts apps/api/src/iam/permissions.ts --outDir infrastructure/desktop/payload/api/seed --module commonjs --target es2020 --esModuleInterop --skipLibCheck --moduleResolution node
+
+      - name: Install runtime deps (Windows-native) into payload
+        working-directory: infrastructure/desktop/payload/api
+        run: |
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('../../../../apps/api/package.json','utf8'));fs.writeFileSync('package.json',JSON.stringify({name:'hotel-erp-runtime',version:'0.5.0',private:true,dependencies:p.dependencies},null,2))"
+          npm install --omit=dev --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund embedded-postgres@18.7.0-beta.19 prisma@5.22.0
+
+      - name: Download portable node.exe
+        run: |
+          curl -sL "https://nodejs.org/dist/${NODE_VERSION_BUNDLE}/node-${NODE_VERSION_BUNDLE}-win-x64.zip" -o node.zip
+          unzip -q node.zip -d nodezip
+          cp "nodezip/node-${NODE_VERSION_BUNDLE}-win-x64/node.exe" infrastructure/desktop/payload/node/node.exe
+          rm -rf node.zip nodezip
+
+      - name: Install NSIS
+        shell: pwsh
+        run: choco install nsis -y --no-progress
+
+      - name: Compile launcher + Persian installer
+        shell: pwsh
+        run: |
+          $nsis = "C:\Program Files (x86)\NSIS\makensis.exe"
+          Set-Location "infrastructure\desktop"
+          & $nsis "launcher.nsi"
+          Copy-Item "out\HotelERP.exe" "payload\HotelERP.exe"
+          & $nsis "installer.nsi"
+          Set-Location $env:GITHUB_WORKSPACE
+          Get-Item "infrastructure\desktop\out\Hotel-ERP-Setup.exe" | Select-Object Name,Length
+
+      # ── تست اجرای واقعی روی ویندوز (الزام کارفرما: exe باید باز شود) ──
+      - name: Smoke test — boot server on real Windows
+        shell: pwsh
+        run: |
+          $env:HOTELERP_PORT = "3300"
+          $env:HOTELERP_DATA_DIR = "$env:RUNNER_TEMP\smoke-data"
+          $p = Start-Process -FilePath "infrastructure\desktop\payload\node\node.exe" -ArgumentList "infrastructure\desktop\payload\server.js" -PassThru -WindowStyle Hidden -RedirectStandardOutput "$env:RUNNER_TEMP\smoke-out.log" -RedirectStandardError "$env:RUNNER_TEMP\smoke-err.log"
+          $ok = $false
+          for ($i = 0; $i -lt 90; $i++) {
+            Start-Sleep -Seconds 2
+            try {
+              $h = Invoke-RestMethod -Uri "http://localhost:3300/api/v1/health" -TimeoutSec 3
+              if ($h.status -eq "ok") { $ok = $true; break }
+            } catch {}
+          }
+          if (-not $ok) {
+            Get-Content "$env:RUNNER_TEMP\smoke-out.log","$env:RUNNER_TEMP\smoke-err.log" -ErrorAction SilentlyContinue | Select-Object -Last 40
+            taskkill /PID $($p.Id) /T /F 2>$null
+            throw "Server did not become healthy on real Windows"
+          }
+          Write-Host "HEALTH OK"
+          # ورود کاربر پذیرش (seed خودکار با Admin@Hotel1)
+          $login = Invoke-RestMethod -Uri "http://localhost:3300/api/v1/auth/login" -Method Post -ContentType "application/json" -Body '{"username":"frontdesk","password":"Admin@Hotel1"}'
+          if (-not $login.accessToken) { throw "login failed" }
+          $map = Invoke-RestMethod -Uri "http://localhost:3300/api/v1/pms/rooms/map" -Headers @{ Authorization = "Bearer $($login.accessToken)" }
+          if ($map.data.floors.Count -ne 3) { throw "PMS room map wrong" }
+          Write-Host "PMS MAP OK — rooms: $($map.data.summary.AVAILABLE) available"
+          $web = Invoke-WebRequest -Uri "http://localhost:3300/" -UseBasicParsing
+          if ($web.Content -notmatch "frontdesk.js") { throw "web shell not served" }
+          Write-Host "WEB SHELL OK"
+          taskkill /PID $($p.Id) /T /F 2>$null
+          Write-Host "SMOKE TEST PASSED — boot + login + PMS + web shell on real Windows"
+
+      - name: Upload artifact (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hotel-ERP-Setup
+          path: infrastructure/desktop/out/Hotel-ERP-Setup.exe
+          if-no-files-found: error
+
+      - name: Attach Setup.exe to the GitHub Release of this tag
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: infrastructure/desktop/out/Hotel-ERP-Setup.exe

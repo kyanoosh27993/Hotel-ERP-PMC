@@ -13,6 +13,7 @@ import { RoomsModule } from './rooms/rooms.module';
 import { PosModule } from './pos/pos.module';
 import { PayrollModule } from './payroll/payroll.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { PmsModule } from './pms/pms.module';
 import { IntegrationHubService, AttendanceSimAdapter } from './integration/integration-hub.service';
 import { IntegrationController } from './integration/integration.controller';
 import { HealthController } from './health/health.controller';
@@ -31,6 +32,7 @@ import { MetricsController } from './health/metrics.controller';
     PosModule,
     PayrollModule,
     DashboardModule,
+    PmsModule,
   ],
   controllers: [HealthController, MetricsController, IntegrationController],
   providers: [

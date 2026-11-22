@@ -23,3 +23,21 @@ apps/mobile/android/**/build/
 apps/mobile/android/local.properties
 apps/mobile/android/.idea/
 apps/mobile/android/capacitor-cordova-android-plugins/
+# artifacts
+node_modules/
+*.log
+.DS_Store
+/tmp/
+dist/
+build/
+.next/
+coverage/
+backups/
+*.tsbuildinfo
+.env
+.env.local
+# نقشه graphify خروجی تولیدی است ولی برای حفظ حافظه کامیت می‌شود (قوانین ۳،۴،۵)
+
+# Desktop build artifacts (CI ساخته می‌کند)
+infrastructure/desktop/payload/
+infrastructure/desktop/out/

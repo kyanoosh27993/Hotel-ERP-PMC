@@ -14,6 +14,10 @@ export const EVENT_NAMES = {
   PAYROLL_RUN_APPROVED: 'payroll.run.approved',
   /** سند حسابداری ثبت شد */
   JOURNAL_ENTRY_POSTED: 'accounting.journal_entry.posted',
+  /** فاز ۴ — مهمان پذیرش شد (ورود) */
+  STAY_CHECKED_IN: 'pms.stay.checked_in',
+  /** فاز ۴ — مهمان تسویه و خارج شد */
+  STAY_CHECKED_OUT: 'pms.stay.checked_out',
 } as const;
 
 export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];

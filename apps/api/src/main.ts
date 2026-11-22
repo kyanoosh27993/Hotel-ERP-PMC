@@ -5,6 +5,7 @@ import 'reflect-metadata';
 import './bigint-json';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/all-exceptions.filter';
@@ -17,7 +18,7 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   startTelemetry();
 
-  const app = await NestFactory.create(AppModule, { bufferLogs: false });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: false });
 
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(
@@ -26,6 +27,13 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.enableCors({ origin: true, credentials: true });
   app.enableShutdownHooks();
+
+  // نسخهٔ دسکتاپ (نصب‌کنندهٔ ویندوز): شل وب استاتیک از WEB_DIR سرو می‌شود — همان مسیر روت
+  const webDir = process.env.WEB_DIR;
+  if (webDir) {
+    app.useStaticAssets(webDir);
+    logger.log(`Web shell served from ${webDir}`);
+  }
 
   const swaggerCfg = new DocumentBuilder()
     .setTitle('Hotel ERP Core API')
