@@ -35,6 +35,12 @@
 | --- | --- | --- |
 | v0.1 | ۱۴۰۵/۰۹/۰۱ | هسته + حقوق + داشبورد AI + قوانین |
 
+- **نتیجه نهایی:** Release v0.4.0 با دو دارایی: Hotel-ERP-Windows.exe (۱۷۷MB، آپلود API)
+  + Hotel-ERP-Android.apk (خروجی ورک‌فلو، ~اندازه debug) — وضعیت ورک‌فلو APK سبز.
+  دو اشکال مسیر APK در runner: مسیر gradlew (باید از داخل android/ صدا زده شود) و
+  Java 21 لازم برای sourceCompatibility capacitor-android — هر دو در ورک‌فلو اصلاح شد.
+  تگ v0.4.0 روی آخرین کامیت بازساخته شد؛ صفحه Actions کاملاً سبز.
+
 ### نشست ۲۲ نوامبر ۲۰۲۶ (سوم) — نسخه‌های قابل نصب: exe ویندوز + APK اندروید (درخواست کارفرما)
 - **exe ویندوز** (`Hotel-ERP-Windows.exe` ~۱۷۷MB، pkg/yao node22-win-x64 + GZip):
   bootstrap دسکتاپ در apps/api/src/desktop/bootstrap.ts — استخراج assets از snapshot،
