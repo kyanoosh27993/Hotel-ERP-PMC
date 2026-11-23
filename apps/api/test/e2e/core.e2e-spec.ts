@@ -596,6 +596,18 @@ describe('فاز ۳ — داشبوردها (F3-T1…T3 — همه اعداد ا�
     const reservation = await prisma.reservation.findUniqueOrThrow({ where: { id: rsv.body.data.reservationId } });
     await drainOutbox();
 
+    // باگ #۱۰: اشغال = اقامت‌های باز؛ رزرو تنها اشغال نمی‌شود — مهمان را وارد می‌کنیم
+    const freeRoom = await prisma.room.findFirstOrThrow({ where: { status: { not: 'OCCUPIED' }, roomTypeId: rt.id } });
+    const checkin = await request(app.getHttpServer())
+      .post('/api/v1/pms/stays/check-in')
+      .set('Authorization', `Bearer ${await login('frontdesk', false)}`)
+      .send({
+        reservationId: rsv.body.data.reservationId, roomIds: [freeRoom.id],
+        plannedCheckOut: plusDays(2), idempotencyKey: 'e2e-stay-d3',
+      });
+    expect(checkin.status).toBe(201);
+    await drainOutbox();
+
     const after = await ceoOf();
     expect(BigInt(after.revenueTodayRials as string) - BigInt(before.revenueTodayRials as string)).toBe(reservation.totalRials);
     expect(BigInt(after.revenueMonthRials as string) - BigInt(before.revenueMonthRials as string)).toBe(reservation.totalRials);
@@ -677,9 +689,12 @@ describe('فاز ۳ — داشبوردها (F3-T1…T3 — همه اعداد ا�
     expect(typeof finAfter.receivablesRials).toBe('string');
     // این تست هیچ بدهکار مطالبات جدیدی نمی‌سازد (پیش‌نویس معلق قطعی نیست) → مطالبات تغییری نمی‌کند
     expect(BigInt(finAfter.receivablesRials as string)).toBe(BigInt(finBefore.receivablesRials as string));
-    // اثبات کوئری واقعی: مطالبات = جمع رزروهای مؤثر (همه CONFIRMED بدون تسویه)
-    const confirmed = await prisma.reservation.findMany({ where: { status: 'CONFIRMED' }, select: { totalRials: true } });
-    const expectedReceivables = confirmed.reduce((acc, r) => acc + r.totalRials, 0n);
+    // اثبات کوئری واقعی: مطالبات = ماندهٔ بدهکار حساب مهمان (۱۲۰۱) از اسناد قطعی
+    const recLines = await prisma.journalLine.groupBy({
+      by: ['accountCode'], where: { accountCode: '1201', entry: { status: 'POSTED' } },
+      _sum: { debitRials: true, creditRials: true },
+    });
+    const expectedReceivables = recLines.reduce((acc, r) => acc + (r._sum.debitRials ?? 0n) - (r._sum.creditRials ?? 0n), 0n);
     expect(BigInt(finAfter.receivablesRials as string)).toBe(expectedReceivables);
   });
 

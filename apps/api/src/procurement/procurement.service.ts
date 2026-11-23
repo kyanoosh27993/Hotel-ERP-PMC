@@ -146,7 +146,7 @@ export class ProcurementService {
         if (l.unitCostRials < 0) throw new BadRequestException('بهای واحد نمی‌تواند منفی باشد');
         const item = await tx.stockItem.findUnique({ where: { code: l.stockItemCode } });
         if (!item) throw new NotFoundException(`قلم انبار ${l.stockItemCode} یافت نشد`);
-        const bps = l.taxRateBps ?? 900;
+        const bps = l.taxRateBps ?? 1000;
         const lineNet = BigInt(l.unitCostRials) * BigInt(Math.round(l.qty));
         subtotal += lineNet;
         taxSum += (lineNet * BigInt(bps)) / 10000n;

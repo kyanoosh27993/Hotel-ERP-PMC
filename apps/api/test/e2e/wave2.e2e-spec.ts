@@ -102,7 +102,7 @@ describe('فاز ۷ — خرید و انبار (اول، تا موجودی بر�
         ],
       });
     expect(po.status).toBe(201);
-    expect(po.body.totalRials).toBe(22_345_000); // (20×800k + 30×150k) × ۱.۰۹
+    expect(po.body.totalRials).toBe(22_550_000); // (20×800k + 30×150k) × ۱.۱
     state.poNo = po.body.poNo;
     state.poId = po.body.id;
 
@@ -158,7 +158,7 @@ describe('فاز ۷ — خرید و انبار (اول، تا موجودی بر�
     const j = await waitForJournal('procurement', state.grnId1);
     expect(j.entryNo).toContain('JV-');
     const net = 11_400_000n;
-    const tax = 1_026_000n;
+    const tax = 1_140_000n;
     expect(j.lines.find((l) => l.accountCode === '1301')?.debitRials).toBe(net);
     expect(j.lines.find((l) => l.accountCode === '2204')?.debitRials).toBe(tax);
     expect(j.lines.find((l) => l.accountCode === '2101')?.creditRials).toBe(net + tax);
@@ -205,8 +205,8 @@ describe('فاز ۶ — رستوران، آشپزخانه و کاست کنترل
       });
     expect(open.status).toBe(201);
     expect(open.body.netRials).toBe(9_500_000);
-    expect(open.body.taxRials).toBe(855_000);
-    expect(open.body.totalRials).toBe(10_355_000);
+    expect(open.body.taxRials).toBe(950_000);
+    expect(open.body.totalRials).toBe(10_450_000);
     state.order1 = open.body.id;
     state.order1No = open.body.orderNo;
     state.order1Key = open.body.idempotencyKey;
@@ -272,9 +272,9 @@ describe('فاز ۶ — رستوران، آشپزخانه و کاست کنترل
 
     // سند فروش: بدهکار صندوق (فروش نقدی — بدون فولیو)
     const sale = await waitForJournal('pos', state.order1);
-    expect(sale.lines.find((l) => l.accountCode === '1101')?.debitRials).toBe(10_355_000n);
+    expect(sale.lines.find((l) => l.accountCode === '1101')?.debitRials).toBe(10_450_000n);
     expect(sale.lines.find((l) => l.accountCode === '4102')?.creditRials).toBe(9_500_000n);
-    expect(sale.lines.find((l) => l.accountCode === '2201')?.creditRials).toBe(855_000n);
+    expect(sale.lines.find((l) => l.accountCode === '2201')?.creditRials).toBe(950_000n);
 
     // مصرف رسپی: کباب ×۲ → BEEF ۶۰۰ گرم، RICE ۵۰۰ گرم — نوشابه بدون رسپی
     const beef = await prisma.stockItem.findUnique({ where: { code: 'STK-BEEF' } });
@@ -314,10 +314,10 @@ describe('فاز ۶ — رستوران، آشپزخانه و کاست کنترل
     expect(serve.status).toBe(201);
 
     const after = await prisma.stay.findUnique({ where: { id: ci.body.data.stayId } });
-    expect(after!.folioRials - before!.folioRials).toBe(4_905_000n); // ۴٬۵۰۰٬۰۰۰ + ۴۰۵٬۰۰۰ مالیات
+    expect(after!.folioRials - before!.folioRials).toBe(4_950_000n); // ۴٬۵۰۰٬۰۰۰ + ۴۵۰٬۰۰۰ مالیات
 
     const sale = await waitForJournal('pos', state.rsOrder);
-    expect(sale.lines.find((l) => l.accountCode === '1201')?.debitRials).toBe(4_905_000n);
+    expect(sale.lines.find((l) => l.accountCode === '1201')?.debitRials).toBe(4_950_000n);
   });
 
   it('F6-T6: تخفیف — بدون مجوز ۴۰۳، با مجوز مجاز + بازمحاسبهٔ مالیات', async () => {
@@ -340,8 +340,8 @@ describe('فاز ۶ — رستوران، آشپزخانه و کاست کنترل
       .send({ amountRials: 1_000_000, reason: 'تخفیف مدیریت — مناسبت' });
     expect(allowed.status).toBe(201);
     expect(allowed.body.netRials).toBe(3_500_000);
-    expect(allowed.body.taxRials).toBe(315_000);
-    expect(allowed.body.totalRials).toBe(3_815_000);
+    expect(allowed.body.taxRials).toBe(350_000);
+    expect(allowed.body.totalRials).toBe(3_850_000);
     expect(allowed.body.discountReason).toContain('تخفیف');
   });
 
@@ -371,7 +371,7 @@ describe('فاز ۶ — رستوران، آشپزخانه و کاست کنترل
     const canceled = cancel.body.items.find((i: { qty: number }) => i.qty === 2);
     expect(canceled.status).toBe('CANCELED');
     expect(canceled.cancelReason).toContain('منصرف');
-    expect(cancel.body.totalRials).toBe(4_905_000); // فقط کباب باقی است + مالیات
+    expect(cancel.body.totalRials).toBe(4_950_000); // فقط کباب باقی است + مالیات
     state.cxOrder = open.body.id;
   });
 

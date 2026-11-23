@@ -75,7 +75,7 @@ const saleLines = (await c.query(`select l."accountCode", l."debitRials"::text a
 const d1101 = saleLines.find((l) => l.accountCode === '1101');
 const c4102 = saleLines.find((l) => l.accountCode === '4102');
 const c2201 = saleLines.find((l) => l.accountCode === '2201');
-const taxExpected = Math.round(gross * 0.09);
+const taxExpected = Math.round(gross * 0.10);
 S.step('سند فروش: صندوق = خالص+مالیات', Number(d1101?.d) === gross + taxExpected, `1101=${d1101?.d} (انتظار ${gross + taxExpected})`);
 S.step('سند فروش: درآمد و مالیات', Number(c4102?.cr) === gross && Number(c2201?.cr) === taxExpected, `4102=${c4102?.cr} 2201=${c2201?.cr}`);
 const rice = (await c.query(`select "qtyOnHand"::text as q from stock_items where code='STK-RICE'`)).rows[0];
@@ -98,7 +98,7 @@ const rsServe = await req('POST', `/restaurant/orders/${rsId}/serve`, { token: T
 S.step('سرو سرویس اتاق', [200, 201].includes(rsServe.status), `status=${rsServe.status}`);
 const folio = (await c.query(`select "folioRials"::text as f from stays where id=$1`, [ci.json?.data?.stayId ?? ci.json?.stayId])).rows[0];
 const kababNet = Number(kabab.priceRials);
-const kababTax = Math.round(kababNet * 0.09);
+const kababTax = Math.round(kababNet * 0.10);
 S.step('فولیو اقامت = کباب + مالیات', Number(folio?.f) === kababNet + kababTax, `folio=${folio?.f} (انتظار ${kababNet + kababTax})`);
 
 await c.end();

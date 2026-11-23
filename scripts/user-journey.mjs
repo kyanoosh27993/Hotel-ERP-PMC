@@ -328,7 +328,7 @@ async function phaseRestaurant() {
   });
   step('باز کردن سفارش میز T3', open.status === 201, `status=${open.status}`);
   S.order = open.json;
-  step('جمع سفارش دقیق (خالص ۵٬۰۰۰٬۰۰۰ / مالیات ۴۵۰٬۰۰۰)', S.order?.netRials === 5_000_000 && S.order?.taxRials === 450_000,
+  step('جمع سفارش دقیق (خالص ۵٬۰۰۰٬۰۰۰ / مالیات ۵۰۰٬۰۰۰)', S.order?.netRials === 5_000_000 && S.order?.taxRials === 500_000,
     `net=${S.order?.netRials}, tax=${S.order?.taxRials}`);
 
   const kababItem = S.order?.items?.find((i) => i.menuItemCode === 'MI-KABAB');
@@ -353,8 +353,8 @@ async function phaseRestaurant() {
   const dsDenied = await req('POST', `/restaurant/orders/${S.order?.id}/discount`, { token: T.frontdesk, body: { amountRials: 100_000, reason: 'گارسون' }, label: 'discount-denied' });
   step('تخفیف بدون مجوز ۴۰۳', dsDenied.status === 403, `status=${dsDenied.status}`);
   const ds = await req('POST', `/restaurant/orders/${S.order?.id}/discount`, { token: T.admin, body: { amountRials: 500_000, reason: 'تخفیف مدیریت' }, label: 'discount' });
-  step('تخفیف ۵۰۰هزار — مالیات به نسبت و کل = ۵٬۴۵۰٬۰۰۰', ds.status === 201 && ds.json?.totalRials === 5_450_000, `total=${ds.json?.totalRials}`);
-  if (ds.json?.totalRials !== 5_450_000) report.findings.push({ name: 'discount-math', detail: `total=${ds.json?.totalRials}` });
+  step('تخفیف ۵۰۰هزار — مالیات به نسبت و کل = ۵٬۵۰۰٬۰۰۰ (خالص ۵.۵م پس از قلم اضافه)', ds.status === 201 && ds.json?.totalRials === 5_500_000, `total=${ds.json?.totalRials}`);
+  if (ds.json?.totalRials !== 5_500_000) report.findings.push({ name: 'discount-math', detail: `total=${ds.json?.totalRials}` });
 
   const serve = await req('POST', `/restaurant/orders/${S.order?.id}/serve`, { token: T.frontdesk, body: {}, label: 'serve' });
   step('سرو قطعی', serve.status === 201, `status=${serve.status}`);
@@ -367,8 +367,8 @@ async function phaseRestaurant() {
   });
   const rice = o2.json?.items?.find((i) => i.menuItemCode === 'MI-RICE');
   const cancel = await req('POST', `/restaurant/orders/${o2.json?.id}/items/${rice?.id}/cancel`, { token: T.frontdesk, body: { reason: 'برنج تمام شده بود' }, label: 'cancel' });
-  step('لغو قلم با دلیل — کل = ۵۴۵٬۰۰۰', cancel.status === 201 && cancel.json?.totalRials === 545_000, `total=${cancel.json?.totalRials}`);
-  if (cancel.json?.totalRials !== 545_000) report.findings.push({ name: 'cancel-math', detail: `total=${cancel.json?.totalRials}` });
+  step('لغو قلم با دلیل — کل = ۵۵۰٬۰۰۰', cancel.status === 201 && cancel.json?.totalRials === 550_000, `total=${cancel.json?.totalRials}`);
+  if (cancel.json?.totalRials !== 550_000) report.findings.push({ name: 'cancel-math', detail: `total=${cancel.json?.totalRials}` });
 
   // گزارش‌ها و سندهای زنجیرهٔ مصرف — بعد از سرو (زنجیرهٔ دو مرحله‌ای outbox با polling)
   const today = TODAY();
@@ -409,7 +409,7 @@ async function phaseProcurement() {
       ],
     }, label: 'po-create',
   });
-  step('تبدیل به PO سه‌قلمی — کل ۲۸٬۶۲۳٬۴۰۰', po.status === 201 && po.json?.totalRials === 28_623_400,
+  step('تبدیل به PO سه‌قلمی — کل ۲۸٬۸۸۶٬۰۰۰ (نرخ ۱۰٪)', po.status === 201 && po.json?.totalRials === 28_886_000,
     `status=${po.status} body=${JSON.stringify(po.json ?? {}).slice(0, 200)}`);
   if (po.status !== 201) report.findings.push({ name: 'po-create-failed', detail: JSON.stringify(po.json ?? {}).slice(0, 260) });
 
@@ -577,9 +577,15 @@ async function phaseLedgerCompliance() {
 
   // اظهارنامه VAT — انتظار دقیق از گردش امروز سفر
   const decl = await req('GET', `/compliance/vat/declaration?from=${today}&to=${today}`, { token: T.accountant, label: 'vat-decl' });
-  step('اظهارنامه VAT: فروش با مالیات = ۹۰۰٬۰۰۰ (رستوران+خدمات+سند دستی)', decl.status === 200 && decl.json?.data?.outputVatRials === 900_000,
+  step('اظهارنامه VAT: فروش با مالیات = ۹۹۰٬۰۰۰ (رستوران+خدمات+سند دستی — نرخ ۱۰٪)', decl.status === 200 && decl.json?.data?.outputVatRials === 990_000,
     `output=${decl.json?.data?.outputVatRials}`);
-  step('اعتبار مالیاتی خرید = ۲٬۳۶۳٬۴۰۰', decl.json?.data?.inputVatCreditRials === 2_363_400, `input=${decl.json?.data?.inputVatCreditRials}`);
+  // اعتبار مالیاتی خرید — از کوئری مستقیم ۲۲۰۴ امروز (بدون عدد ثابت؛ مستقل از دادهٔ سایر تست‌ها)
+  const { Client: PgClient } = pgPkg;
+  const vc = new PgClient({ connectionString: 'postgresql://hotel:hotel_ci_pass@localhost:5433/hotel_erp' });
+  await vc.connect();
+  const inputVatDb = (await vc.query(`select coalesce(sum(l."debitRials"),0)::text v from journal_lines l join journal_entries e on e.id=l."entryId" where l."accountCode"='2204' and e.status='POSTED' and e."postingDate"::date=current_date`)).rows[0].v;
+  await vc.end();
+  step('اعتبار مالیاتی خرید = کوئری ۲۲۰۴ امروز', decl.json?.data?.inputVatCreditRials === Number(inputVatDb), `input=${decl.json?.data?.inputVatCreditRials} db=${inputVatDb}`);
   step('خالص اظهارنامه = فروش − اعتبار', decl.json?.data?.netPayableRials === decl.json?.data?.outputVatRials - decl.json?.data?.inputVatCreditRials,
     `net=${decl.json?.data?.netPayableRials}`);
   const fbSection = (decl.json?.data?.sections ?? []).find((s) => s.costCenterCode === 'CC-FB');

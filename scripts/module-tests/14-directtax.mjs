@@ -93,6 +93,18 @@ S.step('مالیات متعلق = مشمول × ۲۵٪ (مادهٔ ۱۰۵)', com
 const comp2 = await req('POST', '/compliance/directtax/return/compute', { token: T.accountant, body: { taxYear: YEAR } });
 S.step('محاسبهٔ مجدد Idempotent (DRAFT)', [200, 201].includes(comp2.status) && comp2.json?.data?.revenueRials === dbSum.rev, `status=${comp2.status}`);
 
+// ── ۴ب. برگشت درآمد باید از خالص کسر شود (باگ #۹) ──
+const revEntry = await req('POST', '/journal-entries', { token: T.accountant, body: { description: 'برگشت درآمد F9-T5', lines: [
+  { accountCode: '1101', debit: 0, credit: 1_000_000 },
+  { accountCode: '4102', debit: 1_000_000, credit: 0 },
+] } });
+const revId = revEntry.json?.data?.id;
+await req('POST', `/journal-entries/${revId}/approve`, { token: T.approver, body: {} });
+const comp9 = await req('POST', '/compliance/directtax/return/compute', { token: T.accountant, body: { taxYear: YEAR } });
+const expectRev9 = (BigInt(dbSum.rev) - 1_000_000n).toString();
+S.step('برگشت درآمد از خالص کسر شد (باگ #۹)', comp9.json?.data?.revenueRials === expectRev9,
+  `api=${comp9.json?.data?.revenueRials} expect=${expectRev9}`);
+
 // ── ۵. شناسهٔ طرف‌های معامله — معاملهٔ فصلی با شناسه + معاملهٔ ناقص ──
 const cpBefore = (await req('GET', `/compliance/directtax/counterparties?taxYear=${YEAR}`, { token: T.accountant })).json?.data;
 await req('POST', '/compliance/quarterly', {
@@ -161,11 +173,8 @@ await c.query(`delete from audit_logs where "action" like 'DIRECTTAX%'`);
 // سندها و معاملات ساخته‌شدهٔ این تست
 await c.query(`delete from "quarterly_txs" where "docRef" in ('DT-CP-1','DT-CP-2')`);
 await c.query(`delete from "quarterly_periods" where "taxYear"=$1`, [YEAR]);
-await c.query(`delete from "journal_lines" where "entryId" in ($1,$2)`, [draftId, draftId2]).catch(async () => {
-  await c.query(`delete from "journal_lines" where "entryId"=$1`, [draftId]);
-  await c.query(`delete from "journal_lines" where "entryId"=$1`, [draftId2]);
-});
-await c.query(`delete from "journal_entries" where id in ($1,$2)`, [draftId, draftId2]);
+await c.query(`delete from "journal_lines" where "entryId" in ($1,$2,$3)`, [draftId, draftId2, revId]);
+await c.query(`delete from "journal_entries" where id in ($1,$2,$3)`, [draftId, draftId2, revId]);
 await c.query(`delete from audit_logs where "action" like 'QUARTERLY%'`);
 
 await c.end();

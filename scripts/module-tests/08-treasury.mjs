@@ -76,9 +76,9 @@ const stayId = ci.json?.data?.stayId ?? ci.json?.stayId;
 const stayCode = ci.json?.data?.code ?? ci.json?.code;
 const ord = await req('POST', '/ancillary/orders', { token: T.frontdesk, body: { serviceCode: 'SVC-PARKING', quantity: 2, stayCode, idempotencyKey: jKey() } });
 S.step('سفارش خدمت ×۲ ثبت شد', ord.status === 201, `status=${ord.status} ${JSON.stringify(ord.json?.error ?? {}).slice(0, 100)}`);
-S.step('مبلغ خدمت: خالص ۳٬۰۰۰٬۰۰۰ + مالیات ۲۷۰٬۰۰۰', Number(ord.json?.netRials) === 3_000_000 && Number(ord.json?.taxRials) === 270_000, `net=${ord.json?.netRials} tax=${ord.json?.taxRials}`);
+S.step('مبلغ خدمت: خالص ۳٬۰۰۰٬۰۰۰ + مالیات ۳۰۰٬۰۰۰', Number(ord.json?.netRials) === 3_000_000 && Number(ord.json?.taxRials) === 300_000, `net=${ord.json?.netRials} tax=${ord.json?.taxRials}`);
 const folio = (await c.query(`select "folioRials"::text as f from stays where id=$1`, [stayId])).rows[0];
-S.step('فولیو اقامت += خدمت با مالیات', Number(folio?.f) === 3_270_000, `folio=${folio?.f}`);
+S.step('فولیو اقامت += خدمت با مالیات', Number(folio?.f) === 3_300_000, `folio=${folio?.f}`);
 const cancel = await req('POST', `/ancillary/orders/${ord.json?.id ?? ord.json?.data?.id}/cancel`, { token: T.frontdesk, body: { reason: 'لغو تست ماژول۸' } });
 S.step('لغو سفارش خدمت', [200, 201].includes(cancel.status), `status=${cancel.status}`);
 

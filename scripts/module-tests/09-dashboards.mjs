@@ -16,7 +16,7 @@ const occupied = (await c.query(`select count(*)::int as n from rooms where stat
 S.step('CEO: شکل کامل (occupancy/revenue/cash)', !!ceo?.occupancy && 'revenueTodayRials' in ceo && 'cashBalanceRials' in ceo, `keys=${Object.keys(ceo ?? {}).join(',')}`);
 S.step('CEO: جمع اتاق‌ها = DB', ceo?.occupancy?.totalRooms === roomsTotal, `api=${ceo?.occupancy?.totalRooms} db=${roomsTotal}`);
 S.step('CEO: اشغال = DB', ceo?.occupancy?.occupiedUnits === occupied, `api=${ceo?.occupancy?.occupiedUnits} db=${occupied}`);
-const revDb = (await c.query(`select coalesce(sum(l."creditRials"),0)::text as v from journal_lines l join journal_entries e on e.id=l."entryId" join accounts a on a.code=l."accountCode" where a.type='REVENUE' and e.status='POSTED' and e."postingDate"::date=current_date`)).rows[0];
+const revDb = (await c.query(`select coalesce(sum(l."creditRials"-l."debitRials"),0)::text as v from journal_lines l join journal_entries e on e.id=l."entryId" join accounts a on a.code=l."accountCode" where a.type='REVENUE' and e.status='POSTED' and e."postingDate"::date=current_date`)).rows[0];
 S.step('CEO: درآمد امروز = DB', Number(ceo?.revenueTodayRials) === Number(revDb.v), `api=${ceo?.revenueTodayRials} db=${revDb.v}`);
 S.step('CEO: asOf تاریخ شمسی (ماه نام‌دار)', /^[0-9]{1,2}\s+[\u0600-\u06FF]+\s+1[34][0-9]{2}$/.test(String(ceo?.asOf ?? '').trim()), `asOf=${ceo?.asOf}`);
 

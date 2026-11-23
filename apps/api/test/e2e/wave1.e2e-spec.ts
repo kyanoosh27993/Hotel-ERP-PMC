@@ -405,21 +405,21 @@ describe('فاز ۱۰ — خانه‌داری، تعمیرات، لاندری، 
       });
     expect(ord.status).toBe(201);
     expect(ord.body.netRials).toBe(3_000_000);
-    expect(ord.body.taxRials).toBe(270_000);
-    expect(ord.body.totalRials).toBe(3_270_000);
+    expect(ord.body.taxRials).toBe(300_000);
+    expect(ord.body.totalRials).toBe(3_300_000);
     state.svcOrderId = ord.body.id;
 
     const after = await prisma.stay.findUnique({ where: { id: state.stay2 } });
-    expect(after!.folioRials - before!.folioRials).toBe(3_270_000n);
+    expect(after!.folioRials - before!.folioRials).toBe(3_300_000n);
 
     const j = await waitForJournal('ancillary', ord.body.id);
     expect(j.entryNo).toContain('JV-');
     const lines = await prisma.journalLine.findMany({
       where: { entry: { sourceRef: ord.body.id, sourceModule: 'ancillary' } },
     });
-    expect(lines.find((l) => l.accountCode === '1201')?.debitRials).toBe(3_270_000n);
+    expect(lines.find((l) => l.accountCode === '1201')?.debitRials).toBe(3_300_000n);
     expect(lines.find((l) => l.accountCode === '4103')?.creditRials).toBe(3_000_000n);
-    expect(lines.find((l) => l.accountCode === '2201')?.creditRials).toBe(270_000n);
+    expect(lines.find((l) => l.accountCode === '2201')?.creditRials).toBe(300_000n);
 
     // لغو → برگشت فولیو
     const cancel = await request(app.getHttpServer())

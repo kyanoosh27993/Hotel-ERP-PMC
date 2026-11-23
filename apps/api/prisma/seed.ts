@@ -293,7 +293,7 @@ async function main() {
         nameFa: s.fa,
         category: s.cat,
         unitPriceRials: BigInt(s.price),
-        taxRateBps: 900,
+        taxRateBps: 1000,
         glRevenueAccountCode: '4103',
       },
     });
@@ -419,7 +419,7 @@ async function main() {
         nameEn: m.en,
         nameFa: m.fa,
         priceRials: BigInt(m.price),
-        taxRateBps: 900,
+        taxRateBps: 1000,
         recipeId,
       },
     });

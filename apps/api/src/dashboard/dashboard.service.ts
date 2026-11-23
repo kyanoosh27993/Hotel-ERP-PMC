@@ -106,21 +106,24 @@ export class DashboardService {
     return sum;
   }
 
-  /** اشغال امروز به تفکیک نوع اتاق — رزروهای مؤثر بر امروز (checkOut انحصاری) */
-  private async occupancyToday(day: PeriodRange) {
-    const [types, rooms, reservations] = await Promise.all([
+  /** اشغال امروز به تفکیک نوع اتاق — منبع واحد: اقامت‌های OPEN (باگ #۱۰: ورود حضوری هم شمرده می‌شود) */
+  private async occupancyToday(_day: PeriodRange) {
+    const [types, rooms, stayRooms] = await Promise.all([
       this.prisma.roomType.findMany({ select: { id: true, nameFa: true } }),
       // ظرفیت واقعی = اتاق‌های خارج از سرویس‌نشده (تعمیرات لحظه‌ای ظرفیت را کم می‌کند)
       this.prisma.room.groupBy({ by: ['roomTypeId'], where: { status: { not: 'OUT_OF_SERVICE' } }, _count: { _all: true } }),
-      this.prisma.reservation.groupBy({
-        by: ['roomTypeId'],
-        // باگ #۶: مهمان‌های درخانه CHECKED_IN هم اشغال امروز هستند
-        where: { status: { in: ['CONFIRMED', 'CHECKED_IN'] }, checkIn: { lt: day.end }, checkOut: { gt: day.start } },
-        _count: { _all: true },
+      // باگ #۶+#۱۰: مهمان درخانه = اقامت باز — شامل رزروی و حضوری؛ هم‌ارز اتاق‌های وضعیت OCCUPIED
+      this.prisma.stayRoom.findMany({
+        where: { stay: { status: 'OPEN' }, room: { status: { not: 'OUT_OF_SERVICE' } } },
+        select: { roomId: true, room: { select: { roomTypeId: true } } },
       }),
     ]);
     const roomsByType = new Map(rooms.map((r) => [r.roomTypeId, r._count._all]));
-    const occupiedByType = new Map(reservations.map((r) => [r.roomTypeId, r._count._all]));
+    const occupiedByType = new Map<string, number>();
+    for (const sr of stayRooms) {
+      const t = sr.room.roomTypeId;
+      occupiedByType.set(t, (occupiedByType.get(t) ?? 0) + 1);
+    }
     let totalRooms = 0;
     let occupiedUnits = 0;
     const byType = types.map((t) => {
@@ -262,12 +265,9 @@ export class DashboardService {
     const [statusRows, occupancy, arrivals, departures] = await Promise.all([
       this.prisma.room.groupBy({ by: ['status'], _count: { _all: true } }),
       this.occupancyToday(day),
-      this.prisma.reservation.count({
-        where: { status: 'CONFIRMED', checkIn: { gte: day.start, lt: day.end } },
-      }),
-      this.prisma.reservation.count({
-        where: { status: 'CONFIRMED', checkOut: { gte: day.start, lt: day.end } },
-      }),
+      // باگ #۱۰: ورود/خروج امروز از اقامت‌های واقعی (رزروی + حضوری) — رزروی که ورود کرد از فیلتر CONFIRMED می‌افتاد
+      this.prisma.stay.count({ where: { checkInAt: { gte: day.start, lt: day.end } } }),
+      this.prisma.stay.count({ where: { actualCheckOutAt: { gte: day.start, lt: day.end } } }),
     ]);
 
     const statusFa: Record<string, string> = {

@@ -55,12 +55,12 @@ const rsLines = (await req('GET', `/restaurant/orders/${rsId}`, { token: T.front
 for (const it of rsLines) await req('POST', `/restaurant/orders/${rsId}/items/${it.id}/send`, { token: T.frontdesk, body: {} });
 await req('POST', `/restaurant/orders/${rsId}/serve`, { token: T.frontdesk, body: {} });
 const folioAfterService = Number((await c.query(`select "folioRials"::text f from stays where id=$1`, [stay1Id])).rows[0].f);
-S.step('S1: روم‌سرویس به فولیو نشست (۹٬۰۰۰٬۰۰۰+۹٪)', folioAfterService === 9_810_000, `folio=${folioAfterService}`);
+S.step('S1: روم‌سرویس به فولیو نشست (۹٬۰۰۰٬۰۰۰+۱۰٪)', folioAfterService === 9_900_000, `folio=${folioAfterService}`);
 
 // شب‌گردی امروز → +۱ شب
 const na = await req('POST', '/pms/night-audit', { token: T.frontdesk, body: { businessDate: TODAY } });
 const folioAfterAudit = Number((await c.query(`select "folioRials"::text f from stays where id=$1`, [stay1Id])).rows[0].f);
-S.step('S1: شب‌گردی ۱ شب شارژ کرد', [200, 201].includes(na.status) && folioAfterAudit === 9_810_000 + nightly, `folio=${folioAfterAudit} (انتظار ${9_810_000 + nightly})`);
+S.step('S1: شب‌گردی ۱ شب شارژ کرد', [200, 201].includes(na.status) && folioAfterAudit === 9_900_000 + nightly, `folio=${folioAfterAudit} (انتظار ${9_900_000 + nightly})`);
 const naEntry = await waitEntry(`pms.night.${TODAY}`);
 const naLines = naEntry ? await linesOf(naEntry) : [];
 S.step('S1: سند شب‌گردی متوازن ۱۲۰۱/۴۱۰۱', naLines.length >= 2 && balanced(naLines) && naLines.some((l) => l.accountCode === '1201') && naLines.some((l) => l.accountCode === '4101'), `${naLines.map((l) => `${l.accountCode}:${l.d}/${l.cr}`).join(' ')}`);
@@ -68,7 +68,7 @@ S.step('S1: سند شب‌گردی متوازن ۱۲۰۱/۴۱۰۱', naLines.leng
 // چک‌اوت → فولیو کامل حفظ شود (باگ #۷) + سند تسویه
 const co1 = await req('POST', `/pms/stays/${stay1Id}/check-out`, { token: T.frontdesk, body: {} });
 const coFolio = Number(co1.json?.data?.folioRials ?? 0);
-S.step('S1: چک‌اوت فولیو = خدمات + شب‌های سپری‌شده (باگ #۷ رفع)', coFolio === 9_810_000 + nightly, `folio=${coFolio} (انتظار ${9_810_000 + nightly})`);
+S.step('S1: چک‌اوت فولیو = خدمات + شب‌های سپری‌شده (باگ #۷ رفع)', coFolio === 9_900_000 + nightly, `folio=${coFolio} (انتظار ${9_900_000 + nightly})`);
 const settleEntry = await waitEntry(`checkout:${stay1Id}`);
 const settleLines = settleEntry ? await linesOf(settleEntry) : [];
 const d1101 = settleLines.find((l) => l.accountCode === '1101');
@@ -185,7 +185,7 @@ const stay6Id = ci6.json?.data?.stayId;
 const stay6Code = ci6.json?.data?.code;
 const ord6 = await req('POST', '/ancillary/orders', { token: T.frontdesk, body: { serviceCode: 'SVC-PARKING', quantity: 2, stayCode: stay6Code, idempotencyKey: jKey() } });
 const folio6a = Number((await c.query(`select "folioRials"::text f from stays where id=$1`, [stay6Id])).rows[0].f);
-S.step('S6: خدمت پارکینگ به فولیو (۳٬۲۷۰٬۰۰۰)', ord6.status === 201 && folio6a === 3_270_000, `folio=${folio6a}`);
+S.step('S6: خدمت پارکینگ به فولیو (۳٬۳۰۰٬۰۰۰)', ord6.status === 201 && folio6a === 3_300_000, `folio=${folio6a}`);
 const cancel6 = await req('POST', `/ancillary/orders/${ord6.json?.id ?? ord6.json?.data?.id}/cancel`, { token: T.frontdesk, body: { reason: 'لغو لایه۲' } });
 const folio6b = Number((await c.query(`select "folioRials"::text f from stays where id=$1`, [stay6Id])).rows[0].f);
 S.step('S6: لغو خدمت فولیو را برمی‌گرداند', [200, 201].includes(cancel6.status) && folio6b === 0, `folio=${folio6b} (انتظار ۰)`);

@@ -41,7 +41,7 @@ export class AncillaryService {
     glRevenueAccountCode?: string;
   }) {
     if (input.unitPriceRials <= 0) throw new BadRequestException('نرخ واحد باید مثبت باشد');
-    const taxRateBps = input.taxRateBps ?? 900;
+    const taxRateBps = input.taxRateBps ?? 1000;
     if (taxRateBps < 0 || taxRateBps > 10000) throw new BadRequestException('نرخ مالیات باید بین ۰ و ۱۰۰۰۰ basis point باشد');
     const row = await this.prisma.ancillaryService.create({
       data: {

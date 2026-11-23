@@ -117,17 +117,20 @@ export class DirectTaxService {
     let prepaid = 0n;
     for (const e of entries) {
       for (const l of e.lines) {
+        // درآمد/هزینهٔ خالص سال — برگشت‌ها (سطر معکوس) هم در خالص کسر می‌شوند (باگ #۹)
         if (REVENUE_ACCOUNTS.includes(l.accountCode)) {
-          const net = l.creditRials - l.debitRials;
-          if (net > 0n) { revenue += net; revByAcc.set(l.accountCode, (revByAcc.get(l.accountCode) ?? 0n) + net); }
+          revenue += l.creditRials - l.debitRials;
+          revByAcc.set(l.accountCode, (revByAcc.get(l.accountCode) ?? 0n) + (l.creditRials - l.debitRials));
         } else if (COST_ACCOUNTS.includes(l.accountCode)) {
-          const net = l.debitRials - l.creditRials;
-          if (net > 0n) { cost += net; costByAcc.set(l.accountCode, (costByAcc.get(l.accountCode) ?? 0n) + net); }
+          cost += l.debitRials - l.creditRials;
+          costByAcc.set(l.accountCode, (costByAcc.get(l.accountCode) ?? 0n) + (l.debitRials - l.creditRials));
         } else if (l.accountCode === PAYROLL_TAX_ACCOUNT) {
           if (l.creditRials > 0n) prepaid += l.creditRials;
         }
       }
     }
+    if (revenue < 0n) revenue = 0n; // دفاعی: خالص درآمد منفی صفر می‌شود
+    if (cost < 0n) cost = 0n;
 
     // نرخ از کتابخانهٔ قوانین — پارامتریک و تاریخ‌دار
     const params = await this.laws.rateAt(DIRECTTAX_LAW, start);

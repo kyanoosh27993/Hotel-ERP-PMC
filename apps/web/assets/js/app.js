@@ -70,7 +70,7 @@
       nav.appendChild(b);
     });
     sidebar.appendChild(nav);
-    var ver = el('div', 'sidebar-ver', 'نسخه ۰.۷ — فارسی/RTL');
+    var ver = el('div', 'sidebar-ver', 'نسخه ۰.۱۰ — فارسی/RTL');
     sidebar.appendChild(ver);
 
     var main = el('main', 'main');
