@@ -4,6 +4,7 @@
  */
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { nextDocSeq } from '../common/doc-seq';
 import { addRials, isBalanced } from '@hotel-erp/shared';
 import { randomUUID } from 'node:crypto';
 
@@ -95,9 +96,12 @@ export class JournalService {
       }
 
       const entryNo = await this.nextEntryNo(tx, entryDate);
+      // فاز ۸ — شماره عطف قطعی در زمان ثبت (ترتیب دفاتر رسمی)
+      const docIndex = await nextDocSeq(tx, 'journal_docindex');
       const entry = await tx.journalEntry.create({
         data: {
           entryNo,
+          docIndex,
           entryDate,
           postingDate: entryDate,
           periodId: period?.id ?? null,
@@ -156,7 +160,7 @@ export class JournalService {
       );
       const updated = await tx.journalEntry.update({
         where: { id: entryId },
-        data: { status: 'POSTED', approvedById: approverId, approvedAt: new Date() },
+        data: { status: 'POSTED', approvedById: approverId, approvedAt: new Date(), docIndex: await nextDocSeq(tx, 'journal_docindex') },
       });
       await tx.auditLog.create({
         data: { userId: approverId, action: 'JOURNAL_APPROVED', entity: 'JournalEntry', entityId: entryId },
@@ -233,12 +237,8 @@ export class JournalService {
   /** شماره سند الگویی JV-<سال‌میلادی>-<دنباله ۶رقمی> — داخل تراکنش (Race-safe با max) */
   private async nextEntryNo(tx: import('@prisma/client').Prisma.TransactionClient, date: Date): Promise<string> {
     const year = date.getUTCFullYear();
-    const last = await tx.journalEntry.findFirst({
-      where: { entryNo: { startsWith: `JV-${year}-` } },
-      orderBy: { entryNo: 'desc' },
-      select: { entryNo: true },
-    });
-    const seq = last ? Number(last.entryNo.split('-')[2]) + 1 : 1;
+    // فاز ۸ — توالی مشترک با createDraft/closePeriod تا هر دو مسیر هرگز تداخل نکنند
+    const seq = await nextDocSeq(tx, 'journal');
     return `JV-${year}-${String(seq).padStart(6, '0')}`;
   }
 

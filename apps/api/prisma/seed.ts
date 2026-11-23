@@ -500,8 +500,91 @@ async function main() {
     }
   }
 
+  // ── موج ۳ — فاز ۸/۹: حساب‌های اختتام، مراکز هزینه، نگاشت رویداد→سند، کتابخانه قوانین ──
+  const wave3Accounts = [
+    { code: '3901', nameEn: 'Accumulated Profit / Loss', nameFa: 'سود (زیان) انباشته', type: 'EQUITY' },
+    { code: '4901', nameEn: 'Income Summary', nameFa: 'خلاصه سود و زیان', type: 'REVENUE' },
+  ];
+  for (const a of wave3Accounts) {
+    await prisma.account.upsert({
+      where: { code: a.code },
+      update: {},
+      create: { code: a.code, nameEn: a.nameEn, nameFa: a.nameFa, type: a.type as never },
+    });
+  }
+
+  const wave3CostCenters = [
+    { code: 'CC-ROOM', nameFa: 'اقامت', nameEn: 'Rooms', kind: 'PROFIT' },
+    { code: 'CC-FB', nameFa: 'رستوران', nameEn: 'Food & Beverage', kind: 'PROFIT' },
+    { code: 'CC-ANC', nameFa: 'خدمات جانبی', nameEn: 'Ancillary', kind: 'PROFIT' },
+    { code: 'CC-ADMIN', nameFa: 'هتل/مدیریت', nameEn: 'Administration', kind: 'COST' },
+    { code: 'CC-HK', nameFa: 'خانه‌داری', nameEn: 'Housekeeping', kind: 'COST' },
+  ];
+  for (const c of wave3CostCenters) {
+    await prisma.costCenter.upsert({ where: { code: c.code }, update: {}, create: c });
+  }
+
+  // F8-T2 — نگاشت پارامتریک رویداد→سند (موتور سند خودکار)
+  const wave3Mappings = [
+    // F8-T2 — موتور نگاشت پارامتریک فقط برای رویدادهای دوسطری با حساب ثابت فعال است.
+    // رویدادهای موجود با منطق پویا (رزرو چنداتاقه، خدمات با سطر VAT، استهلاک با حساب هر دارایی،
+    // GRN با سطر مالیات خرید، خزانه دریاف/پرداخت، POS، حقوق) هندلر اختصاصی دارند.
+    // افزودن سناریوی جدید ساده → فقط یک سطر در همین جدول، بدون تغییر کد.
+    { eventName: 'pms.night_audit.posted', amountField: 'chargedRials', debitAccount: '1201', creditAccount: '4101', descriptionTemplate: 'Auto: night audit room charge {businessDate}', costCenterCode: 'CC-ROOM' },
+  ];
+  for (const m of wave3Mappings) {
+    await prisma.eventJournalMapping.upsert({
+      where: { eventName: m.eventName },
+      update: { version: { increment: 1 } },
+      create: m as never,
+    });
+  }
+
+  // F9-T1 — کتابخانه قوانین با متادیتای ۱۲گانه (نرخ‌ها پارامتریک — تغییر ۱۴۰۶ بدون کد)
+  const wave3Laws = [
+    {
+      code: 'LAW-VAT-RATE', title: 'نرخ مالیات بر ارزش افزوده', lawName: 'قانون مالیات بر ارزش افزوده',
+      article: 'ماده ۱۷', note: 'نرخ کل از ۱۴۰۴/۰۱/۰۱ به ۱۰٪ رسید؛ شامل ۹٪ مالیات و عوارض + ۱٪ سلامت',
+      effectiveFrom: new Date('2025-03-21T00:00:00Z'), effectiveTo: null,
+      params: { vatBps: 1000, healthBps: 100, defaultBps: 900, exemptSections: ['اقامت معاف در برخی واحدها'] },
+      testScenario: 'فاکتور ۵٬۰۰۰٬۰۰۰ ریال → مالیات ۴۵۰٬۰۰۰ ریال', legalOwner: 'واحد مالیات و انطباق',
+      sourceRef: 'قانون مالیات بر ارزش افزوده اصلاحی ۱۴۰۳',
+    },
+    {
+      code: 'LAW-WITHHOLDING-SALARY', title: 'جدول مالیات دستمزد تکلیفی', lawName: 'قانون مالیات‌های مستقیم',
+      article: 'ماده ۸۵', note: 'معافیت سالانه مبنای محاسبه ماهانه — پارامتر معافیت در params',
+      effectiveFrom: new Date('2025-03-21T00:00:00Z'), effectiveTo: null,
+      params: { annualExemptRials: 264_000_000, brackets: [{ upTo: 350_000_000, rateBps: 1000 }, { above: 350_000_000, rateBps: 1500 }] },
+      testScenario: 'حقوق ۱۲۰٬۰۰۰٬۰۰۰ ماهانه → پس از کسر معافیت، نرخ پلکانی', legalOwner: 'واحد منابع انسانی و مالیات',
+      sourceRef: 'قانون مالیات‌های مستقیم + بستهٔ بودجه ۱۴۰۴',
+    },
+    {
+      code: 'LAW-INSURANCE-SOCIAL', title: 'نرخ بیمه تأمین اجتماعی', lawName: 'قانون تأمین اجتماعی',
+      article: 'ماده ۲۸', note: 'سهم کارگر ۷٪، سهم کارفرما ۲۰٪ + ۳٪ بیمه بیکاری',
+      effectiveFrom: new Date('2025-03-21T00:00:00Z'), effectiveTo: null,
+      params: { employeeBps: 700, employerBps: 2000, unemploymentBps: 300 },
+      testScenario: 'حقوق ۱۰۰٬۰۰۰٬۰۰۰ → کارگر ۷٬۰۰۰٬۰۰۰ / کارفرما ۲۳٬۰۰۰٬۰۰۰', legalOwner: 'واحد منابع انسانی',
+      sourceRef: 'قانون تأمین اجتماعی',
+    },
+    {
+      code: 'LAW-SERVICE-CHARGE', title: 'کارمزد خدمات هتل', lawName: 'مصوبات اتحادیه هتلداران',
+      article: '—', note: 'کارمزد ۳٪ روی فاکتورهای رستوران (زیر غذا) — پارامتریک',
+      effectiveFrom: new Date('2025-03-21T00:00:00Z'), effectiveTo: null,
+      params: { serviceChargeBps: 300, appliesTo: ['REST-MAIN'] },
+      testScenario: 'فاکتور رستوران → کارمزد ۳٪ پیش از مالیات', legalOwner: 'مدیریت هتل',
+      sourceRef: 'اطلاعیه اتحادیه',
+    },
+  ];
+  for (const l of wave3Laws) {
+    await prisma.lawRule.upsert({
+      where: { code: l.code },
+      update: {},
+      create: l as never,
+    });
+  }
+
   // eslint-disable-next-line no-console
-  console.log('✅ seed complete: roles/users/accounts/periods/rooms/rules/payroll/cash-accounts/linen/ancillary (wave-1) + warehouses/stock/recipes/menu/tables/suppliers (wave-2)');
+  console.log('✅ seed complete: roles/users/accounts/periods/rooms/rules/payroll/cash-accounts/linen/ancillary (wave-1) + warehouses/stock/recipes/menu/tables/suppliers (wave-2) + closing accounts/cost-centers/event-mappings/law-rules (wave-3)');
 }
 
 main()

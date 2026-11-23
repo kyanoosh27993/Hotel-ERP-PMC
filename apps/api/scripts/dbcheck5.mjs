@@ -1,0 +1,11 @@
+import pgPkg from 'pg';
+const {Client}=pgPkg;
+const c=new Client({connectionString:'postgresql://hotel:hotel_ci_pass@localhost:5433/hotel_erp'});
+await c.connect();
+const na=await c.query(`select "entryNo", description, status from journal_entries order by "createdAt" desc limit 6`);
+console.log('last entries:'); na.rows.forEach(r=>console.log(' ', r.entryNo, '|', r.status, '|', r.description));
+const ob=await c.query(`select "eventName", count(*)::int from outbox_events group by 1`);
+console.log('outbox:', JSON.stringify(ob.rows));
+const mp=await c.query(`select "eventName", "active", "version", "amountField" from event_journal_mappings`);
+console.log('mappings:', JSON.stringify(mp.rows));
+await c.end();

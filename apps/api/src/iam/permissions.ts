@@ -61,6 +61,10 @@ export const PERMISSIONS = {
   STORES_VIEW: 'stores.view',
   STORES_MANAGE: 'stores.manage',
   STORES_COUNT: 'stores.count',
+  // موج ۳ — فاز ۸/۹: دفاتر و بستن دوره + کتابخانه قوانین
+  PERIOD_CLOSE: 'accounting.period_close',
+  LAW_VIEW: 'compliance.law_view',
+  LAW_MANAGE: 'compliance.law_manage',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -122,6 +126,9 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   { code: PERMISSIONS.STORES_VIEW, en: 'View stock items and movements', fa: 'مشاهده اقلام و گردش انبار' },
   { code: PERMISSIONS.STORES_MANAGE, en: 'Adjust stock and transfers', fa: 'اصلاح موجودی و انتقال انبار' },
   { code: PERMISSIONS.STORES_COUNT, en: 'Run stock counts', fa: 'اجرای انبارگردانی' },
+  { code: PERMISSIONS.PERIOD_CLOSE, en: 'Close fiscal periods', fa: 'بستن دورهٔ مالی' },
+  { code: PERMISSIONS.LAW_VIEW, en: 'View compliance law library', fa: 'مشاهدهٔ کتابخانهٔ قوانین' },
+  { code: PERMISSIONS.LAW_MANAGE, en: 'Manage compliance law library', fa: 'مدیریت کتابخانهٔ قوانین' },
 ];
 
 /** ماتریس نقش‌ها — مرجع واحد ماتریس دسترسی */
@@ -158,6 +165,10 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.RESTAURANT_VIEW,
       PERMISSIONS.PROC_VIEW,
       PERMISSIONS.STORES_VIEW,
+      // موج ۳ — فاز ۸/۹
+      PERMISSIONS.PERIOD_CLOSE,
+      PERMISSIONS.LAW_VIEW,
+      PERMISSIONS.LAW_MANAGE,
     ],
   },
   approver: {
@@ -181,6 +192,9 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.PROC_CREATE,
       PERMISSIONS.PROC_MANAGE,
       PERMISSIONS.STORES_VIEW,
+      // موج ۳ — فاز ۸/۹
+      PERMISSIONS.PERIOD_CLOSE,
+      PERMISSIONS.LAW_VIEW,
     ],
   },
   front_desk: {

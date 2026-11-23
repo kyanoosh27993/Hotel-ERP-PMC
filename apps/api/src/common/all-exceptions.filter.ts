@@ -46,8 +46,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
         status = HttpStatus.CONFLICT;
         code = 'DUPLICATE';
         message = 'رکورد تکراری (کلید یکتا)';
+        details = { target: (exception.meta as { target?: unknown } | null)?.target ?? null };
       }
-      this.logger.warn(`Prisma ${exception.code} → ${status} target=${JSON.stringify((exception.meta as { target?: unknown } | null)?.target ?? null)}`);
+      this.logger.warn(`Prisma ${exception.code} → ${status} target=${JSON.stringify((exception.meta as { target?: unknown } | null)?.target ?? null)} msg=${(exception.message ?? '').slice(-160)}`);
     } else if (exception instanceof Prisma.PrismaClientUnknownRequestError) {
       // خطای raw-query — مهم‌ترین حالت: شناسهٔ بدشکل در کوئری‌های ::uuid
       const msg = exception.message ?? '';

@@ -6,6 +6,7 @@ import { RequirePermissions } from '../iam/permissions.guard';
 import { PERMISSIONS } from '../iam/permissions';
 import { nextDocSeq } from '../common/doc-seq';
 import { JournalService } from './journal.service';
+import { LedgerService } from './ledger.service';
 import { PrismaService } from '../prisma.service';
 import { AuthenticatedRequest } from '../common/authenticated.request';
 export class CreateDraftEntryDto {
@@ -46,16 +47,38 @@ export class ReverseDto {
   reason!: string;
 }
 
+export class AddAttachmentDto {
+  @IsString() @MinLength(1) @MaxLength(200)
+  fileName!: string;
+
+  @IsOptional() @IsString() @MaxLength(120)
+  mimeType?: string;
+
+  @IsOptional() @IsInt() @Min(0)
+  sizeBytes?: number;
+
+  @IsOptional() @IsString() @MaxLength(500)
+  dataRef?: string;
+}
+
 @ApiTags('accounting')
 @ApiBearerAuth()
 @Controller('journal-entries')
 export class AccountingController {
-  constructor(private readonly journal: JournalService, private readonly prisma: PrismaService) {}
+  constructor(private readonly journal: JournalService, private readonly prisma: PrismaService, private readonly ledger: LedgerService) {}
 
   /** ثبت پیش‌نویس سند — حسابدار (طبق ماتریس: ثبت پیش‌نویس ✓ / تأیید ✗) */
   @RequirePermissions(PERMISSIONS.JOURNAL_CREATE_DRAFT)
   @Post()
   async createDraft(@Body() dto: CreateDraftEntryDto, @Req() req: AuthenticatedRequest) {
+    const entryDate = new Date();
+    // اولویت اعتبارسنجی: قفل دورهٔ مالی مقدم بر قواعد سند است
+    const period = await this.prisma.fiscalPeriod.findFirst({
+      where: { startDate: { lte: entryDate }, endDate: { gte: entryDate } },
+    });
+    if (period && period.status === 'LOCKED') {
+      throw new ConflictException({ code: 'BUSINESS_RULE', message: `Fiscal period ${period.code} is locked` });
+    }
     // قاعدهٔ مالی: حتی پیش‌نویس هم باید متوازن باشد — سند کج قابل تأیید نیست
     const totalDebit = dto.lines.reduce((a, l) => a + BigInt(l.debit), 0n);
     const totalCredit = dto.lines.reduce((a, l) => a + BigInt(l.credit), 0n);
@@ -70,17 +93,9 @@ export class AccountingController {
       throw new BadRequestException({ code: 'BUSINESS_RULE', message: 'سند حداقل دو سطر نیاز دارد' });
     }
     const created = await this.prisma.$transaction(async (tx) => {
-      const entryDate = new Date();
       const year = entryDate.getUTCFullYear();
       const seq = await nextDocSeq(tx, 'journal');
       const entryNo = `JV-${year}-${String(seq).padStart(6, '0')}`;
-
-      const period = await tx.fiscalPeriod.findFirst({
-        where: { startDate: { lte: entryDate }, endDate: { gte: entryDate } },
-      });
-      if (period && period.status === 'LOCKED') {
-        throw new ConflictException({ code: 'BUSINESS_RULE', message: `Fiscal period ${period.code} is locked` });
-      }
 
       const entry = await tx.journalEntry.create({
         data: {
@@ -177,6 +192,93 @@ export class AccountingController {
     const result = await this.journal.setPeriodLock(code, true, req.user.id);
     return { data: result };
   }
+
+  // ── موج ۳ — فاز ۸: دفاتر رسمی، صورت‌های مالی و بستن دوره ──
+
+  /** دفتر روزنامه — اسناد قطعی بازه به ترتیب شماره عطف */
+  @RequirePermissions(PERMISSIONS.JOURNAL_VIEW)
+  @Get('ledgers/journal')
+  journalBook(@Query('from') from: string, @Query('to') to: string) {
+    return this.ledger.journalBook(from, to);
+  }
+
+  /** دفتر کل — گردش و ماندهٔ ابتدا/انتهای هر حساب */
+  @RequirePermissions(PERMISSIONS.JOURNAL_VIEW)
+  @Get('ledgers/general')
+  generalLedger(@Query('from') from: string, @Query('to') to: string) {
+    return this.ledger.generalLedger(from, to);
+  }
+
+  /** دفتر معین — سطور یک حساب با ماندهٔ تجمعی */
+  @RequirePermissions(PERMISSIONS.JOURNAL_VIEW)
+  @Get('ledgers/subsidiary/:accountCode')
+  subsidiaryLedger(
+    @Param('accountCode') accountCode: string,
+    @Query('from') from: string,
+    @Query('to') to: string,
+  ) {
+    return this.ledger.subsidiaryLedger(accountCode, from, to);
+  }
+
+  /** تراز آزمایشی — باید متوازن باشد (معیار پذیرش F8-T3) */
+  @RequirePermissions(PERMISSIONS.JOURNAL_VIEW)
+  @Get('trial-balance')
+  trialBalance(@Query('from') from: string, @Query('to') to: string) {
+    return this.ledger.trialBalance(from, to);
+  }
+
+  /** صورت سود و زیان */
+  @RequirePermissions(PERMISSIONS.JOURNAL_VIEW)
+  @Get('statements/income')
+  incomeStatement(@Query('from') from: string, @Query('to') to: string) {
+    return this.ledger.incomeStatement(from, to);
+  }
+
+  /** ترازنامه در تاریخ */
+  @RequirePermissions(PERMISSIONS.JOURNAL_VIEW)
+  @Get('statements/balance-sheet')
+  balanceSheet(@Query('asOf') asOf: string) {
+    return this.ledger.balanceSheet(asOf);
+  }
+
+  /** بستن دوره — سند اختتام + قفل؛ فقط با مجوز period_close */
+  @RequirePermissions(PERMISSIONS.PERIOD_CLOSE)
+  @Post('periods/:code/close')
+  async closePeriod(@Param('code') code: string, @Req() req: AuthenticatedRequest) {
+    return this.ledger.closePeriod(code, req.user.id);
+  }
+
+  /** پیوست سند (متادیتا + ارجاع فایل) — فیلد پیوست‌های ۱۴گانه */
+  @RequirePermissions(PERMISSIONS.JOURNAL_CREATE_DRAFT)
+  @Post(':id/attachments')
+  async addAttachment(
+    @Param('id') id: string,
+    @Body() dto: AddAttachmentDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    const att = await this.prisma.journalAttachment.create({
+      data: {
+        entryId: id,
+        fileName: dto.fileName,
+        mimeType: dto.mimeType ?? 'application/octet-stream',
+        sizeBytes: dto.sizeBytes ?? 0,
+        dataRef: dto.dataRef ?? null,
+        uploadedById: req.user.id,
+      },
+    });
+    await this.prisma.auditLog.create({
+      data: { userId: req.user.id, action: 'JOURNAL_ATTACHMENT_ADDED', entity: 'JournalEntry', entityId: id, reason: dto.fileName },
+    });
+    return { data: { id: att.id, fileName: att.fileName } };
+  }
+
+  @RequirePermissions(PERMISSIONS.JOURNAL_VIEW)
+  @Get(':id/attachments')
+  async listAttachments(@Param('id') id: string) {
+    const rows = await this.prisma.journalAttachment.findMany({ where: { entryId: id }, orderBy: { createdAt: 'asc' } });
+    return { data: rows.map((a) => ({ id: a.id, fileName: a.fileName, mimeType: a.mimeType, sizeBytes: a.sizeBytes, dataRef: a.dataRef })) };
+  }
+
 
   private async permissionSet(req: AuthenticatedRequest): Promise<Set<string>> {
     const userRoles = await this.prisma.userRole.findMany({

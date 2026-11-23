@@ -1,0 +1,11 @@
+import pgPkg from 'pg';
+const {Client}=pgPkg;
+const c=new Client({connectionString:'postgresql://hotel:hotel_ci_pass@localhost:5433/hotel_erp'});
+await c.connect();
+const unbal=await c.query(`select e."entryNo", sum(l."debitRials"-l."creditRials")::text as diff, e.status from journal_entries e join journal_lines l on l."entryId"=e.id group by e."entryNo", e.status having sum(l."debitRials"-l."creditRials")<>0 limit 5`);
+console.log('unbalanced entries:',JSON.stringify(unbal.rows));
+const cnt=await c.query(`select status, count(*)::int from outbox_events group by 1`);
+console.log('outbox:',JSON.stringify(cnt.rows));
+const na=await c.query(`select "entryNo", description, status from journal_entries order by "createdAt" desc limit 5`);
+console.log('last entries:',JSON.stringify(na.rows));
+await c.end();

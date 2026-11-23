@@ -6,6 +6,7 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import {
   EVENT_NAMES,
   type EventEnvelope,
+  type EventName,
   type ReservationConfirmedPayload,
   type PosOrderServedPayload,
   type PayrollRunApprovedPayload,
@@ -39,19 +40,77 @@ export class EventJournalConsumer implements OnModuleInit {
   ) {}
 
   onModuleInit(): void {
-    this.outbox.on(EVENT_NAMES.RESERVATION_CONFIRMED, (e) => this.handleReservationConfirmed(e));
-    this.outbox.on(EVENT_NAMES.POS_ORDER_SERVED, (e) => this.handlePosOrderServed(e));
-    this.outbox.on(EVENT_NAMES.PAYROLL_RUN_APPROVED, (e) => this.handlePayrollRunApproved(e));
+    // فاز ۸ / F8-T2 — هر رویداد اول از جدول نگاشت پارامتریک سند می‌سازد؛
+    // اگر نگاشت فعال نداشت، هندلر اختصاصی (سناریوهای چندجهته) اجرا می‌شود.
+    const bind = (name: EventName, handler: (e: EventEnvelope) => Promise<void>) =>
+      this.outbox.on(name, async (e) => {
+        if (await this.tryMapped(name, e)) return;
+        await handler(e);
+      });
+
+    bind(EVENT_NAMES.RESERVATION_CONFIRMED, (e) => this.handleReservationConfirmed(e));
+    bind(EVENT_NAMES.POS_ORDER_SERVED, (e) => this.handlePosOrderServed(e));
+    bind(EVENT_NAMES.PAYROLL_RUN_APPROVED, (e) => this.handlePayrollRunApproved(e));
     // موج ۱ — فاز ۵ و ۱۰
-    this.outbox.on(EVENT_NAMES.TREASURY_TRANSACTION_POSTED, (e) => this.handleTreasuryTransaction(e));
-    this.outbox.on(EVENT_NAMES.ASSET_DEPRECIATION_POSTED, (e) => this.handleAssetDepreciation(e));
-    this.outbox.on(EVENT_NAMES.ANCILLARY_ORDER_CONFIRMED, (e) => this.handleAncillaryOrder(e));
+    bind(EVENT_NAMES.TREASURY_TRANSACTION_POSTED, (e) => this.handleTreasuryTransaction(e));
+    bind(EVENT_NAMES.ASSET_DEPRECIATION_POSTED, (e) => this.handleAssetDepreciation(e));
+    bind(EVENT_NAMES.ANCILLARY_ORDER_CONFIRMED, (e) => this.handleAncillaryOrder(e));
     // موج ۲ — فاز ۷ (خرید/انبار/کاست کنترل)
-    this.outbox.on(EVENT_NAMES.GRN_RECEIVED, (e) => this.handleGrnReceived(e));
-    this.outbox.on(EVENT_NAMES.INVENTORY_ADJUSTMENT_POSTED, (e) => this.handleInventoryAdjustment(e));
-    this.outbox.on(EVENT_NAMES.INVENTORY_CONSUMPTION_POSTED, (e) => this.handleInventoryConsumption(e));
+    bind(EVENT_NAMES.GRN_RECEIVED, (e) => this.handleGrnReceived(e));
+    bind(EVENT_NAMES.INVENTORY_ADJUSTMENT_POSTED, (e) => this.handleInventoryAdjustment(e));
+    bind(EVENT_NAMES.INVENTORY_CONSUMPTION_POSTED, (e) => this.handleInventoryConsumption(e));
     // شارژ شب حسابرسی شبانه → بدهکار حساب مهمان / بستانکار درآمد اتاق
-    this.outbox.on(EVENT_NAMES.NIGHT_AUDIT_POSTED, (e) => this.handleNightAuditPosted(e));
+    bind(EVENT_NAMES.NIGHT_AUDIT_POSTED, (e) => this.handleNightAuditPosted(e));
+  }
+
+  /**
+   * فاز ۸ / F8-T2 — سند خودکار از جدول نگاشت پارامتریک.
+   * مبلغ از فیلد payload (amountField)، دو سطر debit/credit از نگاشت،
+   * شرح از الگو با جایگذاری {فیلدها} و مرکز هزینهٔ پارامتریک.
+   * در صورت نبود نگاشت فعال یا مبلغ صفر → false (هندلر اختصاصی).
+   */
+  private async tryMapped(eventName: EventName, envelope: EventEnvelope): Promise<boolean> {
+    const mapping = await this.prisma.eventJournalMapping.findUnique({ where: { eventName } }).catch((err) => {
+      this.logger.warn(`mapping lookup failed for ${eventName}: ${String(err)}`);
+      return null;
+    });
+    if (!mapping || !mapping.active) {
+      this.logger.warn(`mapping miss for ${eventName}: found=${!!mapping} active=${mapping?.active}`);
+      return false;
+    }
+
+    const payload = (envelope.payload ?? {}) as Record<string, unknown>;
+    const rawAmount = payload[mapping.amountField];
+    const amount = BigInt(typeof rawAmount === 'number' ? Math.round(rawAmount) : Number(rawAmount ?? 0));
+    if (!amount || amount <= 0n) {
+      this.logger.warn(`mapping amount miss for ${eventName}: field=${mapping.amountField} raw=${String(rawAmount)}`);
+      return false;
+    }
+
+    // شرح: جایگذاری {فیلد} با مقادیر payload (حداکثر ۳ جایگاه)
+    let description = mapping.descriptionTemplate;
+    for (const [k, v] of Object.entries(payload).slice(0, 8)) {
+      if (description.includes(`{${k}}`)) description = description.replace(`{${k}}`, String(v));
+    }
+    description = description.replace(/\{[a-zA-Z]+\}/g, '').trim() || `Auto: ${eventName}`;
+
+    const costCenter = mapping.costCenterCode ?? undefined;
+    await this.journal.postEntryFromEvent(
+      envelope.idempotencyKey,
+      [
+        { accountCode: mapping.debitAccount, debitRials: amount, creditRials: 0n, ...(costCenter ? { costCenterCode: costCenter } : {}) },
+        { accountCode: mapping.creditAccount, debitRials: 0n, creditRials: amount },
+      ],
+      {
+        description: `${description} [mapping:v${mapping.version}]`,
+        sourceModule: eventName.split('.')[0] ?? 'engine',
+        sourceRef: envelope.idempotencyKey,
+        sourceEventId: envelope.eventId,
+        createdByUserId: SYSTEM_ENGINE_USER,
+      },
+    );
+    this.logger.log(`journal posted via mapping v${mapping.version} for ${eventName} (${amount})`);
+    return true;
   }
 
   /** pms.night_audit.posted → سند شارژ شب: بدهکار ۱۲۰۱ / بستانکار ۴۱۰۱ */

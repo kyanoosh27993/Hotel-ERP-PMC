@@ -47,6 +47,8 @@ async function req(method, path, { token, body, label } = {}) {
   return { status: res.status, json, ms };
 }
 const T = {}; const S = {};
+const TODAY = () => new Date().toISOString().slice(0, 10);
+const dayFromNow = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
 const num = (v) => (v == null ? null : Number(v));
 
 /** صبر برای ظاهر شدن سند با توضیح مشخص در دفتر (زنجیرهٔ outbox) */
@@ -172,8 +174,8 @@ async function phasePms() {
   S.roomId = room101?.id; S.roomCode = room101?.code;
 
   // رزرو با چک‌این امروز — تا شب‌گردی امروز شارژ بزند
-  const today = '2026-11-22';
-  const co = '2026-11-25';
+  const today = TODAY();
+  const co = dayFromNow(3);
   const rt = await req('GET', '/room-types', { token: T.frontdesk });
   const std = rt.json?.data?.find((x) => x.code === 'STD');
   const resv = await req('POST', '/pms/reservations', {
@@ -260,32 +262,32 @@ async function phaseTreasury() {
 
   const open = await req('POST', '/treasury/shifts/open', {
     token: T.cashier,
-    body: { cashAccountId: S.cashId, openingFloatRials: 5_000_000, businessDate: '2026-11-22' }, label: 'shift-open',
+    body: { cashAccountId: S.cashId, openingFloatRials: 5_000_000, businessDate: TODAY() }, label: 'shift-open',
   });
   step('باز کردن شیفت با تنخواه ۵م', open.status === 201, `status=${open.status} ${JSON.stringify(open.json ?? {}).slice(0, 120)}`);
   S.shiftId = open.json?.id;
 
   const t1 = await req('POST', '/treasury/transactions', {
     token: T.cashier,
-    body: { cashAccountId: S.cashId, kind: 'RECEIPT', method: 'CASH', amountRials: 2_000_000, businessDate: '2026-11-22', idempotencyKey: 'jr-txn-1' }, label: 'txn-receive',
+    body: { cashAccountId: S.cashId, kind: 'RECEIPT', method: 'CASH', amountRials: 2_000_000, businessDate: TODAY(), idempotencyKey: 'jr-txn-1' }, label: 'txn-receive',
   });
   step('دریافت نقدی ۲م', t1.status === 201, `status=${t1.status}`);
   S.txn1 = t1.json?.id;
   const t1r = await req('POST', '/treasury/transactions', {
     token: T.cashier,
-    body: { cashAccountId: S.cashId, kind: 'RECEIPT', method: 'CASH', amountRials: 2_000_000, businessDate: '2026-11-22', idempotencyKey: 'jr-txn-1' }, label: 'txn-replay',
+    body: { cashAccountId: S.cashId, kind: 'RECEIPT', method: 'CASH', amountRials: 2_000_000, businessDate: TODAY(), idempotencyKey: 'jr-txn-1' }, label: 'txn-replay',
   });
   step('Idempotency تراکنش — ریسپلای بدون رکورد جدید', t1r.status === 201 && t1r.json?.replayed === true, `replayed=${t1r.json?.replayed}`);
 
   const t2 = await req('POST', '/treasury/transactions', {
     token: T.cashier,
-    body: { cashAccountId: S.cashId, kind: 'PAYMENT', method: 'CASH', amountRials: 300_000, businessDate: '2026-11-22', idempotencyKey: 'jr-txn-2', note: 'پرداخت تأمین‌کننده' }, label: 'txn-pay',
+    body: { cashAccountId: S.cashId, kind: 'PAYMENT', method: 'CASH', amountRials: 300_000, businessDate: TODAY(), idempotencyKey: 'jr-txn-2', note: 'پرداخت تأمین‌کننده' }, label: 'txn-pay',
   });
   step('پرداخت نقدی ۳۰۰هزار', t2.status === 201, `status=${t2.status}`);
 
   // تراکنش بدون شیفت باز روی صندوق دیگر؟ — شیفت دوم روی همان صندوق ممنوع
   const dupShift = await req('POST', '/treasury/shifts/open', {
-    token: T.admin, body: { cashAccountId: S.cashId, openingFloatRials: 1_000_000, businessDate: '2026-11-22' }, label: 'shift-dup',
+    token: T.admin, body: { cashAccountId: S.cashId, openingFloatRials: 1_000_000, businessDate: TODAY() }, label: 'shift-dup',
   });
   step('شیفت دوم روی همان صندوق ممنوع (409)', dupShift.status === 409, `status=${dupShift.status} body=${JSON.stringify(dupShift.json ?? {}).slice(0, 120)}`);
 
@@ -366,7 +368,7 @@ async function phaseRestaurant() {
   if (cancel.json?.totalRials !== 545_000) report.findings.push({ name: 'cancel-math', detail: `total=${cancel.json?.totalRials}` });
 
   // گزارش‌ها و سندهای زنجیرهٔ مصرف — بعد از سرو (زنجیرهٔ دو مرحله‌ای outbox با polling)
-  const today = '2026-11-22';
+  const today = TODAY();
   const cc = await req('GET', `/stores/cost-control?from=${today}&to=${today}`, { token: T.storekeeper, label: 'cost-control' });
   step('کاست کنترل: سفارش سرو‌شدهٔ امروز ≥۱', cc.status === 200 && (cc.json?.servedOrders ?? 0) >= 1, `orders=${cc.json?.servedOrders}, lines=${cc.json?.lines?.length}`);
   const reorder = await req('GET', '/stores/reorder', { token: T.storekeeper, label: 'reorder' });
@@ -490,6 +492,111 @@ async function phaseCoherence() {
   }
 }
 
+// ═══════════ ۹) فاز ۸/۹ — دفاتر، تراز آزمایشی، قوانین، اظهارنامه VAT، بستن دوره ═══════════
+async function phaseLedgerCompliance() {
+  console.log('\n══ فاز ۸/۹ — دفاتر و انطباق مالی ══');
+  const today = TODAY();
+
+  // سند دستی سه‌سطری با مرکز هزینه → تأیید → شماره عطف
+  const draft = await req('POST', '/journal-entries', {
+    token: T.accountant,
+    body: {
+      description: 'سفر کاربر — فروش نقدی با مالیات',
+      lines: [
+        { accountCode: '1101', debit: 1_090_000, credit: 0, costCenter: 'CC-FB' },
+        { accountCode: '4102', debit: 0, credit: 1_000_000, costCenter: 'CC-FB' },
+        { accountCode: '2201', debit: 0, credit: 90_000, costCenter: 'CC-FB' },
+      ],
+    }, label: 'manual-entry',
+  });
+  step('سند دستی سه‌سطری ثبت می‌شود', draft.status === 201, `status=${draft.status}`);
+  const ap = await req('POST', `/journal-entries/${draft.json?.data?.id}/approve`, { token: T.approver, body: {}, label: 'manual-approve' });
+  step('تأیید سند توسط تأییدکننده', [200, 201].includes(ap.status), `status=${ap.status}`);
+  S.manualEntryId = draft.json?.data?.id;
+
+  // پیوست سند
+  const att = await req('POST', `/journal-entries/${S.manualEntryId}/attachments`, {
+    token: T.accountant, body: { fileName: 'invoice-journey.pdf', mimeType: 'application/pdf', sizeBytes: 2048, dataRef: 'attachments/invoice-journey.pdf' }, label: 'attach',
+  });
+  step('پیوست سند افزوده می‌شود', att.status === 201, `status=${att.status}`);
+  const attList = await req('GET', `/journal-entries/${S.manualEntryId}/attachments`, { token: T.accountant, label: 'attach-list' });
+  step('پیوست در فهرست دیده می‌شود', attList.status === 200 && attList.json?.data?.length === 1, `count=${attList.json?.data?.length}`);
+
+  // دفاتر
+  const jb = await req('GET', `/journal-entries/ledgers/journal?from=${today}&to=${today}`, { token: T.accountant, label: 'journal-book' });
+  const manualRow = jb.json?.data?.find((e) => e.entryNo === draft.json?.data?.entryNo);
+  step('دفتر روزنامه شامل سند با شماره عطف', jb.status === 200 && manualRow?.docIndex > 0, `docIndex=${manualRow?.docIndex}`);
+  const idxList = (jb.json?.data ?? []).map((e) => e.docIndex).filter((x) => x != null);
+  const sortedIdx = [...idxList].sort((a, b) => a - b);
+  step('شماره‌های عطف صعودی و یکتا', JSON.stringify(idxList) === JSON.stringify(sortedIdx) && new Set(idxList).size === idxList.length, `${idxList.length} سند`);
+
+  const gl = await req('GET', `/journal-entries/ledgers/general?from=${today}&to=${today}`, { token: T.accountant, label: 'general-ledger' });
+  step('دفتر کل متوازن است', gl.status === 200 && gl.json?.meta?.balanced === true, `balanced=${gl.json?.meta?.balanced}`);
+
+  const sub = await req('GET', `/journal-entries/ledgers/subsidiary/1101?from=${today}&to=${today}`, { token: T.accountant, label: 'subsidiary' });
+  const gl1101 = (gl.json?.data ?? []).find((r) => r.accountCode === '1101');
+  const lastRow = sub.json?.data?.[sub.json.data.length - 1];
+  step('دفتر معین: ماندهٔ تجمعی آخرین سطر = ماندهٔ کل', sub.status === 200 && lastRow?.runningBalance === gl1101?.closingBalance,
+    `running=${lastRow?.runningBalance}, closing=${gl1101?.closingBalance}`);
+
+  // تراز آزمایشی
+  const tb = await req('GET', `/journal-entries/trial-balance?from=${today}&to=${today}`, { token: T.accountant, label: 'trial-balance' });
+  step('تراز آزمایشی متوازن (معیار پذیرش فاز ۸)', tb.status === 200 && tb.json?.meta?.balanced === true,
+    `dr=${tb.json?.meta?.totals?.periodDebit}, cr=${tb.json?.meta?.totals?.periodCredit}`);
+
+  // صورت‌های مالی
+  const pnl = await req('GET', `/journal-entries/statements/income?from=${today}&to=${today}`, { token: T.accountant, label: 'income' });
+  step('سود و زیان: نتیجه = درآمد − هزینه', pnl.status === 200 && pnl.json?.totals?.netIncome === pnl.json?.totals?.totalRevenue - pnl.json?.totals?.totalExpense,
+    `net=${pnl.json?.totals?.netIncome}`);
+  const bs = await req('GET', `/journal-entries/statements/balance-sheet?asOf=${today}`, { token: T.accountant, label: 'balance-sheet' });
+  step('ترازنامه متوازن (با نتیجهٔ دوره)', bs.status === 200 && bs.json?.totals?.balanced === true, `balanced=${bs.json?.totals?.balanced}`);
+  S.pnl = pnl.json?.totals;
+
+  // کتابخانه قوانین (فاز ۹)
+  const laws = await req('GET', '/compliance/laws', { token: T.accountant, label: 'laws' });
+  step('کتابخانهٔ قوانین با متادیتای ۱۲گانه (≥۴ قانون)', laws.status === 200 && laws.json?.data?.length >= 4, `count=${laws.json?.data?.length}`);
+  const rate = await req('GET', `/compliance/laws/LAW-VAT-RATE/rate?date=${today}`, { token: T.accountant, label: 'law-rate' });
+  step('نرخ پارامتریک VAT امروز = ۱۰۰۰ (bp)', rate.status === 200 && rate.json?.data?.vatBps === 1000, `vatBps=${rate.json?.data?.vatBps}`);
+  const lawUp = await req('POST', '/compliance/laws', {
+    token: T.admin,
+    body: {
+      code: 'LAW-VAT-RATE', title: 'نرخ مالیات بر ارزش افزوده', lawName: 'قانون مالیات بر ارزش افزوده',
+      article: 'ماده ۱۷', effectiveFrom: '2027-01-01', params: { vatBps: 1100, defaultBps: 1000 },
+      legalOwner: 'واحد مالیات', sourceRef: 'ابلاغ نرخ ۱۴۰۶',
+    }, label: 'law-upsert',
+  });
+  step('به‌روزرسانی قانون = نسخهٔ جدید (نرخ ۱۴۰۶ بدون تغییر کد)', lawUp.status === 201 && parseFloat(lawUp.json?.data?.version ?? '1') >= 1.1,
+    `version=${lawUp.json?.data?.version}`);
+  const rateOut = await req('GET', '/compliance/laws/LAW-VAT-RATE/rate?date=2024-06-01', { token: T.accountant, label: 'law-rate-out' });
+  step('نرخ خارج از بازهٔ اعتبار رد می‌شود (409)', rateOut.status === 409, `status=${rateOut.status}`);
+  const lawsDenied = await req('GET', '/compliance/laws', { token: T.storekeeper, label: 'laws-denied' });
+  step('انباردار قوانین را نمی‌بیند (403)', lawsDenied.status === 403, `status=${lawsDenied.status}`);
+
+  // اظهارنامه VAT — انتظار دقیق از گردش امروز سفر
+  const decl = await req('GET', `/compliance/vat/declaration?from=${today}&to=${today}`, { token: T.accountant, label: 'vat-decl' });
+  step('اظهارنامه VAT: فروش با مالیات = ۹۰۰٬۰۰۰ (رستوران+خدمات+سند دستی)', decl.status === 200 && decl.json?.data?.outputVatRials === 900_000,
+    `output=${decl.json?.data?.outputVatRials}`);
+  step('اعتبار مالیاتی خرید = ۲٬۳۶۳٬۴۰۰', decl.json?.data?.inputVatCreditRials === 2_363_400, `input=${decl.json?.data?.inputVatCreditRials}`);
+  step('خالص اظهارنامه = فروش − اعتبار', decl.json?.data?.netPayableRials === decl.json?.data?.outputVatRials - decl.json?.data?.inputVatCreditRials,
+    `net=${decl.json?.data?.netPayableRials}`);
+  const fbSection = (decl.json?.data?.sections ?? []).find((s) => s.costCenterCode === 'CC-FB');
+  step('تفکیک بخش رستوران (CC-FB) — پایهٔ سند دستی ۱ میلیون', !!fbSection && fbSection.taxBase === 1_000_000, `taxBase=${fbSection?.taxBase}`);
+
+  // بستن دورهٔ جاری — آخرین عملیات
+  const close = await req('POST', `/journal-entries/periods/${today.slice(0, 7)}/close`, { token: T.accountant, body: {}, label: 'period-close' });
+  step('بستن دورهٔ جاری با سند اختتام', [200, 201].includes(close.status) && !!close.json?.data?.closingEntryId,
+    `netIncome=${close.json?.data?.netIncome}`);
+  if (S.pnl && close.json?.data) {
+    step('نتیجهٔ اختتام = نتیجهٔ صورت سود و زیان', close.json.data.netIncome === S.pnl.netIncome,
+      `close=${close.json.data.netIncome}, pnl=${S.pnl.netIncome}`);
+    if (close.json.data.netIncome !== S.pnl.netIncome) report.findings.push({ name: 'close-pnl-mismatch', detail: `close=${close.json.data.netIncome} pnl=${S.pnl.netIncome}` });
+  }
+  const reClose = await req('POST', `/journal-entries/periods/${today.slice(0, 7)}/close`, { token: T.accountant, body: {}, label: 'period-re-close' });
+  step('بستن دوبارهٔ دورهٔ بسته رد می‌شود (409)', reClose.status === 409, `status=${reClose.status}`);
+  const tbAfter = await req('GET', `/journal-entries/trial-balance?from=${today}&to=${today}`, { token: T.accountant, label: 'tb-after-close' });
+  step('تراز آزمایشی پس از بستن همچنان متوازن', tbAfter.status === 200 && tbAfter.json?.meta?.balanced === true, `balanced=${tbAfter.json?.meta?.balanced}`);
+}
+
 // اجرا — با بازنشانی وضعیت تراکنشی (مثل ورود روزانهٔ کاربر به دادهٔ تمیز)
 // ترتیب واقعی عملیات هتل: خرید و شارژ انبار قبل از فروش رستوران (تا بهای میانگین موجود باشد)
 import pgPkg from 'pg';
@@ -505,6 +612,8 @@ async function resetState() {
   await c.query(`UPDATE "dining_tables" SET "status"='FREE'`);
   await c.query(`UPDATE "rooms" SET "status"='AVAILABLE', "hkStatus"='CLEAN', "note"=NULL`);
   await c.query(`UPDATE "stock_items" SET "qtyOnHand"=0, "avgCostRials"=0`);
+  await c.query(`UPDATE "fiscal_periods" SET "status" = CASE WHEN "endDate" < date_trunc('month', now()) THEN 'LOCKED'::fiscal_period_status ELSE 'OPEN'::fiscal_period_status END, "lockedAt" = CASE WHEN "endDate" < date_trunc('month', now()) THEN now() ELSE NULL END, "closedAt"=NULL, "closingEntryId"=NULL`);
+  await c.query(`UPDATE "law_rules" SET "version"='1.0', "effectiveFrom"='2025-03-21', "effectiveTo"=NULL, params='{"vatBps":1000,"healthBps":100,"defaultBps":900}'::jsonb WHERE code='LAW-VAT-RATE'`);
   await c.end();
 }
 await resetState();
@@ -516,6 +625,7 @@ await phasePms();
 await phaseTreasury();
 await phaseRestaurant();
 await phaseCoherence();
+await phaseLedgerCompliance();
 
 // تراز اسناد و اینباکس — مستقیم از DB (صحت‌سنجی حسابرس)
 const pg = new Client({ connectionString: 'postgresql://hotel:hotel_ci_pass@localhost:5433/hotel_erp' });

@@ -23,6 +23,7 @@ const SEQ_MAP: Record<string, string> = {
   lostfound: 'seq_lostfound',
   asset: 'seq_asset',
   journal: 'seq_journal',
+  journal_docindex: 'seq_journal_docindex',
 };
 
 /** شمارهٔ بعدی سند درون تراکنش — اتمیک حتی با درخواست هم‌زمان */

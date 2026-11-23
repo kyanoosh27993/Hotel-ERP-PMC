@@ -24,21 +24,21 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  roles         UserRole[]
-  refreshTokens RefreshToken[]
-  auditLogs     AuditLog[]     @relation("AuditActor")
-  createdEntries JournalEntry[] @relation("EntryCreator")
+  roles           UserRole[]
+  refreshTokens   RefreshToken[]
+  auditLogs       AuditLog[]     @relation("AuditActor")
+  createdEntries  JournalEntry[] @relation("EntryCreator")
   approvedEntries JournalEntry[] @relation("EntryApprover")
 
   @@map("users")
 }
 
 model Role {
-  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           String  @unique // admin | accountant | approver | front_desk | ...
-  displayNameEn  String
-  displayNameFa  String
-  sensitiveMfa   Boolean @default(false) // ورود این نقش نیاز به MFA دارد
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String  @unique // admin | accountant | approver | front_desk | ...
+  displayNameEn String
+  displayNameFa String
+  sensitiveMfa  Boolean @default(false) // ورود این نقش نیاز به MFA دارد
 
   users       UserRole[]
   permissions RolePermission[]
@@ -58,8 +58,8 @@ model Permission {
 }
 
 model UserRole {
-  userId    String @db.Uuid
-  roleId    String @db.Uuid
+  userId     String   @db.Uuid
+  roleId     String   @db.Uuid
   assignedAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -70,7 +70,7 @@ model UserRole {
 }
 
 model RolePermission {
-  roleId String @db.Uuid
+  roleId       String @db.Uuid
   permissionId String @db.Uuid
 
   role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
@@ -81,13 +81,13 @@ model RolePermission {
 }
 
 model RefreshToken {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId     String    @db.Uuid
-  tokenHash  String    @unique // SHA-256 — توکن خام هرگز ذخیره نمی‌شود
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  replacedById String? @db.Uuid
-  createdAt  DateTime  @default(now())
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String    @db.Uuid
+  tokenHash    String    @unique // SHA-256 — توکن خام هرگز ذخیره نمی‌شود
+  expiresAt    DateTime
+  revokedAt    DateTime?
+  replacedById String?   @db.Uuid
+  createdAt    DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -98,17 +98,17 @@ model RefreshToken {
 // ───────────────────────── حسابرسی (تغییرناپذیر) ─────────────────────────
 
 model AuditLog {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String?  @db.Uuid
-  action    String // LOGIN | LOGIN_FAILED | CREATE | UPDATE | APPROVE | REVERSE | ...
-  entity    String
-  entityId  String?
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String?  @db.Uuid
+  action     String // LOGIN | LOGIN_FAILED | CREATE | UPDATE | APPROVE | REVERSE | ...
+  entity     String
+  entityId   String?
   beforeJson Json?
   afterJson  Json?
-  reason    String?
-  ip        String?
-  userAgent String?
-  createdAt DateTime @default(now())
+  reason     String?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
 
   user User? @relation("AuditActor", fields: [userId], references: [id])
 
@@ -149,36 +149,36 @@ model InboxEvent {
 // ───────────────────────── رزرو و اتاق (PoC) ─────────────────────────
 
 model RoomType {
-  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code           String  @unique
-  nameEn         String
-  nameFa         String
-  capacity       Int     @default(2)
-  baseRateRials  BigInt
+  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code          String @unique
+  nameEn        String
+  nameFa        String
+  capacity      Int    @default(2)
+  baseRateRials BigInt
 
-  rooms        Room[]
-  reservations Reservation[]
+  rooms           Room[]
+  reservations    Reservation[]
   waitlistEntries WaitlistEntry[]
 
   @@map("room_types")
 }
 
 model Room {
-  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code       String  @unique
-  roomTypeId String  @db.Uuid
-  floor      Int     @default(1)
-  status     RoomStatus @default(AVAILABLE)
+  id         String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code       String             @unique
+  roomTypeId String             @db.Uuid
+  floor      Int                @default(1)
+  status     RoomStatus         @default(AVAILABLE)
   hkStatus   HousekeepingStatus @default(CLEAN) // F4-T7 وضعیت نظافت
   note       String? // یادداشت تعمیر/نگهداری (F4-T1)
 
-  roomType RoomType @relation(fields: [roomTypeId], references: [id])
-  stayRooms StayRoom[]
-  tasks RoomTask[]
-  inspections RoomInspection[]
+  roomType            RoomType             @relation(fields: [roomTypeId], references: [id])
+  stayRooms           StayRoom[]
+  tasks               RoomTask[]
+  inspections         RoomInspection[]
   maintenanceRequests MaintenanceRequest[]
-  lostFound LostAndFound[]
-  fixedAssets FixedAsset[]
+  lostFound           LostAndFound[]
+  fixedAssets         FixedAsset[]
 
   @@index([status, hkStatus])
   @@map("rooms")
@@ -203,27 +203,27 @@ enum HousekeepingStatus {
 }
 
 model Reservation {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code           String   @unique // RSV-<jy>-<seq>
-  roomTypeId     String   @db.Uuid
+  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code           String            @unique // RSV-<jy>-<seq>
+  roomTypeId     String            @db.Uuid
   guestName      String
-  checkIn        DateTime @db.Date
-  checkOut       DateTime @db.Date
+  checkIn        DateTime          @db.Date
+  checkOut       DateTime          @db.Date
   nights         Int
   totalRials     BigInt
   status         ReservationStatus @default(CONFIRMED)
-  idempotencyKey String   @unique
-  createdById    String?  @db.Uuid
-  createdAt      DateTime @default(now())
+  idempotencyKey String            @unique
+  createdById    String?           @db.Uuid
+  createdAt      DateTime          @default(now())
   cancelledAt    DateTime?
 
-  roomType RoomType @relation(fields: [roomTypeId], references: [id])
-  source   ReservationSource @default(PHONE) // F4-T2 کانال رزرو
+  roomType  RoomType          @relation(fields: [roomTypeId], references: [id])
+  source    ReservationSource @default(PHONE) // F4-T2 کانال رزرو
   groupName String?
-  adults   Int @default(1)
-  children Int @default(0)
-  note     String?
-  stays    Stay[]
+  adults    Int               @default(1)
+  children  Int               @default(0)
+  note      String?
+  stays     Stay[]
 
   @@index([roomTypeId, checkIn, checkOut, status])
   @@map("reservations")
@@ -250,16 +250,16 @@ enum ReservationSource {
 // ─────────────────── فاز ۴ — PMS: لیست انتظار، اقامت، حسابرسی شبانه ───────────────────
 
 model WaitlistEntry {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  guestName  String
-  phone      String?
-  roomTypeId String   @db.Uuid
-  fromDate   DateTime @db.Date
-  toDate     DateTime @db.Date
-  status     WaitlistStatus @default(WAITING)
-  note       String?
-  createdById String? @db.Uuid
-  createdAt  DateTime @default(now())
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  guestName   String
+  phone       String?
+  roomTypeId  String         @db.Uuid
+  fromDate    DateTime       @db.Date
+  toDate      DateTime       @db.Date
+  status      WaitlistStatus @default(WAITING)
+  note        String?
+  createdById String?        @db.Uuid
+  createdAt   DateTime       @default(now())
 
   roomType RoomType @relation(fields: [roomTypeId], references: [id])
 
@@ -277,25 +277,25 @@ enum WaitlistStatus {
 }
 
 model Stay {
-  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code            String  @unique // STY-<yyyy>-<seq>
-  reservationId   String? @db.Uuid
-  guestName       String
-  adults          Int     @default(1)
-  children        Int     @default(0)
-  status          StayStatus @default(OPEN)
-  checkInAt       DateTime @default(now())
-  plannedCheckOut DateTime @db.Date
+  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code             String     @unique // STY-<yyyy>-<seq>
+  reservationId    String?    @db.Uuid
+  guestName        String
+  adults           Int        @default(1)
+  children         Int        @default(0)
+  status           StayStatus @default(OPEN)
+  checkInAt        DateTime   @default(now())
+  plannedCheckOut  DateTime   @db.Date
   actualCheckOutAt DateTime?
-  folioRials      BigInt  @default(0) // جمع شارژ اتاق در خروج
-  idempotencyKey  String  @unique
-  createdById     String? @db.Uuid
-  createdAt       DateTime @default(now())
+  folioRials       BigInt     @default(0) // جمع شارژ اتاق در خروج
+  idempotencyKey   String     @unique
+  createdById      String?    @db.Uuid
+  createdAt        DateTime   @default(now())
 
-  reservation Reservation? @relation(fields: [reservationId], references: [id])
-  rooms StayRoom[]
+  reservation      Reservation?      @relation(fields: [reservationId], references: [id])
+  rooms            StayRoom[]
   cashTransactions CashTransaction[]
-  ancillaryOrders AncillaryOrder[]
+  ancillaryOrders  AncillaryOrder[]
   restaurantOrders RestaurantOrder[]
 
   @@index([status, plannedCheckOut])
@@ -310,13 +310,13 @@ enum StayStatus {
 }
 
 model StayRoom {
-  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  stayId   String  @db.Uuid
-  roomId   String  @db.Uuid
+  id                String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  stayId            String  @db.Uuid
+  roomId            String  @db.Uuid
   rateOverrideRials BigInt? // نرخ توافقی گروهی؛ null = نرخ پایه نوع اتاق
 
   stay Stay @relation(fields: [stayId], references: [id])
-  room Room  @relation(fields: [roomId], references: [id])
+  room Room @relation(fields: [roomId], references: [id])
 
   @@unique([stayId, roomId])
   @@index([roomId])
@@ -324,15 +324,15 @@ model StayRoom {
 }
 
 model NightAuditRun {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  businessDate DateTime @db.Date @unique
-  status       AuditStatus @default(OK)
-  openStays    Int      @default(0)
-  dirtyRooms   Int      @default(0)
-  arrivalsNotCheckedIn Int @default(0)
-  exceptions   Json
-  closedAt     DateTime @default(now())
-  closedById   String?  @db.Uuid
+  id                   String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  businessDate         DateTime    @unique @db.Date
+  status               AuditStatus @default(OK)
+  openStays            Int         @default(0)
+  dirtyRooms           Int         @default(0)
+  arrivalsNotCheckedIn Int         @default(0)
+  exceptions           Json
+  closedAt             DateTime    @default(now())
+  closedById           String?     @db.Uuid
 
   @@map("night_audit_runs")
 }
@@ -352,8 +352,8 @@ model PosOutlet {
   nameEn String
   nameFa String
 
-  orders PosOrder[]
-  diningAreas DiningArea[]
+  orders           PosOrder[]
+  diningAreas      DiningArea[]
   restaurantOrders RestaurantOrder[]
 
   @@map("pos_outlets")
@@ -380,13 +380,13 @@ model PosOrder {
 // ───────────────────────── حسابداری هسته ─────────────────────────
 
 model Account {
-  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code       String  @unique
-  nameEn     String
-  nameFa     String
-  type       AccountType
-  isSensitive Boolean @default(false) // ویرایش فقط با مجوز sensitive_accounts.edit
-  parentCode String?
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code        String      @unique
+  nameEn      String
+  nameFa      String
+  type        AccountType
+  isSensitive Boolean     @default(false) // ویرایش فقط با مجوز sensitive_accounts.edit
+  parentCode  String?
 
   lines JournalLine[]
 
@@ -404,16 +404,84 @@ enum AccountType {
 }
 
 model FiscalPeriod {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code      String   @unique // مثال: 1405-09
-  startDate DateTime @db.Date
-  endDate   DateTime @db.Date
-  status    FiscalPeriodStatus @default(OPEN)
-  lockedAt  DateTime?
+  id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code           String             @unique // مثال: 1405-09
+  startDate      DateTime           @db.Date
+  endDate        DateTime           @db.Date
+  status         FiscalPeriodStatus @default(OPEN)
+  lockedAt       DateTime?
+  closedAt       DateTime? // فاز ۸ — زمان بستن رسمی دوره
+  closingEntryId String?            @db.Uuid // فاز ۸ — سند اختتام (انتقال به سود انباشته)
 
   entries JournalEntry[]
 
   @@map("fiscal_periods")
+}
+
+// فاز ۸ — پیوست سند مالی (متادیتا + ارجاع فایل)
+model JournalAttachment {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entryId      String   @db.Uuid
+  fileName     String
+  mimeType     String   @default("application/octet-stream")
+  sizeBytes    Int      @default(0)
+  dataRef      String? // مسیر/URL فایل در انبار پیوست
+  uploadedById String?  @db.Uuid
+  createdAt    DateTime @default(now())
+
+  entry JournalEntry @relation(fields: [entryId], references: [id])
+
+  @@index([entryId])
+  @@map("journal_attachments")
+}
+
+// فاز ۸ — مراکز هزینه/سود
+model CostCenter {
+  code   String  @id
+  nameFa String
+  nameEn String
+  kind   String  @default("COST") // COST | PROFIT
+  active Boolean @default(true)
+
+  @@map("cost_centers")
+}
+
+// فاز ۸ — موتور پارامتریک نگاشت رویداد→سند (F8-T2)
+model EventJournalMapping {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventName           String   @unique
+  amountField         String   @default("amountRials")
+  debitAccount        String
+  creditAccount       String
+  descriptionTemplate String
+  costCenterCode      String?
+  active              Boolean  @default(true)
+  version             Int      @default(1)
+  updatedAt           DateTime @updatedAt
+
+  @@map("event_journal_mappings")
+}
+
+// فاز ۹ — کتابخانه قوانین با متادیتای ۱۲گانه (F9-T1)
+model LawRule {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code          String    @unique // LAW-VAT-1404
+  title         String
+  lawName       String
+  article       String    @default("")
+  note          String    @default("")
+  effectiveFrom DateTime  @db.Date
+  effectiveTo   DateTime? @db.Date
+  version       String    @default("1.0")
+  params        Json      @default("{}") // نرخ‌ها و پارامترهای عددی
+  testScenario  String    @default("")
+  legalOwner    String    @default("")
+  sourceRef     String    @default("")
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("law_rules")
 }
 
 enum FiscalPeriodStatus {
@@ -424,27 +492,29 @@ enum FiscalPeriodStatus {
 }
 
 model JournalEntry {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  entryNo      String   @unique // JV-1405-000001
-  entryDate    DateTime @db.Date
-  postingDate  DateTime @db.Date
-  periodId     String?  @db.Uuid
-  description  String
-  status       JournalStatus @default(DRAFT)
-  sourceModule String
-  sourceRef    String
-  sourceEventId String? @db.Uuid
-  reversedByEntryId String? @db.Uuid
-  createdById  String?  @db.Uuid
-  approvedById String?  @db.Uuid
-  approvedAt   DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entryNo           String        @unique // JV-1405-000001
+  docIndex          BigInt? // شماره عطف سند قطعی (ترتیب دفاتر رسمی)
+  entryDate         DateTime      @db.Date
+  postingDate       DateTime      @db.Date
+  periodId          String?       @db.Uuid
+  description       String
+  status            JournalStatus @default(DRAFT)
+  sourceModule      String
+  sourceRef         String
+  sourceEventId     String?       @db.Uuid
+  reversedByEntryId String?       @db.Uuid
+  createdById       String?       @db.Uuid
+  approvedById      String?       @db.Uuid
+  approvedAt        DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
-  period     FiscalPeriod? @relation(fields: [periodId], references: [id])
-  createdBy  User?         @relation("EntryCreator", fields: [createdById], references: [id])
-  approvedBy User?         @relation("EntryApprover", fields: [approvedById], references: [id])
-  lines      JournalLine[]
+  period      FiscalPeriod?       @relation(fields: [periodId], references: [id])
+  createdBy   User?               @relation("EntryCreator", fields: [createdById], references: [id])
+  approvedBy  User?               @relation("EntryApprover", fields: [approvedById], references: [id])
+  lines       JournalLine[]
+  attachments JournalAttachment[]
 
   @@index([sourceModule, sourceRef])
   @@index([status])
@@ -478,12 +548,12 @@ model JournalLine {
 // ───────────────────────── موتور سند خودکار (نگاشت رویداد←سند، پارامتریک) ─────────────────────────
 
 model EventJournalRule {
-  id               String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  ruleId           String  @unique // res_confirmed | pos_served ...
-  eventName        String  @unique
-  descriptionFa    String
-  linesJson        Json // [{accountCode, side: 'debit'|'credit', amountKind: 'total'|'tax'|'net'}]
-  isActive         Boolean @default(true)
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ruleId        String  @unique // res_confirmed | pos_served ...
+  eventName     String  @unique
+  descriptionFa String
+  linesJson     Json // [{accountCode, side: 'debit'|'credit', amountKind: 'total'|'tax'|'net'}]
+  isActive      Boolean @default(true)
 
   @@map("event_journal_rules")
 }
@@ -491,18 +561,18 @@ model EventJournalRule {
 // ───────────────────────── حقوق و دستمزد (فاز ۲ — F2-T1…T4) ─────────────────────────
 
 model Employee {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code        String    @unique
-  firstName   String
-  lastName    String
-  nationalId  String?   @unique
-  iban        String?
-  marital     Boolean   @default(false)
-  dependents  Int       @default(0)
-  hireDate    DateTime? @db.Date
-  active      Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code       String    @unique
+  firstName  String
+  lastName   String
+  nationalId String?   @unique
+  iban       String?
+  marital    Boolean   @default(false)
+  dependents Int       @default(0)
+  hireDate   DateTime? @db.Date
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   decisions SalaryDecision[]
   slips     PayrollSlip[]
@@ -511,19 +581,19 @@ model Employee {
 }
 
 model SalaryDecision {
-  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  employeeId   String         @db.Uuid
-  baseSalary   BigInt
-  seniority    BigInt         @default(0)
-  housing      BigInt         @default(0)
-  effectiveFrom DateTime      @db.Date
-  status       DecisionStatus @default(DRAFT)
-  note         String?
-  createdById  String?        @db.Uuid
-  approvedById String?        @db.Uuid
-  approvedAt   DateTime?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  employeeId    String         @db.Uuid
+  baseSalary    BigInt
+  seniority     BigInt         @default(0)
+  housing       BigInt         @default(0)
+  effectiveFrom DateTime       @db.Date
+  status        DecisionStatus @default(DRAFT)
+  note          String?
+  createdById   String?        @db.Uuid
+  approvedById  String?        @db.Uuid
+  approvedAt    DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
 
@@ -539,23 +609,23 @@ enum DecisionStatus {
 }
 
 model PayrollRun {
-  id                String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  periodCode        String           @unique // '1405-09'
-  status            PayrollRunStatus @default(DRAFT)
-  paramsVersion     String
-  grossRials        BigInt           @default(0)
-  netRials          BigInt           @default(0)
-  taxRials          BigInt           @default(0)
-  insEmployeeRials  BigInt           @default(0)
-  insEmployerRials  BigInt           @default(0)
-  employeeCount     Int              @default(0)
-  skippedJson       Json?
-  journalEntryId    String?          @db.Uuid
-  createdById       String?          @db.Uuid
-  approvedById      String?          @db.Uuid
-  approvedAt        DateTime?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  periodCode       String           @unique // '1405-09'
+  status           PayrollRunStatus @default(DRAFT)
+  paramsVersion    String
+  grossRials       BigInt           @default(0)
+  netRials         BigInt           @default(0)
+  taxRials         BigInt           @default(0)
+  insEmployeeRials BigInt           @default(0)
+  insEmployerRials BigInt           @default(0)
+  employeeCount    Int              @default(0)
+  skippedJson      Json?
+  journalEntryId   String?          @db.Uuid
+  createdById      String?          @db.Uuid
+  approvedById     String?          @db.Uuid
+  approvedAt       DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   slips PayrollSlip[]
 
@@ -570,26 +640,26 @@ enum PayrollRunStatus {
 }
 
 model PayrollSlip {
-  id             String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  runId          String @db.Uuid
-  employeeId     String @db.Uuid
-  mizanRials     BigInt @default(0)
-  dailyRials     BigInt @default(0)
-  hourlyRials    BigInt @default(0)
-  overtimeRials  BigInt @default(0)
-  nightRials     BigInt @default(0)
-  housingRials   BigInt @default(0)
-  childAllowRials BigInt @default(0)
-  absentRials    BigInt @default(0)
-  grossRials     BigInt @default(0)
-  insEmployeeRials BigInt @default(0)
-  insEmployerRials BigInt @default(0)
+  id                  String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  runId               String @db.Uuid
+  employeeId          String @db.Uuid
+  mizanRials          BigInt @default(0)
+  dailyRials          BigInt @default(0)
+  hourlyRials         BigInt @default(0)
+  overtimeRials       BigInt @default(0)
+  nightRials          BigInt @default(0)
+  housingRials        BigInt @default(0)
+  childAllowRials     BigInt @default(0)
+  absentRials         BigInt @default(0)
+  grossRials          BigInt @default(0)
+  insEmployeeRials    BigInt @default(0)
+  insEmployerRials    BigInt @default(0)
   monthlyTaxableRials BigInt @default(0)
   annualTaxableRials  BigInt @default(0)
-  taxRials       BigInt @default(0)
-  netRials       BigInt @default(0)
-  overridesJson  Json?
-  paramsVersion  String
+  taxRials            BigInt @default(0)
+  netRials            BigInt @default(0)
+  overridesJson       Json?
+  paramsVersion       String
 
   run      PayrollRun @relation(fields: [runId], references: [id], onDelete: Cascade)
   employee Employee   @relation(fields: [employeeId], references: [id], onDelete: Restrict)
@@ -601,18 +671,18 @@ model PayrollSlip {
 // ───────────────────────── فاز ۵ — صندوق، پرداخت و خزانه‌داری (نقشه ۷.۲) ─────────────────────────
 
 model CashAccount {
-  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code          String @unique // CH-01 صندوق پذیرش، BN-01 بانک ملت…
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code          String          @unique // CH-01 صندوق پذیرش، BN-01 بانک ملت…
   nameEn        String
   nameFa        String
   kind          CashAccountKind
   glAccountCode String // حساب کل متصل (۱۱۰۱ صندوق / ۱۱۰۲ بانک) — بدون FK، با seed کنترل می‌شود
-  active        Boolean @default(true)
-  createdAt     DateTime @default(now())
+  active        Boolean         @default(true)
+  createdAt     DateTime        @default(now())
 
-  shifts         CashierShift[]
-  transactions   CashTransaction[]
-  statementLines BankStatementLine[]
+  shifts          CashierShift[]
+  transactions    CashTransaction[]
+  statementLines  BankStatementLine[]
   reconciliations ReconciliationRun[]
 
   @@map("cash_accounts")
@@ -626,20 +696,20 @@ enum CashAccountKind {
 }
 
 model CashierShift {
-  id                String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code              String  @unique // SHF-<jy>-<seq>
-  cashAccountId     String  @db.Uuid
-  businessDate      DateTime @db.Date
-  openingFloatRials BigInt  @default(0)
+  id                String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code              String          @unique // SHF-<jy>-<seq>
+  cashAccountId     String          @db.Uuid
+  businessDate      DateTime        @db.Date
+  openingFloatRials BigInt          @default(0)
   countedRials      BigInt?
   varianceRials     BigInt?
   status            CashShiftStatus @default(OPEN)
   note              String?
-  openedById        String? @db.Uuid
-  openedAt          DateTime @default(now())
+  openedById        String?         @db.Uuid
+  openedAt          DateTime        @default(now())
   closedAt          DateTime?
 
-  cashAccount CashAccount       @relation(fields: [cashAccountId], references: [id])
+  cashAccount  CashAccount       @relation(fields: [cashAccountId], references: [id])
   transactions CashTransaction[]
 
   @@index([cashAccountId, status])
@@ -654,25 +724,25 @@ enum CashShiftStatus {
 }
 
 model CashTransaction {
-  id                  String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  txnNo               String @unique // TXN-<jy>-<seq>
-  cashAccountId       String @db.Uuid
-  shiftId             String? @db.Uuid
-  kind                CashTxnKind
-  method              CashTxnMethod
-  amountRials         BigInt // همیشه مثبت؛ جهت با kind
-  traceNo             String? // شناسه پیگیری بانک/درگاه
+  id                   String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  txnNo                String        @unique // TXN-<jy>-<seq>
+  cashAccountId        String        @db.Uuid
+  shiftId              String?       @db.Uuid
+  kind                 CashTxnKind
+  method               CashTxnMethod
+  amountRials          BigInt // همیشه مثبت؛ جهت با kind
+  traceNo              String? // شناسه پیگیری بانک/درگاه
   counterGlAccountCode String? // حساب طرف مقابل (پیش‌فرض از seed)
-  stayId              String? @db.Uuid // شارژ فولیوی اقامت
-  payerName           String?
-  note                String?
-  businessDate        DateTime @db.Date
-  status              CashTxnStatus @default(POSTED)
-  idempotencyKey      String @unique
-  createdById         String? @db.Uuid
-  createdAt           DateTime @default(now())
+  stayId               String?       @db.Uuid // شارژ فولیوی اقامت
+  payerName            String?
+  note                 String?
+  businessDate         DateTime      @db.Date
+  status               CashTxnStatus @default(POSTED)
+  idempotencyKey       String        @unique
+  createdById          String?       @db.Uuid
+  createdAt            DateTime      @default(now())
 
-  cashAccount CashAccount  @relation(fields: [cashAccountId], references: [id])
+  cashAccount CashAccount   @relation(fields: [cashAccountId], references: [id])
   shift       CashierShift? @relation(fields: [shiftId], references: [id])
   stay        Stay?         @relation(fields: [stayId], references: [id])
 
@@ -708,17 +778,17 @@ enum CashTxnStatus {
 }
 
 model BankStatementLine {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  cashAccountId  String   @db.Uuid
-  valueDate      DateTime @db.Date
-  externalRef    String // شماره سند بانک
-  description    String
-  debitRials     BigInt   @default(0)
-  creditRials    BigInt   @default(0)
-  matchedTxnId   String?  @db.Uuid
-  matchedAt      DateTime?
-  createdById    String?  @db.Uuid
-  createdAt      DateTime @default(now())
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  cashAccountId String    @db.Uuid
+  valueDate     DateTime  @db.Date
+  externalRef   String // شماره سند بانک
+  description   String
+  debitRials    BigInt    @default(0)
+  creditRials   BigInt    @default(0)
+  matchedTxnId  String?   @db.Uuid
+  matchedAt     DateTime?
+  createdById   String?   @db.Uuid
+  createdAt     DateTime  @default(now())
 
   cashAccount CashAccount @relation(fields: [cashAccountId], references: [id])
 
@@ -746,18 +816,18 @@ model ReconciliationRun {
 // ───────────────────────── فاز ۱۰ — خانه‌داری، لاندری و تعمیرات (نقشه ۷.۴) ─────────────────────────
 
 model RoomTask {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  roomId       String   @db.Uuid
-  kind         RoomTaskKind
-  status       RoomTaskStatus @default(PENDING)
-  priority     TaskPriority @default(NORMAL)
-  assigneeId   String?  @db.Uuid
-  scheduledDate DateTime @db.Date
-  startedAt    DateTime?
-  doneAt       DateTime?
-  note         String?
-  createdById  String?  @db.Uuid
-  createdAt    DateTime @default(now())
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomId        String         @db.Uuid
+  kind          RoomTaskKind
+  status        RoomTaskStatus @default(PENDING)
+  priority      TaskPriority   @default(NORMAL)
+  assigneeId    String?        @db.Uuid
+  scheduledDate DateTime       @db.Date
+  startedAt     DateTime?
+  doneAt        DateTime?
+  note          String?
+  createdById   String?        @db.Uuid
+  createdAt     DateTime       @default(now())
 
   room Room @relation(fields: [roomId], references: [id])
 
@@ -794,14 +864,14 @@ enum TaskPriority {
 }
 
 model RoomInspection {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  roomId         String   @db.Uuid
-  taskId         String?  @db.Uuid
-  passed         Boolean
-  score          Int?
-  issuesJson     Json?
-  inspectedById  String?  @db.Uuid
-  inspectedAt    DateTime @default(now())
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomId        String   @db.Uuid
+  taskId        String?  @db.Uuid
+  passed        Boolean
+  score         Int?
+  issuesJson    Json?
+  inspectedById String?  @db.Uuid
+  inspectedAt   DateTime @default(now())
 
   room Room @relation(fields: [roomId], references: [id])
 
@@ -810,23 +880,23 @@ model RoomInspection {
 }
 
 model MaintenanceRequest {
-  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  requestNo      String   @unique // MNT-<jy>-<seq>
-  roomId         String?  @db.Uuid
-  assetId        String?  @db.Uuid
+  id             String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  requestNo      String            @unique // MNT-<jy>-<seq>
+  roomId         String?           @db.Uuid
+  assetId        String?           @db.Uuid
   title          String
   description    String
-  priority       TaskPriority @default(NORMAL)
+  priority       TaskPriority      @default(NORMAL)
   status         MaintenanceStatus @default(OPEN)
-  reportedById   String?  @db.Uuid
-  assigneeId     String?  @db.Uuid
-  openedAt       DateTime @default(now())
+  reportedById   String?           @db.Uuid
+  assigneeId     String?           @db.Uuid
+  openedAt       DateTime          @default(now())
   closedAt       DateTime?
   resolutionNote String?
   costRials      BigInt?
 
-  room       Room?        @relation(fields: [roomId], references: [id])
-  asset      FixedAsset?  @relation(fields: [assetId], references: [id])
+  room  Room?       @relation(fields: [roomId], references: [id])
+  asset FixedAsset? @relation(fields: [assetId], references: [id])
 
   @@index([status, priority])
   @@map("maintenance_requests")
@@ -843,11 +913,11 @@ enum MaintenanceStatus {
 }
 
 model LinenItem {
-  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code   String @unique
+  id     String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code   String  @unique
   nameEn String
   nameFa String
-  unit   String @default("عدد")
+  unit   String  @default("عدد")
   active Boolean @default(true)
 
   movements LaundryMovement[]
@@ -856,13 +926,13 @@ model LinenItem {
 }
 
 model LaundryBatch {
-  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code       String   @unique // LDY-<jy>-<seq>
+  id         String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code       String           @unique // LDY-<jy>-<seq>
   direction  LaundryDirection
-  status     LaundryStatus @default(OPEN)
-  openedAt   DateTime @default(now())
+  status     LaundryStatus    @default(OPEN)
+  openedAt   DateTime         @default(now())
   closedAt   DateTime?
-  openedById String?  @db.Uuid
+  openedById String?          @db.Uuid
 
   movements LaundryMovement[]
 
@@ -884,11 +954,11 @@ enum LaundryStatus {
 }
 
 model LaundryMovement {
-  id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  batchId      String @db.Uuid
-  linenItemId  String @db.Uuid
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  batchId      String   @db.Uuid
+  linenItemId  String   @db.Uuid
   qty          Int
-  recordedById String? @db.Uuid
+  recordedById String?  @db.Uuid
   recordedAt   DateTime @default(now())
 
   batch LaundryBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
@@ -899,17 +969,17 @@ model LaundryMovement {
 }
 
 model LostAndFound {
-  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code            String   @unique // LNF-<jy>-<seq>
-  roomId          String   @db.Uuid
+  id              String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code            String          @unique // LNF-<jy>-<seq>
+  roomId          String          @db.Uuid
   itemDesc        String
-  foundAt         DateTime @default(now())
+  foundAt         DateTime        @default(now())
   storageLocation String
   status          LostFoundStatus @default(STORED)
   returnedTo      String?
   returnedAt      DateTime?
   note            String?
-  foundById       String?  @db.Uuid
+  foundById       String?         @db.Uuid
 
   room Room @relation(fields: [roomId], references: [id])
 
@@ -927,26 +997,26 @@ enum LostFoundStatus {
 // ───────────────────────── فاز ۱۰ — دارایی ثابت (نقشه ۷.۸) ─────────────────────────
 
 model FixedAsset {
-  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  assetCode              String   @unique // FA-<seq>
-  nameEn                 String
-  nameFa                 String
-  category               String // FUN | ELE | VEH | FUR | IT | OTHER
-  acquiredAt             DateTime @db.Date
-  costRials              BigInt
-  salvageRials           BigInt   @default(0)
-  usefulLifeMonths       Int
-  method                 DepreciationMethod @default(STRAIGHT_LINE)
-  glAssetAccountCode     String // ۱۵۰۱ دارایی ثابت
-  glAccDepAccountCode    String // ۱۵۰۲ استهلاک انباشته
+  id                      String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assetCode               String             @unique // FA-<seq>
+  nameEn                  String
+  nameFa                  String
+  category                String // FUN | ELE | VEH | FUR | IT | OTHER
+  acquiredAt              DateTime           @db.Date
+  costRials               BigInt
+  salvageRials            BigInt             @default(0)
+  usefulLifeMonths        Int
+  method                  DepreciationMethod @default(STRAIGHT_LINE)
+  glAssetAccountCode      String // ۱۵۰۱ دارایی ثابت
+  glAccDepAccountCode     String // ۱۵۰۲ استهلاک انباشته
   glDepExpenseAccountCode String // ۵۲۰۱ هزینه استهلاک
-  roomId                 String?  @db.Uuid
-  status                 AssetStatus @default(ACTIVE)
-  note                   String?
-  createdById            String?  @db.Uuid
-  createdAt              DateTime @default(now())
+  roomId                  String?            @db.Uuid
+  status                  AssetStatus        @default(ACTIVE)
+  note                    String?
+  createdById             String?            @db.Uuid
+  createdAt               DateTime           @default(now())
 
-  room                Room?                  @relation(fields: [roomId], references: [id])
+  room                Room?                @relation(fields: [roomId], references: [id])
   depreciations       AssetDepreciation[]
   maintenanceRequests MaintenanceRequest[]
 
@@ -969,14 +1039,14 @@ enum AssetStatus {
 }
 
 model AssetDepreciation {
-  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  assetId         String   @db.Uuid
-  periodCode      String   // '1405-09'
-  amountRials     BigInt
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  assetId          String   @db.Uuid
+  periodCode       String // '1405-09'
+  amountRials      BigInt
   accumulatedRials BigInt
-  journalEntryNo  String?
-  postedAt        DateTime @default(now())
-  idempotencyKey  String   @unique
+  journalEntryNo   String?
+  postedAt         DateTime @default(now())
+  idempotencyKey   String   @unique
 
   asset FixedAsset @relation(fields: [assetId], references: [id], onDelete: Cascade)
 
@@ -987,16 +1057,16 @@ model AssetDepreciation {
 // ───────────────────────── فاز ۱۰ — خدمات جانبی (نقشه ۷.۱۰) ─────────────────────────
 
 model AncillaryService {
-  id                 String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code               String  @unique // SVC-PHONE، SVC-PARKING…
-  nameEn             String
-  nameFa             String
-  category           AncillaryCategory
-  unitPriceRials     BigInt
-  taxRateBps         Int     @default(900) // ۹٪ ارزش افزوده بر حسب basis point
+  id                   String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                 String            @unique // SVC-PHONE، SVC-PARKING…
+  nameEn               String
+  nameFa               String
+  category             AncillaryCategory
+  unitPriceRials       BigInt
+  taxRateBps           Int               @default(900) // ۹٪ ارزش افزوده بر حسب basis point
   glRevenueAccountCode String // ۴۱۰۳ درآمد خدمات جانبی
-  active             Boolean @default(true)
-  createdAt          DateTime @default(now())
+  active               Boolean           @default(true)
+  createdAt            DateTime          @default(now())
 
   orders AncillaryOrder[]
 
@@ -1017,21 +1087,21 @@ enum AncillaryCategory {
 }
 
 model AncillaryOrder {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  orderNo       String   @unique // SVC-<jy>-<seq>
-  serviceId     String   @db.Uuid
-  quantity      Int
+  id             String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderNo        String               @unique // SVC-<jy>-<seq>
+  serviceId      String               @db.Uuid
+  quantity       Int
   unitPriceRials BigInt
-  netRials      BigInt
-  taxRials      BigInt
-  totalRials    BigInt
-  stayId        String?  @db.Uuid // شارژ فولیوی اقامت
-  guestName     String?
-  status        AncillaryOrderStatus @default(CONFIRMED)
-  servedAt      DateTime @default(now())
-  servedById    String?  @db.Uuid
-  idempotencyKey String  @unique
-  note          String?
+  netRials       BigInt
+  taxRials       BigInt
+  totalRials     BigInt
+  stayId         String?              @db.Uuid // شارژ فولیوی اقامت
+  guestName      String?
+  status         AncillaryOrderStatus @default(CONFIRMED)
+  servedAt       DateTime             @default(now())
+  servedById     String?              @db.Uuid
+  idempotencyKey String               @unique
+  note           String?
 
   service AncillaryService @relation(fields: [serviceId], references: [id])
   stay    Stay?            @relation(fields: [stayId], references: [id])
@@ -1056,18 +1126,18 @@ model DiningArea {
   nameEn   String
   nameFa   String
 
-  outlet PosOutlet      @relation(fields: [outletId], references: [id])
+  outlet PosOutlet     @relation(fields: [outletId], references: [id])
   tables DiningTable[]
 
   @@map("dining_areas")
 }
 
 model DiningTable {
-  id      String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  areaId  String @db.Uuid
-  code    String @unique
-  seats   Int    @default(4)
-  status  TableStatus @default(FREE)
+  id     String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  areaId String      @db.Uuid
+  code   String      @unique
+  seats  Int         @default(4)
+  status TableStatus @default(FREE)
 
   area DiningArea @relation(fields: [areaId], references: [id])
 
@@ -1096,18 +1166,18 @@ model MenuCategory {
 }
 
 model MenuItem {
-  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  categoryId  String  @db.Uuid
-  code        String  @unique
-  nameEn      String
-  nameFa      String
-  priceRials  BigInt
-  taxRateBps  Int     @default(900)
-  recipeId    String? @db.Uuid // null = سیاست مصرف مشخص (مصرف انبار نمی‌شود)
-  active      Boolean @default(true)
+  id         String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  categoryId String  @db.Uuid
+  code       String  @unique
+  nameEn     String
+  nameFa     String
+  priceRials BigInt
+  taxRateBps Int     @default(900)
+  recipeId   String? @db.Uuid // null = سیاست مصرف مشخص (مصرف انبار نمی‌شود)
+  active     Boolean @default(true)
 
-  category MenuCategory @relation(fields: [categoryId], references: [id])
-  recipe   Recipe?      @relation(fields: [recipeId], references: [id])
+  category   MenuCategory @relation(fields: [categoryId], references: [id])
+  recipe     Recipe?      @relation(fields: [recipeId], references: [id])
   orderItems OrderItem[]
 
   @@map("menu_items")
@@ -1123,18 +1193,18 @@ model Recipe {
   note          String?
   active        Boolean @default(true)
 
-  menuItems  MenuItem[]
+  menuItems   MenuItem[]
   recipeLines RecipeLine[]
 
   @@map("recipes")
 }
 
 model RecipeLine {
-  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  recipeId      String  @db.Uuid
-  stockItemId   String  @db.Uuid
-  qtyPerPortion Decimal @db.Decimal(12, 3)
-  wasteFactorBps Int    @default(0) // افت پاک‌کردن و پخت
+  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipeId       String  @db.Uuid
+  stockItemId    String  @db.Uuid
+  qtyPerPortion  Decimal @db.Decimal(12, 3)
+  wasteFactorBps Int     @default(0) // افت پاک‌کردن و پخت
 
   recipe    Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   stockItem StockItem @relation(fields: [stockItemId], references: [id])
@@ -1144,29 +1214,29 @@ model RecipeLine {
 }
 
 model RestaurantOrder {
-  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  orderNo        String  @unique // RORD-<jy>-<seq>
-  outletId       String  @db.Uuid
-  areaId         String? @db.Uuid
-  tableId        String? @db.Uuid
-  mode           OrderMode @default(DINE_IN)
-  stayId         String? @db.Uuid // روم‌سرویس — شارژ فولیو
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderNo        String      @unique // RORD-<jy>-<seq>
+  outletId       String      @db.Uuid
+  areaId         String?     @db.Uuid
+  tableId        String?     @db.Uuid
+  mode           OrderMode   @default(DINE_IN)
+  stayId         String?     @db.Uuid // روم‌سرویس — شارژ فولیو
   guestName      String?
   status         OrderStatus @default(OPEN)
-  discountRials  BigInt  @default(0)
+  discountRials  BigInt      @default(0)
   discountReason String?
-  netRials       BigInt  @default(0)
-  taxRials       BigInt  @default(0)
-  totalRials     BigInt  @default(0)
-  idempotencyKey String  @unique
-  openedById     String? @db.Uuid
-  openedAt       DateTime @default(now())
+  netRials       BigInt      @default(0)
+  taxRials       BigInt      @default(0)
+  totalRials     BigInt      @default(0)
+  idempotencyKey String      @unique
+  openedById     String?     @db.Uuid
+  openedAt       DateTime    @default(now())
   servedAt       DateTime?
   note           String?
 
-  outlet PosOutlet   @relation(fields: [outletId], references: [id])
-  stay   Stay?       @relation(fields: [stayId], references: [id])
-  items  OrderItem[]
+  outlet  PosOutlet       @relation(fields: [outletId], references: [id])
+  stay    Stay?           @relation(fields: [stayId], references: [id])
+  items   OrderItem[]
   tickets KitchenTicket[]
 
   @@index([outletId, status])
@@ -1190,9 +1260,9 @@ enum OrderStatus {
 }
 
 model OrderItem {
-  id             String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  orderId        String @db.Uuid
-  menuItemId     String @db.Uuid
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  orderId        String          @db.Uuid
+  menuItemId     String          @db.Uuid
   qty            Int
   unitPriceRials BigInt // snapshot نرخ هنگام ثبت
   lineNetRials   BigInt
@@ -1220,13 +1290,13 @@ enum OrderItemStatus {
 }
 
 model KitchenTicket {
-  id         String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  ticketNo   String @unique // KDS-<jy>-<seq>
-  orderId    String @db.Uuid
+  id         String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ticketNo   String              @unique // KDS-<jy>-<seq>
+  orderId    String              @db.Uuid
   status     KitchenTicketStatus @default(QUEUED)
   tableLabel String?
   itemsJson  Json // snapshot اقلام بلیت
-  openedAt   DateTime @default(now())
+  openedAt   DateTime            @default(now())
   readyAt    DateTime?
   servedAt   DateTime?
 
@@ -1277,7 +1347,7 @@ model StockItem {
   allowNegative    Boolean @default(true) // منفی فقط با مجوز صریح
   active           Boolean @default(true)
 
-  warehouse   Warehouse?     @relation(fields: [warehouseId], references: [id])
+  warehouse   Warehouse?                @relation(fields: [warehouseId], references: [id])
   movements   StockMovement[]
   recipeLines RecipeLine[]
   reqLines    PurchaseRequisitionLine[] @relation("reqLines")
@@ -1289,18 +1359,18 @@ model StockItem {
 }
 
 model StockMovement {
-  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  stockItemId   String  @db.Uuid
-  warehouseId   String  @db.Uuid
+  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  stockItemId   String            @db.Uuid
+  warehouseId   String            @db.Uuid
   direction     MovementDirection
-  qty           Decimal @db.Decimal(12, 3)
+  qty           Decimal           @db.Decimal(12, 3)
   unitCostRials BigInt
   valueRials    BigInt
   refModule     String // procurement | restaurant | stores
   refId         String?
   note          String?
-  createdById   String? @db.Uuid
-  createdAt     DateTime @default(now())
+  createdById   String?           @db.Uuid
+  createdAt     DateTime          @default(now())
 
   stockItem StockItem @relation(fields: [stockItemId], references: [id])
   warehouse Warehouse @relation(fields: [warehouseId], references: [id])
@@ -1335,14 +1405,14 @@ model Supplier {
 }
 
 model PurchaseRequisition {
-  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  reqNo         String @unique // REQ-<jy>-<seq>
+  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reqNo         String            @unique // REQ-<jy>-<seq>
   status        RequisitionStatus @default(DRAFT)
-  requestedById String? @db.Uuid
-  decidedById   String? @db.Uuid
+  requestedById String?           @db.Uuid
+  decidedById   String?           @db.Uuid
   decidedAt     DateTime?
   note          String?
-  createdAt     DateTime @default(now())
+  createdAt     DateTime          @default(now())
 
   lines  PurchaseRequisitionLine[]
   orders PurchaseOrder[]
@@ -1374,22 +1444,23 @@ model PurchaseRequisitionLine {
 }
 
 model PurchaseOrder {
-  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  poNo          String @unique // PO-<jy>-<seq>
-  supplierId    String @db.Uuid
-  requisitionId String? @db.Uuid
-  status        PoStatus @default(DRAFT)
-  subtotalRials BigInt @default(0)
-  taxRials      BigInt @default(0)
-  totalRials    BigInt @default(0)
-  decidedById   String? @db.Uuid
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  poNo          String    @unique // PO-<jy>-<seq>
+  supplierId    String    @db.Uuid
+  requisitionId String?   @db.Uuid
+  status        PoStatus  @default(DRAFT)
+  subtotalRials BigInt    @default(0)
+  taxRials      BigInt    @default(0)
+  totalRials    BigInt    @default(0)
+  decidedById   String?   @db.Uuid
   decidedAt     DateTime?
-  createdAt     DateTime @default(now())
+  createdAt     DateTime  @default(now())
 
-  supplier    Supplier            @relation(fields: [supplierId], references: [id])
+  supplier    Supplier             @relation(fields: [supplierId], references: [id])
   requisition PurchaseRequisition? @relation(fields: [requisitionId], references: [id])
   lines       PurchaseOrderLine[]
   receipts    GoodsReceipt[]
+
   @@index([supplierId, status])
   @@map("purchase_orders")
 }
@@ -1405,28 +1476,28 @@ enum PoStatus {
 }
 
 model PurchaseOrderLine {
-  id           String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  poId         String  @db.Uuid
-  stockItemId  String  @db.Uuid
-  qtyOrdered   Decimal @db.Decimal(12, 3)
-  qtyReceived  Decimal @default(0) @db.Decimal(12, 3)
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  poId          String  @db.Uuid
+  stockItemId   String  @db.Uuid
+  qtyOrdered    Decimal @db.Decimal(12, 3)
+  qtyReceived   Decimal @default(0) @db.Decimal(12, 3)
   unitCostRials BigInt
-  taxRateBps   Int     @default(900)
+  taxRateBps    Int     @default(900)
 
-  po        PurchaseOrder @relation(fields: [poId], references: [id], onDelete: Cascade)
-  stockItem StockItem     @relation("poLines", fields: [stockItemId], references: [id])
+  po           PurchaseOrder      @relation(fields: [poId], references: [id], onDelete: Cascade)
+  stockItem    StockItem          @relation("poLines", fields: [stockItemId], references: [id])
   receiptLines GoodsReceiptLine[]
 
   @@map("purchase_order_lines")
 }
 
 model GoodsReceipt {
-  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  grnNo       String @unique // GRN-<jy>-<seq>
-  poId        String @db.Uuid
-  receivedById String? @db.Uuid
-  receivedAt  DateTime @default(now())
-  note        String?
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  grnNo        String   @unique // GRN-<jy>-<seq>
+  poId         String   @db.Uuid
+  receivedById String?  @db.Uuid
+  receivedAt   DateTime @default(now())
+  note         String?
 
   po    PurchaseOrder      @relation(fields: [poId], references: [id])
   lines GoodsReceiptLine[]
@@ -1435,10 +1506,10 @@ model GoodsReceipt {
 }
 
 model GoodsReceiptLine {
-  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  grnId         String  @db.Uuid
-  poLineId      String  @db.Uuid
-  qtyReceived   Decimal @db.Decimal(12, 3)
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  grnId         String    @db.Uuid
+  poLineId      String    @db.Uuid
+  qtyReceived   Decimal   @db.Decimal(12, 3)
   unitCostRials BigInt
   expiryDate    DateTime? @db.Date
 
@@ -1449,16 +1520,16 @@ model GoodsReceiptLine {
 }
 
 model StockCount {
-  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  countNo     String @unique // CNT-<jy>-<seq>
-  warehouseId String @db.Uuid
+  id          String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  countNo     String      @unique // CNT-<jy>-<seq>
+  warehouseId String      @db.Uuid
   status      CountStatus @default(OPEN)
-  countedById String? @db.Uuid
-  countedAt   DateTime @default(now())
-  closedById  String? @db.Uuid
+  countedById String?     @db.Uuid
+  countedAt   DateTime    @default(now())
+  closedById  String?     @db.Uuid
   closedAt    DateTime?
 
-  warehouse Warehouse     @relation(fields: [warehouseId], references: [id])
+  warehouse Warehouse        @relation(fields: [warehouseId], references: [id])
   lines     StockCountLine[]
 
   @@map("stock_counts")

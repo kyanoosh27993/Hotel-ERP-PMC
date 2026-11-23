@@ -1,0 +1,10 @@
+import pgPkg from 'pg';
+const {Client}=pgPkg;
+const c=new Client({connectionString:'postgresql://hotel:hotel_ci_pass@localhost:5433/hotel_erp'});
+await c.connect();
+const s=await c.query(`select last_value from seq_journal`);
+const m=await c.query(`select max((regexp_replace("entryNo", '^JV-\\d+-', ''))::bigint) as maxseq, count(*)::int from journal_entries where "entryNo" like 'JV-%'`);
+const ob=await c.query(`select "eventName", attempts, "nextAttemptAt", "lastError" is not null as has_err from outbox_events order by "createdAt" asc limit 8`);
+console.log('seq_journal last_value:', s.rows[0].last_value, '| max entryNo seq:', m.rows[0].maxseq, '| entries:', m.rows[0].count);
+console.log('outbox (oldest first):'); ob.rows.forEach(r=>console.log(' ', r.eventName, 'attempts', r.attempts, 'next', r.nextAttemptAt, r.has_err ? 'ERR' : ''));
+await c.end();

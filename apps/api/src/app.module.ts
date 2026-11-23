@@ -19,6 +19,7 @@ import { AssetsModule } from './assets/assets.module';
 import { AncillaryModule } from './ancillary/ancillary.module';
 import { RestaurantModule } from './restaurant/restaurant.module';
 import { ProcurementModule } from './procurement/procurement.module';
+import { ComplianceModule } from './compliance/compliance.module';
 import { StoresModule } from './stores/stores.module';
 import { IntegrationHubService, AttendanceSimAdapter } from './integration/integration-hub.service';
 import { IntegrationController } from './integration/integration.controller';
@@ -45,6 +46,7 @@ import { MetricsController } from './health/metrics.controller';
     RestaurantModule,
     StoresModule,
     ProcurementModule,
+    ComplianceModule,
   ],
   controllers: [HealthController, MetricsController, IntegrationController],
   providers: [

@@ -1,0 +1,11 @@
+import pgPkg from 'pg';
+const {Client}=pgPkg;
+const c=new Client({connectionString:'postgresql://hotel:hotel_ci_pass@localhost:5433/hotel_erp'});
+await c.connect();
+const v=await c.query(`select e."entryNo", e.description, l."creditRials"::text, l."costCenterCode" from journal_lines l join journal_entries e on e.id=l."entryId" where l."accountCode"='2201' and e."postingDate"::date=current_date and l."creditRials">0`);
+console.log('2201 credits today:'); v.rows.forEach(r=>console.log(' ', r.entryNo,'|',r.creditRials,'|',r.description,'|',r.costCenterCode));
+const law=await c.query(`select "code","version","effectiveFrom" from law_rules where code='LAW-VAT-RATE'`);
+console.log('law row:', JSON.stringify(law.rows));
+const per=await c.query(`select code, status, "closedAt" is not null as closed from fiscal_periods order by code`);
+console.log('periods:', JSON.stringify(per.rows));
+await c.end();
