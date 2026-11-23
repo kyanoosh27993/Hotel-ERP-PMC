@@ -71,7 +71,7 @@
       nav.appendChild(b);
     });
     sidebar.appendChild(nav);
-    var ver = el('div', 'sidebar-ver', 'نسخه ۰.۱۰ — فارسی/RTL');
+    var ver = el('div', 'sidebar-ver', 'نسخه ۰.۱۱ — فارسی/RTL');
     sidebar.appendChild(ver);
 
     var main = el('main', 'main');
