@@ -143,6 +143,15 @@
                 });
               };
               actCell.appendChild(ap); actCell.appendChild(rj);
+              // لغو توسط آغازگر یا مدیر (سرور مجوز را دوباره چک می‌کند)
+              var cn = el('button', 'btn btn-sm', 'لغو');
+              cn.style.marginRight = '4px';
+              cn.onclick = function () {
+                api('POST', '/workflows/' + r.id + '/cancel').then(function (res2) {
+                  if ([200, 201].includes(res2.status)) loadList(); else window.alert(failText(res2));
+                });
+              };
+              actCell.appendChild(cn);
             }
             var vf = el('button', 'btn btn-sm', 'راستی‌آزمایی');
             vf.style.marginRight = '4px';
