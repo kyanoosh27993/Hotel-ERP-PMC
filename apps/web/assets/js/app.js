@@ -34,7 +34,7 @@
 
   var NAV = [
     { id: 'dashboard', title: 'داشبورد مدیر AI', icon: '▦' },
-    { id: 'rooms', title: 'نقشه اتاق (فاز ۴)', icon: '🛏' },
+    { id: 'frontdesk', title: 'نقشه اتاق (فاز ۴)', icon: '🛏' },
     { id: 'treasury', title: 'خزانه‌داری و صندوق (فاز ۵)', icon: '💰' },
     { id: 'housekeepingops', title: 'خانه‌داری و تعمیرات (فاز ۱۰)', icon: '🧹' },
     { id: 'assets', title: 'دارایی ثابت (فاز ۱۰)', icon: '🏛️' },
