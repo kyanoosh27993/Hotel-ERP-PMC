@@ -150,7 +150,11 @@ async function deElevateIfNeeded() {
 
 function run(cmd, args, opts = {}) {
   return new Promise((resolve, reject) => {
-    const p = spawn(cmd, args, { cwd: API_DIR, env: process.env, shell: IS_WIN, ...opts });
+    // باگ #۱۰ — با shell:true ویندوز، node رشتهٔ خام را به cmd می‌سپارد و مسیر نصب
+    // «C:\Program Files\HotelERP\node\node.exe» (دارای فاصله) به «'C:\Program' is not
+    // recognized» می‌شکند. همهٔ فراخواننده‌های run() باینری واقعی exe هستند (node.exe)،
+    // پس shell لازم نیست — همان الگوی runBin که روی مسیر فاصله‌دار کار می‌کند.
+    const p = spawn(cmd, args, { cwd: API_DIR, env: process.env, shell: false, ...opts });
     p.stdout.on('data', (d) => logStream.write(d));
     p.stderr.on('data', (d) => logStream.write(d));
     p.on('error', reject);
@@ -221,7 +225,7 @@ async function waitForHttp(url, timeoutMs) {
 async function main() {
   console.log('\n==============================================');
   console.log('   Hotel ERP — سامانه یکپارچه هتلداری');
-  console.log('   نسخهٔ دسکتاپ v0.5.0 — در حال راه‌اندازی…');
+  console.log('   نسخهٔ دسکتاپ v0.8.4 — در حال راه‌اندازی…');
   console.log('==============================================\n');
   log('data dir: ' + DATA_DIR);
   log('log file: ' + LOG_FILE);
