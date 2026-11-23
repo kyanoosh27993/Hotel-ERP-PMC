@@ -1,5 +1,15 @@
 /** payloadهای رویدادها — نسخه ۱ قرارداد */
 
+export interface StayCheckedOutPayload {
+  stayId: string;
+  code: string;
+  roomCodes: string[];
+  nights: number;
+  /** فولیو نهایی اقامت (شب‌ها + خدمات) برای سند تسویه */
+  folioRials: number;
+  guestName: string;
+}
+
 export interface ReservationCancelledPayload {
   reservationId: string;
   guestName: string;

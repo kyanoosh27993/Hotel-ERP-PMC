@@ -401,11 +401,26 @@ export class PmsService {
       const today = new Date().toISOString().slice(0, 10);
       const checkInDate = stay.checkInAt.toISOString().slice(0, 10);
       const nights = nightsBetween(checkInDate, today);
-      let folio = 0n;
+      // باگ #۷: فولیو قبلاً overwrite می‌شد و خدمات اقامت (روم‌سرویس و…) حذف می‌شد.
+      // مدل درست: فولیوی انباشته (شب‌های شارژشدهٔ شب‌گردی + خدمات) + شب‌های هنوز
+      // شارژنشده = کل شب‌ها − تعداد شب‌گردی‌های اجراشده از ورود تا خروج (شامل).
+      // شب‌گردی‌ای این اقامت را شارژ کرده که «هنگام اجرا» اقامت باز بوده:
+      // businessDate در بازهٔ [ورود، خروج] و زمان اجرا (closedAt) بعد از چک‌این.
+      const chargedNights = await tx.nightAuditRun.count({
+        where: {
+          businessDate: {
+            gte: new Date(`${checkInDate}T00:00:00Z`),
+            lte: new Date(`${today}T00:00:00Z`),
+          },
+          closedAt: { gte: stay.checkInAt },
+        },
+      });
+      const remainingNights = Math.max(0, nights - chargedNights);
+      let folio = stay.folioRials;
       const roomCodes: string[] = [];
       for (const sr of stay.rooms) {
         const nightly = sr.rateOverrideRials ?? sr.room.roomType.baseRateRials;
-        folio += nightly * BigInt(nights);
+        folio += BigInt(nightly) * BigInt(remainingNights);
         roomCodes.push(sr.room.code);
       }
 

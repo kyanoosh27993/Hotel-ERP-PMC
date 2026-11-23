@@ -8,6 +8,7 @@ import {
   type EventEnvelope,
   type EventName,
   type ReservationCancelledPayload,
+  type StayCheckedOutPayload,
   ReservationConfirmedPayload,
   type PosOrderServedPayload,
   type PayrollRunApprovedPayload,
@@ -51,6 +52,7 @@ export class EventJournalConsumer implements OnModuleInit {
 
     bind(EVENT_NAMES.RESERVATION_CONFIRMED, (e) => this.handleReservationConfirmed(e));
     bind(EVENT_NAMES.RESERVATION_CANCELLED, (e) => this.handleReservationCancelled(e));
+    bind(EVENT_NAMES.STAY_CHECKED_OUT, (e) => this.handleStayCheckedOut(e));
     bind(EVENT_NAMES.POS_ORDER_SERVED, (e) => this.handlePosOrderServed(e));
     bind(EVENT_NAMES.PAYROLL_RUN_APPROVED, (e) => this.handlePayrollRunApproved(e));
     // موج ۱ — فاز ۵ و ۱۰
@@ -163,6 +165,32 @@ export class EventJournalConsumer implements OnModuleInit {
       },
     );
     this.logger.log(`journal posted for reservation ${payload.reservationId}`);
+  }
+
+  /**
+   * pms.stay.checked_out → سند تسویهٔ فولیو (باگ #۷ب: تسویه اصلاً سند نمی‌خورد):
+   * بدهکار صندوق (۱۱۰۱) / بستانکار حساب مهمان (۱۲۰۱) به اندازهٔ فولیوی نهایی.
+   */
+  private async handleStayCheckedOut(envelope: EventEnvelope): Promise<void> {
+    const payload = envelope.payload as unknown as StayCheckedOutPayload;
+    const total = BigInt(payload.folioRials);
+    if (total <= 0n) return;
+
+    await this.journal.postEntryFromEvent(
+      envelope.idempotencyKey,
+      [
+        { accountCode: '1101', debitRials: total, creditRials: 0n },
+        { accountCode: '1201', debitRials: 0n, creditRials: total },
+      ],
+      {
+        description: `Auto: checkout settlement of stay ${payload.code} (${payload.nights} nights)`,
+        sourceModule: 'pms',
+        sourceRef: `checkout:${payload.stayId}`,
+        sourceEventId: envelope.eventId,
+        createdByUserId: SYSTEM_ENGINE_USER,
+      },
+    );
+    this.logger.log(`checkout settlement journal posted for stay ${payload.code} (${total})`);
   }
 
   /** booking.reservation.cancelled → سند معکوس رزرو (بستانکار حساب مهمان / بدهکار درآمد اتاق) */
