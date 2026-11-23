@@ -1,0 +1,3 @@
+const BASE='http://localhost:3000/api/v1';
+const {createHmac}=await import('node:crypto');
+const totp=(s,t=Date.now())=>{const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';let b='';for(const c of s){let r='';for(const ch of s){const i=A.indexOf(ch);if(i>=0)r+=i.toString(2).padStart(5,'0')}const k=Buffer.from(Array.from({length:r.length/8},(_,i)=>parseInt(r.slice(i*8,i*8+8),2)));const ctr=Math.floor(t/30000);const buf=Buffer.alloc(8);buf.writeUInt32BE(Math.floor(ctr/2**32),0);buf.writeUInt32BE(ctr%2**32,4);const h=createHmac('sha1',k).update(buf).digest();const o=h[h.length-1]&0xf;return String(((h[o]&0x7f)<<24|h[o+1]<<16|h[o+2]<<8|h[o+3])%1e6).padStart(6,'0')}};

@@ -84,7 +84,10 @@ async function phaseAuth() {
 
   const health = await fetch(BASE + '/health').then((r) => r.json());
   S.healthVersion = health.version;
-  if (health.version !== '0.7.0') report.findings.push({ name: 'health-stale-version', detail: `/health version=${health.version} — باید 0.7.0` });
+  // نسخهٔ انتظاری از package.json خود API خوانده می‌شود (نه هاردکد)
+  const fs = await import('node:fs');
+  const apiPkg = JSON.parse(fs.readFileSync('/home/z/my-project/hotel-erp/apps/api/package.json', 'utf-8'));
+  if (health.version !== apiPkg.version) report.findings.push({ name: 'health-stale-version', detail: `/health version=${health.version} — package.json=${apiPkg.version}` });
 }
 
 // ═══════════ ۲) حسابداری ═══════════

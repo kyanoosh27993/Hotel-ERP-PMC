@@ -171,12 +171,15 @@ export class AccountingController {
       data: entries.map((e) => ({
         id: e.id,
         entryNo: e.entryNo,
+        docIndex: e.docIndex ? Number(e.docIndex) : null,
         status: e.status,
         description: e.description,
         sourceModule: e.sourceModule,
         sourceRef: e.sourceRef,
         lines: e.lines.map((l) => ({
+          lineNo: l.lineNo,
           accountCode: l.accountCode,
+          costCenterCode: l.costCenterCode,
           debit: l.debitRials.toString(),
           credit: l.creditRials.toString(),
         })),
