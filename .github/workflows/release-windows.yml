@@ -76,6 +76,16 @@ jobs:
           # تولید کلاینت Prisma داخل payload (بدون این، seed و API خطای
           # "@prisma/client did not initialize yet" می‌دهند)
           node node_modules/prisma/build/index.js generate --schema prisma/schema.prisma
+          # باگ #۱۱ — npm پکیج‌های extraneous را prune می‌کند و @hotel-erp/payroll از
+          # payload حذف می‌شد (تست دود به‌خاطر node_modules ریشهٔ مونوریپو جواب دروغی
+          # می‌گرفت). کپی مجدد سه پکیج workspace پس از npm install + گیت سخت.
+          for p in shared contracts payroll; do
+            rm -rf "node_modules/@hotel-erp/$p"
+            mkdir -p "node_modules/@hotel-erp/$p"
+            cp -r "../../../../packages/$p/dist" "../../../../packages/$p/package.json" "node_modules/@hotel-erp/$p/"
+            test -f "node_modules/@hotel-erp/$p/package.json" || { echo "GATE FAILED: @hotel-erp/$p is missing from payload"; exit 1; }
+          done
+          echo "PAYLOAD PACKAGES OK — @hotel-erp/{shared,contracts,payroll} present"
 
       - name: Download portable node.exe
         run: |
