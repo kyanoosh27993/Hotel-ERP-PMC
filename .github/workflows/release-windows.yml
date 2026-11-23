@@ -86,7 +86,15 @@ jobs:
 
       - name: Install NSIS
         shell: pwsh
-        run: choco install nsis -y --no-progress
+        run: |
+          $ok = $false
+          for ($i = 1; $i -le 3; $i++) {
+            choco install nsis -y --no-progress
+            if ($LASTEXITCODE -eq 0) { $ok = $true; break }
+            Write-Host "choco install attempt $i failed — retrying in 20s"
+            Start-Sleep -Seconds 20
+          }
+          if (-not $ok) { throw "choco install nsis failed after 3 attempts (network flake?)" }
 
       - name: Compile launcher + Persian installer
         shell: pwsh
