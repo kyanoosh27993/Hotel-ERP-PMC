@@ -24,6 +24,7 @@ const SEQ_MAP: Record<string, string> = {
   asset: 'seq_asset',
   journal: 'seq_journal',
   journal_docindex: 'seq_journal_docindex',
+  invoice_number: 'seq_invoice_number',
 };
 
 /** شمارهٔ بعدی سند درون تراکنش — اتمیک حتی با درخواست هم‌زمان */

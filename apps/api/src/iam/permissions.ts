@@ -65,6 +65,10 @@ export const PERMISSIONS = {
   PERIOD_CLOSE: 'accounting.period_close',
   LAW_VIEW: 'compliance.law_view',
   LAW_MANAGE: 'compliance.law_manage',
+  // موج ۳ — فاز ۹ (F9-T2): ادغام مؤدیان — صورتحساب الکترونیکی
+  INVOICE_VIEW: 'compliance.invoice_view',
+  INVOICE_MANAGE: 'compliance.invoice_manage',
+  INVOICE_SEND: 'compliance.invoice_send',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -129,6 +133,10 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   { code: PERMISSIONS.PERIOD_CLOSE, en: 'Close fiscal periods', fa: 'بستن دورهٔ مالی' },
   { code: PERMISSIONS.LAW_VIEW, en: 'View compliance law library', fa: 'مشاهدهٔ کتابخانهٔ قوانین' },
   { code: PERMISSIONS.LAW_MANAGE, en: 'Manage compliance law library', fa: 'مدیریت کتابخانهٔ قوانین' },
+  // موج ۳ — فاز ۹ (F9-T2): مؤدیان
+  { code: PERMISSIONS.INVOICE_VIEW, en: 'View Moadian electronic invoices', fa: 'مشاهدهٔ صورتحساب‌های الکترونیکی مؤدیان' },
+  { code: PERMISSIONS.INVOICE_MANAGE, en: 'Generate and retry Moadian invoices', fa: 'تولید و تلاش مجدد صورتحساب مؤدیان' },
+  { code: PERMISSIONS.INVOICE_SEND, en: 'Cancel (storno) Moadian invoices', fa: 'لغو/استورنو صورتحساب مؤدیان' },
 ];
 
 /** ماتریس نقش‌ها — مرجع واحد ماتریس دسترسی */
@@ -169,6 +177,8 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.PERIOD_CLOSE,
       PERMISSIONS.LAW_VIEW,
       PERMISSIONS.LAW_MANAGE,
+      PERMISSIONS.INVOICE_VIEW,
+      PERMISSIONS.INVOICE_MANAGE,
     ],
   },
   approver: {
@@ -195,6 +205,8 @@ export const ROLE_MATRIX: Record<
       // موج ۳ — فاز ۸/۹
       PERMISSIONS.PERIOD_CLOSE,
       PERMISSIONS.LAW_VIEW,
+      PERMISSIONS.INVOICE_VIEW,
+      PERMISSIONS.INVOICE_SEND,
     ],
   },
   front_desk: {

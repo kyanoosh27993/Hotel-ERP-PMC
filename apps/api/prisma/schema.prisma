@@ -1556,3 +1556,34 @@ model StockCountLine {
   @@unique([countId, stockItemId])
   @@map("stock_count_lines")
 }
+
+// ── موج ۳ — فاز ۹ (F9-T2): ادغام مؤدیان — صورتحساب الکترونیکی ──
+model MoadianInvoice {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoiceNumber   String    @unique // INV-YY-NNNNNN — از توالی seq_invoice_number
+  journalEntryId  String    @db.Uuid // سند فروش مبدأ (قطعی، POSTED)
+  sellerTaxId     String
+  buyerTaxId      String    @default("")
+  buyerName       String    @default("")
+  issueDate       DateTime  @db.Date
+  status          String    @default("DRAFT") // DRAFT|QUEUED|SENT|ACCEPTED|REJECTED|CANCELLED
+  header          Json      @default("{}") // پاکت هدر مؤدیان
+  body            Json      @default("[]") // سطرهای صورتحساب
+  totalRials      BigInt    @default(0)
+  vatRials        BigInt    @default(0)
+  discountRials   BigInt    @default(0)
+  uid             String?   // شمارهٔ مرجع مؤدیان
+  idempotencyKey  String    @unique // کلید ارسال تکرارپذیر
+  attempts        Int       @default(0)
+  lastError       String?
+  lastResponse    Json?
+  submittedAt     DateTime?
+  cancelledAt     DateTime?
+  cancelReason    String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status, issueDate])
+  @@index([journalEntryId])
+  @@map("moadian_invoices")
+}

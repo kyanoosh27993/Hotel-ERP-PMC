@@ -574,6 +574,14 @@ async function main() {
       testScenario: 'فاکتور رستوران → کارمزد ۳٪ پیش از مالیات', legalOwner: 'مدیریت هتل',
       sourceRef: 'اطلاعیه اتحادیه',
     },
+    {
+      code: 'LAW-MOADIAN-CONFIG', title: 'پیکربندی ادغام سامانه مؤدیان', lawName: 'قانون مالیات‌ها',
+      article: 'ماده ۱۶۹', note: 'شناسهٔ مالیاتی فروشندهٔ هتل و آدرس سندباکس مؤدیان (F9-T2)',
+      effectiveFrom: new Date('2025-03-21T00:00:00Z'), effectiveTo: null,
+      params: { sellerTaxId: '140000000000', sandboxBaseUrl: 'https://sandbox.tax.in.gov.ir', adapterMode: 'sim' },
+      testScenario: 'تولید صورتحساب از سند فروش → ارسال به سندباکس → uid', legalOwner: 'واحد مالیات و انطباق',
+      sourceRef: 'دستورالعمل مؤدیان سامانه مؤدیان',
+    },
   ];
   for (const l of wave3Laws) {
     await prisma.lawRule.upsert({

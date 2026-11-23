@@ -42,6 +42,7 @@
     { id: 'restaurant', title: 'رستوران و آشپزخانه (فاز ۶)', icon: '🍽️' },
     { id: 'procurement', title: 'خرید و تدارکات (فاز ۷)', icon: '🚚' },
     { id: 'stores', title: 'انبار و کاست کنترل (فاز ۷)', icon: '📦' },
+    { id: 'moadian', title: 'صورتحساب مؤدیان (فاز ۹)', icon: '🧾' },
     { id: 'calendar', title: 'تقویم شمسی', icon: '📅' },
     { id: 'payroll', title: 'حقوق و دستمزد', icon: '₪' },
     { id: 'settings', title: 'تنظیمات', icon: '⚙' }

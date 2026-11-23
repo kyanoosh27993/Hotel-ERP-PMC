@@ -48,6 +48,13 @@ export const EVENT_NAMES = {
   INVENTORY_ADJUSTMENT_POSTED: 'inventory.adjustment.posted',
   /** مصرف مواد به بهای میانگین قطعی شد — COGS (پولی) */
   INVENTORY_CONSUMPTION_POSTED: 'inventory.consumption.posted',
+  // ── موج ۳ — فاز ۹ (F9-T2): ادغام مؤدیان — صورتحساب الکترونیکی ──
+  /** صورتحساب از سند فروش تولید و در صف ارسال مؤدیان قرار گرفت (غیرپولی — صف ارسال) */
+  INVOICE_QUEUED: 'compliance.invoice.queued',
+  /** صورتحساب توسط سندباکس مؤدیان پذیرفته شد (uid برگشت) */
+  INVOICE_ACCEPTED: 'compliance.invoice.accepted',
+  /** صورتحساب لغو/استورنو شد (پاکت جداگانه) */
+  INVOICE_CANCELLED: 'compliance.invoice.cancelled',
 } as const;
 
 export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
