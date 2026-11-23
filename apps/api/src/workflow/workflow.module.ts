@@ -9,5 +9,6 @@ import { WorkflowService } from './workflow.service';
 @Module({
   controllers: [WorkflowController],
   providers: [WorkflowService],
+  exports: [WorkflowService], // مصرف‌کننده‌های دامنه (مثلاً بستن فصل معاملات فصلی F9-T4)
 })
 export class WorkflowModule {}

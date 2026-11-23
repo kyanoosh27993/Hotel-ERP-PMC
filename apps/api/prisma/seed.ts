@@ -613,6 +613,11 @@ async function main() {
       ],
     },
   ];
+  // F9-T4 — گردش کار بستن فصل معاملات فصلی («ارسال مالیاتی هرگز بدون تأیید انسانی»)
+  workflowDefs.push({
+    code: 'WF-QUARTERLY-CLOSE', title: 'بستن فصل معاملات فصلی',
+    steps: [{ order: 1, title: 'تأیید بستن فصل', permission: 'accounting.period_close', minApprovers: 1, selfApproval: false }],
+  });
   for (const d of workflowDefs) {
     await prisma.workflowDef.upsert({
       where: { code: d.code },
@@ -622,7 +627,7 @@ async function main() {
   }
 
   // eslint-disable-next-line no-console
-  console.log('✅ seed complete: roles/users/accounts/periods/rooms/rules/payroll/cash-accounts/linen/ancillary (wave-1) + warehouses/stock/recipes/menu/tables/suppliers (wave-2) + closing accounts/cost-centers/event-mappings/law-rules (wave-3) + workflow-defs (F8-T6)');
+  console.log('✅ seed complete: roles/users/accounts/periods/rooms/rules/payroll/cash-accounts/linen/ancillary (wave-1) + warehouses/stock/recipes/menu/tables/suppliers (wave-2) + closing accounts/cost-centers/event-mappings/law-rules (wave-3) + workflow-defs (F8-T6, F9-T4)');
 }
 
 main()

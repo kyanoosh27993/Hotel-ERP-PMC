@@ -1643,3 +1643,44 @@ model WorkflowAction {
   @@index([instanceId, stepNo])
   @@map("workflow_actions")
 }
+
+// ── موج ۳ — فاز ۹ (F9-T4): معاملات فصلی خارج از سامانه + فایل استاندارد اداره دارایی ──
+model QuarterlyPeriod {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  taxYear            Int // سال مالیاتی شمسی (۱۴۰۵)
+  quarter            Int // ۱..۴
+  status             String    @default("OPEN") // OPEN | CLOSED
+  workflowInstanceId String?   @db.Uuid
+  closedAt           DateTime?
+  closedById         String?   @db.Uuid
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  txs QuarterlyTx[]
+
+  @@unique([taxYear, quarter])
+  @@map("quarterly_periods")
+}
+
+model QuarterlyTx {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  periodId         String   @db.Uuid
+  txType           String // SALE | PURCHASE
+  counterpartyName String
+  counterpartyTin  String   @default("-") // شناسهٔ ملی (۱۰) یا کد اقتصادی (۱۲) یا '-' ناشناس
+  amountRials      BigInt
+  vatRials         BigInt
+  txDate           DateTime
+  exempt           Boolean  @default(false)
+  sourceType       String   @default("MANUAL") // MANUAL | POS
+  docRef           String // مرجع سند — یکتا در هر فصل
+  notes            String   @default("")
+  registeredById   String?  @db.Uuid
+  createdAt        DateTime @default(now())
+
+  period QuarterlyPeriod @relation(fields: [periodId], references: [id])
+
+  @@unique([periodId, docRef])
+  @@index([periodId, txType])
+  @@map("quarterly_txs")
+}

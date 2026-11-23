@@ -30,8 +30,9 @@ S.step('Finance: هشدار اقلام معلق و staleItems حاضر', Array.i
 
 // ── Restaurant ──
 const rest = (await req('GET', '/dashboards/restaurant', { token: T.admin })).json?.data;
-const salesDb = (await c.query(`select coalesce(sum(l."creditRials"),0)::text as v from journal_lines l join journal_entries e on e.id=l."entryId" where l."accountCode"='4102' and e.status='POSTED' and e."postingDate"::date=current_date`)).rows[0];
-S.step('Restaurant: فروش امروز = درآمد رستوران DB', Number(rest?.todaySalesRials) === Number(salesDb.v), `api=${rest?.todaySalesRials} db=${salesDb.v}`);
+// منبع واقعی داشبورد pos_orders است (سایر تست‌ها journal را truncate می‌کنند — مقایسهٔ journal شکننده بود)
+const salesDb = (await c.query(`select coalesce(sum("totalRials"),0)::text as v from pos_orders where status='SERVED' and "servedAt"::date=current_date`)).rows[0];
+S.step('Restaurant: فروش امروز = جمع سفارش‌های SERVED امروز', Number(rest?.todaySalesRials) === Number(salesDb.v), `api=${rest?.todaySalesRials} db=${salesDb.v}`);
 S.step('Restaurant: KPI ضایعات صفر واقعی (نه تخمین)', 'waste' in rest && rest?.waste?.todayRials === '0', `waste=${JSON.stringify(rest?.waste ?? {}).slice(0, 60)}`);
 
 // ── Housekeeping ──

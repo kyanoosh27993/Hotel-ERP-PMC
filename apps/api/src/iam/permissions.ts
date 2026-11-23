@@ -73,6 +73,9 @@ export const PERMISSIONS = {
   WORKFLOW_VIEW: 'workflow.view',
   WORKFLOW_ACT: 'workflow.act',
   WORKFLOW_MANAGE: 'workflow.manage',
+  // موج ۳ — فاز ۹ (F9-T4): معاملات فصلی و فایل استاندارد دارایی
+  QUARTERLY_VIEW: 'compliance.quarterly_view',
+  QUARTERLY_MANAGE: 'compliance.quarterly_manage',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -145,6 +148,9 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   { code: PERMISSIONS.WORKFLOW_VIEW, en: 'View workflow instances and verify signatures', fa: 'مشاهدهٔ نمونه‌های گردش کار و راستی‌آزمایی امضاها' },
   { code: PERMISSIONS.WORKFLOW_ACT, en: 'Approve/reject workflow steps', fa: 'تأیید/رد مراحل گردش کار' },
   { code: PERMISSIONS.WORKFLOW_MANAGE, en: 'Define/edit workflow definitions', fa: 'تعریف/ویرایش گردش‌های کار' },
+  // موج ۳ — فاز ۹ (F9-T4): معاملات فصلی
+  { code: PERMISSIONS.QUARTERLY_VIEW, en: 'View quarterly transactions and export file', fa: 'مشاهدهٔ معاملات فصلی و دریافت فایل استاندارد' },
+  { code: PERMISSIONS.QUARTERLY_MANAGE, en: 'Register/derive quarterly transactions and request quarter close', fa: 'ثبت/استخراج معاملات فصلی و درخواست بستن فصل' },
 ];
 
 /** ماتریس نقش‌ها — مرجع واحد ماتریس دسترسی */
@@ -187,6 +193,8 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.LAW_MANAGE,
       PERMISSIONS.INVOICE_VIEW,
       PERMISSIONS.INVOICE_MANAGE,
+      PERMISSIONS.QUARTERLY_VIEW,
+      PERMISSIONS.QUARTERLY_MANAGE,
       PERMISSIONS.WORKFLOW_VIEW,
       PERMISSIONS.WORKFLOW_ACT,
     ],
@@ -217,6 +225,7 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.LAW_VIEW,
       PERMISSIONS.INVOICE_VIEW,
       PERMISSIONS.INVOICE_SEND,
+      PERMISSIONS.QUARTERLY_VIEW,
       PERMISSIONS.WORKFLOW_VIEW,
       PERMISSIONS.WORKFLOW_ACT,
     ],

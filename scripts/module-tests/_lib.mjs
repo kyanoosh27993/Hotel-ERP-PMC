@@ -38,9 +38,10 @@ export async function req(method, path, { token, body } = {}) {
     headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
+  const raw = await r.text();
   let json = null;
-  try { json = await r.json(); } catch { /* empty body */ }
-  return { status: r.status, json };
+  try { json = JSON.parse(raw); } catch { /* پاسخ متنی (مثلاً CSV) */ }
+  return { status: r.status, json, raw };
 }
 
 export async function login(username, withTotp) {
