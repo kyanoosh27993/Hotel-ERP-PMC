@@ -20,6 +20,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # ── گیت انکودینگ (باگ #۸): اسکریپت‌های NSIS باید UTF-8 با BOM باشند ──
+      # بدون BOM، makensis فایل را با صفحه‌کد ANSI می‌خواند و متن فارسی
+      # به‌صورت «â€"» و «Ø³ÛŒ...» داخل Setup.exe پخته می‌شود.
+      - name: Gate — NSIS scripts must be UTF-8 with BOM (Persian text integrity)
+        shell: pwsh
+        run: |
+          foreach ($f in @("installer.nsi", "launcher.nsi")) {
+            $p = "infrastructure\desktop\$f"
+            $b = [System.IO.File]::ReadAllBytes($p)
+            if (-not ($b.Length -ge 3 -and $b[0] -eq 0xEF -and $b[1] -eq 0xBB -and $b[2] -eq 0xBF)) {
+              throw "GATE FAILED: $f is missing UTF-8 BOM — Persian strings would be corrupted (bug #8). Save the file as UTF-8 with BOM."
+            }
+            Write-Host "BOM OK — $f"
+          }
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -79,8 +94,10 @@ jobs:
           $nsis = "C:\Program Files (x86)\NSIS\makensis.exe"
           Set-Location "infrastructure\desktop"
           & $nsis "launcher.nsi"
+          if ($LASTEXITCODE -ne 0) { throw "makensis launcher.nsi failed (exit $LASTEXITCODE)" }
           Copy-Item "out\HotelERP.exe" "payload\HotelERP.exe"
           & $nsis "installer.nsi"
+          if ($LASTEXITCODE -ne 0) { throw "makensis installer.nsi failed (exit $LASTEXITCODE)" }
           Set-Location $env:GITHUB_WORKSPACE
           Get-Item "infrastructure\desktop\out\Hotel-ERP-Setup.exe" | Select-Object Name,Length
 
@@ -123,6 +140,58 @@ jobs:
           Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force
           schtasks /delete /tn "HotelERP Limited Run" /f 2>$null | Out-Null
           Write-Host "SMOKE TEST PASSED — boot + login + PMS + web shell on real Windows"
+
+      # ── تست نصب واقعی + معادل دابل‌کلیک (باگ #۹): Setup را روی Program Files نصب
+      #    می‌کنیم و سپس دقیقاً همان exe نصب‌شده (مسیر دابل‌کلیک کاربر) را اجرا می‌کنیم ──
+      - name: Install test — silent setup + double-click equivalent on real Windows
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $p = Start-Process -FilePath "infrastructure\desktop\out\Hotel-ERP-Setup.exe" -ArgumentList "/S" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Setup.exe /S exited with $($p.ExitCode)" }
+          $inst = "C:\Program Files\HotelERP"
+          foreach ($f in @("HotelERP.exe", "run-server.cmd", "server.js", "node\node.exe", "Uninstall.exe")) {
+            if (-not (Test-Path (Join-Path $inst $f))) { throw "installed file missing: $f" }
+          }
+          foreach ($d in @("web", "api")) {
+            if (-not (Test-Path (Join-Path $inst $d))) { throw "installed folder missing: $d" }
+          }
+          Write-Host "INSTALL OK — files present in $inst"
+          # معادل دابل‌کلیک کاربر: اجرای HotelERP.exe نصب‌شده (نه node مستقیم)
+          Start-Process -FilePath "$inst\HotelERP.exe"
+          $ok = $false
+          for ($i = 0; $i -lt 150; $i++) {
+            Start-Sleep -Seconds 2
+            try {
+              $h = Invoke-RestMethod -Uri "http://localhost:3000/api/v1/health" -TimeoutSec 3
+              if ($h.status -eq "ok") { $ok = $true; break }
+            } catch {}
+          }
+          if (-not $ok) {
+            Get-ChildItem "$env:APPDATA\HotelERP\logs" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "--- $($_.Name) ---"; Get-Content $_.FullName -ErrorAction SilentlyContinue | Select-Object -Last 35 }
+            Write-Host "--- pg-server.log ---"; Get-Content "$env:APPDATA\HotelERP\pgdata\pg-server.log" -ErrorAction SilentlyContinue | Select-Object -Last 25
+            Write-Host "--- boot.cmd ---"; Get-Content "$env:APPDATA\HotelERP\boot.cmd" -ErrorAction SilentlyContinue
+            Write-Host "--- schtasks ---"; schtasks /query /tn "HotelERP Limited Run" /v /fo list 2>$null | Select-Object -Last 12
+            Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force
+            throw "Installed app did not become healthy on port 3000 after double-click launch"
+          }
+          Write-Host "DOUBLE-CLICK LAUNCH OK — installed exe booted the server on port 3000"
+          $login = Invoke-RestMethod -Uri "http://localhost:3000/api/v1/auth/login" -Method Post -ContentType "application/json" -Body '{"username":"frontdesk","password":"Admin@Hotel1"}'
+          if (-not $login.accessToken) { throw "installed app login failed" }
+          $map = Invoke-RestMethod -Uri "http://localhost:3000/api/v1/pms/rooms/map" -Headers @{ Authorization = "Bearer $($login.accessToken)" }
+          if ($map.data.floors.Count -ne 3) { throw "installed app PMS map wrong" }
+          $web = Invoke-WebRequest -Uri "http://localhost:3000/" -UseBasicParsing
+          if ($web.Content -notmatch "frontdesk.js") { throw "installed web shell not served" }
+          Write-Host "INSTALLED APP FUNCTIONAL OK — login + PMS map + web shell"
+          # پاکسازی کامل: توقف فرایندها، حذف وظیفهٔ اجرای محدود، حذف نصب
+          Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force
+          Start-Sleep -Seconds 2
+          schtasks /delete /tn "HotelERP Limited Run" /f 2>$null | Out-Null
+          Start-Process -FilePath "$inst\Uninstall.exe" -ArgumentList "/S" -Wait
+          $gone = $false
+          for ($i = 0; $i -lt 15; $i++) { Start-Sleep -Seconds 2; if (-not (Test-Path $inst)) { $gone = $true; break } }
+          if (-not $gone) { throw "uninstall left files behind in $inst" }
+          Write-Host "UNINSTALL OK — INSTALL / DOUBLE-CLICK / FUNCTIONAL / UNINSTALL all passed"
 
       - name: Upload artifact (always)
         if: always()
