@@ -45,6 +45,7 @@
     { id: 'moadian', title: 'صورتحساب مؤدیان (فاز ۹)', icon: '🧾' },
     { id: 'quarterly', title: 'معاملات فصلی (فاز ۹)', icon: '🗂' },
     { id: 'directtax', title: 'مالیات مستقیم (فاز ۹)', icon: '🏛' },
+    { id: 'bi', title: 'BI و هوش مصنوعی (فاز ۱۱)', icon: '📊' },
     { id: 'workflow', title: 'گردش کار تأیید (فاز ۸)', icon: '✅' },
     { id: 'calendar', title: 'تقویم شمسی', icon: '📅' },
     { id: 'payroll', title: 'حقوق و دستمزد', icon: '₪' },

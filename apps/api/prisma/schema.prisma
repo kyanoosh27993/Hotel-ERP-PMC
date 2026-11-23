@@ -1721,3 +1721,55 @@ model DirectTaxReturn {
   @@unique([taxYear])
   @@map("direct_tax_returns")
 }
+
+// ── موج ۴ — فاز ۱۱: BI کامل و هوش مصنوعی گسترده ──
+model BiBudget {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  taxYear        Int // سال مالیاتی شمسی
+  periodCode     String // '1405-09' ماهانه یا '1405-Q3'
+  costCenterCode String // CC-ROOMS | CC-FB | CC-ADMIN | ...
+  revenueRials   BigInt   @default(0) // بودجهٔ درآمد
+  costRials      BigInt   @default(0) // بودجهٔ هزینه
+  note           String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([taxYear, periodCode, costCenterCode])
+  @@map("bi_budgets")
+}
+
+model AiRateSuggestion {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomTypeCode   String
+  businessDate   DateTime  @db.Date
+  baseRials      BigInt // نرخ پایهٔ فعلی نوع اتاق
+  suggestedRials BigInt // نرخ پیشنهادی
+  confidenceLow  BigInt // کران پایین اطمینان
+  confidenceHigh BigInt // کران بالا
+  reasonJson     Json      @default("{}") // روند/ضریب‌ها — ردپای محاسبه
+  status         String    @default("DRAFT") // DRAFT | APPROVED | REJECTED — بدون اثر خودکار
+  createdById    String?   @db.Uuid
+  decidedById    String?   @db.Uuid
+  decidedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@index([businessDate])
+  @@map("ai_rate_suggestions")
+}
+
+model AiDocDraft {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceText        String    @db.Text // متن استخراج‌شدهٔ فاکتور/سند
+  extractedJson     Json      @default("{}") // مبلغ/مالیات/فروشنده/تاریخ — خروجی قواعد
+  suggestedLinesJson Json     @default("[]") // سطرهای پیشنهادی سند
+  status            String    @default("DRAFT") // DRAFT | DRAFTED | DISCARDED — هیچ‌گاه قطعی نمی‌شود
+  draftEntryId      String?   @db.Uuid // سند پیش‌نویس حسابداری (تأیید انسانی لازم دارد)
+  createdById       String?   @db.Uuid
+  approvedById      String?   @db.Uuid
+  approvedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@map("ai_doc_drafts")
+}

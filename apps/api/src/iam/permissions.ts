@@ -79,6 +79,9 @@ export const PERMISSIONS = {
   // موج ۳ — فاز ۹ (F9-T5): مالیات مستقیم
   DIRECTTAX_VIEW: 'compliance.directtax_view',
   DIRECTTAX_MANAGE: 'compliance.directtax_manage',
+  // موج ۴ — فاز ۱۱: BI و هوش مصنوعی
+  BI_VIEW: 'bi.view',
+  BI_MANAGE: 'bi.manage',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -157,6 +160,9 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   // موج ۳ — فاز ۹ (F9-T5): مالیات مستقیم
   { code: PERMISSIONS.DIRECTTAX_VIEW, en: 'View direct tax plan/return and counterparty registry', fa: 'مشاهدهٔ برنامهٔ عملکرد، اظهارنامه و شناسهٔ طرف‌های معامله' },
   { code: PERMISSIONS.DIRECTTAX_MANAGE, en: 'Maintain plan, compute return and request submission', fa: 'نگهداری برنامهٔ عملکرد، محاسبهٔ اظهارنامه و درخواست ارسال' },
+  // موج ۴ — فاز ۱۱: BI و هوش مصنوعی
+  { code: PERMISSIONS.BI_VIEW, en: 'View BI dashboards, assistant answers, forecasts and anomalies', fa: 'مشاهدهٔ تحلیل بخش‌ها، پاسخ دستیار، پیش‌بینی‌ها و ناهنجاری‌ها' },
+  { code: PERMISSIONS.BI_MANAGE, en: 'Maintain budgets, generate AI document drafts and decide rate suggestions', fa: 'نگهداری بودجه، تولید پیش‌نویس سند هوشمند و تصمیم پیشنهاد نرخ' },
 ];
 
 /** ماتریس نقش‌ها — مرجع واحد ماتریس دسترسی */
@@ -205,6 +211,9 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.DIRECTTAX_MANAGE,
       PERMISSIONS.WORKFLOW_VIEW,
       PERMISSIONS.WORKFLOW_ACT,
+      // موج ۴ — فاز ۱۱
+      PERMISSIONS.BI_VIEW,
+      PERMISSIONS.BI_MANAGE,
     ],
   },
   approver: {
@@ -237,6 +246,7 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.DIRECTTAX_VIEW,
       PERMISSIONS.WORKFLOW_VIEW,
       PERMISSIONS.WORKFLOW_ACT,
+      PERMISSIONS.BI_VIEW,
     ],
   },
   front_desk: {
