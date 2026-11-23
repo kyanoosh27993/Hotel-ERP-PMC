@@ -1773,3 +1773,20 @@ model AiDocDraft {
 
   @@map("ai_doc_drafts")
 }
+
+// ── موج ۵ — فاز ۱۲ (F12-T4): API Marketplace — کلیدهای مشتریان ──
+model ApiClient {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String // نام مشتری/پارتنر
+  keyPrefix      String    @unique // ۸ نویسهٔ اول کلید — نمایش و جستجو (کلید کامل هرگز ذخیره نمی‌شود)
+  apiKeyHash     String // SHA-256 کلید — تطبیق بدون ذخیرهٔ متن آشکار
+  scopes         Json      @default("[]") // ["availability","rates","reservations"]
+  rateLimitPerMin Int      @default(60) // محدودسازی نرخ در هر دقیقه
+  active         Boolean   @default(true)
+  lastUsedAt     DateTime?
+  createdById    String?   @db.Uuid
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("api_clients")
+}

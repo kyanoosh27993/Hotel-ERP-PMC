@@ -1,0 +1,12 @@
+{
+  "appId": "ir.hotel.erp.mobile",
+  "appName": "Hotel ERP",
+  "webDir": "../web",
+  "server": {
+    "androidScheme": "http",
+    "hostname": "localhost:3000"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}

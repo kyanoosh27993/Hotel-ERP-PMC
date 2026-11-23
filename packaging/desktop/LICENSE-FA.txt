@@ -1,0 +1,2 @@
+Hotel ERP — راهنمای کاربر در docs/17-user-guide ذخیره شده است.
+این نصاب شامل پایگاه‌دادهٔ PostgreSQL نیست؛ نصب آن طبق docs/INSTALL-WINDOWS-FA.md انجام می‌شود.

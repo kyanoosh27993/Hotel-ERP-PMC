@@ -46,6 +46,38 @@
     return b;
   }
 
+  /** فرم ورود خودِ ماژول — کاربر مالی بدون رفتن به ماژول دیگر وارد می‌شود */
+  function connPanel(root, rerender) {
+    var panel = el('div', 'panel');
+    panel.appendChild(el('h3', '', 'اتصال به سرور (حسابدار/تأییدکننده/مدیر)'));
+    var baseIn = el('input'); baseIn.placeholder = 'آدرس API'; baseIn.value = apiBase();
+    var userIn = el('input'); userIn.placeholder = 'نام کاربری (admin/accountant/approver)';
+    var passIn = el('input'); passIn.type = 'password'; passIn.placeholder = 'گذرواژه';
+    var totpIn = el('input'); totpIn.placeholder = 'کد TOTP (نقش حساس)';
+    var btn = el('button', 'btn btn-primary', 'ورود و ذخیره توکن');
+    var msg = el('div', 'muted', 'توکن در حافظهٔ مرورگر ذخیره می‌شود.');
+    function rw(l, i) { var w = el('div'); w.style.cssText = 'display:flex;gap:8px;align-items:center;margin:6px 0;'; w.appendChild(el('label', null, l)); w.appendChild(i); return w; }
+    panel.appendChild(rw('آدرس API', baseIn));
+    panel.appendChild(rw('کاربر', userIn));
+    panel.appendChild(rw('گذرواژه', passIn));
+    panel.appendChild(rw('TOTP', totpIn));
+    panel.appendChild(btn);
+    panel.appendChild(msg);
+    btn.onclick = function () {
+      localStorage.setItem(API_BASE_KEY, baseIn.value.trim());
+      var body = { username: userIn.value.trim(), password: passIn.value };
+      if (totpIn.value.trim()) body.totp = totpIn.value.trim();
+      api('POST', '/auth/login', body).then(function (res) {
+        if (res.status === 200 || res.status === 201) {
+          localStorage.setItem(TOKEN_KEY, res.body.accessToken);
+          msg.textContent = '✅ ورود موفق — توکن ذخیره شد.';
+          rerender();
+        } else msg.textContent = '❌ ورود ناموفق: ' + failText(res);
+      });
+    };
+    root.appendChild(panel);
+  }
+
   Modules.quarterly = {
     render: function (content) {
       content.innerHTML = '';
@@ -53,7 +85,7 @@
       content.appendChild(el('p', 'muted', 'معاملات خارج از مؤدیان (فروش دستی/POS/معاف) به‌ازای هر فصل شمسی + فایل استاندارد اداره دارایی. بستن فصل فقط با تأیید انسانی (گردش کار فاز ۸).'));
 
       if (!apiToken()) {
-        content.appendChild(el('div', 'panel', 'برای استفاده ابتدا با نقش حسابدار/تأییدکننده/مدیر وارد شوید.'));
+        connPanel(content, function () { Modules.quarterly.render(content); });
         return;
       }
 
@@ -223,6 +255,59 @@
         });
       }
       loadList();
+
+      // ── اظهارنامهٔ ارزش افزوده (F9-T3) — از اسناد قطعی، حساب‌های ۲۲۰۱/۲۲۰۴ ──
+      var vatPanel = el('div', 'panel');
+      vatPanel.appendChild(el('h3', '', 'اظهارنامهٔ ارزش افزوده (F9-T3)'));
+      vatPanel.appendChild(el('p', 'muted', 'محاسبهٔ مالیات فروش (بستانکار ۲۲۰۱)، اعتبار خرید (بدهکار ۲۲۰۴) و خالص پرداختنی از اسناد قطعی بازهٔ انتخابی — مرجع: مادهٔ ۱۷ قانون مالیات بر ارزش افزوده (LAW-VAT-RATE).'));
+      var vatRow = el('div'); vatRow.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;';
+      function mkDate(v) { var i = el('input'); i.type = 'date'; i.value = v; return i; }
+      var vatFrom = mkDate(new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).toISOString().slice(0, 10));
+      var vatTo = mkDate(new Date().toISOString().slice(0, 10));
+      var vatBtn = el('button', 'btn btn-primary', 'محاسبهٔ اظهارنامه');
+      var vatOut = el('div'); var vatMsg = el('div', 'muted');
+      vatRow.appendChild(vatFrom); vatRow.appendChild(vatTo); vatRow.appendChild(vatBtn);
+      vatPanel.appendChild(vatRow);
+      vatPanel.appendChild(vatOut);
+      vatPanel.appendChild(vatMsg);
+      vatBtn.onclick = function () {
+        api('GET', '/compliance/vat/declaration?from=' + vatFrom.value + '&to=' + vatTo.value).then(function (res) {
+          if (res.status !== 200) { vatMsg.textContent = '❌ ' + failText(res); return; }
+          var d = res.body.data;
+          vatOut.innerHTML = '';
+          var kv = el('div'); kv.style.cssText = 'display:flex;gap:16px;flex-wrap:wrap;margin:8px 0;';
+          function card(title, v, hot) {
+            var c = el('div'); c.style.cssText = 'border:1px solid #d0d7de;border-radius:8px;padding:10px 14px;min-width:180px;';
+            c.appendChild(el('div', 'muted', title));
+            var n = el('div', null, money(v) + ' ریال');
+            n.style.cssText = 'font-size:18px;font-weight:600;color:' + (hot ? '#cf222e' : '#1a7f37') + ';';
+            c.appendChild(n);
+            return c;
+          }
+          kv.appendChild(card('مالیات فروش (۲۲۰۱)', d.outputVatRials, false));
+          kv.appendChild(card('اعتبار خرید (۲۲۰۴)', d.inputVatCreditRials, false));
+          kv.appendChild(card('خالص پرداختنی', d.netPayableRials, true));
+          kv.appendChild(card('پایهٔ مالیاتی', d.taxBaseRials, false));
+          vatOut.appendChild(kv);
+          if ((d.sections || []).length) {
+            var tbl = el('table');
+            var tb = el('tbody');
+            var trh = el('tr');
+            ['مرکز هزینه', 'پایهٔ مالیاتی', 'مالیات'].forEach(function (h) { var th = el('th'); th.textContent = h; trh.appendChild(th); });
+            tb.appendChild(trh);
+            d.sections.forEach(function (s) {
+              var tr = el('tr');
+              [s.costCenterCode, money(s.taxBase), money(s.vat)].forEach(function (v) { var td = el('td'); td.textContent = v; tr.appendChild(td); });
+              tb.appendChild(tr);
+            });
+            tbl.appendChild(tb);
+            var wrap = el('div'); wrap.style.cssText = 'overflow-x:auto;'; wrap.appendChild(tbl);
+            vatOut.appendChild(wrap);
+          } else vatOut.appendChild(el('p', 'muted', 'در این بازه سطری با مالیات ثبت نشده است.'));
+          vatMsg.textContent = '✅ محاسبه از اسناد قطعی — ارسال اظهارنامه به سامانهٔ مالیاتی خارج از این سامانه است.';
+        });
+      };
+      content.appendChild(vatPanel);
     },
   };
 })(typeof window !== 'undefined' ? window : globalThis);

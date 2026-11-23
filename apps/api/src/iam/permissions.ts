@@ -82,6 +82,8 @@ export const PERMISSIONS = {
   // موج ۴ — فاز ۱۱: BI و هوش مصنوعی
   BI_VIEW: 'bi.view',
   BI_MANAGE: 'bi.manage',
+  // موج ۵ — فاز ۱۲ (F12-T4): API Marketplace
+  MARKETPLACE_MANAGE: 'marketplace.manage',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -163,6 +165,7 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   // موج ۴ — فاز ۱۱: BI و هوش مصنوعی
   { code: PERMISSIONS.BI_VIEW, en: 'View BI dashboards, assistant answers, forecasts and anomalies', fa: 'مشاهدهٔ تحلیل بخش‌ها، پاسخ دستیار، پیش‌بینی‌ها و ناهنجاری‌ها' },
   { code: PERMISSIONS.BI_MANAGE, en: 'Maintain budgets, generate AI document drafts and decide rate suggestions', fa: 'نگهداری بودجه، تولید پیش‌نویس سند هوشمند و تصمیم پیشنهاد نرخ' },
+  { code: PERMISSIONS.MARKETPLACE_MANAGE, en: 'Manage marketplace API clients and keys', fa: 'مدیریت کلیدها و مشتریان API عمومی' },
 ];
 
 /** ماتریس نقش‌ها — مرجع واحد ماتریس دسترسی */

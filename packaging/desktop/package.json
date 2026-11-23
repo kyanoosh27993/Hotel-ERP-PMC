@@ -1,0 +1,42 @@
+{
+  "name": "hotel-erp-desktop",
+  "version": "0.12.0",
+  "description": "Hotel ERP — Desktop shell (Electron) loading the bundled web app and local API",
+  "main": "main.js",
+  "author": "Hotel ERP Project",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis",
+    "dist:linux": "electron-builder --linux AppImage"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "ir.hotel.erp.desktop",
+    "productName": "Hotel ERP",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "preload.js", "icon.png"],
+    "extraResources": [
+      { "from": "../../apps/web", "to": "web" },
+      { "from": "../../apps/api/dist", "to": "api" },
+      { "from": "../../node_modules", "to": "api-node_modules" }
+    ],
+    "win": {
+      "target": ["nsis"],
+      "artifactName": "Hotel-ERP-Setup-${version}.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "license": "LICENSE-FA.txt"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "artifactName": "Hotel-ERP-${version}-x86_64.AppImage",
+      "category": "Office"
+    }
+  }
+}

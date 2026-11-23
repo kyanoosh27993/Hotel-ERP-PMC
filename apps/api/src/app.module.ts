@@ -23,6 +23,7 @@ import { ComplianceModule } from './compliance/compliance.module';
 import { StoresModule } from './stores/stores.module';
 import { WorkflowModule } from './workflow/workflow.module';
 import { BiModule } from './bi/bi.module';
+import { MarketplaceModule } from './marketplace/marketplace.controller';
 import { IntegrationHubService, AttendanceSimAdapter } from './integration/integration-hub.service';
 import { IntegrationController } from './integration/integration.controller';
 import { HealthController } from './health/health.controller';
@@ -51,6 +52,7 @@ import { MetricsController } from './health/metrics.controller';
     ComplianceModule,
     WorkflowModule,
     BiModule,
+    MarketplaceModule,
   ],
   controllers: [HealthController, MetricsController, IntegrationController],
   providers: [
