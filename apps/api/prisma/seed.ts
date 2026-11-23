@@ -582,6 +582,20 @@ async function main() {
       testScenario: 'تولید صورتحساب از سند فروش → ارسال به سندباکس → uid', legalOwner: 'واحد مالیات و انطباق',
       sourceRef: 'دستورالعمل مؤدیان سامانه مؤدیان',
     },
+    {
+      code: 'LAW-DIRECT-TAX-RATE', title: 'نرخ مالیات عملکرد و معافیت‌های ۱۴۰۵', lawName: 'قانون مالیات‌های مستقیم',
+      article: 'ماده ۱۰۵', note: 'نرخ اشخاص حقوقی ۲۵٪ (ماده ۱۰۵)؛ معافیت حقوق ۱۴۰۵ ماهانه ۴۰۰٬۰۰۰٬۰۰۰ ریال (بخشنامه — §3 قرارداد). پله‌های ۱۰٪–۳۰٪ اشخاص حقیقی نیازمند تأیید بخشنامهٔ ۱۴۰۵.',
+      effectiveFrom: new Date('2026-03-21T00:00:00Z'), effectiveTo: null,
+      params: {
+        corporateRatePercent: 25,
+        salaryExemptMonthlyRials: 400_000_000,
+        salaryExemptAnnualRials: 4_800_000_000,
+        individualBrackets: [{ upTo: null, ratePercent: 10 }],
+        bracketsNeedConfirmation: true,
+      },
+      testScenario: 'اظهارنامه عملکرد ۱۴۰۵: درآمد مشمول ۱۰۰م → مالیات ۲۵م (ماده ۱۰۵)', legalOwner: 'واحد مالیات و انطباق',
+      sourceRef: 'قانون مالیات‌های مستقیم + بخشنامهٔ معافیت حقوق ۱۴۰۵ (§3 IRAN-LAWS)',
+    },
   ];
   for (const l of wave3Laws) {
     await prisma.lawRule.upsert({
@@ -617,6 +631,11 @@ async function main() {
   workflowDefs.push({
     code: 'WF-QUARTERLY-CLOSE', title: 'بستن فصل معاملات فصلی',
     steps: [{ order: 1, title: 'تأیید بستن فصل', permission: 'accounting.period_close', minApprovers: 1, selfApproval: false }],
+  });
+  // F9-T5 — گردش کار ارسال اظهارنامهٔ مالیات عملکرد (تأییدکننده: مجوز ارسال مؤدیان)
+  workflowDefs.push({
+    code: 'WF-DIRECTTAX-SUBMIT', title: 'ارسال اظهارنامهٔ مالیات عملکرد',
+    steps: [{ order: 1, title: 'تأیید ارسال اظهارنامه', permission: 'compliance.invoice_send', minApprovers: 1, selfApproval: false }],
   });
   for (const d of workflowDefs) {
     await prisma.workflowDef.upsert({

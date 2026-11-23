@@ -44,6 +44,7 @@
     { id: 'stores', title: 'انبار و کاست کنترل (فاز ۷)', icon: '📦' },
     { id: 'moadian', title: 'صورتحساب مؤدیان (فاز ۹)', icon: '🧾' },
     { id: 'quarterly', title: 'معاملات فصلی (فاز ۹)', icon: '🗂' },
+    { id: 'directtax', title: 'مالیات مستقیم (فاز ۹)', icon: '🏛' },
     { id: 'workflow', title: 'گردش کار تأیید (فاز ۸)', icon: '✅' },
     { id: 'calendar', title: 'تقویم شمسی', icon: '📅' },
     { id: 'payroll', title: 'حقوق و دستمزد', icon: '₪' },

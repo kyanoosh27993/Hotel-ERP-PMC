@@ -1684,3 +1684,40 @@ model QuarterlyTx {
   @@index([periodId, txType])
   @@map("quarterly_txs")
 }
+
+// ── موج ۳ — فاز ۹ (F9-T5): مالیات مستقیم — برنامهٔ عملکرد، اظهارنامه، شناسهٔ طرف‌های معامله ──
+model DirectTaxPlan {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  taxYear       Int // سال مالیاتی شمسی — یکتا
+  planJson      Json // ظرفیت اتاق، نرخ اشغال هدف، درآمد هدف به تفکیک بخش، اشتغال
+  status        String    @default("DRAFT") // DRAFT | CONFIRMED
+  confirmedAt   DateTime?
+  confirmedById String?   @db.Uuid
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@unique([taxYear])
+  @@map("direct_tax_plans")
+}
+
+model DirectTaxReturn {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  taxYear            Int // سال مالیاتی شمسی — یکتا
+  revenueRials       BigInt    @default(0) // جمع درآمد (۴۱۰۱..۴۱۰۳ بستانکار) اسناد قطعی سال
+  costRials          BigInt    @default(0) // جمع هزینه‌های قابل قبول (۵۱۰۱..۵۱۰۴، ۵۲۰۱)
+  taxableIncomeRials BigInt    @default(0) // درآمد مشمول = max(0, درآمد − هزینه)
+  taxRatePercent     Int       @default(0) // نرخ از کتابخانهٔ قوانین (ماده ۱۰۵)
+  taxDueRials        BigInt    @default(0) // مالیات متعلق
+  prepaidRials       BigInt    @default(0) // مالیات حقوق کسرشده (بستانکار ۲۲۰۳ سال)
+  payableRials       BigInt    @default(0) // بدهی قابل پرداخت = max(0, متعلق − پیش‌پرداخت)
+  linesJson          Json      @default("{}") // تفکیک حساب‌ها — رد پای محاسبه
+  status             String    @default("DRAFT") // DRAFT | SUBMITTED
+  workflowInstanceId String?   @db.Uuid
+  submittedAt        DateTime?
+  submittedById      String?   @db.Uuid
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@unique([taxYear])
+  @@map("direct_tax_returns")
+}

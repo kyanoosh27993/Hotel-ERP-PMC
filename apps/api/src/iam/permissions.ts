@@ -76,6 +76,9 @@ export const PERMISSIONS = {
   // موج ۳ — فاز ۹ (F9-T4): معاملات فصلی و فایل استاندارد دارایی
   QUARTERLY_VIEW: 'compliance.quarterly_view',
   QUARTERLY_MANAGE: 'compliance.quarterly_manage',
+  // موج ۳ — فاز ۹ (F9-T5): مالیات مستقیم
+  DIRECTTAX_VIEW: 'compliance.directtax_view',
+  DIRECTTAX_MANAGE: 'compliance.directtax_manage',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -151,6 +154,9 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   // موج ۳ — فاز ۹ (F9-T4): معاملات فصلی
   { code: PERMISSIONS.QUARTERLY_VIEW, en: 'View quarterly transactions and export file', fa: 'مشاهدهٔ معاملات فصلی و دریافت فایل استاندارد' },
   { code: PERMISSIONS.QUARTERLY_MANAGE, en: 'Register/derive quarterly transactions and request quarter close', fa: 'ثبت/استخراج معاملات فصلی و درخواست بستن فصل' },
+  // موج ۳ — فاز ۹ (F9-T5): مالیات مستقیم
+  { code: PERMISSIONS.DIRECTTAX_VIEW, en: 'View direct tax plan/return and counterparty registry', fa: 'مشاهدهٔ برنامهٔ عملکرد، اظهارنامه و شناسهٔ طرف‌های معامله' },
+  { code: PERMISSIONS.DIRECTTAX_MANAGE, en: 'Maintain plan, compute return and request submission', fa: 'نگهداری برنامهٔ عملکرد، محاسبهٔ اظهارنامه و درخواست ارسال' },
 ];
 
 /** ماتریس نقش‌ها — مرجع واحد ماتریس دسترسی */
@@ -195,6 +201,8 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.INVOICE_MANAGE,
       PERMISSIONS.QUARTERLY_VIEW,
       PERMISSIONS.QUARTERLY_MANAGE,
+      PERMISSIONS.DIRECTTAX_VIEW,
+      PERMISSIONS.DIRECTTAX_MANAGE,
       PERMISSIONS.WORKFLOW_VIEW,
       PERMISSIONS.WORKFLOW_ACT,
     ],
@@ -226,6 +234,7 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.INVOICE_VIEW,
       PERMISSIONS.INVOICE_SEND,
       PERMISSIONS.QUARTERLY_VIEW,
+      PERMISSIONS.DIRECTTAX_VIEW,
       PERMISSIONS.WORKFLOW_VIEW,
       PERMISSIONS.WORKFLOW_ACT,
     ],
