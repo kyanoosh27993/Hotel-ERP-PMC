@@ -10,7 +10,7 @@ WITH numbered AS (
 )
 UPDATE journal_entries SET "docIndex" = numbered.rn
 FROM numbered WHERE journal_entries.id = numbered.id;
-SELECT setval('seq_journal_docindex', (SELECT COALESCE(MAX("docIndex"), 0) FROM journal_entries));
+SELECT setval('seq_journal_docindex', GREATEST((SELECT COALESCE(MAX("docIndex"), 0) FROM journal_entries), 1));
 
 CREATE TABLE IF NOT EXISTS "journal_attachments" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
