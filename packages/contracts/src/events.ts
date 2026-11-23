@@ -6,6 +6,8 @@
 export const EVENT_NAMES = {
   /** رزرو تأیید شد (پس از کنترل ظرفیت در تراکنش) */
   RESERVATION_CONFIRMED: 'booking.reservation.confirmed',
+  /** رزرو لغو شد (فقط در وضعیت CONFIRMED) → سند معکوس بدهی مهمان */
+  RESERVATION_CANCELLED: 'booking.reservation.cancelled',
   /** سفارش رستوران نهایی و تحویل شد */
   POS_ORDER_SERVED: 'pos.order.served',
   /** گردش انبار ثبت شد */

@@ -3,6 +3,11 @@ import { ApiTags } from '@nestjs/swagger';
 import { PrismaService } from '../prisma.service';
 import { Public } from '../common/public.decorator';
 
+// نسخهٔ API از package.json خوانده می‌شود تا با هر انتشار هم‌خوان بماند
+// (رفع باگ #۴ لاگ باگ: نسخهٔ هاردکد ۰.۸.۰ با انتشار v0.8.1 ناسازگار شده بود)
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const APP_VERSION: string = require('../../package.json').version;
+
 @ApiTags('health')
 @Controller('health')
 export class HealthController {
@@ -16,7 +21,7 @@ export class HealthController {
     return {
       status: db ? 'ok' : 'degraded',
       db: db ? 'up' : 'down',
-      version: '0.8.0',
+      version: APP_VERSION,
     };
   }
 }

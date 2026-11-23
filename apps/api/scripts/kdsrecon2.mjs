@@ -1,0 +1,16 @@
+const BASE='http://localhost:3000/api/v1';
+const r=await fetch(BASE+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'frontdesk',password:'ChangeMe_Str0ng!'})});
+const t=(await r.json()).accessToken;
+const rc=await fetch(BASE+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'chef',password:'ChangeMe_Str0ng!'})});
+const tc=(await rc.json()).accessToken;
+const menu=(await (await fetch(BASE+'/restaurant/menu',{headers:{Authorization:'Bearer '+t}})).json()).flatMap(c=>c.items??[]);
+const kab=menu.find(i=>i.code==='MI-KABAB');
+const ord=await (await fetch(BASE+'/restaurant/orders',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify({outletCode:'REST-MAIN',tableCode:'T5',mode:'DINE_IN',items:[{menuItemCode:'MI-KABAB',qty:1}],idempotencyKey:`kds-${Date.now()}`})})).json();
+console.log('order:', ord.id ?? ord.data?.id, ord.orderNo);
+const lines=(await (await fetch(BASE+`/restaurant/orders/${ord.id}`,{headers:{Authorization:'Bearer '+t}})).json());
+console.log('order GET shape:', JSON.stringify(lines).slice(0,200));
+const lineId=lines.items?.[0]?.id ?? lines.data?.items?.[0]?.id;
+const send=await fetch(BASE+`/restaurant/orders/${ord.id}/items/${lineId}/send`,{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:'{}'});
+console.log('send:', send.status);
+const k=await (await fetch(BASE+'/restaurant/kitchen/tickets',{headers:{Authorization:'Bearer '+tc}})).json();
+console.log('tickets:', JSON.stringify(k).slice(0,300));

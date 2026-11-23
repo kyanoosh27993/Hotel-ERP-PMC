@@ -1,5 +1,13 @@
 /** payloadهای رویدادها — نسخه ۱ قرارداد */
 
+export interface ReservationCancelledPayload {
+  reservationId: string;
+  guestName: string;
+  nights: number;
+  /** مبلغ کل رزرو لغوشده برای سند معکوس */
+  totalAmountRials: number;
+}
+
 export interface ReservationConfirmedPayload {
   reservationId: string;
   roomTypeId: string;

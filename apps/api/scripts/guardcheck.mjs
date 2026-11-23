@@ -1,0 +1,10 @@
+import pgPkg from 'pg';
+const c = new pgPkg.Client({ connectionString: 'postgresql://hotel:hotel_ci_pass@localhost:5433/hotel_erp' });
+await c.connect();
+const r = await c.query(`select "checkIn"::text, "checkOut"::text, status, count(*)::int as n from reservations where status='CONFIRMED' group by 1,2,3 order by 1`);
+r.rows.forEach(x => console.log(x.checkIn, '→', x.checkOut, x.status, '×', x.n));
+const d10 = new Date(Date.now() + 10*86400000).toISOString().slice(0,10);
+const d11 = new Date(Date.now() + 11*86400000).toISOString().slice(0,10);
+const ov = await c.query(`select count(*)::int as n from reservations where status='CONFIRMED' and "checkIn" < $2 and "checkOut" > $1`, [d10, d11]);
+console.log('overlap day10-11:', ov.rows[0].n);
+await c.end();

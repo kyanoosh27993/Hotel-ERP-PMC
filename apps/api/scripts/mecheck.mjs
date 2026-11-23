@@ -1,0 +1,13 @@
+const BASE='http://localhost:3000/api/v1';
+const {createHmac}=await import('node:crypto');
+const totp=()=>{const S='JBSWY3DPEHPK3PXPE2ETEST',A='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';let b='';for(const c of S){const i=A.indexOf(c);if(i>=0)b+=i.toString(2).padStart(5,'0')}const k=Buffer.from(Array.from({length:b.length/8},(_,i)=>parseInt(b.slice(i*8,i*8+8),2)));const ctr=Math.floor(Date.now()/30000);const buf=Buffer.alloc(8);buf.writeUInt32BE(Math.floor(ctr/2**32),0);buf.writeUInt32BE(ctr%2**32,4);const h=createHmac('sha1',k).update(buf).digest();const o=h[h.length-1]&0xf;return String(((h[o]&0x7f)<<24|h[o+1]<<16|h[o+2]<<8|h[o+3])%1e6).padStart(6,'0')};
+const r=await fetch(BASE+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:'admin',password:'ChangeMe_Str0ng!',totp:totp()})});
+const j=await r.json();
+console.log('login keys:', Object.keys(j));
+const me=await (await fetch(BASE+'/auth/me',{headers:{Authorization:'Bearer '+j.accessToken}})).json();
+console.log('me:', JSON.stringify(me));
+const rf=await fetch(BASE+'/auth/refresh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:j.refreshToken})});
+const rj=await rf.json();
+console.log('refresh status:', rf.status, 'keys:', Object.keys(rj));
+const lo=await fetch(BASE+'/auth/logout',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+j.accessToken},body:JSON.stringify({refreshToken:rj.refreshToken??j.refreshToken})});
+console.log('logout status:', lo.status);

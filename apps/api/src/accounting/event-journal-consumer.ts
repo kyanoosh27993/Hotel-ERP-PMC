@@ -7,7 +7,8 @@ import {
   EVENT_NAMES,
   type EventEnvelope,
   type EventName,
-  type ReservationConfirmedPayload,
+  type ReservationCancelledPayload,
+  ReservationConfirmedPayload,
   type PosOrderServedPayload,
   type PayrollRunApprovedPayload,
   type TreasuryTransactionPostedPayload,
@@ -49,6 +50,7 @@ export class EventJournalConsumer implements OnModuleInit {
       });
 
     bind(EVENT_NAMES.RESERVATION_CONFIRMED, (e) => this.handleReservationConfirmed(e));
+    bind(EVENT_NAMES.RESERVATION_CANCELLED, (e) => this.handleReservationCancelled(e));
     bind(EVENT_NAMES.POS_ORDER_SERVED, (e) => this.handlePosOrderServed(e));
     bind(EVENT_NAMES.PAYROLL_RUN_APPROVED, (e) => this.handlePayrollRunApproved(e));
     // موج ۱ — فاز ۵ و ۱۰
@@ -161,6 +163,34 @@ export class EventJournalConsumer implements OnModuleInit {
       },
     );
     this.logger.log(`journal posted for reservation ${payload.reservationId}`);
+  }
+
+  /** booking.reservation.cancelled → سند معکوس رزرو (بستانکار حساب مهمان / بدهکار درآمد اتاق) */
+  private async handleReservationCancelled(envelope: EventEnvelope): Promise<void> {
+    const payload = envelope.payload as unknown as ReservationCancelledPayload;
+    const rule = await this.loadRule(EVENT_NAMES.RESERVATION_CONFIRMED);
+    if (!rule) return;
+
+    const total = BigInt(payload.totalAmountRials);
+    // معکوس رزرو: طرف‌های سند تأیید عوض می‌شوند
+    const lines = rule.map((l) => ({
+      accountCode: l.accountCode,
+      debitRials: l.side === 'credit' ? total : 0n,
+      creditRials: l.side === 'debit' ? total : 0n,
+    }));
+
+    await this.journal.postEntryFromEvent(
+      envelope.idempotencyKey,
+      lines,
+      {
+        description: `Auto: cancellation of reservation ${payload.reservationId}`,
+        sourceModule: 'booking',
+        sourceRef: `cancel:${payload.reservationId}`,
+        sourceEventId: envelope.eventId,
+        createdByUserId: SYSTEM_ENGINE_USER,
+      },
+    );
+    this.logger.log(`cancellation journal posted for reservation ${payload.reservationId}`);
   }
 
   /**

@@ -1,0 +1,10 @@
+import pgPkg from 'pg';
+const c = new pgPkg.Client({ connectionString: 'postgresql://hotel:hotel_ci_pass@localhost:5433/hotel_erp' });
+await c.connect();
+const rt = (await c.query(`select id, code from room_types where code='STD'`)).rows[0];
+const rooms = (await c.query(`select count(*)::int as n from rooms where "roomTypeId"=$1`, [rt.id])).rows[0];
+const d20 = new Date(Date.now() + 20*86400000).toISOString().slice(0,10);
+const d21 = new Date(Date.now() + 21*86400000).toISOString().slice(0,10);
+const ov = (await c.query(`select count(*)::int as n from reservations where "roomTypeId"=$1 and status in ('CONFIRMED','CHECKED_IN') and "checkIn" < $3 and "checkOut" > $2`, [rt.id, d20, d21])).rows[0];
+console.log(`STD rooms=${rooms.n} | overlapping ${d20}→${d21}: ${ov.n}`);
+await c.end();

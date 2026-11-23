@@ -7,6 +7,10 @@
 | ۱ | وب (TS) | ۲۰۲۶-۱۱-۲۳ | 🟡 | شل وب خطای ۴۰۴ به کاربر نشان می‌داد (fetch روی مبدأ وب) | `apps/web-next/app/page.tsx` + `next.config.mjs` | ✅ رفع شد | v0.8.1 |
 | ۲ | حسابداری (TS) | ۲۰۲۶-۱۱-۲۳ | 🟢 | فهرست اسناد costCenter/lineNo/docIndex را نمایش نمی‌داد | `apps/api/src/accounting/accounting.controller.ts` | ✅ رفع شد | v0.8.1 |
 | ۳ | تست (JS) | ۲۰۲۶-۱۱-۲۳ | 🟢 | چک نسخهٔ سفر کاربر هاردکد ۰.۷.۰ بود | `scripts/user-journey.mjs` | ✅ رفع شد | v0.8.1 |
+| ۴ | سلام‌رسانی (TS) | ۲۰۲۶-۱۱-۲۳ | 🟡 | نسخهٔ /health هاردکد ۰.۸.۰ بود و از انتشار جا می‌ماند | `apps/api/src/health/health.controller.ts` | ✅ رفع شد (خواندن از package.json) | v0.8.2 |
+| ۵ | PMS (TS) | ۲۰۲۶-۱۱-۲۳ | 🔴 | **endpoint لغو رزرو وجود نداشت** — کاربر نمی‌توانست رزرو تلفنی را لغو کند و بدهی ۱۲۰۱ فانتزی می‌ماند | `apps/api/src/pms/pms.{controller,service}.ts` + مصرف‌کنندهٔ رویداد | ✅ رفع شد: POST reservations/:id/cancel + رویداد cancelled + سند معکوس ۴۱۰۱/۱۲۰۱ | v0.8.2 |
+| ۶ | داشبورد (TS) | ۲۰۲۶-۱۱-۲۳ | 🔴 | **اشغال امروز فقط CONFIRMED را می‌شمرد** — مهمان‌های درخانه (CHECKED_IN) جا می‌افتادند و اشغال صفر نمایش داده می‌شد | `apps/api/src/dashboard/dashboard.service.ts` occupancyToday | ✅ رفع شد: status در {CONFIRMED, CHECKED_IN} | v0.8.2 |
+| — | انطباق (TS) | ۲۰۲۶-۱۱-۲۳ | 🟢 | یادداشت طرح: نسخهٔ قانون در همان رکورد افزایش می‌یابد و تاریخچهٔ پارامترها فقط در audit_log است — نرخ در تاریخ گذشته محاسبه نمی‌شود | `apps/api/src/compliance/compliance.service.ts` | 📋 پیشنهاد برای موج انطباق آینده | — |
 
 ## قوانین لاگ
 - **هر یافته در همین جدول ثبت شود**، حتی اگر همان لحظه رفع شود — برای پوشش تاریخی.

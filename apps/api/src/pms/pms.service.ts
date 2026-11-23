@@ -185,6 +185,39 @@ export class PmsService {
     });
   }
 
+  /**
+   * F5 گیت — لغو رزرو (باگ #۵ لاگ باگ: endpoint لغو وجود نداشت).
+   * فقط رزرو CONFIRMED قابل لغو است؛ پس از چک‌این مسیر تسویه/چک‌اوت الزامی است.
+   * رویداد cancellation → مصرف‌کننده سند معکوس می‌زند (۴۱۰۱ بدهکار / ۱۲۰۱ بستانکار).
+   */
+  async cancelReservation(reservationId: string, cancelledByUserId: string) {
+    const existing = await this.prisma.reservation.findUnique({ where: { id: reservationId } });
+    if (!existing) throw new ConflictException({ code: 'NOT_FOUND', message: 'Reservation not found' });
+    if (existing.status !== 'CONFIRMED') {
+      throw new ConflictException({ code: 'BUSINESS_RULE', message: `Only CONFIRMED reservations can be cancelled (current: ${existing.status})` });
+    }
+    return this.prisma.$transaction(async (tx) => {
+      const updated = await tx.reservation.update({
+        where: { id: reservationId },
+        data: { status: 'CANCELLED', cancelledAt: new Date() },
+      });
+      await this.outbox.enqueue(tx, {
+        eventName: EVENT_NAMES.RESERVATION_CANCELLED,
+        aggregate: 'reservation',
+        idempotencyKey: `cancel:${reservationId}`,
+        producer: 'booking',
+        payload: {
+          reservationId,
+          guestName: updated.guestName,
+          nights: updated.nights,
+          totalAmountRials: Number(updated.totalRials),
+        },
+      });
+      void cancelledByUserId;
+      return { reservationId, code: updated.code, cancelledAt: (updated.cancelledAt ?? new Date()).toISOString(), replayed: false };
+    });
+  }
+
   async listReservations(filter: { status?: string; date?: string }) {
     const where: Record<string, unknown> = {};
     if (filter.status) where.status = filter.status;

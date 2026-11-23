@@ -1,6 +1,6 @@
 {
   "name": "@hotel-erp/web-next",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "private": true,
   "description": "وب کلاینت Next.js — فاز ۱: شل دوزبانه EN/RTL + اتصال به API هسته",
   "scripts": {

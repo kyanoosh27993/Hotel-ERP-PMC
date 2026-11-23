@@ -114,7 +114,8 @@ export class DashboardService {
       this.prisma.room.groupBy({ by: ['roomTypeId'], where: { status: { not: 'OUT_OF_SERVICE' } }, _count: { _all: true } }),
       this.prisma.reservation.groupBy({
         by: ['roomTypeId'],
-        where: { status: 'CONFIRMED', checkIn: { lt: day.end }, checkOut: { gt: day.start } },
+        // باگ #۶: مهمان‌های درخانه CHECKED_IN هم اشغال امروز هستند
+        where: { status: { in: ['CONFIRMED', 'CHECKED_IN'] }, checkIn: { lt: day.end }, checkOut: { gt: day.start } },
         _count: { _all: true },
       }),
     ]);

@@ -186,6 +186,12 @@ export class PmsController {
     return { data: await this.pms.createReservation(input) };
   }
 
+  @RequirePermissions(PERMISSIONS.RESERVATION_CREATE)
+  @Post('reservations/:id/cancel')
+  async cancelReservation(@Param('id') id: string, @Req() req: AuthenticatedRequest) {
+    return { data: await this.pms.cancelReservation(id, req.user.id) };
+  }
+
   @RequirePermissions(PERMISSIONS.RESERVATION_VIEW)
   @Get('reservations')
   async listReservations(
