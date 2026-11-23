@@ -37,6 +37,8 @@ export class PermissionsGuard implements CanActivate {
     if (!user?.id) throw new ForbiddenException({ code: 'FORBIDDEN', message: 'No authenticated user' });
 
     const perms = await this.getUserPermissions(user.id);
+    // برای استفادهٔ سرویس‌ها (مثلاً موتور گردش کار که مجوزِ هر مرحله را جداگانه چک می‌کند)
+    (user as { perms?: Set<string> }).perms = perms;
     const okAll = !required || required.length === 0 || required.every((p) => perms.has(p));
     const okAny = !anyOf || anyOf.length === 0 || anyOf.some((p) => perms.has(p));
     if (!(okAll && okAny)) throw new ForbiddenException({ code: 'FORBIDDEN', message: 'You do not have permission for this action' });

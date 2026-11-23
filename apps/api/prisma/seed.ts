@@ -591,8 +591,38 @@ async function main() {
     });
   }
 
+  // F8-T6 — تعریف‌های پیش‌فرض موتور گردش کار («تأییدکننده ≠ ثبت‌کننده» در هر مرحله)
+  const workflowDefs = [
+    {
+      code: 'WF-JOURNAL-POST', title: 'تأیید سند حسابداری',
+      steps: [{ order: 1, title: 'تأیید مالی', permission: 'journal.approve', minApprovers: 1, selfApproval: false }],
+    },
+    {
+      code: 'WF-PAYROLL-RUN', title: 'تأیید دورهٔ حقوق',
+      steps: [{ order: 1, title: 'تأیید دوره', permission: 'payroll.approve', minApprovers: 1, selfApproval: false }],
+    },
+    {
+      code: 'WF-MOADIAN-CANCEL', title: 'لغو صورتحساب مؤدیان',
+      steps: [{ order: 1, title: 'تأیید لغو', permission: 'compliance.invoice_send', minApprovers: 1, selfApproval: false }],
+    },
+    {
+      code: 'WF-LARGE-PO', title: 'تأیید خرید بزرگ (دومرحله‌ای)',
+      steps: [
+        { order: 1, title: 'تأیید مدیر خرید', permission: 'procurement.manage', minApprovers: 1, selfApproval: false },
+        { order: 2, title: 'تأیید مالی', permission: 'journal.approve', minApprovers: 1, selfApproval: false },
+      ],
+    },
+  ];
+  for (const d of workflowDefs) {
+    await prisma.workflowDef.upsert({
+      where: { code: d.code },
+      update: {},
+      create: d as never,
+    });
+  }
+
   // eslint-disable-next-line no-console
-  console.log('✅ seed complete: roles/users/accounts/periods/rooms/rules/payroll/cash-accounts/linen/ancillary (wave-1) + warehouses/stock/recipes/menu/tables/suppliers (wave-2) + closing accounts/cost-centers/event-mappings/law-rules (wave-3)');
+  console.log('✅ seed complete: roles/users/accounts/periods/rooms/rules/payroll/cash-accounts/linen/ancillary (wave-1) + warehouses/stock/recipes/menu/tables/suppliers (wave-2) + closing accounts/cost-centers/event-mappings/law-rules (wave-3) + workflow-defs (F8-T6)');
 }
 
 main()

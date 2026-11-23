@@ -69,6 +69,10 @@ export const PERMISSIONS = {
   INVOICE_VIEW: 'compliance.invoice_view',
   INVOICE_MANAGE: 'compliance.invoice_manage',
   INVOICE_SEND: 'compliance.invoice_send',
+  // موج ۳ — فاز ۸ (F8-T6): موتور گردش کار تأیید چندمرحله‌ای
+  WORKFLOW_VIEW: 'workflow.view',
+  WORKFLOW_ACT: 'workflow.act',
+  WORKFLOW_MANAGE: 'workflow.manage',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -137,6 +141,10 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   { code: PERMISSIONS.INVOICE_VIEW, en: 'View Moadian electronic invoices', fa: 'مشاهدهٔ صورتحساب‌های الکترونیکی مؤدیان' },
   { code: PERMISSIONS.INVOICE_MANAGE, en: 'Generate and retry Moadian invoices', fa: 'تولید و تلاش مجدد صورتحساب مؤدیان' },
   { code: PERMISSIONS.INVOICE_SEND, en: 'Cancel (storno) Moadian invoices', fa: 'لغو/استورنو صورتحساب مؤدیان' },
+  // موج ۳ — فاز ۸ (F8-T6): موتور گردش کار
+  { code: PERMISSIONS.WORKFLOW_VIEW, en: 'View workflow instances and verify signatures', fa: 'مشاهدهٔ نمونه‌های گردش کار و راستی‌آزمایی امضاها' },
+  { code: PERMISSIONS.WORKFLOW_ACT, en: 'Approve/reject workflow steps', fa: 'تأیید/رد مراحل گردش کار' },
+  { code: PERMISSIONS.WORKFLOW_MANAGE, en: 'Define/edit workflow definitions', fa: 'تعریف/ویرایش گردش‌های کار' },
 ];
 
 /** ماتریس نقش‌ها — مرجع واحد ماتریس دسترسی */
@@ -179,6 +187,8 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.LAW_MANAGE,
       PERMISSIONS.INVOICE_VIEW,
       PERMISSIONS.INVOICE_MANAGE,
+      PERMISSIONS.WORKFLOW_VIEW,
+      PERMISSIONS.WORKFLOW_ACT,
     ],
   },
   approver: {
@@ -207,6 +217,8 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.LAW_VIEW,
       PERMISSIONS.INVOICE_VIEW,
       PERMISSIONS.INVOICE_SEND,
+      PERMISSIONS.WORKFLOW_VIEW,
+      PERMISSIONS.WORKFLOW_ACT,
     ],
   },
   front_desk: {

@@ -55,6 +55,9 @@ export const EVENT_NAMES = {
   INVOICE_ACCEPTED: 'compliance.invoice.accepted',
   /** صورتحساب لغو/استورنو شد (پاکت جداگانه) */
   INVOICE_CANCELLED: 'compliance.invoice.cancelled',
+  // ── موج ۳ — فاز ۸ (F8-T6): موتور گردش کار تأیید چندمرحله‌ای ──
+  /** نمونهٔ گردش کار همهٔ مراحلش تأیید شد (غیرپولی — ماژول‌ها مصرف‌کنندهٔ خود را ثبت می‌کنند) */
+  WORKFLOW_COMPLETED: 'workflow.completed',
 } as const;
 
 export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];

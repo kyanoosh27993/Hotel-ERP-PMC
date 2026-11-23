@@ -1587,3 +1587,59 @@ model MoadianInvoice {
   @@index([journalEntryId])
   @@map("moadian_invoices")
 }
+
+// ── موج ۳ — فاز ۸ (F8-T6): موتور گردش کار تأیید چندمرحله‌ای + امضای الکترونیکی ──
+model WorkflowDef {
+  id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code    String  @unique // WF-JOURNAL-POST
+  title   String
+  steps   Json // آرایهٔ [{order, title, permission, minApprovers, selfApproval}]
+  version Int     @default(1)
+  active  Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  instances WorkflowInstance[]
+
+  @@map("workflow_defs")
+}
+
+model WorkflowInstance {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  defId          String    @db.Uuid
+  entityType     String // journal_entry | payroll_run | moadian_invoice | purchase_order | ...
+  entityId       String    @db.Uuid
+  title          String
+  status         String    @default("IN_PROGRESS") // IN_PROGRESS|APPROVED|REJECTED|CANCELLED
+  currentStep    Int       @default(1)
+  initiatedById  String?   @db.Uuid
+  finishedAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  def    WorkflowDef      @relation(fields: [defId], references: [id])
+  actions WorkflowAction[]
+
+  @@unique([entityType, entityId])
+  @@index([status])
+  @@map("workflow_instances")
+}
+
+model WorkflowAction {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  instanceId String   @db.Uuid
+  stepNo     Int
+  action     String   // APPROVE | REJECT
+  actorId    String?  @db.Uuid
+  actorName  String   @default("")
+  comment    String   @default("")
+  signature  String // HMAC-SHA256 امضای الکترونیکی
+  prevHash   String // هش اقدام قبلی (GENESIS برای اولین)
+  hash       String // SHA256(prevHash|signature|action|actorId) — زنجیرهٔ ضد دست‌کاری
+  at         DateTime @default(now())
+
+  instance WorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@index([instanceId, stepNo])
+  @@map("workflow_actions")
+}
