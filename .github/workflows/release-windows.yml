@@ -205,6 +205,9 @@ jobs:
           # (حذف ~۱۱هزار فایل ممکن است بیش از ۳۰ ثانیه طول بکشد یا فایل لحظه‌ای قفل شود —
           #  دو تلاش با انتظار کامل ۹۰ ثانیه‌ای + دامپ فایل‌های باقیمانده در صورت شکست)
           Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force
+          # پنجرهٔ کنسول run-server.cmd با pause>nul باز می‌ماند و CWD آن روی INSTDIR است —
+          # پوشهٔ ریشه «in use» می‌شود؛ cmdهای مربوط به HotelERP را هدفمند می‌بندیم
+          Get-CimInstance Win32_Process -Filter "Name='cmd.exe'" | Where-Object { $_.CommandLine -like '*run-server*' -or $_.CommandLine -like '*HotelERP*' } | ForEach-Object { try { Stop-Process -Id $_.ProcessId -Force -ErrorAction Stop } catch {} }
           Start-Sleep -Seconds 2
           schtasks /delete /tn "HotelERP Limited Run" /f 2>$null | Out-Null
           $gone = $false
@@ -222,8 +225,10 @@ jobs:
             try { Get-MpThreatDetection -ErrorAction Stop | Select-Object -First 5 -Property InitialDetectionTime, Resources | Format-List | Out-String | Write-Host } catch { Write-Host "Get-MpThreatDetection unavailable" }
             # رانر باید برای ران بعدی پاک بماند — حذف مستقیم به‌عنوان آخرین راهکار؛
             # زنجیرهٔ اصلی (نصب/دابل‌کلیک/کارکرد) قبلاً کامل سبز شده است.
-            Remove-Item $inst -Recurse -Force -ErrorAction Continue
-            Start-Sleep -Seconds 2
+            for ($r = 0; $r -lt 6 -and (Test-Path $inst); $r++) {
+              Remove-Item $inst -Recurse -Force -ErrorAction Continue
+              if (Test-Path $inst) { Start-Sleep -Seconds 3 }
+            }
             if (Test-Path $inst) { throw "uninstall left files behind in $inst" }
             Write-Host "UNINSTALL OK (fallback removal used — see leftovers/Defender output above)"
           } else {
