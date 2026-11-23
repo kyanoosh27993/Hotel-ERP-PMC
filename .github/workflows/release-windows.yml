@@ -202,13 +202,21 @@ jobs:
           if ($web.Content -notmatch "frontdesk.js") { throw "installed web shell not served" }
           Write-Host "INSTALLED APP FUNCTIONAL OK — login + PMS map + web shell"
           # پاکسازی کامل: توقف فرایندها، حذف وظیفهٔ اجرای محدود، حذف نصب
+          # (حذف ~۱۱هزار فایل ممکن است بیش از ۳۰ ثانیه طول بکشد یا فایل لحظه‌ای قفل شود —
+          #  دو تلاش با انتظار کامل ۹۰ ثانیه‌ای + دامپ فایل‌های باقیمانده در صورت شکست)
           Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force
           Start-Sleep -Seconds 2
           schtasks /delete /tn "HotelERP Limited Run" /f 2>$null | Out-Null
-          Start-Process -FilePath "$inst\Uninstall.exe" -ArgumentList "/S" -Wait
           $gone = $false
-          for ($i = 0; $i -lt 15; $i++) { Start-Sleep -Seconds 2; if (-not (Test-Path $inst)) { $gone = $true; break } }
-          if (-not $gone) { throw "uninstall left files behind in $inst" }
+          for ($attempt = 1; $attempt -le 2 -and -not $gone; $attempt++) {
+            Start-Process -FilePath "$inst\Uninstall.exe" -ArgumentList "/S" -Wait
+            for ($i = 0; $i -lt 45; $i++) { Start-Sleep -Seconds 2; if (-not (Test-Path $inst)) { $gone = $true; break } }
+          }
+          if (-not $gone) {
+            Write-Host "--- leftovers (first 30 paths) ---"
+            Get-ChildItem $inst -Recurse -ErrorAction SilentlyContinue | Select-Object -First 30 -ExpandProperty FullName
+            throw "uninstall left files behind in $inst"
+          }
           Write-Host "UNINSTALL OK — INSTALL / DOUBLE-CLICK / FUNCTIONAL / UNINSTALL all passed"
 
       - name: Upload artifact (always)
