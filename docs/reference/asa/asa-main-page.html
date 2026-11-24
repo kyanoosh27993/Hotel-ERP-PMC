@@ -1,0 +1,697 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0039)http://192.168.133.146/hotel/index1.php -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>نرم افزار جامع هتلداری آسا</title>
+    <link rel="stylesheet" type="text/css" href="./صفحه اصلی نرم افزار_files/fonts.css" media="all">
+
+    <link rel="stylesheet" href="./صفحه اصلی نرم افزار_files/font-awesome.css">
+    <link href="./صفحه اصلی نرم افزار_files/font_roboto.css" rel="stylesheet">
+    <link rel="stylesheet" href="./صفحه اصلی نرم افزار_files/style2.php">
+
+    <style type="text/css">
+        body { margin: 0; padding: 0; }
+        .hover{ background: #FFFF99;}
+        img:hover { background: none !important; }
+        #wrraper_cont { width: 1020px; margin: 0 auto;}
+        #header { background: url(images_new/index_page/header.png); width: inherit; height: 100px;  }
+        #content { background: url(images_new/index_page/content.png) no-repeat top center;  width: 970px; height: 550px; margin: 10px auto; }
+        #content ul { list-style: none; margin: 0; padding: 0; direction: rtl; }
+        .top { text-align: center; }
+        /* Front Office */
+        #front_office { background: url(images_new/index_page/front_office.png); width: 760px; height: 140px;  }
+        .icons_front { float: right; margin-right: 22px; cursor: pointer;  }
+        .icons_front img { width: 67px; height: 56px;}
+        .icons_front .down { color: #db2c25; font: 15px MH_NassimBold; text-align: center; margin-top: 18px; padding: 2px; }
+        .icons_front .down:hover { background: #FFFF99; border-radius:7px }
+        #wrraper_front { margin-right: 37px; margin-top: 0px; padding-top: 18px; }
+
+        /* Back Office */
+        #back_office { background: url(images_new/index_page/back_office.png); width: 880px; height: 140px; margin-top: 30px;  }
+        .icons_back { float: right; margin-right: 20px; cursor: pointer;  }
+        .icons_back img { width: 67px; height: 56px;}
+        .icons_back .down { color: #342f2d; font: 15px MH_NassimBold; text-align: center; margin-top: 20px; padding: 2px; }
+        .icons_back .down:hover { background: #FFFF99; border-radius:7px }
+        #wrraper_back { margin-right: 63px; margin-top: 0px; padding-top: 22px; }
+
+
+        /*Other Office*/
+        #other_office { background: url(images_new/index_page/other_office1.png); width: 790px; height: 140px; margin-top: 30px; margin-left: 200px; }
+        .icons_other { float: right; margin-right: 20px; cursor: pointer;  }
+        .icons_other img { width: 67px; height: 56px;}
+        .icons_other .down { color: #4e6f8a; font: 15px MH_NassimBold; text-align: center; margin-top: 22px; padding: 2px; }
+        .icons_other .down:hover { background: #FFFF99; border-radius:7px }
+        #wrraper_other { margin-right: 80px; margin-top: 0px; padding-top: 22px; }
+
+        #copy_right { margin: 0 auto; font: 15px MH_Nassim; color: #4e6f8a; margin-left: 25px; margin-top: -15px; width: 500px; }
+    </style>
+    <script src="./صفحه اصلی نرم افزار_files/react.min.js.download"></script>
+    <script src="./صفحه اصلی نرم افزار_files/react-dom.min.js.download"></script>
+    <script src="./صفحه اصلی نرم افزار_files/index.php"></script>
+    <script src="./صفحه اصلی نرم افزار_files/index(1).php"></script>
+    <script type="text/javascript" src="./صفحه اصلی نرم افزار_files/jquery.min.js.download"></script>
+
+    <script type="text/javascript">
+        $(document).ready( function()
+        {
+            var time_zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            document.cookie = "time_zone =" + time_zone;
+
+            $('#user, #pass, #captcha_value').keydown(function(e){
+                var key = e.which;
+                if(key == 13)
+                {
+                    if($(e.target).attr('id') == 'user')
+                        $('#pass').focus();
+                                        else if($(e.target).attr('id') == 'pass')
+                        $('#captcha_value').focus();
+                                        else
+                        $('#sub').focus();
+                }
+            });
+
+            $('#sub').click(function valid()
+            {
+                var user = $('#user').val();
+                var pass = $('#pass').val();
+                /*var show_captcha = $('#show_captcha').val();*/
+                var captcha_value = $('#captcha_value').val();
+
+                if(user == '')
+                {
+                    alert('نام کاربری خالی میباشد');
+                    $('#user').focus();
+                    return;
+                }
+                if(pass == '')
+                {
+                    alert('کلمه عبور خالی میباشد');
+                    $('#pass').focus();
+                    return;
+                }
+                                if(captcha_value == '')
+                {
+                    alert('حروف امنیتی را وارد نمایید');
+                    $('#captcha_value').focus();
+                    return;
+                }
+                
+                change_visible(1);
+
+                $('#deactive').css('display', 'none');
+                $('#blacklist').css('display', 'none');
+                $('#error_ip').css('display', 'none');
+                $('#error').css('display', 'none');
+                $('#error_captcha').css('display', 'none');
+                $('#error_login').css('display', 'none');
+                $('#loader').css('display', 'table-row');
+
+                $.post('../financial/check_password.php', {user:user, pass:pass, captcha_value:captcha_value},
+                    function(data){
+                        if(data.error > 0)
+                        {
+                            change_visible(0);
+
+                            if(data.error == 1)
+                            {
+                                $('#loader').css('display', 'none');
+                                $('#error_captcha').css('display', 'table-row');
+                                $('#captcha_value').focus();
+                            }
+                            else if(data.error == 4)
+                            {
+                                $('#loader').css('display', 'none');
+                                $('#error_ip').css('display', 'table-row');
+                                $('#user').focus();
+                            }
+                            else if(data.error == 5)
+                            {
+                                $('#loader').css('display', 'none');
+                                $('#error_login').css('display', 'table-row');
+                                $('#user').focus();
+
+                                _data = 'در حال حاضر تعداد ورود همزمان مجاز برای این کاربر به حداکثر رسیده است.\n\n';
+                                _data += 'تعداد ورودهای همزمان فعلی: ' + data.cur_logins + '\n';
+                                _data += 'شما میتوانید تا پایان فعالیت های قبلی منتظر بمانید\n\n';
+                                _data += 'و یا آنها را به اجبار متوقف کنید.\n\n';
+                                _data += 'آیا میخواهید نشستهای کاربری قبلی را لغو کنید؟';
+                                if(confirm(_data) == true)
+                                {
+                                    $.ajax({
+                                        url: '../financial/financial/log_out.php',
+                                        method: 'POST',
+                                        type: 'POST',
+                                        data: 'user=' + user,
+                                        complete: function() {
+                                            alert('نشستهای فعلی کاربر لغو شد. اکنون میتوانید وارد شوید.');
+                                        },
+                                    });
+                                }
+                            }
+                            else if(data.error == 99)
+                            {
+                                document.location = '/financial/otp.php';
+                            }
+                            else if(data.error == 11)
+                            {
+                                $('#loader').css('display', 'none');
+                                $('#blacklist').css('display', 'table-row');
+                                $('#user').focus();
+                            }
+                            else if(data.error == 12)
+                            {
+                                $('#loader').css('display', 'none');
+                                $('#deactive').css('display', 'table-row');
+                                $('#user').focus();
+                            }
+                            else
+                            {
+                                $('#loader').css('display', 'none');
+                                $('#error').css('display', 'table-row');
+                                $('#user').val('');
+                                $('#pass').val('');
+                                $('#user').focus();
+
+                            }
+
+                            if (data.captcha)
+                                ReactDOM.render(React.createElement(App, {src : data.captcha}), document.getElementById('main'));
+                        }
+                        else
+                        {
+                            if(data.show == 1)
+                            {
+                                alert(data.message);
+                            }
+                            document.location = '../financial/menu/index_header.php';
+                        }
+                    }, 'json');
+            });
+
+            $('.img-refresh').click( function () {
+                $.post('../financial/refresh_captcha.php', {action:'refresh'},
+                    function(data)
+                    {
+                        if(data.error == 1)
+                        {
+                            ReactDOM.render(React.createElement(App, {src : data.captcha.image_src}), document.getElementById('main'));
+                            $("#captcha_value").focus();
+                        }
+                    }, 'json');
+            });
+
+            //-----------------------------خزانه داری-----------------------------
+
+            $('#user_khazaneh, #pass_khazaneh, #captcha_value_khazaneh').keydown(function(e){
+                var key = e.which;
+                if(key == 13)
+                {
+                    if($(e.target).attr('id') == 'user_khazaneh')
+                        $('#pass_khazaneh').focus();
+                                        else if($(e.target).attr('id') == 'pass_khazaneh')
+                        $('#captcha_value_khazaneh').focus();
+                                        else
+                        $('#sub_khazaneh').focus();
+                }
+            });
+
+            $('#sub_khazaneh').click(function valid()
+            {
+                var user = $('#user_khazaneh').val();
+                var pass = $('#pass_khazaneh').val();
+                /*var show_captcha = $('#show_captcha').val();*/
+                var captcha_value = $('#captcha_value_khazaneh').val();
+
+                if(user == '')
+                {
+                    alert('نام کاربری خالی میباشد');
+                    $('#user_khazaneh').focus();
+                    return;
+                }
+                if(pass == '')
+                {
+                    alert('کلمه عبور خالی میباشد');
+                    $('#pass_khazaneh').focus();
+                    return;
+                }
+                                if(captcha_value == '')
+                {
+                    alert('حروف امنیتی را وارد نمایید');
+                    $('#captcha_value_khazaneh').focus();
+                    return;
+                }
+                
+                change_visible_khazaneh(1);
+
+                $('#deactive_khazaneh').css('display', 'none');
+                $('#blacklist_khazaneh').css('display', 'none');
+                $('#error_ip_khazaneh').css('display', 'none');
+                $('#error_khazaneh').css('display', 'none');
+                $('#error_captcha_khazaneh').css('display', 'none');
+                $('#error_login_khazaneh').css('display', 'none');
+                $('#loader_khazaneh').css('display', 'table-row');
+
+                $.post('../financial/check_password.php', {user:user, pass:pass, captcha_value:captcha_value},
+                    function(data){
+                        if(data.error > 0)
+                        {
+                            change_visible_khazaneh(0);
+
+                            if(data.error == 1)
+                            {
+                                $('#loader_khazaneh').css('display', 'none');
+                                $('#error_captcha_khazaneh').css('display', 'table-row');
+                                $('#captcha_value_khazaneh').focus();
+                            }
+                            else if(data.error == 4)
+                            {
+                                $('#loader_khazaneh').css('display', 'none');
+                                $('#error_ip_khazaneh').css('display', 'table-row');
+                                $('#user_khazaneh').focus();
+                            }
+                            else if(data.error == 5)
+                            {
+                                $('#loader_khazaneh').css('display', 'none');
+                                $('#error_login_khazaneh').css('display', 'table-row');
+                                $('#user_khazaneh').focus();
+
+                                _data = 'در حال حاضر تعداد ورود همزمان مجاز برای این کاربر به حداکثر رسیده است.\n\n';
+                                _data += 'تعداد ورودهای همزمان فعلی: ' + data.cur_logins + '\n';
+                                _data += 'شما میتوانید تا پایان فعالیت های قبلی منتظر بمانید\n\n';
+                                _data += 'و یا آنها را به اجبار متوقف کنید.\n\n';
+                                _data += 'آیا میخواهید نشستهای کاربری قبلی را لغو کنید؟';
+                                if(confirm(_data) == true)
+                                {
+                                    $.ajax({
+                                        url: '../financial/financial/log_out_khazaneh.php',
+                                        method: 'POST',
+                                        type: 'POST',
+                                        data: 'user=' + user,
+                                        complete: function() {
+                                            alert('نشستهای فعلی کاربر لغو شد. اکنون میتوانید وارد شوید.');
+                                        },
+                                    });
+                                }
+                            }
+                            else if(data.error == 99)
+                            {
+                                document.location = '/financial/otp.php';
+                            }
+                            else if(data.error == 11)
+                            {
+                                $('#loader_khazaneh').css('display', 'none');
+                                $('#blacklist_khazaneh').css('display', 'table-row');
+                                $('#user_khazaneh').focus();
+                            }
+                            else if(data.error == 12)
+                            {
+                                $('#loader_khazaneh').css('display', 'none');
+                                $('#deactive_khazaneh').css('display', 'table-row');
+                                $('#user_khazaneh').focus();
+                            }
+                            else
+                            {
+                                $('#loader_khazaneh').css('display', 'none');
+                                $('#error_khazaneh').css('display', 'table-row');
+                                $('#user_khazaneh').val('');
+                                $('#pass_khazaneh').val('');
+                                $('#user_khazaneh').focus();
+
+                            }
+
+                            if (data.captcha)
+                                ReactDOM.render(React.createElement(AppKh, {src : data.captcha}), document.getElementById('mainKh'));
+                        }
+                        else
+                        {
+                            if(data.show == 1)
+                            {
+                                alert(data.message);
+                            }
+                            document.location = '../financial/menu/header_khazaneh.php';
+                        }
+                    }, 'json');
+            });
+
+            $('.img-refresh-khazaneh').click( function () {
+                $.post('../financial/refresh_captcha.php', {action:'refresh'},
+                    function(data)
+                    {
+                        if(data.error == 1)
+                        {
+                            ReactDOM.render(React.createElement(AppKh, {src : data.captcha.image_src}), document.getElementById('mainKh'));
+                            $("#captcha_value_khazaneh").focus();
+                        }
+                    }, 'json');
+            });
+
+            //-----------------------------غیره-----------------------------
+            $('.software').click(function() {
+                let _text = $(this)[0]['childNodes'][3]['innerHTML'];
+                let _path = $(this).data('path');
+                                $("#reg").html('');
+                ReactDOM.render(React.createElement(Reg, {src : '/hotel/captcha/simple-php-captcha.php?_CAPTCHA&amp;t=0.71696400+1795524873'}), document.getElementById('reg'));
+                $(".etcBtn").click();
+                $("#modal-title").html(_text);
+                $('#user_reg, #pass_reg, #captcha_value_reg').keydown(function(e){
+                    var key = e.which;
+                    if(key == 13)
+                    {
+                        if($(e.target).attr('id') == 'user_reg')
+                            $('#pass_reg').focus();
+                                            else if($(e.target).attr('id') == 'pass_reg')
+                            $('#captcha_value_reg').focus();
+                                            else
+                            $('#sub_reg').focus();
+                    }
+                });
+
+                $('#user_reg').focus();
+
+                $('#sub_reg').click(function valid()
+                {
+                    var user = $('#user_reg').val();
+                    var pass = $('#pass_reg').val();
+                    /*var show_captcha = $('#show_captcha').val();*/
+                    var captcha_value = $('#captcha_value_reg').val();
+
+                    if(user == '')
+                    {
+                        alert('نام کاربری خالی میباشد');
+                        $('#user_reg').focus();
+                        return;
+                    }
+                    if(pass == '')
+                    {
+                        alert('کلمه عبور خالی میباشد');
+                        $('#pass_reg').focus();
+                        return;
+                    }
+                                        if(captcha_value == '')
+                    {
+                        alert('حروف امنیتی را وارد نمایید');
+                        $('#captcha_value_reg').focus();
+                        return;
+                    }
+                    
+                    change_visible_reg(1);
+
+                    $('#expire_reg').css('display', 'none');
+                    $('#deactive_reg').css('display', 'none');
+                    $('#blacklist_reg').css('display', 'none');
+                    $('#error_ip_reg').css('display', 'none');
+                    $('#error_reg').css('display', 'none');
+                    $('#error_captcha_reg').css('display', 'none');
+                    $('#error_login_reg').css('display', 'none');
+                    $('#loader_reg').css('display', 'table-row');
+
+                    $.post('check_password.php', {user:user, pass:pass, captcha_value:captcha_value},
+                        function(data){
+                            if(data.error > 0)
+                            {
+                                change_visible_reg(0);
+
+                                if(data.error == 1)
+                                {
+                                    $('#loader_reg').css('display', 'none');
+                                    $('#error_captcha_reg').css('display', 'table-row');
+                                    $('#captcha_value_reg').focus();
+                                }
+                                else if(data.error == 4)
+                                {
+                                    $('#loader_reg').css('display', 'none');
+                                    $('#error_ip_reg').css('display', 'table-row');
+                                    $('#user_reg').focus();
+                                }
+                                else if(data.error == 5)
+                                {
+                                    $('#loader_reg').css('display', 'none');
+                                    $('#error_login_reg').css('display', 'table-row');
+                                    $('#user_reg').focus();
+
+                                    _data = 'در حال حاضر تعداد ورود همزمان مجاز برای این کاربر به حداکثر رسیده است.\n\n';
+                                    _data += 'تعداد ورودهای همزمان فعلی: ' + data.front_cur_logins + '\n';
+                                    _data += 'شما میتوانید تا پایان فعالیت های قبلی منتظر بمانید\n\n';
+                                    _data += 'و یا آنها را به اجبار متوقف کنید.\n\n';
+                                    _data += 'آیا میخواهید نشستهای کاربری قبلی را لغو کنید؟';
+                                    if(confirm(_data) == true)
+                                    {
+                                        $.ajax({
+                                            url: 'front_logoff.php',
+                                            method: 'POST',
+                                            type: 'POST',
+                                            data: 'user=' + user + '&token=a9fdec42652618ec4cff221380d17ad726cb27a839f70485e87b65255b64dc2f',
+                                            complete: function() {
+                                                alert('نشستهای قبلی کاربر لغو شد. اکنون میتوانید وارد شوید.');
+                                            },
+                                        });
+                                    }
+                                }
+                                else if(data.error == 99)
+                                {
+                                    document.location = 'otp.php';
+                                }
+                                else if(data.error == 11)
+                                {
+                                    $('#loader_reg').css('display', 'none');
+                                    $('#blacklist_reg').css('display', 'table-row');
+                                    $('#user_reg').focus();
+                                }
+                                else if(data.error == 12)
+                                {
+                                    $('#loader_reg').css('display', 'none');
+                                    $('#deactive_reg').css('display', 'table-row');
+                                    $('#user_reg').focus();
+                                }
+                                else if(data.error == 37)
+                                {
+                                    $('#loader_reg').css('display', 'none');
+                                    $('#expire_reg').css('display', 'table-row');
+                                    $('#user_reg').focus();
+                                }
+                                else
+                                {
+                                    $('#loader_reg').css('display', 'none');
+                                    $('#error_reg').css('display', 'table-row');
+                                    $('#user_reg').val('');
+                                    $('#pass_reg').val('');
+                                    $('#user_reg').focus();
+                                }
+
+                                if (data.captcha)
+                                    ReactDOM.render(React.createElement(Reg, {src : data.captcha}), document.getElementById('reg'));
+                            }
+                            else
+                            {
+                                document.location = _path;
+                            }
+                        }, 'json');
+                });
+
+                $('.img-refresh-reg').click( function () {
+                    $.post('refresh_captcha.php', {action:'refresh'},
+                        function(data)
+                        {
+                            if(data.error == 1)
+                            {
+                                ReactDOM.render(React.createElement(Reg, {src : data.captcha.image_src}), document.getElementById('reg'));
+                                $("#captcha_value_reg").focus();
+                            }
+                        }, 'json');
+                });
+                // $('.img-refresh-reg').click();
+                            });
+        });
+
+        function change_visible(kind)
+        {
+            document.getElementById('user').disabled = kind;
+            document.getElementById('pass').disabled = kind;
+                            document.getElementById('captcha_value').disabled = kind;
+                            document.getElementById('sub').disabled = kind;
+        }
+
+        function change_visible_khazaneh(kind)
+        {
+            document.getElementById('user_khazaneh').disabled = kind;
+            document.getElementById('pass_khazaneh').disabled = kind;
+                            document.getElementById('captcha_value_khazaneh').disabled = kind;
+                            document.getElementById('sub_khazaneh').disabled = kind;
+        }
+
+        function change_visible_reg(kind)
+        {
+            document.getElementById('user_reg').disabled = kind;
+            document.getElementById('pass_reg').disabled = kind;
+                            document.getElementById('captcha_value_reg').disabled = kind;
+                            document.getElementById('sub_reg').disabled = kind;
+        }
+    </script>
+
+</head>
+<body>
+<div id="wrraper_cont">
+<img src="./صفحه اصلی نرم افزار_files/dl_r_4.gif" style="float:left;">
+<img src="./صفحه اصلی نرم افزار_files/dl_l_4.gif" style="float:right;">
+<div id="header">
+<table style="padding-top: 0px; font: 15px MH_NassimBold; margin-left: 5px;" cellspacing="2" width="95%">
+<tbody><tr>
+    <td colspan="8" align="right">
+        <h2 style="color: white; margin-top: 16px;">&nbsp;</h2>
+    </td>
+</tr>
+<tr>
+    <td width="1"><a href="http://192.168.133.146/hotel/language/change_lang.php?_kind=2"> <img src="./صفحه اصلی نرم افزار_files/en.png"> </a></td>
+    <td width="1"><a href="http://192.168.133.146/hotel/language/change_lang.php?_kind=1"> <img src="./صفحه اصلی نرم افزار_files/ir.png"> </a></td>
+    <td width="1"><a href="http://192.168.133.146/hotel/language/change_lang.php?_kind=3"> <img src="./صفحه اصلی نرم افزار_files/ar.png"> </a></td>
+    <td width="1"><a href="http://192.168.133.146/hotel/language/change_lang.php?_kind=4"> <img src="./صفحه اصلی نرم افزار_files/ka.png"> </a></td>
+    <td width="1"><a href="http://192.168.133.146/hotel/language/change_lang.php?_kind=5"> <img src="./صفحه اصلی نرم افزار_files/ru.png"> </a></td>
+    <td width="1"><a href="http://192.168.133.146/hotel/language/change_lang.php?_kind=1"> <img src="./صفحه اصلی نرم افزار_files/af.png"> </a></td>
+    <td width="1"><a href="http://192.168.133.146/hotel/language/change_lang.php?_kind=7"> <img width="20px" height="10px" src="./صفحه اصلی نرم افزار_files/am.png"> </a></td>
+
+    <td style="color: #0887ef; padding-left: 20px;" colspan="2">
+    <table style="margin-top: 1px;">
+    <tbody><tr>
+        <td style="direction: ltr;">2026 November 24</td>
+        <td>سه شنبه  ۳  آذر  ۱۴۰۵ برابر با </td>
+    </tr>
+    </tbody></table>
+    </td>
+    </tr>
+    </tbody></table>
+    </div>
+    <div id="content">
+    <div id="front_office">
+    <div id="wrraper_front">
+        <div id="reg"><div data-reactroot=""><span class="etcBtn"></span><div class="modal" data-status="false"><div class="modal-left"><a href="http://192.168.133.146/hotel/index1.php"><span class="price-tag"></span></a></div><div class="modal-right"><h2 id="modal-title">صفحه ورود کاربران</h2><p id="loader_reg" dir="rtl" class="blue hidden">لطفا تامل فرمایید.</p><p id="error_reg" dir="rtl" class="red hidden">نام کاربری و رمز عبور مطابقت ندارند.</p><p id="error_captcha_reg" dir="rtl" class="red hidden">حروف امنیتی مطابقت ندارند.</p><p id="error_ip_reg" dir="rtl" class="red hidden">اجازه ورود به سیستم با این IP را ندارید.</p><p id="error_login_reg" dir="rtl" class="red hidden">این نام کاربری در سیستم لاگین است.</p><p id="blacklist_reg" dir="rtl" class="red hidden">دسترسی شما به این سامانه مسدود شده است. لطفا با مدیر سیستم تماس بگیرید.</p><p id="deactive_reg" dir="rtl" class="red hidden">حساب کاربری شما مسدود شده است. لطفا با مدیر سیستم تماس بگیرید.</p><p id="expire_reg" dir="rtl" class="red hidden">اعتبار حساب کاربری شما به پایان رسیده است.</p><form class="ContactForm" autocomplete="off"><input type="text" placeholder="نام کاربری" name="user_reg" id="user_reg" dir="rtl" autocomplete="off"><input type="password" placeholder="رمز عبور" name="pass_reg" id="pass_reg" dir="rtl" autocomplete="off"><div class="captcah-images"><img src="./صفحه اصلی نرم افزار_files/simple-php-captcha.php" class="img"><img src="./صفحه اصلی نرم افزار_files/refresh_1.png" class="img-refresh-reg"></div><input type="text" placeholder="حروف امنیتی" name="captcha_value" id="captcha_value_reg" dir="rtl"><p id="info" dir="rtl" class="SmallBlue"></p><button type="button" id="sub_reg" class="submitbtn"></button></form><button class="close"><span class="fa fa-close"></span></button></div></div></div></div>
+        <div class="icons_front software" data-path="menu/recp1.php">
+            <div class="top"><img src="./صفحه اصلی نرم افزار_files/reception.png"></div>
+            <div class="down">پذیرش</div>
+        </div>
+        <div class="icons_front software" data-path="menu/cashier1.php">
+            <div class="top"><img src="./صفحه اصلی نرم افزار_files/cashier.png"></div>
+            <div class="down">صندوق</div>
+        </div>
+        <div class="icons_front software" data-path="menu/reserve1.php">
+            <div class="top"><img src="./صفحه اصلی نرم افزار_files/reservation.png"></div>
+            <div class="down">رزرواسیون</div>
+        </div>
+        <div class="icons_front software" data-path="menu/restaurant1.php">
+            <div class="top"><img src="./صفحه اصلی نرم افزار_files/resturant.png"></div>
+            <div class="down">رستوران</div>
+        </div>
+        <div class="icons_front software" data-path="menu/housekeeping1.php">
+            <div class="top"><img src="./صفحه اصلی نرم افزار_files/housekeeping.png"></div>
+            <div class="down">خانه داری</div>
+        </div>
+        <div class="icons_front software" data-path="menu/laundry1.php">
+            <div class="top"><img src="./صفحه اصلی نرم افزار_files/lundary.png"></div>
+            <div class="down">لاندری</div>
+        </div>
+        <div class="icons_front software" data-path="menu/telephone1.php">
+            <div class="top"><img src="./صفحه اصلی نرم افزار_files/telephone.png"></div>
+            <div class="down">تلفن</div>
+        </div>
+        <div class="icons_front software" data-path="menu/ceremonies1.php">
+            <div class="top"><img src="./صفحه اصلی نرم افزار_files/cermonism.png"></div>
+            <div class="down">تشریفات</div>
+        </div>
+        <div style="clear: both;"></div>
+    </div>
+    </div>
+    <div id="back_office">
+    <div id="wrraper_back">
+    <div class="icons_back software" data-path="menu/reception_account1.php">
+        <div class="top"><img src="./صفحه اصلی نرم افزار_files/gozareshate_modiriaty.png"></div>
+        <div class="down">گزارشات مدیریت</div>
+    </div>
+
+                <div class="icons_back">
+                <div id="main"><div data-reactroot=""><button class="place-order"><span class="fa"></span></button><div class="modal" data-status="false"><div class="modal-left"><a href="http://192.168.133.146/hotel/index1.php#"><span class="price-tag"></span></a></div><div class="modal-right"><h2>ورود کاربران حسابداری</h2><p id="loader" dir="rtl" class="blue hidden">لطفا تامل فرمایید.</p><p id="error" dir="rtl" class="red hidden">نام کاربری و رمز عبور مطابقت ندارند.</p><p id="error_captcha" dir="rtl" class="red hidden">حروف امنیتی مطابقت ندارند.</p><p id="error_ip" dir="rtl" class="red hidden">اجازه ورود به سیستم با این IP را ندارید.</p><p id="error_login" dir="rtl" class="red hidden">این نام کاربری در سیستم لاگین است.</p><p id="blacklist" dir="rtl" class="red hidden">دسترسی شما به این سامانه مسدود شده است. لطفا با مدیر سیستم تماس بگیرید.</p><p id="deactive" dir="rtl" class="red hidden">حساب کاربری شما مسدود شده است. لطفا با مدیر سیستم تماس بگیرید.</p><form class="ContactForm" autocomplete="off"><input type="text" placeholder="نام کاربری" name="user" id="user" dir="rtl" autocomplete="off"><input type="password" placeholder="رمز عبور" name="pass" id="pass" dir="rtl" autocomplete="off"><div class="captcah-images"><img src="./صفحه اصلی نرم افزار_files/simple-php-captcha(1).php" class="img"><img src="./صفحه اصلی نرم افزار_files/refresh_1(1).png" class="img-refresh"></div><input type="text" placeholder="حروف امنیتی" name="captcha_value" id="captcha_value" dir="rtl"><p id="info" dir="rtl" class="SmallBlue">سامانه به حروف کوچک و بزرگ حساس میباشد.</p><button type="button" id="sub" class="submitbtn"></button></form><button class="close"><span class="fa fa-close"></span></button></div></div></div></div>
+                <div class="down">حسابداری</div>
+            </div>
+            <script>
+                ReactDOM.render(React.createElement(App, {src : '/financial/captcha/simple-php-captcha.php?_CAPTCHA&amp;t=0.68901700+1795524873'}), document.getElementById('main'));
+            </script>
+                <!--<div class="icons_back" onclick="document.location='../financial/index.php'" >
+        <div class="top"><img src="/hsb_hotel.png" /></div>
+        <div class="down">حسابداری</div>
+    </div>-->
+                <div class="icons_back">
+                <div id="mainKh"><div data-reactroot=""><button class="place-order-kh"><span class="fa"></span></button><div class="modal" data-status="false"><div class="modal-left"><a href="http://192.168.133.146/hotel/index1.php#"><span class="price-tag"></span></a></div><div class="modal-right"><h2>ورود کاربران خزانه داری</h2><p id="loader_khazaneh" dir="rtl" class="blue hidden">لطفا تامل فرمایید.</p><p id="error_khazaneh" dir="rtl" class="red hidden">نام کاربری و رمز عبور مطابقت ندارند.</p><p id="error_captcha_khazaneh" dir="rtl" class="red hidden">حروف امنیتی مطابقت ندارند.</p><p id="error_ip_khazaneh" dir="rtl" class="red hidden">اجازه ورود به سیستم با این IP را ندارید.</p><p id="error_login_khazaneh" dir="rtl" class="red hidden">این نام کاربری در سیستم لاگین است.</p><p id="blacklist_khazaneh" dir="rtl" class="red hidden">دسترسی شما به این سامانه مسدود شده است. لطفا با مدیر سیستم تماس بگیرید.</p><p id="deactive_khazaneh" dir="rtl" class="red hidden">حساب کاربری شما مسدود شده است. لطفا با مدیر سیستم تماس بگیرید.</p><form class="ContactForm" autocomplete="off"><input type="text" placeholder="نام کاربری" name="user_khazaneh" id="user_khazaneh" dir="rtl" autocomplete="off"><input type="password" placeholder="رمز عبور" name="pass_khazaneh" id="pass_khazaneh" dir="rtl" autocomplete="off"><div class="captcah-images"><img src="./صفحه اصلی نرم افزار_files/simple-php-captcha(1).php" class="img"><img src="./صفحه اصلی نرم افزار_files/refresh_1(1).png" class="img-refresh-khazaneh"></div><input type="text" placeholder="حروف امنیتی" name="captcha_value" id="captcha_value_khazaneh" dir="rtl"><p id="info" dir="rtl" class="SmallBlue">سامانه به حروف کوچک و بزرگ حساس میباشد.</p><button type="button" id="sub_khazaneh" class="submitbtn"></button></form><button class="close"><span class="fa fa-close"></span></button></div></div></div></div>
+                <div class="down">خزانه داری</div>
+            </div>
+            <script>
+                ReactDOM.render(React.createElement(AppKh, {src : '/financial/captcha/simple-php-captcha.php?_CAPTCHA&amp;t=0.68901700+1795524873'}), document.getElementById('mainKh'));
+            </script>
+        <!--<div class="icons_back" onclick="document.location='../financial/index_khazaneh.php'" >
+        <div class="top"><img src="/khazanehdari.png"  /></div>
+        <div class="down">خزانه داری</div>
+    </div>-->
+    <div class="icons_back software" data-path="menu/asset1.php">
+        <div class="top"><img src="./صفحه اصلی نرم افزار_files/hsb_amval.png"></div>
+        <div class="down">اموال</div>
+    </div>
+    <div class="icons_back software" data-path="menu/payment1.php">
+        <div class="top"><img src="./صفحه اصلی نرم افزار_files/payroll.png"></div>
+        <div class="down">حقوق و دستمزد</div>
+    </div>
+    <div class="icons_back software" data-path="menu/costcontrol1.php">
+        <div class="top"><img src="./صفحه اصلی نرم افزار_files/cost.png"></div>
+        <div class="down">کاست کنترل</div>
+    </div>
+    <div class="icons_back software" data-path="menu/storage1.php">
+        <div class="top"><img src="./صفحه اصلی نرم افزار_files/storage.png"></div>
+        <div class="down">انبار داری</div>
+    </div>
+    <div class="icons_back software" data-path="menu/engineering1.php">
+        <div class="top"><img src="./صفحه اصلی نرم افزار_files/enginering.png"></div>
+        <div class="down">مهندسی تاسیسات</div>
+    </div>
+</div>
+</div>
+<div id="other_office">
+<div id="wrraper_other">
+    <div class="icons_other software" data-path="sohotel/index.php">
+        <div class="top"><img src="./صفحه اصلی نرم افزار_files/shop2.png"></div>
+        <div class="down">فروشگاه اینترنتی</div>
+    </div>
+    <div class="icons_other software" data-path="menu/consumption1.php">
+        <div class="top"><img src="./صفحه اصلی نرم افزار_files/masaref.png"></div>
+        <div class="down">مصارف و درخواستها</div>
+    </div>
+    <div class="icons_other software" data-path="menu/keycard1.php">
+        <div class="top"><img src="./صفحه اصلی نرم افزار_files/key_card.png"></div>
+        <div class="down">کلید کارت</div>
+    </div>
+    <div class="icons_other software" data-path="menu/crm1.php">
+        <div class="top"><img src="./صفحه اصلی نرم افزار_files/crm.png"></div>
+        <div class="down">خدمات مشتریان</div>
+    </div>
+    <div class="icons_other software" data-path="menu/paperless1.php">
+        <div class="top"><img src="./صفحه اصلی نرم افزار_files/paperless.png"></div>
+        <div class="down">مکاتبات داخلی</div>
+    </div>
+    <div class="icons_other software" data-path="menu/lakers1.php">
+        <div class="top"><img src="./صفحه اصلی نرم افزار_files/poolclub.png"></div>
+        <div class="down">مجموعه آبی</div>
+    </div>
+    <div class="icons_other software" data-path="menu/portal1.php">
+        <div class="top"><img src="./صفحه اصلی نرم افزار_files/portal.jpg"></div>
+        <div class="down">پورتال پرسنلی</div>
+    </div>
+</div>
+</div>
+<div align="right" style="font: 12px MH_NassimBold; color: rgb(167, 24, 24); margin-top: 15px; margin-right: 50px;">
+<div style="display: inline; float: right">
+    <div><img src="./صفحه اصلی نرم افزار_files/clerk.png"></div>
+    <div>نام کاربر </div>
+</div>
+</div>
+</div>
+<div id="copy_right">
+    Copyright © 2011 Asa System Yeganeh Co. All rights reserved.</div>
+</div>
+
+
+</body></html>
