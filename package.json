@@ -31,5 +31,8 @@
     "prisma:generate": "npm run prisma:generate -w apps/api",
     "prisma:migrate": "npm run prisma:migrate -w apps/api",
     "db:seed": "npm run db:seed -w apps/api"
+  },
+  "dependencies": {
+    "@embedded-postgres/windows-x64": "^19.0.0-beta.20"
   }
 }

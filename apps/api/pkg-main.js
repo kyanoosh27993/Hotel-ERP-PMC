@@ -97,7 +97,9 @@ function startPostgres(cfg) {
     if (r.status !== 0) throw new Error('initdb failed: ' + r.status + ' ' + (r.error && r.error.code) + ' ' + (r.stderr && r.stderr.toString().slice(0, 200)));
   }
   ensureDir(SOCK);
-  const r = spawnSync(pgctl, ['-D', PGDATA, '-w', 'start', '-o', `-p ${PG_PORT} -k "${SOCK}" -c listen_addresses=127.0.0.1`], { stdio: 'ignore' });
+  // ویندوز از سوکت یونیکس پشتیبانی نمی‌کند — فقط TCP روی 127.0.0.1
+  const sockOpt = WIN ? '' : ` -k "${SOCK}"`;
+  const r = spawnSync(pgctl, ['-D', PGDATA, '-w', 'start', '-o', `-p ${PG_PORT}${sockOpt} -c listen_addresses=127.0.0.1`], { stdio: 'ignore' });
   if (r.status !== 0) LOG('pg_ctl start status=' + r.status + ' — احتمالاً از قبل روشن است؛ ادامه…');
   // URL ادمین — ساخت دیتابیس در main() با کلاینت Node (psql در پکیج embedded نیست)
   const adminUrl = `postgresql://hotel@127.0.0.1:${PG_PORT}/postgres`;
