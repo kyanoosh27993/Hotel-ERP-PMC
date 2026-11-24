@@ -60,6 +60,10 @@
       bar.appendChild(occ);
 
       var tools = el('div', 'rr-tools');
+      /* نیاز ۲ کارفرما: چیدمان دلخواه — گروه‌بندی بر اساس طبقه یا نوع اتاق */
+      var groupSel = el('select');
+      groupSel.appendChild(new Option('گروه‌بندی: طبقه', 'floor'));
+      groupSel.appendChild(new Option('گروه‌بندی: نوع اتاق', 'type'));
       var layoutBtn = el('button', 'rr-tool-btn', 'چیدمان: ستونی');
       var searchInp = el('input');
       searchInp.type = 'search';
@@ -67,10 +71,14 @@
       var typeSel = el('select');
       typeSel.appendChild(new Option('همهٔ انواع', ''));
       var dirtyToggle = el('button', 'rr-tool-btn', 'نمایش همه');
+      var setupBtn = el('button', 'rr-tool-btn', '⚙ تنظیم اتاق‌ها');
+      setupBtn.onclick = function () { global.App.go('roomssetup'); };
       tools.appendChild(layoutBtn);
+      tools.appendChild(groupSel);
       tools.appendChild(typeSel);
       tools.appendChild(searchInp);
       tools.appendChild(dirtyToggle);
+      tools.appendChild(setupBtn);
       bar.appendChild(tools);
       wrap.appendChild(bar);
 
@@ -86,7 +94,7 @@
       wrap.appendChild(msg);
       root.appendChild(wrap);
 
-      var state = { floors: [], layout: 'column', onlyDirty: false, typeFilter: '', search: '' };
+      var state = { floors: [], layout: 'column', groupBy: 'floor', onlyDirty: false, typeFilter: '', search: '' };
       var allRooms = [];
 
       function occupancyPct() {
@@ -132,26 +140,46 @@
 
       function renderMap() {
         mapEl.innerHTML = '';
-        var floors = state.floors.map(function (f) {
-          return { floor: f.floor, rooms: f.rooms.filter(function (r) {
-            if (state.typeFilter && (!r.roomType || r.roomType.code !== state.typeFilter)) return false;
-            if (state.onlyDirty && !(r.status === 'DIRTY' || r.hkStatus === 'DIRTY')) return false;
-            if (state.search && !String(r.code).includes(state.search)) return false;
-            return true;
-          }) };
-        }).filter(function (f) { return f.rooms.length; });
-
-        if (!floors.length) {
+        /* نیاز ۲ کارفرما: گروه‌بندی دلخواه — طبقه یا نوع اتاق (تویین‌ها زیر هم، دبل‌ها زیر هم، …) */
+        var rooms = [];
+        state.floors.forEach(function (f) {
+          f.rooms.forEach(function (r) {
+            if (state.typeFilter && (!r.roomType || r.roomType.code !== state.typeFilter)) return;
+            if (state.onlyDirty && !(r.status === 'DIRTY' || r.hkStatus === 'DIRTY')) return;
+            if (state.search && !String(r.code).includes(state.search)) return;
+            rooms.push(r);
+          });
+        });
+        if (!rooms.length) {
           mapEl.appendChild(el('div', 'muted', 'اتاقی با این فیلتر یافت نشد.'));
           return;
         }
-        floors.forEach(function (f) {
+        var groups = [];
+        if (state.groupBy === 'floor') {
+          var byFloor = {};
+          rooms.forEach(function (r) {
+            var fl = r.floor != null ? r.floor : parseInt(String(r.code).charAt(0), 10) || 1;
+            (byFloor[fl] = byFloor[fl] || []).push(r);
+          });
+          Object.keys(byFloor).sort(function (a, b) { return a - b; }).forEach(function (fl) {
+            groups.push({ title: 'طبقهٔ ' + Num.toPersian(fl), rooms: byFloor[fl].slice().sort(function (a, b) { return String(a.code).localeCompare(String(b.code)); }) });
+          });
+        } else {
+          var byType = {};
+          rooms.forEach(function (r) {
+            var key = (r.roomType && r.roomType.code) || 'NONE';
+            (byType[key] = byType[key] || []).push(r);
+          });
+          Object.keys(byType).forEach(function (key) {
+            var sample = rooms.find(function (r) { return r.roomType && r.roomType.code === key; });
+            groups.push({ title: sample && sample.roomType ? sample.roomType.nameFa : 'بدون نوع', rooms: byType[key].slice().sort(function (a, b) { return String(a.code).localeCompare(String(b.code)); }) });
+          });
+        }
+        groups.forEach(function (g) {
           var sec = el('div', 'rr-floor');
-          if (state.layout === 'column') {
-            sec.className = 'rr-floor rr-floor-col';
-            sec.appendChild(el('div', 'rr-floor-title', 'طبقهٔ ' + Num.toPersian(f.floor)));
-          }
-          f.rooms.forEach(function (r) { sec.appendChild(roomTile(r)); });
+          if (state.layout === 'column') sec.className = 'rr-floor rr-floor-col';
+          sec.appendChild(el('div', 'rr-floor-title', g.title));
+          g.rooms.forEach(function (r) { sec.appendChild(roomTile(r)); });
           mapEl.appendChild(sec);
         });
       }
@@ -277,6 +305,7 @@
         renderAll();
       }
 
+      groupSel.onchange = function () { state.groupBy = groupSel.value; renderMap(); };
       layoutBtn.onclick = function () {
         state.layout = state.layout === 'column' ? 'flow' : 'column';
         layoutBtn.textContent = state.layout === 'column' ? 'چیدمان: ستونی' : 'چیدمان: جریانی';

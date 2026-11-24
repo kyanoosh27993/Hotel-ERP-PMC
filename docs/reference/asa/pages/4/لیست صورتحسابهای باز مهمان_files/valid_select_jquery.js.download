@@ -1,0 +1,22 @@
+function valid_select_jquery()
+{
+    $('#action').attr("disabled", 1).css({"background-color":"yellow","font-size":"13px"}).fadeTo('fast', 0.25).val('Please Wait');
+}
+
+$.fn.hasAttr = function(name) {  
+	   return this.attr(name) !== undefined;
+	};
+	
+$(document).keydown(function(e) {
+    if (e.which == 83 && e.ctrlKey) 
+    {        
+    	if($('#action').hasAttr('disabled') != true){
+        	e.preventDefault();
+        	$('#action').click();
+        }else{
+        	alert("امکان ثبت مقدور نمی باشد");
+        	e.preventDefault();
+        }
+    }
+});
+

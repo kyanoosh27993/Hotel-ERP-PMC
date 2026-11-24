@@ -63,6 +63,40 @@
     return g.gy + '-' + mm + '-' + dd;
   }
 
+  /* ── حافظهٔ مدارک: IndexedDB (hotel-erp-docs) — اسکن/ذخیره/پرینت/حذف ── */
+  function docDb() {
+    return new Promise(function (resolve, reject) {
+      var req = indexedDB.open('hotel-erp-docs', 1);
+      req.onupgradeneeded = function () { req.result.createObjectStore('docs', { keyPath: 'id', autoIncrement: true }); };
+      req.onsuccess = function () { resolve(req.result); };
+      req.onerror = function () { reject(req.error); };
+    });
+  }
+  function idbReq(store, mode, fn) {
+    return docDb().then(function (db) {
+      return new Promise(function (resolve, reject) {
+        var r = fn(db.transaction('docs', mode).objectStore(store));
+        r.onsuccess = function () { resolve(r.result); };
+        r.onerror = function () { reject(r.error); };
+      });
+    });
+  }
+  function compressImage(file, cb) {
+    var img = new Image();
+    var url = URL.createObjectURL(file);
+    img.onload = function () {
+      var max = 1400;
+      var scale = Math.min(1, max / Math.max(img.width, img.height));
+      var c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      cb(c.toDataURL('image/jpeg', 0.72));
+    };
+    img.src = url;
+  }
+
   global.Modules = global.Modules || {};
 
   global.Modules.register = {
@@ -156,6 +190,11 @@
       var fGender = el('select');
       fGender.appendChild(new Option('مرد'));
       fGender.appendChild(new Option('زن'));
+      /* نیاز ۳ کارفرما: تفکیک مهمان ایرانی/خارجی */
+      var fNat = el('select');
+      fNat.appendChild(new Option('— انتخاب ملت —', ''));
+      fNat.appendChild(new Option('ایرانی', 'IRANIAN'));
+      fNat.appendChild(new Option('خارجی', 'FOREIGNER'));
       var fFather = textInp('نام پدر');
       var fBirth = textInp('____/__/__');
       var fJob = textInp('شغل');
@@ -180,6 +219,7 @@
       g3.appendChild(field('کد ملی', fNationalId).row);
       g3.appendChild(field('شناسنامه/پاسپورت', fIdDoc).row);
       g3.appendChild(field('جنسیت', fGender).row);
+      g3.appendChild(field('ملت', fNat).row);
       g3.appendChild(field('نام پدر', fFather).row);
       g3.appendChild(field('تاریخ تولد', fBirth).row);
       g3.appendChild(field('شغل', fJob).row);
@@ -196,6 +236,27 @@
       g3.appendChild(field('شرح ۲', fDesc2).row);
       s3.appendChild(g3);
       form.appendChild(s3);
+
+      /* ── بخش ۴: اسکن مدارک شناسایی (نیاز ۴ کارفرما) — ذخیرهٔ محلی IndexedDB + چاپ ── */
+      var s4 = el('fieldset', 'reg-section');
+      s4.appendChild(el('legend', null, 'اسکن مدارک شناسایی (کارت ملی / شناسنامه / پاسپورت)'));
+      var docRow = el('div', 'reg-doc-row');
+      [['national_card', 'کارت ملی'], ['id_booklet', 'شناسنامه'], ['passport', 'پاسپورت']].forEach(function (d) {
+        var label = el('label', 'reg-doc-btn', '📷 اسکن ' + d[1]);
+        var fi = el('input');
+        fi.type = 'file';
+        fi.accept = 'image/*';
+        fi.setAttribute('capture', 'environment');
+        fi.hidden = true;
+        fi.onchange = function () { if (fi.files && fi.files[0]) saveDoc(d[0], d[1], fi.files[0]); };
+        label.appendChild(fi);
+        docRow.appendChild(label);
+      });
+      s4.appendChild(docRow);
+      s4.appendChild(el('p', 'muted', 'تصویر به‌صورت فشرده در حافظهٔ برنامه ذخیره می‌شود و هر وقت لازم شد از همین‌جا پرینت می‌گیرید.'));
+      var docList = el('div', 'reg-doc-list');
+      s4.appendChild(docList);
+      form.appendChild(s4);
 
       /* ── ثبت ── */
       var actions = el('div', 'reg-actions');
@@ -227,21 +288,65 @@
       fCheckOut.oninput = calcDays;
       calcDays();
 
-      /* انتخاب نوع اتاق: فهرست از API برای roomTypeId */
-      var roomTypeId = '';
-      api('GET', '/rooms/map').then(function (res) {
-        if (res.status >= 200 && res.status < 300 && res.body.data) {
-          var seen = {};
-          (res.body.data.floors || []).forEach(function (f) {
-            f.rooms.forEach(function (r) {
-              if (r.roomType && !seen[r.roomType.code]) {
-                seen[r.roomType.code] = true;
-                fRoom.appendChild(new Option(r.roomType.nameFa, r.roomType.code));
-              }
-            });
+      /* ── اسکن مدارک: ذخیره، فهرست، پرینت، حذف ── */
+      function saveDoc(kind, kindLabel, file) {
+        compressImage(file, function (dataUrl) {
+          idbReq('docs', 'readwrite', function (st) { return st.add({ kind: kind, kindLabel: kindLabel, guestName: (fFirst.value + ' ' + fLast.value).trim(), dataUrl: dataUrl, at: new Date().toISOString() }); })
+            .then(function () { renderDocs(); ok('تصویر «' + kindLabel + '» ذخیره شد.'); })
+            .catch(function (e) { err.textContent = 'ذخیرهٔ مدرک ناموفق: ' + e.message; });
+        });
+      }
+      function renderDocs() {
+        idbReq('docs', 'readonly', function (st) { return st.getAll(); }).then(function (list) {
+          docList.innerHTML = '';
+          if (!list.length) {
+            docList.appendChild(el('p', 'muted', 'هنوز مدارکی ذخیره نشده است.'));
+            return;
+          }
+          list.slice().sort(function (a, b) { return b.id - a.id; }).slice(0, 30).forEach(function (d) {
+            var row = el('div', 'reg-doc-item');
+            row.appendChild(el('span', 'reg-doc-name', '📄 ' + d.kindLabel + ' — ' + (d.guestName || '—') + ' — ' + Num.toPersian(Jalali.fromDate(new Date(d.at)))));
+            var pv = el('img', 'reg-doc-thumb');
+            pv.src = d.dataUrl;
+            pv.onclick = function () { openDocPrint(d); };
+            row.appendChild(pv);
+            var printB = el('button', 'rs-mini-btn', '🖨 پرینت');
+            printB.onclick = function () { openDocPrint(d); };
+            row.appendChild(printB);
+            var delB = el('button', 'rs-mini-btn rs-del-btn', 'حذف');
+            delB.onclick = function () { idbReq('docs', 'readwrite', function (st) { return st.delete(d.id); }).then(renderDocs); };
+            row.appendChild(delB);
+            docList.appendChild(row);
           });
-        }
-      }).catch(function () { /* بدون سرور — حالت پیش‌نویس */ });
+        }).catch(function (e) {
+          docList.appendChild(el('p', 'muted', 'حافظهٔ مدارک در دسترس نیست: ' + e.message));
+        });
+      }
+      function openDocPrint(d) {
+        var w = window.open('', '_blank');
+        if (!w) { err.textContent = 'اجازهٔ popup را بدهید تا پرینت باز شود.'; return; }
+        w.document.write('<html dir="rtl"><head><title>چاپ مدرک — ' + (d.guestName || '') + '</title>' +
+          '<style>body{font-family:Tahoma,sans-serif;padding:16px}img{max-width:100%;height:auto;border:1px solid #ccc}h3{color:#b91c1c}</style></head><body>' +
+          '<h3>مدرک ' + d.kindLabel + ' — مهمان: ' + (d.guestName || '—') + '</h3>' +
+          '<img src="' + d.dataUrl + '">' +
+          '<scr' + 'ipt>setTimeout(function(){window.print()},400)</scr' + 'ipt></body></html>');
+        w.document.close();
+      }
+      renderDocs();
+
+      /* انتخاب نوع اتاق: فهرست از API — مقدار option باید UUID نوع باشد (نه کد) */
+      var roomTypeId = '';
+      function loadRoomTypes() {
+        return api('GET', '/pms/room-types').then(function (res) {
+          if (res.status >= 200 && res.status < 300 && res.body.data) {
+            res.body.data.forEach(function (rt) {
+              fRoom.appendChild(new Option(rt.nameFa + ' (' + rt.code + ') — نرخ ' + Num.toPersian(Number(rt.baseRateRials).toLocaleString('en-US')), rt.id));
+            });
+          }
+          return res;
+        });
+      }
+      loadRoomTypes().catch(function () { /* بدون سرور — حالت پیش‌نویس */ });
 
       submit.onclick = function () {
         err.textContent = '';
@@ -267,6 +372,8 @@
           adults: 1,
           note: (fDesc1.value || '') + (fDesc2.value ? ' — ' + fDesc2.value : ''),
         };
+        if (fNat.value) body.nationality = fNat.value;
+        if (rateRial) body.rateOverrideRials = String(rateRial);
         /* roomTypeId از انتخاب اتاق (کد نوع) — اگر خالی بود اولین نوع از API */
         function send(typeId) {
           body.roomTypeId = typeId;
@@ -276,6 +383,8 @@
             drafts.push(Object.assign({ savedAt: new Date().toISOString() }, body, {
               nationalId: fNationalId.value, idDoc: fIdDoc.value, mobile: fMobile.value,
               gender: fGender.value, fatherName: fFather.value, birthDate: fBirth.value,
+              nationality: fNat.value || null, toCity: fToCity.value, job: fJob.value,
+              travel: fTravel.value, fromCity: fFromCity.value, purpose: fPurpose.value,
             }));
             localStorage.setItem('hotel-erp-register-drafts', JSON.stringify(drafts));
             ok.textContent = 'سرور در دسترس نیست — رجیستر به‌عنوان پیش‌نویس ذخیره شد (پس از اتصال، از اینجا ثبت نهایی می‌شود).';
@@ -296,18 +405,12 @@
             ok.textContent = 'اتصال قطع شد — پیش‌نویس ذخیره شد.';
           });
         }
-        /* پیدا کردن roomTypeId: از select اتاق */
+        /* پیدا کردن roomTypeId: از select؛ اگر خالی بود اولین نوع از API */
         roomTypeId = fRoom.value;
         if (roomTypeId) { send(roomTypeId); return; }
-        api('GET', '/rooms/map').then(function (res) {
-          var fl = (res.body.data && res.body.data.floors) || [];
-          var firstType = '';
-          for (var i = 0; i < fl.length && !firstType; i++) {
-            for (var j = 0; j < fl[i].rooms.length && !firstType; j++) {
-              if (fl[i].rooms[j].roomType) firstType = fl[i].rooms[j].roomType.code;
-            }
-          }
-          send(firstType);
+        loadRoomTypes().then(function () {
+          roomTypeId = fRoom.value;
+          send(roomTypeId);
         }).catch(function () { send(''); });
       };
     },

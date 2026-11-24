@@ -86,7 +86,19 @@
   }
   function cashTab(panel) { mountModule(panel, 'treasury', 'صندوق'); }
   function reportsMTab(panel) { mountModule(panel, 'bi', 'گزارشات ماهانه'); }
-  function reportsDTab(panel) { mountModule(panel, 'dashboard', 'گزارشات روزانه'); }
+  function reportsDTab(panel) {
+    /* نیاز ۳ کارفرما: گزارش مهمان ایرانی/خارجی + داشبورد روزانه زیر آن */
+    panel.innerHTML = '';
+    if (global.Modules && global.Modules.guestreport) {
+      var gr = el('div', 'rec-module-mount');
+      panel.appendChild(gr);
+      global.Modules.guestreport.render(gr);
+    }
+    var db = global.Modules && global.Modules.dashboard;
+    var wrap = el('div', 'rec-module-mount');
+    panel.appendChild(wrap);
+    if (db) db.render(wrap);
+  }
   function fac1Tab(panel) { mountModule(panel, 'ancillary', 'امکانات ۱'); }
   function fac2Tab(panel) { panelStub(panel, 'امکانات ۲', '—', 'بعدی', ['امکانات تکمیلی پذیرش']); }
   function toursTab(panel) {
@@ -97,11 +109,19 @@
     ]);
   }
   function opsTab(panel) {
-    panelStub(panel, 'عملیات — Room Sharge Menu', 'Room_Sharge_Menu.html', 'R4', [
-      'چارج اتاق: انتقال شارژ خدمات به حساب مهمان',
-      'عملیات صندوق پذیرش: دریافت/پرداخت سریع',
-      'پیغام کاربران و محاسبهٔ خودکار شارژها',
-    ]);
+    /* R4 بر اساس 4.zip: اقلام اضافی اتاق + لیست صورتحساب‌های باز مهمان (فولیو واقعی) */
+    panel.innerHTML = '';
+    if (global.Modules && global.Modules.folio) {
+      var wrap = el('div', 'rec-module-mount');
+      panel.appendChild(wrap);
+      global.Modules.folio.render(wrap);
+    } else {
+      panelStub(panel, 'عملیات — Room Sharge Menu', 'Room_Sharge_Menu.html', 'R4', [
+        'چارج اتاق: انتقال شارژ خدمات به حساب مهمان',
+        'عملیات صندوق پذیرش: دریافت/پرداخت سریع',
+        'پیغام کاربران و محاسبهٔ خودکار شارژها',
+      ]);
+    }
   }
   function registerTab(panel) {
     /* R3 — فرم ثبت رجیستر جدید با فیلدهای دقیق آسا؛ ثبت به POST /pms/reservations یا پیش‌نویس */

@@ -1,0 +1,67 @@
+.suggestionsBox 
+{
+	position: absolute;
+    width: 400px;
+	padding:0px;
+	background-color: #F0F8FF;
+	border: 1px solid green;
+    z-index: 10;
+}
+.suggestionList ul li 
+{
+	list-style:none;
+	margin: 0px;
+	padding: 6px;
+	border-bottom:1px solid green;
+	cursor: pointer;
+}
+ul 
+{
+	font-family:tahoma, sans-serif;
+	font-size:11px;
+    text-align: right;
+	color:black;
+	padding:0;
+	margin:0;
+    line-height: 11px;
+}
+.loading{
+    background-image: url("../image_asa/loader.gif");
+    background-repeat: no-repeat;
+}
+.error_class{
+    font-weight: bold; 
+    font-size: 17px;
+    background-color: #FDE6E6;
+    border:1px solid #DB0101;
+}
+.warning_class{
+	font-weight: bold;
+	font-size: 17px;
+	background-color: #ffffa6;
+	border:1px solid #ffff00;
+}
+.accept_class{
+    font-weight: bold; 
+    font-size: 17px;
+    background-color: #C6FEB9;
+    border:1px solid #326E0C;
+}
+.list{
+
+}
+.selected{
+	background : #678FD6;
+	border : 1px solid #678FD6;
+	color: white;
+}
+.matched{
+
+	font-weight:bold;
+	color: #FF51EB;
+}
+div#error_log{
+    color:red;
+    font-weight: bold;
+    text-align: center;
+}

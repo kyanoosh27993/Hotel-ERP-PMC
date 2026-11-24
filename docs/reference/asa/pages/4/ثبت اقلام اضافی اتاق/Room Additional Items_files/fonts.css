@@ -1,0 +1,152 @@
+@font-face {
+	font-family: "parastoo";
+	src: url("../fonts/parastoo/Farsi-Digits/bzar.eot");
+	src: local("☺"),
+	url("../fonts/parastoo/Farsi-Digits/Parastoo-FD.woff") format("woff"),
+	url("../fonts/parastoo/Farsi-Digits/Parastoo-FD.ttf") format("truetype");
+	font-style: normal;
+}
+@font-face {
+	font-family: "lotus";
+	src: url("../fonts/blotus/blotus.eot");
+	src: local("☺"),
+	url("../fonts/blotus/blotus.woff") format("woff"),
+	url("../fonts/blotus/blotus.ttf") format("truetype");
+	font-style: normal;
+}
+@font-face {
+	font-family: "zar";
+	src: url("../fonts/bzar/bzar.eot");
+	src: local("☺"),
+	url("../fonts/bzar/bzar.woff") format("woff"),
+	url("../fonts/bzar/bzar.ttf") format("truetype");
+	font-style: normal;
+}
+@font-face {
+	font-family: "nasim";
+	src: url("../fonts/nassimreqular/nassim-regular.eot");
+	src: local("☺"),
+	url("../fonts/nassimreqular/nassim-regular.woff") format("woff"),
+	url("../fonts/nassimreqular/nassim-regular.ttf") format("truetype");
+	font-style: normal;
+}
+@font-face {
+	font-family: "shabnam";
+	src: url("../fonts/shabnam/Farsi-Digits/Shabnam-FD.eot");
+	src: local("☺"),
+	url("../fonts/shabnam/Farsi-Digits/Shabnam-FD.woff") format("woff"),
+	url("../fonts/shabnam/Farsi-Digits/Shabnam-FD.ttf") format("truetype");
+	font-style: normal;
+}
+@font-face {
+	font-family: "MH_BZar";
+	src: url("../fonts/bzar/bzar.eot");
+	src: local("☺"),
+	url("../fonts/bzar/bzar.woff") format("woff"),
+	url("../fonts/bzar/bzar.ttf") format("truetype");
+	font-style: normal;
+}
+@font-face {
+	font-family: "MH_BZar";
+	src: url("../fonts/bzar/bzar.eot");
+	src: local("☺"),
+	url("../fonts/bzar/bzar.woff") format("woff"),
+	url("../fonts/bzar/bzar.ttf") format("truetype");
+	font-style: normal;
+}
+@font-face {
+	  font-family: "MH_Nassim";
+	  src: url("../fonts/nassimreqular/nassim-regular.eot");
+	  src: local("☺"),
+	    url("../fonts/nassimreqular/nassim-regular.woff") format("woff"),
+	    url("../fonts/nassimreqular/nassim-regular.ttf") format("truetype");
+	  font-weight: normal;
+	  font-style: normal;
+	}
+	
+@font-face {
+  font-family: "MH_NassimBold";
+  src: url("../fonts/nassimbold/nassim-bold.eot");
+  src: local("☺"),
+	url("../fonts/nassimbold/nassim-bold.woff") format("woff"),
+	url("../fonts/nassimbold/nassim-bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+@font-face {
+  font-family: "MH_BZar";
+  src: url("../fonts/bzar/bzar.eot");
+  src: local("☺"),
+	url("../fonts/bzar/bzar.woff") format("woff"),
+	url("../fonts/bzar/bzar.ttf") format("truetype");
+  font-style: normal;
+}
+@font-face {
+	font-family: 'bnazanin';
+	src: url('../fonts/bnazanin/bnazanin.eot');
+	src: local('☺'), 
+	url('../fonts/bnazanin/bnazanin.woff') format('woff'), 
+	url('../fonts/bnazanin/bnazanin.ttf') format('truetype'), 
+	url('../fonts/bnazanin/bnazanin.svg') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: 'btitr';
+	src: url('../fonts/btitr/btitr.eot');
+	src: local('☺'), 
+	url('../fonts/btitr/btitr.woff') format('woff'), 
+	url('../fonts/btitr/btitr.ttf') format('truetype'), 
+	url('../fonts/btitr/btitr.svg') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: 'bhoma';
+	src: url('../fonts/bhoma/bhoma.eot');
+	src: local('☺'), 
+	url('../fonts/bhoma/bhoma.woff') format('woff'), 
+	url('../fonts/bhoma/bhoma.ttf') format('truetype'), 
+	url('../fonts/bhoma/bhoma.svg') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+	font-family: 'byekan';
+	src: url('../fonts/byekan/byekan.eot');
+	src: local('☺'), 
+	url('../fonts/byekan/byekan.woff') format('woff'), 
+	url('../fonts/byekan/byekan.ttf') format('truetype'), 
+	url('../fonts/byekan/byekan.svg') format('svg');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face {
+  font-family: "bzarbold";
+  src: url("../fonts/bzarbold/bzarbold.eot");
+  src: local("☺"),
+	url("../fonts/bzarbold/bzarbold.woff") format("woff"),
+	url("../fonts/bzarbold/bzarbold.ttf") format("truetype");
+  font-style: normal;
+}
+@font-face {
+  font-family: "zar";
+  src: url("../fonts/zarreqular/zar.eot");
+  src: local("☺"),
+	url("../fonts/zarreqular/zar.woff") format("woff"),
+	url("../fonts/zarreqular/zar.ttf") format("truetype");
+  font-style: normal;
+}
+@font-face {
+	font-family: "Georgian";
+	src: url("../fonts/Georgian/NotoSerifGeorgian-ExtraCondensedLight.ttf") format("truetype");
+	font-weight: normal;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "GeorgianBold";
+	src: url("../fonts/Georgian/NotoSerifGeorgian-ExtraCondensedMedium.ttf") format("truetype");
+	font-weight: bold;
+	font-style: normal;
+}

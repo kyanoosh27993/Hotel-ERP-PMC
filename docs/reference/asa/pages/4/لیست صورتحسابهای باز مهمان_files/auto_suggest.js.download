@@ -1,0 +1,3965 @@
+//----------------------------------------------------
+function foods_suggest(e,myfield,lang_align,_language)
+{
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post('../suggest/foods_suggest.php', 
+            {
+                queryString: inputString,
+                lang_align: lang_align,
+                _language: _language
+            }, function (data)
+            {
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill(data.data_rsv,0,2,0);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var offset_top = $("#"+myfield.name).offset().top+27;
+                        var offset_left = $("#"+myfield.name).offset().left-150;
+                        $("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill(data.data_rsv,data.id_data,data.id_code,1);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+    // Hide it after finishing ajax request
+    $("#"+myfield.id).LoadingOverlay("hide");
+    // $.LoadingOverlay("hide");
+
+}
+
+function suggest_location(e, myfield, url, lang_align, _language)
+{
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+
+            $.post(url, {queryString: inputString, lang_align: lang_align, _language: _language}, function (data)
+            {
+                //alert(data.query);
+
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_1(data.data_rsv,0,0,0,0,0);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var offset_top = $("#"+myfield.name).offset().top+27;
+                        var offset_left = $("#"+myfield.name).offset().left-15;
+                        $("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_1(data._id,data._name,data.room_id,data._room,1,data._code);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+    // Hide it after finishing ajax request
+    $("#"+myfield.id).LoadingOverlay("hide");
+    // $.LoadingOverlay("hide");
+
+}
+function suggest_search_name1(name,sur_name,rdf_search,kind_search,lang_align,lang_directory)
+{
+    $('#action').val('Waiting').attr("disabled",1);
+    $.post("../suggest/search_name1_suggest.php",{name:name,sur_name:sur_name,rdf_search:rdf_search,kind_search:kind_search,lang_align:lang_align,lang_directory:lang_directory},function(data)
+    {                                           
+        //----------------------
+        if(data.counter == 0) // یعنی هیچ دیتایی نیست
+        {
+            $('#suggestionsList_list_3').hide("fast");
+            if (lang_align>0)
+            {
+	            $("div#error_log").show("fast").html("Empty record");
+	            $('#action').val('Submit');
+            }
+            else
+            {
+	            $("div#error_log").show("fast").html("رکوردی برای نمایش وجود ندارد");
+	            $('#action').val('  ثبت شود  ');
+            }
+            document.getElementById('action').disabled=0;
+        }
+        else
+        {   
+            if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+            {
+                $("div#error_log").hide();
+                $('#suggestionsList_list_3').html(data.data_rsv).show("fast");
+                if (lang_align>0)
+                	$('#action').val('Submit');
+                else
+                	$('#action').val('  ثبت شود  ');
+                	
+	            document.getElementById('action').disabled=0;
+            }
+        }                
+    },"json");
+}
+
+//------------------------------------------------------------------
+function suggest(e, myfield, url, kind_fill, lang_align, _language, _date)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {
+                queryString: inputString,
+                kind_fill: kind_fill,
+                lang_align: lang_align,
+                _language: _language,
+                _date: _date
+            }, function (data)
+            {
+                //alert(data.query);
+
+            	//----------------------
+            	if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                	fill(data.data_rsv,0,2,kind_fill);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-150;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                    	fill(data.data_rsv,data.id_data,1,kind_fill);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+    // Hide it after finishing ajax request
+    $("#"+myfield.id).LoadingOverlay("hide");
+    // $.LoadingOverlay("hide");
+
+}
+
+//------------------------------------------------
+function suggest_asset(e, myfield, url, kind_fill)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {queryString: inputString, kind_fill: kind_fill}, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                	if (kind_fill==1)
+                		fill(data.data_rsv,0,2,kind_fill);// یعنی برو کلاس error را نشان بده
+                   	if (kind_fill==2)
+                		fill_1(data.data_rsv,0,2,kind_fill);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-15;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                    	if (kind_fill==1)
+                    		fill(data.data_rsv,data.id_data,1,kind_fill);
+                    	if (kind_fill==2)
+                    		fill_1(data.data_rsv,data.id_data,1,kind_fill);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//------------------------------------------------
+function psng_suggest(e, myfield, url, kind_fill, _country)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {queryString: inputString, kind_fill: kind_fill, _country: _country}, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill(data.data_rsv,0,2,kind_fill);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-15;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill(data.data_rsv,data.id_data,1,kind_fill);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//--------------------------------------------------------------------------
+function reserve_new_suggest(e,myfield,url,rate_tour_calc_status,lang_align)
+{
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,rate_tour_calc_status:rate_tour_calc_status,lang_align:lang_align},function(data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill(0,0,0,0,0,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-15;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        //--------------------------------
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill(data.data_rsv,data.id_data,data.test_valid,data.Full_Board_Person_Rate2,data.Full_Board_Person_Dolar,1);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//------------------------------------------------
+function suggest_list(e, myfield, url, kind)
+{ 
+    inputString = myfield.value;
+    name_input = myfield.name;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+name_input).addClass("loading");
+        //------------------------------------
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {queryString: inputString, kind: kind}, function (data)
+            {                              
+                //----------------------
+                if(data.counter == 0) // یعنی هیچ دیتایی نیست
+                {
+                    $("#"+name_input).removeClass("loading");
+                    $('#suggestionsList_list_1').hide("fast");
+                    $("div#error_log").show("fast").html("رکوردی برای نمایش وجود ندارد");
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("div#error_log").hide();
+                        $("#"+name_input).removeClass("loading");
+                        $('#suggestionsList_list_1').html(data.data_rsv).show("fast");
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+name_input).removeClass("loading");
+                        fill(data.data_rsv,data.id_data,1);
+                    }
+                }                
+            },"json");//
+        }
+        else
+        {
+            $("#"+name_input).removeClass("loading");
+            get_child_list(key);    
+        }
+    }
+}
+//-------------------------------------------------------------------
+function suggest_list_reserve(e,myfield,url,kind,lang_align,lang_directory)
+{ 
+    inputString = myfield.value;
+    name_input = myfield.name;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+name_input).addClass("loading");
+        //------------------------------------
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,kind:kind,lang_align:lang_align,lang_directory:lang_directory},function(data)
+            {
+                //----------------------
+                if(data.counter == 0) // یعنی هیچ دیتایی نیست
+                {
+                    $("#"+name_input).removeClass("loading");
+                    $('#suggestionsList_list_2').hide("fast");
+                    if (lang_align=='0')
+                        $("div#error_log").show("fast").html("رکوردی برای نمایش وجود ندارد");
+                    else
+                        $("div#error_log").show("fast").html("...Not Found...");
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("div#error_log").hide();
+                        $("#"+name_input).removeClass("loading");
+                        $('#suggestionsList_list_2').html(data.data_rsv).show("fast");
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+name_input).removeClass("loading");
+                        fill(data.data_rsv,data.id_data,1);
+                    }
+                }                
+            },"json");//
+        }
+        else
+        {
+            $("#"+name_input).removeClass("loading");
+            get_child_list(key);    
+        }
+    }
+}
+//------------------------------------------------------------------
+function suggest_list_reserve_agency(e,myfield,url,kind,lang_dir,Clerk_ToursID)
+{
+    inputString = myfield.value;
+    name_input = myfield.name;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+name_input).addClass("loading");
+        //------------------------------------
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,kind:kind,lang_dir:lang_dir,Clerk_ToursID:Clerk_ToursID},function(data)
+            {                              
+                //----------------------
+                if(data.counter == 0) // یعنی هیچ دیتایی نیست
+                {
+                    $("#"+name_input).removeClass("loading");
+                    $('#suggestionsList_list_2').hide("fast");
+                    $("div#error_log").show("fast").html(search_name1_reserve_array[2]);//رکوردی برای نمایش وجود ندارد
+                }
+                else
+                {
+                    
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("div#error_log").hide();
+                        $("#"+name_input).removeClass("loading");
+                        $('#suggestionsList_list_2').html(data.data_rsv).show("fast");
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+name_input).removeClass("loading");
+                        fill(data.data_rsv,data.id_data,1);
+                    }
+                } 
+            },"json");//
+        }
+        else
+        {
+            $("#"+name_input).removeClass("loading");
+            get_child_list(key);    
+        }
+    }
+}
+//-----------------------------------------------------------------
+function suggest_list_melli(e, myfield, url, kind, date1, date2, lang_align, lang_directory)
+{ 
+    inputString = myfield.value;
+    name_input = myfield.name;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+name_input).addClass("loading");
+        //-------------------------------------
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {
+                queryString: inputString,
+                kind: kind,
+                date1: date1,
+                date2: date2,
+                lang_align: lang_align,
+                lang_directory: lang_directory
+            }, function (data)
+            {                                           
+                //----------------------
+                if(data.counter == 0) // یعنی هیچ دیتایی نیست
+                {
+                    $("#"+name_input).removeClass("loading");
+                    $('#suggestionsList_list_3').hide("fast");
+                    $("div#error_log").show("fast").html("Not Found");
+                }
+                else
+                {   
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("div#error_log").hide();
+                        $("#"+name_input).removeClass("loading");
+                        $('#suggestionsList_list_3').html(data.data_rsv).show("fast");
+                    }
+                }                
+            },"json");
+        }
+        else
+        {
+            $("#"+name_input).removeClass("loading");
+            get_child_list(key);    
+        }
+    }
+}
+//-----------------------------------------------------------------
+function suggest_amount_search(e, myfield, url, kind, date1, date2)
+{ 
+    inputString = myfield.value.replace(/,/g, '');
+    name_input = myfield.name;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+name_input).addClass("loading");
+        //-------------------------------------
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,kind:kind,date1:date1,date2:date2},function(data)
+            {
+            	//alert(data.query);
+            	//$("div#error_log").show("fast").html("<pre>"+data.query+"</pre>");
+            	//----------------------
+            	if(data.counter == 0) // یعنی هیچ دیتایی نیست
+                {
+                    $("#"+name_input).removeClass("loading");
+                    $('#suggestionsList_list_3').hide("fast");
+                    $("div#error_log").show("fast").html("رکوردی برای نمایش وجود ندارد");
+                    $("#action").fadeIn();
+                }
+                else
+                {   
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("div#error_log").hide();
+                        $("#"+name_input).removeClass("loading");
+                        $('#suggestionsList_list_3').html(data.data_rsv).show("fast");
+                        $("#action").fadeIn();
+                    }
+                }                
+            },"json");
+        }
+        else
+        {
+            $("#"+name_input).removeClass("loading");
+            get_child_list(key);    
+        }
+    }
+}
+
+//-----------------------------------------------------------------
+function suggest_amount_cash(e, myfield, url, kind, date1, date2, _reference, _desc)
+{
+    inputString = myfield.value.replace(/,/g, '');
+    name_input = myfield.name;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    $("#" + name_input).addClass("loading");
+    //-------------------------------------
+    if (key != 38 && key != 40 && key != 13)
+    {
+        $.post(url, {
+            queryString: inputString,
+            kind: kind,
+            date1: date1,
+            date2: date2,
+            _reference: _reference,
+            _desc: _desc
+        }, function (data)
+        {
+            //----------------------
+            if (data.counter == 0) // یعنی هیچ دیتایی نیست
+            {
+                $("#" + name_input).removeClass("loading");
+                $('#suggestionsList_list_3').hide("fast");
+                $("div#error_log").show("fast").html("رکوردی برای نمایش وجود ندارد");
+                $("#action").fadeIn();
+            } else
+            {
+                if (data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                {
+                    $("div#error_log").hide();
+                    $("#" + name_input).removeClass("loading");
+                    $('#suggestionsList_list_3').html(data.data_rsv).show("fast");
+                    $("#action").fadeIn();
+                }
+            }
+        }, "json");
+    } else
+    {
+        $("#" + name_input).removeClass("loading");
+        get_child_list(key);
+    }
+}
+
+//------------------------------------------------
+function suggest_list_reserve1(e, myfield, url, kind, date1, date2, lang_align, lang_directory)
+{ 
+    inputString = myfield.value;
+    name_input = myfield.name;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+name_input).addClass("loading");
+        //-------------------------------------
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {
+                queryString: inputString,
+                kind: kind,
+                date1: date1,
+                date2: date2,
+                lang_align: lang_align,
+                lang_directory: lang_directory
+            }, function (data)
+            {                                           
+                //----------------------
+                if(data.counter == 0) // یعنی هیچ دیتایی نیست
+                {
+                    $("#"+name_input).removeClass("loading");
+                    $('#suggestionsList_list_3').hide("fast");
+                    $("div#error_log").show("fast").html("رکوردی برای نمایش وجود ندارد");
+                }
+                else
+                {   
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("div#error_log").hide();
+                        $("#"+name_input).removeClass("loading");
+                        $('#suggestionsList_list_3').html(data.data_rsv).show("fast");
+                    }
+                }                
+            },"json");
+        }
+        else
+        {
+            $("#"+name_input).removeClass("loading");
+            get_child_list(key);    
+        }
+    }
+}
+//------------------------------------------------
+function suggest_list_reserve2(e, myfield, url, kind, date1, date2)
+{ 
+    inputString = myfield.value;
+    name_input = myfield.name;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+name_input).addClass("loading");
+        //-------------------------------------
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {queryString: inputString, kind: kind, date1: date1, date2: date2}, function (data)
+            {                                           
+                //----------------------
+                if(data.counter == 0) // یعنی هیچ دیتایی نیست
+                {
+                    $("#"+name_input).removeClass("loading");
+                    $('#suggestionsList_list_3').hide("fast");
+                    $("div#error_log").show("fast").html("رکوردی برای نمایش وجود ندارد");
+                }
+                else
+                {   
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("div#error_log").hide();
+                        $("#"+name_input).removeClass("loading");
+                        $('#suggestionsList_list_3').html(data.data_rsv).show("fast");
+                    }
+                }                
+            },"json");
+        }
+        else
+        {
+            $("#"+name_input).removeClass("loading");
+            get_child_list(key);    
+        }
+    }
+}
+//--------------------------------------------------------
+function suggest_search_all(e,myfield,url,kind,lang_align)
+{ 
+    inputString = myfield.value;
+    name_input = myfield.name;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        //------------------------------------
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,kind_tra:kind,lang_align:lang_align},function(data)
+            {                              
+                if(data.counter == 0) // یعنی هیچ دیتایی نیست
+                {
+                    fill(data.room_num,data.register_id,data.name,2);
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        //--------------------------
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left+42;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill(data.room_num,data.register_id,data.name,1);
+                    }
+                }                
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//----------------------------------------------------------------------------------------------------------
+function suggest_receipt_input_new1(e,myfield,_storage,_radif,Codding_Storage,lang_align,_language,use_codes)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            //alert(_language);
+            $.post("../suggest/receipt_input_new1_suggest.php",{queryString:inputString,_storage:_storage,_radif:_radif,Codding_Storage:Codding_Storage,lang_align:lang_align,_language:_language,use_codes:use_codes},function(data)
+            {
+                //alert(data._language);
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    //alert('lang='+data.lang_align);
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','','','','','','','','','','','','','','','','',_radif,2,0);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var el_height = $("#"+myfield.name).height();
+                        var el_width = $("#"+myfield.name).width();
+                        
+                        /*var offset_top = $("#"+myfield.name).position().top+el_height;
+                    	var offset_left = $("#"+myfield.name).position().left;*/
+                        var offset_top = $("#"+myfield.name).offset().top+el_height;
+                        var offset_left = $("#"+myfield.name).offset().left;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left,"width":el_width});
+                        $("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(   data.code_s,
+                                data._codeid,
+                                data.name,
+                                data.test_valid,
+                                data._unit1,
+                                data._unit1_id,
+                                data._unit2,
+                                data._unit2_id,
+                                data._unit3,
+                                data._unit3_id,
+                                data.conversion_factor,
+                                data.conversion_factor_kind,
+                                data.conversion_factor2,
+                                data.conversion_factor_kind2,
+                                data._avrg,
+                                data._amont,
+                                data._amont_,
+                                data.radiff,
+                                1,
+                                data.date_control_val
+                            );
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------------
+function suggest_receipt_output_new0(e, myfield, _storage, _rsv_date, _radif, Codding_Storage, asset_kind = 0, lang_align, _language, use_codes)
+{    
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post("../suggest/receipt_output_new0_suggest.php", {
+                queryString: inputString,
+                _storage: _storage,
+                _radif: _radif,
+                _rsv_date: _rsv_date,
+                Codding_Storage: Codding_Storage,
+                asset_kind: asset_kind,
+                lang_align: lang_align,
+                _language: _language,
+                use_codes: use_codes
+            }, function (data)
+            {
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','','','','','','','','','','','','','','','','',_radif,2,0);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //-------------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-95;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(   data.code_s,
+                                data._codeid,
+                                data.name,
+                                data.test_valid,
+                                data._unit1,
+                                data._unit1_id,
+                                data._unit2,
+                                data._unit2_id,
+                                data._unit3,
+                                data._unit3_id,
+                                data.conversion_factor,
+                                data.conversion_factor_kind,
+                                data.conversion_factor2,
+                                data.conversion_factor_kind2,
+                                data._avrg,
+                                data._amont,
+                                data._amont_,
+                                data.radiff,
+                                1
+                            );
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+//---------------------------------------------------------------------------------------------------------
+function suggest_bonn_new(myfield, e, resturant, fullboard_input_kind, Food_Multi_Rate, _radif, lang_align)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post("../suggest/bonn_new_suggest.php", {
+                queryString: inputString,
+                resturant: resturant,
+                fullboard_input_kind: fullboard_input_kind,
+                Food_Multi_Rate: Food_Multi_Rate,
+                _radif: _radif,
+                lang_align: lang_align
+            }, function (data)
+            {
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','','','','','','','',_radif,2,0,0);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //------------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-157;
+                        //------------------------------------------------------------------
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(   
+                        data.FoodsCode,
+                        data._codeid,
+                        data._name,
+                        data._cost,
+                        data._unit,
+                        data.food_name,
+                        data.disactive,
+                        data._fiee,
+                        data._rdf,
+                        1,
+                        data._tax,
+                        data._amount
+                        );
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+
+//------------------------------------------------------------------
+function customer_suggest(myfield, e,customers_club,restaurant_club)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            if (restaurant_club>0)
+                txt_target="../suggest/point_suggest.php";
+            else
+                txt_target="../suggest/customer_suggest.php";
+            
+            $.post(txt_target, {queryString: inputString}, function (data)
+            {                
+            	//----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    customer_fill('','',2,'','');// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //------------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-157;
+                        //------------------------------------------------------------------
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        customer_fill( data._customer,
+                                data._customer_name,
+                                1,
+                                data.id_customer,
+                                data._adress
+                            );
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+
+//----------------------------
+function customer_suggest_reserve_desk(myfield,e,code_breakf1,date_month,code_id)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post("../suggest/customer_suggest_reserve_desk.php",{queryString:inputString,code_breakf1:code_breakf1,date_month:date_month,code_id:code_id},function(data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    customer_fill('','',2,'');// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //------------------------------------------------------
+                        var offset_top = $("#"+myfield.name).offset().top+27;
+                        var offset_left = $("#"+myfield.name).offset().left-157;
+                        //------------------------------------------------------------------
+                        $("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        customer_fill( data._customer,
+                                data._customer_name,
+                                1,
+                                data.id_customer,
+                                data._lunch,
+                                data._dinner,
+                                data._takafol,
+                                data.num_all
+                            );
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+//----------------------------
+function get_child_list(event)
+{
+    $(".list tr .selected").removeClass("selected");
+    var found = 0;
+    //-----------------------
+    switch(event)
+    {
+        case 40:// arrow down 
+        {
+            $(".list tr").each(function()
+            {
+                if($(this).attr("class") == "selected")
+                    found = 1; 	
+            });
+            if(found == 1)
+            {
+                var sel = $(".list tr[class='selected']");
+                //--------------------------
+                if(sel.next().text() == "")					
+                    $(".list tr:first").addClass("selected");
+                else
+                    sel.next().addClass("selected");
+                
+                // remove class selected from previous item
+                sel.removeClass("selected");
+            }
+            else
+                $(".list tr:first").addClass("selected"); 
+        }
+        break;
+        case 38:// arrow up
+        {
+            $(".list tr").each(function()
+            {
+                if($(this).attr("class") == "selected")
+                    found = 1;
+            });
+            if(found == 1)
+            {
+                var sel = $(".list tr[class='selected']");
+                if(sel.prev().text() == "")					
+                    $(".list tr:last").addClass("selected");
+                else
+                    sel.prev().addClass("selected");
+                // remove class selected from previous item
+                sel.removeClass("selected");
+            }
+            else
+                $(".list tr:last").addClass("selected");
+        }
+        break;
+        case 13:// enter
+        {
+            $(".list tr[class='selected']").click();
+        }
+    }
+}
+//-----------------------
+function get_child(event)
+{
+    $(".list li .selected").removeClass("selected");
+    var found = 0;
+    //-----------------------
+    switch(event)
+    {
+        case 40:// arrow down 
+        {
+            $(".list li").each(function()
+            {
+                if($(this).attr("class") == "selected")
+                    found = 1; 	
+            });
+            if(found == 1)
+            {
+                var sel = $(".list li[class='selected']");
+                //--------------------------
+                if(sel.next().text() == "")					
+                    $(".list li:first").addClass("selected");
+                else
+                    sel.next().addClass("selected");
+                
+                // remove class selected from previous item
+                sel.removeClass("selected");
+            }
+            else
+                $(".list li:first").addClass("selected"); 
+        }
+        break;
+        case 38:// arrow up
+        {
+            $(".list li").each(function()
+            {
+                if($(this).attr("class") == "selected")
+                    found = 1;
+            });
+            if(found == 1)
+            {
+                var sel = $(".list li[class='selected']");
+                if(sel.prev().text() == "")					
+                    $(".list li:last").addClass("selected");
+                else
+                    sel.prev().addClass("selected");
+                // remove class selected from previous item
+                sel.removeClass("selected");
+            }
+            else
+                $(".list li:last").addClass("selected");
+        }
+        break;
+        case 13:// enter
+        {
+            $(".list li[class='selected']").click();
+        }
+    }
+}
+//-------------------------------------------------------
+function seller_suggest(e,myfield,url,kind_fill,lang_align,_language)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {            
+            $.post(url,{queryString:inputString,kind_fill:kind_fill,lang_align:lang_align,_language:_language},function(data)
+            {
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_1(data.data_rsv,0,0);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var el_height = $("#"+myfield.name).height();
+                        var el_width = $("#"+myfield.name).width();
+                        var offset_top = $("#"+myfield.name).offset().top+el_height;
+                    	var offset_left = $("#"+myfield.name).offset().left;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left,"width":el_width});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_1(data.data_rsv,data.id_data,1);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//-------------------------------------------------------
+function account_suggest(e,myfield,codding_id,url,kind_fill)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,kind_fill:kind_fill,codding_id:codding_id},function(data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_2(data.data_rsv,0,0);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var el_height = $("#"+myfield.name).height();
+                        var el_width = $("#"+myfield.name).width();
+                        var offset_top = $("#"+myfield.name).offset().top+el_height;
+                        var offset_left = $("#"+myfield.name).offset().left;
+                        $("div.suggestionsBox").css({"top":offset_top,"left":offset_left,"width":el_width});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_2(data.data_rsv,data.id_data,1);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+
+//-------------------------------------------------------
+function codding_suggest(e,myfield,url,kind_fill)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0)
+    {
+        $('#suggestions').fadeOut();
+    }
+    else
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,kind_fill:kind_fill},function(data)
+            {
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_3(data.data_rsv,0,0);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var el_height = $("#"+myfield.name).height();
+                        var el_width = $("#"+myfield.name).width();
+                        var offset_top = $("#"+myfield.name).offset().top+el_height;
+                        var offset_left = $("#"+myfield.name).offset().left;
+                        $("div.suggestionsBox").css({"top":offset_top,"left":offset_left,"width":el_width});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'});
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'});
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_3(data.data_rsv,data.id_data,1);
+                    }
+                }
+            },"json");
+        }
+        else
+        {
+            get_child(key);
+        }
+    }
+}
+
+//--------------------------------------------------------------------
+function personel_suggest(e, myfield, url, lang_align, _language)
+{
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {queryString: inputString, lang_align: lang_align, _language: _language}, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_1(data.data_rsv,0,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var el_height = $("#"+myfield.name).height();
+                        var el_width = $("#"+myfield.name).width();
+                        var offset_top = $("#"+myfield.name).offset().top+el_height;
+                    	var offset_left = $("#"+myfield.name).offset().left;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left,"width":el_width});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_1(data.data_rsv,data.id_data,1);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+
+//-------------------------------------------------------
+function detail_seller_suggest(e,myfield,url,kind_fill)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,kind_fill:kind_fill},function(data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_11(data.data_rsv,0,2,kind_fill);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-15;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_11(data.data_rsv,data.id_data,1,kind_fill);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//-------------------------------------------------------------------------------------------
+function detail_seller_suggest2(e,myfield,url,kind_fill,_radif,lang_align,_language)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,kind_fill:kind_fill,_radif:_radif,lang_align:lang_align,_language:_language},function(data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    //alert(data._language);
+                    fill_12(data.data_rsv,0,2,_radif);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var el_height = $("#"+myfield.name).height();
+                        var el_width = $("#"+myfield.name).width();
+                        var offset_top = $("#"+myfield.name).offset().top+el_height;
+                    	var offset_left = $("#"+myfield.name).offset().left;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left,"width":el_width});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_12(data.data_rsv,data.id_data,1,_radif);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//-----------------------------------------------------------------------------
+function person_suggest(e, myfield, url, kind_fill, lang_align, _language,_all)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {
+                queryString: inputString,
+                kind_fill  : kind_fill,
+                lang_align : lang_align,
+                _language  : _language,
+                _all       : _all
+            }, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill(data.data_rsv,0,2,kind_fill);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var el_height = $("#"+myfield.name).height();
+                        var el_width = $("#"+myfield.name).width();
+                        var offset_top = $("#"+myfield.name).offset().top+el_height;
+                        var offset_left = $("#"+myfield.name).offset().left;
+                        $("div.suggestionsBox").css({"top":offset_top,"left":offset_left,"width":el_width});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill(data.data_rsv,data.id_data,1,kind_fill);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+
+//--------------------------------------------------------------------
+function person1_suggest(e, myfield, url, kind_fill, lang_align, _language)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {
+                queryString: inputString,
+                kind_fill: kind_fill,
+                lang_align: lang_align,
+                _language: _language
+            }, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_2(data.data_rsv,0,2,kind_fill);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var el_height = $("#"+myfield.name).height();
+                        var el_width = $("#"+myfield.name).width();
+                        var offset_top = $("#"+myfield.name).offset().top+el_height;
+                    	var offset_left = $("#"+myfield.name).offset().left;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left,"width":el_width});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_2(data.data_rsv,data.id_data,1,kind_fill);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//-----------------------------------------------------------------------------
+function person2_suggest(e, myfield, url, kind_fill, lang_align, _language)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {
+                queryString: inputString,
+                kind_fill: kind_fill,
+                lang_align: lang_align,
+                _language: _language
+            }, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_3(data.data_rsv,0,2,kind_fill);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var el_height = $("#"+myfield.name).height();
+                        var el_width = $("#"+myfield.name).width();
+                        var offset_top = $("#"+myfield.name).offset().top+el_height;
+                    	var offset_left = $("#"+myfield.name).offset().left;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left,"width":el_width});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_3(data.data_rsv,data.id_data,1,kind_fill);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//------------------------------------------------------------------------------
+function income_suggest(e,myfield,url,txt_to_link,lang_align,_language)
+{
+    var kind_fill = 0;
+	
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,kind_fill:kind_fill,txt_to_link:txt_to_link,lang_align:lang_align,_language:_language},function(data)
+            {
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_1(data.data_rsv,0,2,kind_fill);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-120;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_1(data.data_rsv,data.id_data,1,kind_fill);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//---------------------------------------------------------------------
+function income2_suggest(e,myfield,url,kind_fill,inc)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,kind_fill:kind_fill,inc:inc},function(data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_3(data.data_rsv,0,2,kind_fill,inc);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-120;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_3(data.data_rsv,data.id_data,1,kind_fill,inc);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------
+function suggest_receipt_input_new3(e,myfield,_storage,_radif,test_kind,Codding_Storage,lang_align,_language,use_codes)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    var url = '';
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            if (test_kind == 'has_one')
+                url = "../suggest/seller_suggest_2.php";
+            else
+                url = "../suggest/receipt_input_new3_suggest.php";
+            
+            $.post(url,{queryString:inputString,_storage:_storage,_radif:_radif,test_kind:test_kind,Codding_Storage:Codding_Storage,lang_align:lang_align,_language:_language,use_codes:use_codes},function(data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','','','','','','','','','','','','','','','','',_radif,test_kind,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-30;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(   data.code_s,
+                                data._codeid,
+                                data.name,
+                                data.test_valid,
+                                data._unit1,
+                                data._unit1_id,
+                                data._unit2,
+                                data._unit2_id,
+                                data._unit3,
+                                data._unit3_id,
+                                data.conversion_factor,
+                                data.conversion_factor_kind,
+                                data.conversion_factor2,
+                                data.conversion_factor_kind2,
+                                data._avrg,
+                                data._amont,
+                                data._amont_,
+                                data.radiff,
+                                test_kind,
+                                1,
+                                data.date_control_val
+                            );
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------
+function suggest_receipt_output_input_update0(e,myfield,_storage,_rsv_date,_radif,test_st,Codding_Storage,lang_align,_language,use_codes)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    var url;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            switch(test_st)
+            {
+                case 'in_while':
+                    url = "../suggest/suggest_receipt_output_input_update0.php";
+                break;
+                case 'income_name':
+                    url = "../suggest/suggest_income_1.php";
+                break;
+                case 'person_name':
+                    url = "../suggest/suggest_person_1.php";
+                break;
+                case 'storage_name':
+                    url = "../suggest/suggest_storage_1.php";
+                break;
+                case 'seller_name':
+                    url = "../suggest/suggest_seller_11.php";
+                break;
+            }
+            $.post(url,{queryString:inputString,_storage:_storage,_radif:_radif,_rsv_date:_rsv_date,test_st:test_st,Codding_Storage:Codding_Storage,lang_align:lang_align,_language:_language,use_codes:use_codes},function(data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','','','','','','','',_radif,test_st,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //-------------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-95;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        //alert("ok=="+data._seller+"="+data.seller_name);
+
+                        fill(   data.code_s,
+                                data._codeid,
+                                data.name,
+                                data.test_valid,
+                                data._unit1,
+                                data._unit1_id,
+                                data._unit2,
+                                data._unit2_id,
+                                data._unit3,
+                                data._unit3_id,
+                                data.conversion_factor,
+                                data.conversion_factor_kind,
+                                data.conversion_factor2,
+                                data.conversion_factor_kind2,
+                                data._avrg,
+                                data._amont,
+                                data._amont_,
+                                data.radiff,
+                                test_st,
+                                1,
+                                0,
+                                data.year_name,
+                                data.year_id,
+                                data.storage_name,
+                                data._storage,
+                                data._seller,
+                                data.seller_name
+                            );
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+//--------------------------------------------------------------------------------------------------
+function suggest_receipt_output_input_new0(e,myfield,_storage,_rsv_date,_radif,test_st,cost_link,Codding_Storage,lang_align,_language)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    var url;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            switch(test_st)
+            {
+                case 'in_while':
+                    url = "../suggest/suggest_receipt_output_input_new0.php";
+                break;
+                case 'income_name':
+                    url = "../suggest/suggest_income_1.php";
+                break;
+                case 'person_name':
+                    url = "../suggest/suggest_person_1.php";
+                break;
+                case 'storage_name':
+                    url = "../suggest/suggest_storage_new0.php";
+                break;
+                case 'seller_name':
+                    url = "../suggest/suggest_seller_11.php";
+                break;
+            }
+            $.post(url,{queryString:inputString,_storage:_storage,_radif:_radif,_rsv_date:_rsv_date,test_st:test_st,cost_link:cost_link,Codding_Storage:Codding_Storage,lang_align:lang_align,_language:_language},function(data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','','','','','','','',_radif,test_st,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //-------------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-95;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(   0,
+                                data._codeid,
+                                data.name,
+                                '','','','','',
+                                '','','','','',
+                                '','','','','',
+                                test_st,1,0
+                            );
+
+                        // fill(   data.code_s,
+                        //         data._codeid,
+                        //         data.name,
+                        //         data.test_valid,
+                        //         data._unit,
+                        //         data._avrg,
+                        //         data._amont,
+                        //         data._amont_,
+                        //         data.radiff,
+                        //         test_st,
+                        //         1
+                        //     );
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------
+function suggest_income_new2(e,myfield,_storage,_rsv_date,_radif,txt_st,Codding_Storage,lang_align,_language,use_codes)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            switch(txt_st)
+            {
+                case '_person':
+                    url = "../suggest/person_output_new2_suggest.php";
+                break;
+                case '_income':
+                    url = "../suggest/income_output_new2_suggest.php";
+                break;
+                case 'in_while':
+                    url = "../suggest/receipt_output_new2_suggest.php";
+                break;
+            }
+                
+            $.post(url,{queryString:inputString,_storage:_storage,_radif:_radif,_rsv_date:_rsv_date,txt_st:txt_st,Codding_Storage:Codding_Storage,lang_align:lang_align,_language:_language,use_codes:use_codes},function(data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','','','','','','','','','','','','','','','','',_radif,txt_st,2,0);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //-------------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-95;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(   data.code_s,
+                                data._codeid,
+                                data.name,
+                                data.test_valid,
+                                data._unit1,
+                                data._unit1_id,
+                                data._unit2,
+                                data._unit2_id,
+                                data._unit3,
+                                data._unit3_id,
+                                data.conversion_factor,
+                                data.conversion_factor_kind,
+                                data.conversion_factor2,
+                                data.conversion_factor_kind2,
+                                data._avrg,
+                                data._amont,
+                                data._amont_,
+                                data.radiff,
+                                txt_st,
+                                1,
+                                data.date_control
+                            );
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+
+//------------------------------------------------------------------------------------------------------------
+function account1_suggest(e, myfield, txt_st, kind_fill, send_account_incoming, ignore, lang_align, _language)
+{
+    if(ignore == 1)
+        return true;
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    var index_tafzily=0;
+    //-------------------------
+    if(key == 8 || key == 39 || key == 37 || key == 46 || key == 16 || key == 9)
+    {
+    	return;
+    }
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            switch(txt_st)
+            {
+                case '_account1_url':
+                    url = "../suggest/account1_suggest_1.php";
+                break;
+                case '_compar1_url':
+                    var n=e.target.name;
+                    var list_tafzily=n.split('_');
+                    index_tafzily=list_tafzily[list_tafzily.length-1];
+                    url = "../suggest/compar1_suggest_1.php";
+                break;
+                case '_compar2_url':
+                    url = "../suggest/compar2_suggest_1.php";
+                break;
+                case 'shahr_url':
+                    url = "../suggest/shahr_suggest_1.php";
+                break;
+                case '_compar12_url':
+                    var n=e.target.name;
+                    var list_tafzily=n.split('_');
+                    var index_tafzily=list_tafzily[list_tafzily.length-1];
+                    url = "../suggest/compar12_suggest_1.php";
+                    break;
+                case '_compar22_url':
+                    url = "../suggest/compar22_suggest_1.php";
+                    break;
+                case '_compar14_url':
+                    var n=e.target.name;
+                    var list_tafzily=n.split('_');
+                    var index_tafzily=list_tafzily[list_tafzily.length-1];
+                    url = "../suggest/compar14_suggest_1.php";
+                    break;
+                case '_compar24_url':
+                    url = "../suggest/compar24_suggest_1.php";
+                    break;
+                case '_compar15_url':
+                    var n=e.target.name;
+                    var list_tafzily=n.split('_');
+                    var index_tafzily=list_tafzily[list_tafzily.length-1];
+                    url = "../suggest/compar15_suggest_1.php";
+                    break;
+                case '_compar25_url':
+                    url = "../suggest/compar25_suggest_1.php";
+                    break;
+                case '_compar14_2_url':
+                    var n=e.target.name;
+                    var list_tafzily=n.split('_');
+                    var index_tafzily=list_tafzily[list_tafzily.length-1];
+                    url = "../suggest/compar14_2_suggest_1.php";
+                    break;
+                case '_compar24_2_url':
+                    url = "../suggest/compar24_2_suggest_1.php";
+                    break;
+                case '_compar15_2_url':
+                    var n=e.target.name;
+                    var list_tafzily=n.split('_');
+                    var index_tafzily=list_tafzily[list_tafzily.length-1];
+                    url = "../suggest/compar15_2_suggest_1.php";
+                    break;
+                case '_compar25_2_url':
+                    url = "../suggest/compar25_2_suggest_1.php";
+                    break;
+            }
+            //alert('before='+kind_fill);
+
+            $.post(url, {
+                queryString: inputString,
+                kind_fill: kind_fill,
+                send_account_incoming: send_account_incoming,
+                lang_align: lang_align,
+                _language: _language,
+                index_tafzily: index_tafzily
+            }, function (data)
+            {
+                //-----------------------------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill_1(data.name_val,0,0,txt_st,2,kind_fill,index_tafzily);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-110;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        //$("#"+myfield.name).removeClass("loading");
+                        //alert(data.data_rsv+"=="+data.id_val+"=="+data.code_val+"==("+txt_st+")");
+                        fill_1(data.data_rsv,data.id_val,data.code_val,txt_st,1,1,index_tafzily);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+//--------------------------------------------------
+function buffet_codding_suggest(e, myfield)
+{
+	//alert (myfield.value);
+	
+	url="../suggest/buffet_codding_suggest.php";
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {queryString: inputString}, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill(data.data_rsv,0,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-15;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill(data.data_rsv,data.id_data,1);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+
+//-----------------------------------------------------------
+function cost_codding_suggest(e, myfield, lang_align, _language)
+{
+	//alert (myfield.value);
+	
+	url="../suggest/cost_codding_suggest.php";
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $("#"+myfield.name).addClass("loading");
+
+            $.post(url, {queryString: inputString, lang_align: lang_align, _language: _language}, function (data)
+            {
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('', '', '', '',2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-15;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(data.data_rsv, data.unit_name, data.id_data, data.unit_id, 1);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+
+//------------------------------------------------
+function send_user_suggest(e, myfield, url, kind_fill)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {queryString: inputString, kind_fill: kind_fill}, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill(data.data_rsv,0,2,kind_fill);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-15;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill(data.data_rsv,data.id_data,1,kind_fill);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//------------------------------------------------
+function send_requester_suggest(e, myfield, url, kind_fill)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {queryString: inputString, kind_fill: kind_fill}, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_requester(data.data_rsv,0,2,kind_fill);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-15;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                    	fill_requester(data.data_rsv,data.id_data,1,kind_fill);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//------------------------------------------------
+function suggest_engin_ripair(e, myfield, url, my_inp, kind_fill)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {queryString: inputString, my_inp: my_inp, kind_fill: kind_fill}, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill(data.data_rsv,0,2,my_inp,kind_fill);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-15;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill(data.data_rsv,data.id_data,1,my_inp,kind_fill);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+
+function suggest_point_register(e, myfield, url)
+{
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url, {queryString: inputString}, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill1(0);// یعنی برو کلاس error را نشان بده
+                }
+                else// یعنی دیتا یکی است
+                {
+                    fill1(1,data.RegisterID, data.Name, data.SurName, data.Email, data.MobileNumber, data.Melli_Code,
+                            data.BirthDate, data.IsWoman, data.HomeAddress, data.FatherName, data.PassportNumber,
+                            data.New_IsPlaceName, data.New_IsPlaceID, data.New_OccutationID, data.job, data.New_NationalityName,
+                            data.New_NationalityID, data.ForeignGuest);
+                }
+                $('#is_woman').val(data.IsWoman);
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//-------------------------------------------------------------------------------------------------------------------
+function gate_entry(e,myfield,url,kind_fill,_country)
+{
+	if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,kind_fill:kind_fill,_country:_country},function(data)
+            {          
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill(data.data_rsv,0,2,kind_fill);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-15;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill(data.data_rsv,data.id_data,1,kind_fill);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------
+function suggest_goods_request_new2(e, myfield, _storage, _radif, lang_align, _language)
+{
+    inputString = myfield.value;
+	//alert(inputString);
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post("../suggest/goods_request_new2_suggest.php", {
+                queryString: inputString,
+                _storage: _storage,
+                _radif: _radif,
+                lang_align: lang_align,
+                _language: _language
+            }, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','','','','','','',_radif,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-95;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(   data.code_s,
+                                data._codeid,
+                                data.name,
+                                data.test_valid,
+                                data._unit,
+                                data._amont,
+                                data._amont_,
+                                data.radiff,
+                                1,
+                                data.New_Storage,
+                                data.has_decimal
+                            );
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+//--------------------------------------------------------------------------------------------------
+function suggest_engin_receipt_new0(e, myfield, _storage, _rsv_date, _radif, Codding_Storage, lang_align, _language)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        //$("#"+myfield.name).removeClass("loading");
+        fill('', '', '', '', '', '', '', _radif, 2);// یعنی برو کلاس error را نشان بده
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post("../suggest/engin_receipt_new0_suggest.php", {
+                queryString: inputString,
+                _storage: _storage,
+                _radif: _radif,
+                _rsv_date: _rsv_date,
+                Codding_Storage: Codding_Storage,
+                lang_align: lang_align,
+                _language: _language
+            }, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('', '', '', '', '', '', '', _radif, 2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter > 1)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //-------------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-95;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(   data.code_s,
+                                data._codeid,
+                                data.name,
+                                data.test_valid,
+                                data._unit,
+                                data._amont,
+                            	data.txt_fiee,
+                                data.radiff,
+                                1
+                            );
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child_list(key);    
+        }
+    }
+}
+//----------------------------------------------------------------------
+function sellerdetail_suggest(e,myfield,url,kind_fill,lang_align,_language)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,kind_fill:kind_fill,lang_align:lang_align,_language:_language},function(data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_1(data.data_rsv,0,2,kind_fill);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var el_height = $("#"+myfield.name).height();
+                        var el_width = $("#"+myfield.name).width();
+                        var offset_top = $("#"+myfield.name).offset().top+el_height;
+                    	var offset_left = $("#"+myfield.name).offset().left;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left,"width":el_width});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_1(data.data_rsv,data.id_data,1,kind_fill);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//-----------------------------------------------------
+function suggest_laundry_new(myfield,e,_radif)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post("../suggest/laundry_new_suggest.php",{queryString:inputString,_radif:_radif},function(data)
+            {             
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','',_radif,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //------------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-157;
+                        //------------------------------------------------------------------
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(  
+                                data._id,
+                                data._name,
+                                data._dry,
+                                data._press,
+                                data._wash,
+                                _radif,
+                                1
+                            );
+                            
+                        
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+
+//---------------------------------------------------------------
+function suggest_ceremonies(myfield, e, _radif,active_ceremonies)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post("../suggest/ceremonies_suggest.php", {queryString: inputString, _radif: _radif, active_ceremonies: active_ceremonies}, function (data)
+            {
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','',_radif,0,0,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //------------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-157;
+                        //------------------------------------------------------------------
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(data.id_data,data.extra_name,data._radif,data.tax_percent,data.extra_srvc,1);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+//--------------------------------------------------------------------------------------------------------
+function suggest_laundry_new2(myfield,e,_radif)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post("../suggest/laundry_new2_suggest.php",{queryString:inputString,_radif:_radif},function(data)
+            {             
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','',_radif,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //------------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-157;
+                        //------------------------------------------------------------------
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(  
+                                data._id,
+                                data._name,
+                                data._dry,
+                                data._press,
+                                data._wash,
+                                _radif,
+                                1
+                            );
+                            
+                        
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+//--------------------------------------------------------------------------------------------------------------
+function suggest_laundry_new1(myfield, e, _radif)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post("../suggest/laundry_new1_suggest.php", {queryString: inputString, _radif: _radif}, function (data)
+            {             
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','',_radif,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //------------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-157;
+                        //------------------------------------------------------------------
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(  
+                                data._id,
+                                data._name,
+                                data._dry,
+                                data._press,
+                                data._wash,
+                                _radif,
+                                1
+                            );
+                            
+                        
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);    
+        }
+    }
+}
+
+//-----------------------------------------
+function buffet1_codding_suggest(e, myfield)
+{
+	//alert (myfield.value);
+	
+	url="../suggest/buffet1_codding_suggest.php";
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString},function(data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill(data.data_rsv,0,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-15;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill(data.data_rsv,data.id_data,1);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+
+//---------------------------------------------
+function cost2_codding_suggest(e, myfield, state)
+{
+	//alert (myfield.value);
+	
+	url="../suggest/cost2_codding_suggest.php";
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+
+            $.post(url, {queryString: inputString, state: state}, function (data)
+            {                
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_1(data.data_rsv,0,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-15;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_1(data.data_rsv,data.id_data,1,1);
+                    }           
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+
+//--------------------------------------------------
+function suggest_receipt_output_new_chain(e, myfield)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0)
+    {
+        $('#suggestions').fadeOut();
+    }
+    else
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post("../suggest/receipt_output_new_chain_suggest.php", {queryString: inputString}, function (data)
+            {
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','','','','','','','',_radif,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //-------------------------------------------------------
+                        var offset_top = $("#"+myfield.name).offset().top+27;
+                        var offset_left = $("#"+myfield.name).offset().left-95;
+                        $("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'});
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'});
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(   data.code_s,
+                            data._codeid,
+                            data.name,
+                            data.constant,
+                            1
+                        );
+                    }
+                }
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);
+        }
+    }
+}
+//----------------------------------------------------------------------------------------------------------
+function suggest_house_receipt(e,myfield,_radif,lang_align,_language)
+{
+    inputString = myfield.value;
+    //----------------------
+    var evt = e || window.event;
+    var key = evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0)
+    {
+        $('#suggestions').fadeOut();
+    }
+    else
+    {
+        $("#"+myfield.name).addClass("loading");
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post("../suggest/house_receipt_suggest.php",{queryString:inputString,_radif:_radif,lang_align:lang_align,_language:_language},function(data)
+            {
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    //alert('lang='+data.lang_align);
+                    $("#"+myfield.name).removeClass("loading");
+                    fill('','','','','','','',_radif,2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var el_height = $("#"+myfield.name).height();
+                        var el_width = $("#"+myfield.name).width();
+                        
+                        /*var offset_top = $("#"+myfield.name).position().top+el_height;
+                    	var offset_left = $("#"+myfield.name).position().left;*/
+                        var offset_top = $("#"+myfield.name).offset().top+el_height;
+                        var offset_left = $("#"+myfield.name).offset().left;
+                        $("div.suggestionsBox").css({"top":offset_top,"left":offset_left,"width":el_width});
+                        $("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'});
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'});
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        $("#"+myfield.name).removeClass("loading");
+                        fill(data.code_s,
+                            data._codeid,
+                            data.name,
+                            data.test_valid,
+                            data._unit1,
+                            data._unit1_id,
+                            data._unit2,
+                            data.radiff,
+                            1
+                        );
+                    }
+                }
+            },"json");
+        }
+        else
+        {
+            $("#"+myfield.name).removeClass("loading");
+            get_child(key);
+        }
+    }
+}
+//-------------------------------------------------------------------------
+function task_manager_suggest(e,myfield,url,kind_fill,lang_align,_language)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {            
+            $.post(url,{queryString:inputString,kind_fill:kind_fill,lang_align:lang_align,_language:_language},function(data)
+            {
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_1(data.data_rsv,0,0,0,0);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var el_height = $("#"+myfield.name).height();
+                        var el_width = $("#"+myfield.name).width();
+                        var offset_top = $("#"+myfield.name).offset().top+el_height;
+                        var offset_left = $("#"+myfield.name).offset().left;
+                        $("div.suggestionsBox").css({"top":offset_top,"left":offset_left,"width":el_width});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill_1(data.data_rsv,data.id_data,data.input_activity,data.kind_fill,1);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}
+//-------------------------------------------------------------------------
+function task_location_suggest(e,myfield,url,kind_fill,lang_align,_language)
+{
+    if(kind_fill == '' || kind_fill == null || kind_fill == 'null')
+    {
+        kind_fill = 0;
+    }
+    //--------------------------
+    inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.which || evt.keyCode;
+    //-------------------------
+    if(inputString.length == 0) 
+    {
+        $('#suggestions').fadeOut();
+    } 
+    else 
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {            
+            $.post(url,{queryString:inputString,kind_fill:kind_fill,lang_align:lang_align,_language:_language},function(data)
+            {
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill_2(data.data_rsv,0,0,0,0,0);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                        var el_height = $("#"+myfield.name).height();
+                        var el_width = $("#"+myfield.name).width();
+                        var offset_top = $("#"+myfield.name).offset().top+el_height;
+                        var offset_left = $("#"+myfield.name).offset().left;
+                        $("div.suggestionsBox").css({"top":offset_top,"left":offset_left,"width":el_width});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'}); 
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'}); 
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        //alert(data.data_rsv+"="+data.id_data+"="+data.id_room+"="+data.id_regs+"="+data.room_number);
+                        //console.log(data);
+                        
+                        fill_2(data.data_rsv,data.id_data,data.id_room,data.id_regs,data.room_number,1);
+                    }
+                }                   
+            },"json");
+        }
+        else
+        {
+            get_child(key);    
+        }
+    }
+}

@@ -36,6 +36,7 @@ model User {
   auditLogs       AuditLog[]     @relation("AuditActor")
   createdEntries  JournalEntry[] @relation("EntryCreator")
   approvedEntries JournalEntry[] @relation("EntryApprover")
+  folioItems      FolioItem[]
 
   @@map("users")
 }
@@ -230,6 +231,7 @@ model Reservation {
   adults    Int               @default(1)
   children  Int               @default(0)
   note      String?
+  nationality String?         // IRANIAN | FOREIGNER — تفکیک مهمان ایرانی/خارجی (درخواست کارفرما)
   stays     Stay[]
 
   @@index([roomTypeId, checkIn, checkOut, status])
@@ -304,9 +306,28 @@ model Stay {
   cashTransactions CashTransaction[]
   ancillaryOrders  AncillaryOrder[]
   restaurantOrders RestaurantOrder[]
+  folioItems       FolioItem[]
 
   @@index([status, plannedCheckOut])
   @@map("stays")
+}
+
+// اقلام اضافی فولیو اقامت — چارج اتاق (Room Additional Items — مرجع آسا 4.zip)
+model FolioItem {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  stayId      String   @db.Uuid
+  desc        String   @db.VarChar(120)
+  qty         Int      @default(1)
+  unitRials   BigInt   @default(0)
+  totalRials  BigInt   @default(0)
+  postedAt    DateTime @default(now())
+  createdById String?  @db.Uuid
+
+  stay    Stay @relation(fields: [stayId], references: [id])
+  creator User? @relation(fields: [createdById], references: [id])
+
+  @@index([stayId])
+  @@map("folio_items")
 }
 
 enum StayStatus {

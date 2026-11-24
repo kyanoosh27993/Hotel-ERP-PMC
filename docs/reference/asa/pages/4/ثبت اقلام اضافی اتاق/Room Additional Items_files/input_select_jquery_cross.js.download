@@ -1,0 +1,65 @@
+$(document).ready(function(){
+    
+    $("input:text, textarea").focus
+    (
+    	function()
+    	{
+            $('input:text, textarea').removeClass('newSelect');
+            $(this).addClass('newSelect');
+    	}
+    );
+    
+    $(':input').keydown(function(e)
+    {
+        $(':input').removeClass('select_focus');
+        var key = e.which;
+        
+        if(key == 13)//enter
+        {
+            if($(this).attr('enter') != 0)
+            {
+                var currentElement = parseInt($(this).attr('tabindex'));
+                var nextElement = $(":input[tabindex="+(currentElement+1)+"]"); 
+                
+                if ( 
+                      nextElement.index() != -1 && nextElement.attr('disabled') != true && 
+                      nextElement.attr('disabled') != 'disabled' && nextElement.parents('div').css('display') != 'none' &&
+                      nextElement.parents('tr').css('display') != 'none'
+                   )
+                {
+                    nextElement.focus();
+                    
+                    if(nextElement[0].nodeName.toLowerCase() == 'select')
+                        nextElement.addClass('select_focus');
+                }
+                else
+                {
+                    var count = ++currentElement;
+                    var tst = 0;
+                    while(true)
+                    {
+                        tst++;
+                        count++;
+                        var tempNextElement = $(":input[tabindex="+(count)+"]"); 
+                        if (    
+                                tempNextElement.index() != -1 && tempNextElement.attr('disabled') != true && 
+                                tempNextElement.attr('disabled') != 'disabled' && tempNextElement.parents('div').css('display') != 'none' &&
+                                tempNextElement.parents('tr').css('display') != 'none'
+                           )
+                        {
+                            tempNextElement.focus();
+                            if(tempNextElement[0].nodeName.toLowerCase() == 'select')
+                                tempNextElement.addClass('select_focus');                            
+                            break;
+                        }
+                        if(tst >= 6)
+                            break;
+                    }
+                }
+            }
+        }
+    });    
+
+});
+
+

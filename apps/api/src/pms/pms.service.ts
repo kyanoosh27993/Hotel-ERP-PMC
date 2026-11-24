@@ -23,6 +23,7 @@ export interface PmsReservationInput {
   adults?: number;
   children?: number;
   note?: string;
+  nationality?: 'IRANIAN' | 'FOREIGNER'; // تفکیک مهمان ایرانی/خارجی
   rateOverrideRials?: string; // ارقام — نرخ توافقی (گروهی)
 }
 
@@ -78,11 +79,11 @@ export class PmsService {
   }
 
   /** تغییر وضعیت اتاق — قواعد: اشغال فقط با پذیرش؛ اتاق اشغال مستقیم تغییر نمی‌کند؛ نظافت کامل DIRTY→AVAILABLE */
-  async updateRoom(roomId: string, patch: { status?: string; hkStatus?: string; note?: string | null }) {
+  async updateRoom(roomId: string, patch: { status?: string; hkStatus?: string; note?: string | null; code?: string; floor?: number; roomTypeId?: string }) {
     const room = await this.prisma.room.findUnique({ where: { id: roomId } });
     if (!room) throw new NotFoundException({ code: 'NOT_FOUND', message: 'Room not found' });
 
-    const data: { status?: 'AVAILABLE' | 'OCCUPIED' | 'DIRTY' | 'OUT_OF_SERVICE'; hkStatus?: 'CLEAN' | 'DIRTY' | 'IN_PROGRESS' | 'INSPECTED'; note?: string | null } = {};
+    const data: { status?: 'AVAILABLE' | 'OCCUPIED' | 'DIRTY' | 'OUT_OF_SERVICE'; hkStatus?: 'CLEAN' | 'DIRTY' | 'IN_PROGRESS' | 'INSPECTED'; note?: string | null; code?: string; floor?: number; roomTypeId?: string } = {};
 
     if (patch.status !== undefined) {
       if (patch.status === 'OCCUPIED') {
@@ -110,8 +111,29 @@ export class PmsService {
 
     if (patch.note !== undefined) data.note = patch.note;
 
-    const updated = await this.prisma.room.update({ where: { id: roomId }, data });
-    return { id: updated.id, code: updated.code, status: updated.status, hkStatus: updated.hkStatus, note: updated.note };
+    // تنظیم اتاق (درخواست کارفرما): ویرایش کد/طبقه/نوع اتاق
+    if (patch.code !== undefined && patch.code !== room.code) {
+      const dup = await this.prisma.room.findUnique({ where: { code: patch.code } });
+      if (dup) throw new ConflictException({ code: 'VALIDATION', message: `Room code ${patch.code} already exists` });
+      data.code = patch.code;
+    }
+    if (patch.floor !== undefined) {
+      if (!Number.isInteger(patch.floor) || patch.floor < 0 || patch.floor > 99) {
+        throw new ConflictException({ code: 'VALIDATION', message: 'Floor must be an integer between 0 and 99' });
+      }
+      data.floor = patch.floor;
+    }
+    if (patch.roomTypeId !== undefined) {
+      const rt = await this.prisma.roomType.findUnique({ where: { id: patch.roomTypeId } });
+      if (!rt) throw new NotFoundException({ code: 'NOT_FOUND', message: 'Room type not found' });
+      data.roomTypeId = patch.roomTypeId;
+    }
+
+    const updated = await this.prisma.room.update({ where: { id: roomId }, data }).catch((e: { code?: string }) => {
+      if (e && e.code === 'P2002') throw new ConflictException({ code: 'VALIDATION', message: 'Room code already exists' });
+      throw e;
+    });
+    return { id: updated.id, code: updated.code, floor: updated.floor, roomTypeId: updated.roomTypeId, status: updated.status, hkStatus: updated.hkStatus, note: updated.note };
   }
 
   // ───────── F4-T2: رزرواسیون توسعه‌یافته (کانال/گروه/لیست انتظار) ─────────
@@ -161,6 +183,7 @@ export class PmsService {
           adults: input.adults ?? 1,
           children: input.children ?? 0,
           note: input.note,
+          nationality: input.nationality ?? null,
         },
       });
       await this.outbox.enqueue(tx, {
@@ -218,21 +241,30 @@ export class PmsService {
     });
   }
 
-  async listReservations(filter: { status?: string; date?: string }) {
+  async listReservations(filter: { status?: string; date?: string; from?: string; to?: string; nationality?: string }) {
     const where: Record<string, unknown> = {};
     if (filter.status) where.status = filter.status;
     if (filter.date) where.checkIn = new Date(`${filter.date}T00:00:00Z`);
+    // بازهٔ زمانی گزارش (درخواست کارفرما): از/تا روی checkIn
+    if (filter.from || filter.to) {
+      const range: Record<string, Date> = {};
+      if (filter.from) range.gte = new Date(`${filter.from}T00:00:00Z`);
+      if (filter.to) range.lte = new Date(`${filter.to}T00:00:00Z`);
+      where.checkIn = range;
+    }
+    if (filter.nationality) where.nationality = filter.nationality;
     const rows = await this.prisma.reservation.findMany({
       where,
       include: { roomType: { select: { code: true, nameFa: true } } },
       orderBy: [{ checkIn: 'desc' }, { code: 'asc' }],
-      take: 200,
+      take: 500,
     });
     return rows.map((r) => ({
       id: r.id,
       code: r.code,
       guestName: r.guestName,
       roomType: r.roomType.code,
+      roomTypeNameFa: r.roomType.nameFa,
       checkIn: r.checkIn.toISOString().slice(0, 10),
       checkOut: r.checkOut.toISOString().slice(0, 10),
       nights: r.nights,
@@ -240,6 +272,7 @@ export class PmsService {
       status: r.status,
       source: r.source,
       groupName: r.groupName,
+      nationality: r.nationality ?? null,
     }));
   }
 
@@ -475,6 +508,149 @@ export class PmsService {
       checkInAt: s.checkInAt.toISOString(),
       plannedCheckOut: s.plannedCheckOut.toISOString().slice(0, 10),
       folioRials: s.folioRials.toString(),
+    }));
+  }
+
+  // ───────── تنظیمات اتاق‌ها (درخواست کارفرما: طبقه/نوع/نرخ قابل ویرایش) ─────────
+
+  async listRoomTypes() {
+    const rows = await this.prisma.roomType.findMany({
+      include: { _count: { select: { rooms: true } } },
+      orderBy: { code: 'asc' },
+    });
+    return rows.map((rt) => ({
+      id: rt.id,
+      code: rt.code,
+      nameEn: rt.nameEn,
+      nameFa: rt.nameFa,
+      capacity: rt.capacity,
+      baseRateRials: rt.baseRateRials.toString(),
+      roomsCount: rt._count.rooms,
+    }));
+  }
+
+  async createRoomType(input: { code: string; nameEn: string; nameFa: string; capacity?: number; baseRateRials: string }) {
+    const dup = await this.prisma.roomType.findUnique({ where: { code: input.code } });
+    if (dup) throw new ConflictException({ code: 'VALIDATION', message: `Room type code ${input.code} already exists` });
+    if (!/^\d+$/.test(input.baseRateRials)) throw new ConflictException({ code: 'VALIDATION', message: 'baseRateRials must be integer digits (Rials)' });
+    const rt = await this.prisma.roomType.create({
+      data: { code: input.code, nameEn: input.nameEn, nameFa: input.nameFa, capacity: input.capacity ?? 2, baseRateRials: BigInt(input.baseRateRials) },
+    });
+    return { id: rt.id, code: rt.code, nameFa: rt.nameFa, capacity: rt.capacity, baseRateRials: rt.baseRateRials.toString() };
+  }
+
+  async updateRoomType(id: string, patch: { nameFa?: string; nameEn?: string; capacity?: number; baseRateRials?: string }) {
+    const rt = await this.prisma.roomType.findUnique({ where: { id } });
+    if (!rt) throw new NotFoundException({ code: 'NOT_FOUND', message: 'Room type not found' });
+    const data: { nameFa?: string; nameEn?: string; capacity?: number; baseRateRials?: bigint } = {};
+    if (patch.nameFa !== undefined) data.nameFa = patch.nameFa;
+    if (patch.nameEn !== undefined) data.nameEn = patch.nameEn;
+    if (patch.capacity !== undefined) {
+      if (!Number.isInteger(patch.capacity) || patch.capacity < 1 || patch.capacity > 10) {
+        throw new ConflictException({ code: 'VALIDATION', message: 'Capacity must be between 1 and 10' });
+      }
+      data.capacity = patch.capacity;
+    }
+    if (patch.baseRateRials !== undefined) {
+      if (!/^\d+$/.test(patch.baseRateRials)) throw new ConflictException({ code: 'VALIDATION', message: 'baseRateRials must be integer digits (Rials)' });
+      data.baseRateRials = BigInt(patch.baseRateRials);
+    }
+    const updated = await this.prisma.roomType.update({ where: { id }, data });
+    return { id: updated.id, code: updated.code, nameFa: updated.nameFa, capacity: updated.capacity, baseRateRials: updated.baseRateRials.toString() };
+  }
+
+  async createRoom(input: { code: string; floor: number; roomTypeId: string }) {
+    const dup = await this.prisma.room.findUnique({ where: { code: input.code } });
+    if (dup) throw new ConflictException({ code: 'VALIDATION', message: `Room code ${input.code} already exists` });
+    if (!Number.isInteger(input.floor) || input.floor < 0 || input.floor > 99) {
+      throw new ConflictException({ code: 'VALIDATION', message: 'Floor must be an integer between 0 and 99' });
+    }
+    const rt = await this.prisma.roomType.findUnique({ where: { id: input.roomTypeId } });
+    if (!rt) throw new NotFoundException({ code: 'NOT_FOUND', message: 'Room type not found' });
+    const room = await this.prisma.room.create({ data: { code: input.code, floor: input.floor, roomTypeId: input.roomTypeId } });
+    return { id: room.id, code: room.code, floor: room.floor, roomTypeId: room.roomTypeId, status: room.status };
+  }
+
+  async deleteRoom(roomId: string) {
+    const room = await this.prisma.room.findUnique({ where: { id: roomId }, include: { _count: { select: { stayRooms: true } } } });
+    if (!room) throw new NotFoundException({ code: 'NOT_FOUND', message: 'Room not found' });
+    if (room.status === 'OCCUPIED') throw new ConflictException({ code: 'BUSINESS_RULE', message: 'Room is occupied — check out the stay first' });
+    if (room._count.stayRooms > 0) {
+      throw new ConflictException({ code: 'BUSINESS_RULE', message: 'Room has stay history — close it (OUT_OF_SERVICE) instead of deleting' });
+    }
+    await this.prisma.room.delete({ where: { id: roomId } });
+    return { deleted: room.code };
+  }
+
+  // ───────── فولیو — اقلام اضافی اتاق و صورتحساب‌های باز (مرجع آسا 4.zip) ─────────
+
+  async addFolioItem(stayId: string, input: { desc: string; qty: number; unitRials: string; createdByUserId: string }) {
+    const stay = await this.prisma.stay.findUnique({ where: { id: stayId } });
+    if (!stay) throw new NotFoundException({ code: 'NOT_FOUND', message: 'Stay not found' });
+    if (stay.status !== 'OPEN') throw new ConflictException({ code: 'BUSINESS_RULE', message: 'Stay is closed — folio is settled' });
+    if (!Number.isInteger(input.qty) || input.qty < 1 || input.qty > 999) {
+      throw new ConflictException({ code: 'VALIDATION', message: 'qty must be between 1 and 999' });
+    }
+    if (!/^\d+$/.test(input.unitRials)) throw new ConflictException({ code: 'VALIDATION', message: 'unitRials must be integer digits (Rials)' });
+    const unit = BigInt(input.unitRials);
+    const total = unit * BigInt(input.qty);
+    return this.prisma.$transaction(async (tx) => {
+      const item = await tx.folioItem.create({
+        data: {
+          stayId,
+          desc: input.desc,
+          qty: input.qty,
+          unitRials: unit,
+          totalRials: total,
+          createdById: input.createdByUserId === 'system:engine' ? null : input.createdByUserId,
+        },
+      });
+      await tx.stay.update({ where: { id: stayId }, data: { folioRials: { increment: total } } });
+      return { id: item.id, desc: item.desc, qty: item.qty, unitRials: item.unitRials.toString(), totalRials: item.totalRials.toString() };
+    });
+  }
+
+  async listFolioItems(stayId: string) {
+    const stay = await this.prisma.stay.findUnique({
+      where: { id: stayId },
+      include: { folioItems: { orderBy: { postedAt: 'desc' } }, rooms: { include: { room: { select: { code: true } } } } },
+    });
+    if (!stay) throw new NotFoundException({ code: 'NOT_FOUND', message: 'Stay not found' });
+    return {
+      stay: { id: stay.id, code: stay.code, guestName: stay.guestName, status: stay.status, rooms: stay.rooms.map((sr) => sr.room.code) },
+      folioRials: stay.folioRials.toString(),
+      items: stay.folioItems.map((f) => ({
+        id: f.id,
+        desc: f.desc,
+        qty: f.qty,
+        unitRials: f.unitRials.toString(),
+        totalRials: f.totalRials.toString(),
+        postedAt: f.postedAt.toISOString(),
+      })),
+    };
+  }
+
+  /** لیست صورتحساب‌های باز مهمان (Open Invoices Guests List — مرجع آسا) */
+  async openFolios() {
+    const rows = await this.prisma.stay.findMany({
+      where: { status: 'OPEN' },
+      include: {
+        rooms: { include: { room: { select: { code: true } } } },
+        folioItems: { orderBy: { postedAt: 'desc' } },
+      },
+      orderBy: { checkInAt: 'asc' },
+      take: 200,
+    });
+    return rows.map((s) => ({
+      id: s.id,
+      code: s.code,
+      guestName: s.guestName,
+      rooms: s.rooms.map((sr) => sr.room.code),
+      checkInAt: s.checkInAt.toISOString(),
+      plannedCheckOut: s.plannedCheckOut.toISOString().slice(0, 10),
+      folioRials: s.folioRials.toString(),
+      itemsCount: s.folioItems.length,
+      lastItem: s.folioItems[0] ? s.folioItems[0].desc : null,
     }));
   }
 

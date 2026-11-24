@@ -2,7 +2,7 @@
  * pms.controller.ts — فاز ۴: نقشه اتاق، رزرو توسعه‌یافته، لیست انتظار، پذیرش، خانه‌داری، حسابرسی شبانه.
  * همه مسیرها نسخه‌دار: /api/v1/pms/... و با مجوز RBAC محافظت شده‌اند.
  */
-import { Body, Controller, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { IsArray, IsIn, IsNumber, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 import { RequirePermissions, RequireAnyPermissions } from '../iam/permissions.guard';
@@ -23,6 +23,93 @@ export class UpdateRoomDto {
   @IsString()
   @MaxLength(240)
   note!: string | null;
+
+  // تنظیم اتاق (درخواست کارفرما)
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(20)
+  code!: string;
+
+  @IsOptional()
+  @IsNumber()
+  floor!: number;
+
+  @IsOptional()
+  @IsString()
+  roomTypeId!: string;
+}
+
+export class CreateRoomDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(20)
+  code!: string;
+
+  @IsNumber()
+  floor!: number;
+
+  @IsString()
+  roomTypeId!: string;
+}
+
+export class CreateRoomTypeDto {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(20)
+  code!: string;
+
+  @IsString()
+  @MinLength(2)
+  @MaxLength(60)
+  nameEn!: string;
+
+  @IsString()
+  @MinLength(2)
+  @MaxLength(60)
+  nameFa!: string;
+
+  @IsOptional()
+  @IsNumber()
+  capacity!: number;
+
+  @Matches(/^\d+$/, { message: 'baseRateRials must be integer digits (Rials)' })
+  baseRateRials!: string;
+}
+
+export class UpdateRoomTypeDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(60)
+  nameFa!: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(2)
+  @MaxLength(60)
+  nameEn!: string;
+
+  @IsOptional()
+  @IsNumber()
+  capacity!: number;
+
+  @IsOptional()
+  @Matches(/^\d+$/, { message: 'baseRateRials must be integer digits (Rials)' })
+  baseRateRials!: string;
+}
+
+export class FolioItemDto {
+  @IsString()
+  @MinLength(2)
+  @MaxLength(120)
+  desc!: string;
+
+  @IsNumber()
+  qty!: number;
+
+  @Matches(/^\d+$/, { message: 'unitRials must be integer digits (Rials)' })
+  unitRials!: string;
 }
 
 export class PmsReservationDto {
@@ -70,6 +157,10 @@ export class PmsReservationDto {
   @IsOptional()
   @Matches(/^\d+$/, { message: 'rateOverrideRials must be integer digits (Rials)' })
   rateOverrideRials!: string;
+
+  @IsOptional()
+  @IsIn(['IRANIAN', 'FOREIGNER'])
+  nationality!: 'IRANIAN' | 'FOREIGNER';
 }
 
 export class WaitlistDto {
@@ -182,6 +273,7 @@ export class PmsController {
       children: dto.children,
       note: dto.note,
       rateOverrideRials: dto.rateOverrideRials,
+      nationality: dto.nationality,
     };
     return { data: await this.pms.createReservation(input) };
   }
@@ -197,8 +289,11 @@ export class PmsController {
   async listReservations(
     @Query('status') status?: string,
     @Query('date') date?: string,
+    @Query('from') from?: string,
+    @Query('to') to?: string,
+    @Query('nationality') nationality?: string,
   ) {
-    return { data: await this.pms.listReservations({ status, date }) };
+    return { data: await this.pms.listReservations({ status, date, from, to, nationality }) };
   }
 
   @RequirePermissions(PERMISSIONS.RESERVATION_CREATE)
@@ -247,6 +342,58 @@ export class PmsController {
   @Post('stays/:id/check-out')
   async checkOut(@Param('id') id: string) {
     return { data: await this.pms.checkOut(id) };
+  }
+
+  // ───────── تنظیمات اتاق‌ها (درخواست کارفرما) ─────────
+
+  @RequirePermissions(PERMISSIONS.ROOM_VIEW)
+  @Get('room-types')
+  async listRoomTypes() {
+    return { data: await this.pms.listRoomTypes() };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Post('room-types')
+  async createRoomType(@Body() dto: CreateRoomTypeDto) {
+    return { data: await this.pms.createRoomType(dto) };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Patch('room-types/:id')
+  async updateRoomType(@Param('id') id: string, @Body() dto: UpdateRoomTypeDto) {
+    return { data: await this.pms.updateRoomType(id, dto) };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Post('rooms')
+  async createRoom(@Body() dto: CreateRoomDto) {
+    return { data: await this.pms.createRoom(dto) };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Delete('rooms/:id')
+  async deleteRoom(@Param('id') id: string) {
+    return { data: await this.pms.deleteRoom(id) };
+  }
+
+  // ───────── فولیو — اقلام اضافی و صورتحساب‌های باز (مرجع آسا 4.zip) ─────────
+
+  @RequirePermissions(PERMISSIONS.RESERVATION_CREATE)
+  @Post('stays/:id/folio-items')
+  async addFolioItem(@Param('id') stayId: string, @Body() dto: FolioItemDto, @Req() req: AuthenticatedRequest) {
+    return { data: await this.pms.addFolioItem(stayId, { desc: dto.desc, qty: dto.qty, unitRials: dto.unitRials, createdByUserId: req.user.id }) };
+  }
+
+  @RequirePermissions(PERMISSIONS.RESERVATION_VIEW)
+  @Get('stays/:id/folio-items')
+  async listFolioItems(@Param('id') stayId: string) {
+    return { data: await this.pms.listFolioItems(stayId) };
+  }
+
+  @RequirePermissions(PERMISSIONS.RESERVATION_VIEW)
+  @Get('folios/open')
+  async openFolios() {
+    return { data: await this.pms.openFolios() };
   }
 
   // ── F4-T8 حسابرسی شبانه ──

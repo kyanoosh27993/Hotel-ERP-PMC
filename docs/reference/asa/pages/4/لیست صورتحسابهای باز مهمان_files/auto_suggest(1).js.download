@@ -1,0 +1,182 @@
+function import_cheque(myfield,e,kind)
+{
+    inputString = myfield.value;
+    //alert(inputString);
+
+    //----------------------
+    evt = e || window.event;
+    var key = evt.keyCode;
+    var url = '../suggest/import_cheque_suggest.php';
+    var mf = myfield.id;
+
+    $("#"+mf).blur(function(){
+        $('#suggestions').fadeOut();
+    });
+    //-------------------------
+    if(inputString.length == 0)
+    {
+        $('#suggestions').fadeOut();
+    }
+    else
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{queryString:inputString,kind:kind},function(data)
+            {
+                //----------------------
+                if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+                    fill('','','','','',2,kind);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-100;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                        fill(data.codding_id,data.code,data.acc_name,data.Comparative_Unique_Activity,data.center_availablity,1,kind);
+                    }
+                }
+            },"json");
+        }
+        else
+        {
+            get_child(key);
+        }
+    }
+}
+//-------------------------------------
+
+function comparative_unique(e,myfield)
+{
+	kind = '1';
+	inputString = myfield.value;
+	id = document.getElementById('_codeid_customer').value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.keyCode;
+    var url = '../suggest/comparative_suggest.php';
+    var mf = myfield.id;
+    $("#"+mf).blur(function(){
+        $('#suggestions').fadeOut();
+    });
+    //-------------------------
+    if(inputString.length == 0)
+    {
+        $('#suggestions').fadeOut();
+    }
+    else
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{val:inputString, id:id},function(data)
+            {
+
+            	if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+            		fill_comparative('','',2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-300;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'});
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'});
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                    	fill_comparative(data.id,data.Name,1,data._sheba);
+                    }
+                }
+            },"json");
+        }
+        else
+        {
+            get_child(key);
+        }
+    }
+}
+
+//--------------------------------------
+function central_cost_suggest(e,myfield)
+{
+	kind = '1';
+	inputString = myfield.value;
+    //----------------------
+    evt = e || window.event;
+    var key = evt.keyCode;
+    var url = '../suggest/central_cost_suggest.php';
+    var mf = myfield.id;
+    $("#"+mf).blur(function(){
+        $('#suggestions').fadeOut();
+    });
+    //-------------------------
+    if(inputString.length == 0)
+    {
+        $('#suggestions').fadeOut();
+    }
+    else
+    {
+        if(key != 38 && key != 40 && key != 13)
+        {
+            $.post(url,{val:inputString},function(data)
+            {
+            	if(data.counter == 0)//یعنی هیچ دیتایی نیست
+                {
+            		fill_central_cost('','',2);// یعنی برو کلاس error را نشان بده
+                }
+                else
+                {
+                    if(data.counter == 10)//یعنی تعداد دیتا بیش از یک رکورد است
+                    {
+                        $('#suggestions').fadeIn();
+                        //--------------------------------------------------
+                    	var offset_top = $("#"+myfield.name).offset().top+27;
+                    	var offset_left = $("#"+myfield.name).offset().left-300;
+                    	$("div.suggestionsBox").css({"top":offset_top,"left":offset_left});
+                        //-----------------------------------------
+                        $('#suggestionsList').html(data.data_rsv);
+                        $(".suggestionList ul li").hover(
+                            function(){
+                                $(this).css({'background-color':'#FFFF00','font-weight':'bold'});
+                            },
+                            function(){
+                                $(this).css({'background-color':'#F0F8FF','font-weight':'normal'});
+                            }
+                        );
+                    }
+                    else // یعنی دیتا یکی است
+                    {
+                    	fill_central_cost(data.id,data.Name,1);
+                    }
+                }
+            },"json");
+        }
+        else
+        {
+            get_child(key);
+        }
+    }
+}
+//---------------------------------

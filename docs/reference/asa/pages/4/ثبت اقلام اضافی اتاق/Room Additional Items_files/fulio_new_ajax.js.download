@@ -1,0 +1,40 @@
+async function fulio_new_ajax(room_num, room_D1, _dir, _symbol, lang_directory,_regs,type_reg='')
+{
+    var url = "../ajax_new/php/fulio_new_ajax.php";
+    let loger='';
+    //------------------------------------------------------------------------------------------
+    await $.post(url, {
+        room_num: room_num,
+        room_D1: room_D1,
+        _dir: _dir,
+        _symbol: _symbol,
+        lang_directory: lang_directory,
+        _regs: _regs,
+        type_reg: type_reg
+    }, function (data)
+    {                
+        $.each(data,function(key,value) 
+        {
+            if (key==='is_temporary_checkout' && value) loger='is_temporary_checkout';
+            $.each(value,function(key1,value2)
+            {
+                if(key == "inputs")
+                {
+                    if(key1 == 'regs_id1')
+                        $("#"+key1).html(value2);
+                    else
+                        $("#"+key1).val(value2);
+                }
+                else if(key == "disabled")
+                {
+                    $("#"+key1).attr("disabled",value2);
+                }
+                else
+                {
+                    eval(value2);
+                }
+            });
+        }); 
+    },"json");
+    return loger;
+}

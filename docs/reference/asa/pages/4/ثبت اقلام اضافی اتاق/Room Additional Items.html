@@ -1,0 +1,1127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0052)http://192.168.133.146/hotel/reception/fulio_new.php -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script type="text/javascript">var tst_for_url_to_confirm = '0';</script>
+    
+    <meta name="author" content="ASA CO.">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+
+    <title>Room Additional Items</title>    <link href="./Room Additional Items_files/fonts.css" rel="stylesheet" type="text/css" media="all">
+    <link href="./Room Additional Items_files/cross_style.css" rel="stylesheet" type="text/css" media="all">
+
+    <link rel="stylesheet" media="screen" type="text/css" href="./Room Additional Items_files/list_styles.css">
+    <link rel="stylesheet" media="print" type="text/css" href="./Room Additional Items_files/print_styles.css">
+    <link rel="stylesheet" media="screen" type="text/css" href="./Room Additional Items_files/auto_suggest.css">
+    <link rel="stylesheet" media="screen" type="text/css" href="./Room Additional Items_files/report_error_style.css">
+
+    <script language="javascript" src="./Room Additional Items_files/jqury_3.3.1.js.download"></script>
+    <script type="text/javascript" src="./Room Additional Items_files/cross_script.js.download"></script>
+    <script type="text/javascript" src="./Room Additional Items_files/valid_select_jquery.js.download"></script>
+            <script type="text/javascript" src="./Room Additional Items_files/input_select_jquery_cross.js.download"></script>
+            <script type="text/javascript" src="./Room Additional Items_files/farsitype.js.download"></script>
+            <script type="text/javascript" src="./Room Additional Items_files/auto_suggest.js.download"></script>
+        <script type="text/javascript" src="./Room Additional Items_files/auto_suggest(1).js.download"></script>
+        <script type="text/javascript" src="./Room Additional Items_files/loadingoverlay.min.js.download"></script>
+    
+    <script type="text/javascript" src="./Room Additional Items_files/jquery.fixedtableheader.min.js.download"></script>
+
+    <link rel="stylesheet" href="./Room Additional Items_files/theme.default.css">
+    <script type="text/javascript" src="./Room Additional Items_files/jquery.tablesorter.min.js.download"></script>
+    <script type="text/javascript" src="./Room Additional Items_files/jquery.tablesorter.widgets.min.js.download"></script>
+
+    <script language="javascript" src="./Room Additional Items_files/persianumber.min.js.download"></script>
+
+    <link rel="stylesheet" href="./Room Additional Items_files/smartnoti.css" type="text/css" media="screen">
+    <script type="text/javascript" src="./Room Additional Items_files/smartnoti.js.download"></script>
+
+
+    <script type="text/javascript">
+        function numToSSColumnLetter(num) {
+            let columnLetter = "",
+                t;
+
+            while (num > 0) {
+                t = (num - 1) % 26;
+                columnLetter = String.fromCharCode(65 + t) + columnLetter;
+                num = (num - t) / 26 | 0;
+            }
+            return columnLetter || undefined;
+        }
+
+        $(document).ready(function () {
+
+            //change language by ctrl+space
+            document.onkeydown = function KeyPress(e) {
+                var evtobj = window.event ? event : e
+
+                if (evtobj.keyCode == 32 && evtobj.ctrlKey) {
+                    if (FarsiType.Type == true)
+                        FarsiType.Type = false;
+                    else
+                        FarsiType.Type = true;
+                }
+
+            };
+        });
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.number').on('keyup', function (e) {
+                var ids = e.target.id;
+                var ids_1 = '#' + ids;
+                var check_disable = true;
+                try {
+                    if ($(ids_1).hasAttr('readonly') || $(ids_1).hasAttr('disabled')) {
+                        check_disable=false;
+                    } else {
+                    }
+                } catch (e) {
+
+                }
+                if (check_disable == true) {
+                    if (isPersian(e.key)) {
+                        alert('لطفا کیبورد خود را انگلیسی کنید');
+                        var is_date = ids.indexOf('date') + ids.indexOf('Date') + ids.indexOf('DATE') +
+                            ids.indexOf('_dprtirn1') + ids.indexOf('_entryirn1') + ids.indexOf('_entryfrn1') + ids.indexOf('_dprtfrn1');
+                        if (ids.indexOf('date') > -1 || ids.indexOf('Date') > -1 || ids.indexOf('DATE') > -1 ||
+                            ids.indexOf('_dprtirn1') > -1 || ids.indexOf('_entryirn1') > -1 || ids.indexOf('_entryfrn1') > 0 || ids.indexOf('_dprtfrn1') > -1
+                            || ids.indexOf('dat') > -1 || ids.indexOf('Dat') > -1) {
+                            document.getElementById(ids).value = "";
+                        } else {
+                            var is_time = ids.indexOf('time') + ids.indexOf('Time') + ids.indexOf('time');
+                            if (is_time > -1) {
+                                document.getElementById(ids).value = "00:00";
+                            } else {
+                                document.getElementById(ids).value = "0";
+                            }
+                        }
+                        return false;
+                    }
+                }
+            });
+
+            function isEnglish(charCode) {
+                return (charCode >= 97 && charCode <= 122)
+                    || (charCode >= 65 && charCode <= 90);
+            }
+
+            function isPersian(key) {
+                var p = /^[\u0600-\u06FF\s]+$/;
+                return p.test(key) && key != ' ';
+            }
+
+            var tables = document.querySelectorAll("#main_tab");
+            [].forEach.call(tables, function (table) {
+                let __tableToExcel = table;
+                let __row = 1;
+                let __export = {};
+                let __merges = [];
+                let __tr = {};
+
+                // انتخاب تمام ردیف‌ها (هم thead و هم tbody را شامل شود)
+                let __trs = __tableToExcel.querySelectorAll('tr');
+
+                __trs.forEach((a) => {
+                    let __col = 1;
+                    let __td = {};
+                    // انتخاب th یا td برای اطمینان از خواندن هدرها
+                    let __tds = a.querySelectorAll('td, th');
+
+                    __tds.forEach((aa) => {
+                        let colspan = aa.getAttribute('colspan') || 1;
+
+                        // اصلاح اصلی: استفاده از innerText برای گرفتن تمام متن‌های داخل سلول
+                        // .trim() فاصله‌های خالی اضافه دور متن را پاک می‌کند
+                        let __content = aa.innerText ? aa.innerText.trim() : "";
+
+                        if (colspan > 1) {
+                            __merges.push(numToSSColumnLetter(__col) + __row + ':' + numToSSColumnLetter(__col + +colspan - 1) + __row);
+                            __td[__col] = {'val': __content};
+                            __col++;
+                            for (let __i = 1; __i < +colspan; __i++) {
+                                __td[__col] = {'val': ''};
+                                __col++;
+                            }
+                        } else {
+                            __td[__col] = {'val': __content};
+                            __col++;
+                        }
+                    });
+                    __tr[__row] = __td;
+                    __row++;
+                });
+
+                __export['file_name'] = document.title;
+                __export['merges'] = __merges;
+                __export['data'] = __tr;
+
+                __tableToExcel.outerHTML += '<br /><form method="post" action="../_export2.php" class="no_print" id="excel_export_js"><input type="hidden" name="data" value="' + btoa(unescape(encodeURIComponent(JSON.stringify(__export)))) + '"><input type="image" name="xlsx" src="../images/excel.png" style="width: 30px; height: 30px; border: none; margin-left: 10px" title="خروجی اکسل" /></form>';
+            });
+
+            $("a").each(function() {
+                if (this.href) {
+                    let _href = this.href;
+                    if (_href.indexOf('delete.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete.php\?/, 'delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&');
+                    }
+                    if (_href.indexOf('delete1.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete1.php\?/, 'delete1.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&');
+                    }
+                    if (_href.indexOf('delete2.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete2.php\?/, 'delete2.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&');
+                    }
+                    if (_href.indexOf('delete3.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete3.php\?/, 'delete3.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&');
+                    }
+                    if (_href.indexOf('delete4.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete4.php\?/, 'delete4.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&');
+                    }
+                }
+            });
+
+            $("form").each(function() {
+                if ($(this).find("input[name=__token__]").length === 0) {
+                    $(this).append('<input type="hidden" name="__token__" value="778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9" />');
+                }
+            })
+        });
+    </script><script language="javascript" src="./Room Additional Items_files/fulio_new_ajax.js.download"></script>
+<script language="javascript">
+function valid()
+{
+    if(document.form1._room1.value.length<1 || document.form1._room1.value==0)
+    {
+        name_tur40=document.form1.name_tur40.value;
+        alert(name_tur40);
+
+    	document.form1._room1.focus();
+        return false;
+    }
+    if(document.form1._regs.value.length<1 || document.form1._regs.value==0)
+    {
+        name_tur41=document.form1.name_tur41.value;
+        alert(name_tur41);
+
+    	document.form1._room1.focus();
+        return false;
+    }
+	//-------------------------------
+   	var _d1=document.form1._D1.value;
+    //-----------------------------------------------------------------------------------------------------------
+    if ((_d1=='1' || _d1=='2') && (document.form1.main_amnt.value.length<1 || document.form1.main_amnt.value==0))
+    {
+        name_tur42=document.form1.name_tur42.value;
+        alert(name_tur42);
+
+    	document.form1._amnt.focus();
+        return false;
+    }
+    if(parseInt(document.form1._D2.value) == 1)
+    {
+        if(parseInt($('#_D4').val()) == 0)
+        {
+            name_tur43=document.form1.name_tur43.value;
+            alert(name_tur43);
+
+    		document.form1._D4.focus();
+        	return false;
+        }
+    }  
+	//----------------------------------------
+    if(document.form1._descfar.value.length<1)
+    {
+        name_tur44=document.form1.name_tur44.value;
+        alert(name_tur44);
+
+    	document.form1._descfar.focus();
+        return false;
+    }
+    //--------------------
+    //------------------
+    var date_save = document.form1.date_save.value;
+    var date_save_old = '';
+    var url = "../ajax_new/php/check_balance_accounting.php";
+    $.post(url,{date_save:date_save,date_save_old:date_save_old},function(data)
+    {
+        if(data.result == 'fail')
+        {
+            name_tur73 = document.form1.name_tur73.value;
+            var res73 = name_tur73.replace("date", date_save);
+
+            name_tur74 = document.form1.name_tur74.value;
+            var res74 = name_tur74.replace("number", data.DocumentMasterNum);
+
+            alert(res73+'\n'+res74);
+            document.form1.date_save.focus();
+            return false;
+        }
+        else
+        {
+            valid_select_jquery();
+            //--------------------
+            document.form1.submit();
+        }
+    },"json");
+    //------------------
+    //--------------------
+    //valid_select_jquery();
+    //--------------------
+    //document.form1.submit();
+}
+//------------------
+async function valid_temporary_checkout()
+{
+    var roomNumber = document.form1._room1.value;
+    if (roomNumber == '' || roomNumber == 0)
+    {
+        $("#_roomname1,#_room1,#_regs,#_roomname2").val('');
+    } else
+    {
+        var room_D1=document.form1._D1.value;
+        var len_D1=document.form1._D1.value.length;
+        var room_num=document.form1._room1.value;
+        //-----------------------------------------------------
+        var _dir=document.form1._dir.value;
+        var _symbol=document.form1._symbol.value;
+        var lang_directory=document.form1.lang_directory.value;
+        var _regs=document.form1._regs.value;
+        if (await fulio_new_ajax(room_num, room_D1, _dir, _symbol, lang_directory,_regs) !== 'is_temporary_checkout')
+        {
+            tst_room1();
+        } else
+        {
+            $("#_roomname1,#_room1,#_regs,#_roomname2").val('');
+            if (!window.opener) valid_help_room(roomNumber);
+            else window.opener.focus();
+        }
+    }
+}
+function tst_room1()
+{
+    var room_D1=document.form1._D1.value;
+    var len_D1=document.form1._D1.value.length;
+    var room_num=document.form1._room1.value;
+    var _regs=document.form1._regs.value;
+    //-----------------------------------------------------
+    var _dir=document.form1._dir.value;
+    var _symbol=document.form1._symbol.value;
+    var lang_directory=document.form1.lang_directory.value;
+
+    //--------------------------------------------------------------------
+    fulio_new_ajax(room_num, room_D1, _dir, _symbol, lang_directory,_regs);
+    //--------------------------------------------------------------------
+    name_doc();
+    calc_amnt();
+}
+//-----------------
+function skip_num()
+{
+	_d1=document.form1._D1.value;
+	if (_d1==15 ||_d1==16 ||_d1==17 ||_d1==23 ||_d1==25 ||_d1==38 ||_d1==43 ||_d1==44)
+	{
+		document.form1._num.value=0;
+		document.form1._descfar.focus();
+	}
+	else
+	{
+//        document.form1._num.select();
+	}
+	name_doc();
+	calc_amnt();
+}
+//------------------------------------------------------------------------
+function name_doc()
+{
+	var _d1=document.form1._D1.value;
+	var _d2=document.form1._D2.value;
+	var _room1=document.form1._room1.value;
+    
+	var mm2=document.form1._D1.selectedIndex;
+	var mm3=document.form1._D1.options[mm2].text;
+
+	if (_d1==15 ||_d1==16 ||_d1==17 ||_d1==23 ||_d1==25 ||_d1==43 ||_d1==44)
+	{
+		document.form1._num.value=0;
+	}
+	var _num=document.form1._num.value;
+	if (_d2==0)
+	{
+		txt_rbtfar='';
+		txt_rbtltn='';
+        $('.div1').css('display', 'none');
+	}
+	else
+    {
+        name_tur45=document.form1.name_tur45.value;
+    	txt_rbtfar=' '+name_tur45+' ';
+     	txt_rbtltn='Rebate ';
+        
+        var temp_display = 'table-cell';
+        if($.browser.msie)
+        {
+            temp_display = 'block';
+        }
+        $('.div1').css('display', temp_display);
+    }
+  	switch (_d1)
+  	{
+  	case '1':
+            name_tur46=document.form1.name_tur46.value;
+    	    far_desc=txt_rbtfar+_num+' '+name_tur46+' '+_room1;
+        	ltn_desc=txt_rbtltn+_num+" Night(s) Accommodation Room No. "+_room1;
+        	break;
+	case '2':
+            name_tur47=document.form1.name_tur47.value;
+            far_desc=txt_rbtfar+_num+' '+name_tur47+' '+_room1;
+  		    ltn_desc=txt_rbtltn+_num+" Night(s) Guest Accommodation Room No. "+_room1;
+        	break;
+	case '3':
+            name_tur48=document.form1.name_tur48.value;
+    	    far_desc=txt_rbtfar+_num+' '+name_tur48;
+ 	       	ltn_desc=txt_rbtltn+_num+" Night(s) Tax ";
+        	break;
+	case '8':
+            name_tur49=document.form1.name_tur49.value;
+            far_desc=txt_rbtfar+_num+' '+name_tur49;
+ 	       	ltn_desc=txt_rbtltn+_num+" Laundry ";
+        	break;
+	case '14':
+            name_tur50=document.form1.name_tur50.value;
+            far_desc=txt_rbtfar+_num+' '+name_tur50;
+        	ltn_desc=txt_rbtltn+_num+" Night(s) Service ";
+        	break;
+	case '15':
+            name_tur51=document.form1.name_tur51.value;
+            far_desc=txt_rbtfar+' '+name_tur51;
+        	ltn_desc=txt_rbtltn+"Long D. Phone";
+        	break;
+	case '16':
+            name_tur52=document.form1.name_tur52.value;
+            far_desc=txt_rbtfar+' '+name_tur52;
+        	ltn_desc=txt_rbtltn+"Fax";
+        	break;
+	case '17':
+            name_tur53=document.form1.name_tur53.value;
+            far_desc=txt_rbtfar+' '+name_tur53;
+        	ltn_desc=txt_rbtltn+"Cabin Phone";
+        	break;
+	case '18':
+            name_tur54=document.form1.name_tur54.value;
+            far_desc=txt_rbtfar+_num+' '+name_tur54;
+        	ltn_desc=txt_rbtltn+_num+" Night(s) Parking ";
+        	break;
+  	case '23':
+            name_tur55=document.form1.name_tur55.value;
+            far_desc=txt_rbtfar+' '+name_tur55;
+        	ltn_desc=txt_rbtltn+" House Charge ";
+       	 	break;
+  	case '24':
+            name_tur56=document.form1.name_tur56.value;
+            far_desc=txt_rbtfar+_num+' '+name_tur56;
+        	ltn_desc=txt_rbtltn+_num+" BreakFast";
+       	 	break;
+	case '27':
+            name_tur57=document.form1.name_tur57.value;
+            far_desc=txt_rbtfar+_num+' '+name_tur57;
+ 	       	ltn_desc=txt_rbtltn+_num+" Night(s) Tax ";
+        	break;
+	case '28':
+            name_tur58=document.form1.name_tur58.value;
+            far_desc=txt_rbtfar+_num+' '+name_tur58;
+        	ltn_desc=txt_rbtltn+_num+" Night(s) Service";
+        	break;
+  	case '43':
+            name_tur59=document.form1.name_tur59.value;
+            far_desc=txt_rbtfar+_num+' '+name_tur59+' '+_room1;
+        	ltn_desc=txt_rbtltn+"Extra Person Accommodation Room No. "+_room1;
+        	break;
+	case '44':
+            name_tur60=document.form1.name_tur60.value;
+            far_desc=txt_rbtfar+_num+' '+name_tur60+' '+_room1;
+  		    ltn_desc=txt_rbtltn+"Extra Person Guest Accommodation "+_room1;
+        	break;
+	case '51':
+            name_tur61=document.form1.name_tur61.value;
+            far_desc=txt_rbtfar+mm3+' '+_num+' '+name_tur61;
+  		    ltn_desc=txt_rbtltn+' '+_num+" Gurantee Food";
+        	break;
+ 	default:
+    	    far_desc=txt_rbtfar+mm3;
+        	ltn_desc=txt_rbtltn+" Miscelaneus ";
+  	}
+	document.form1._descfar.value=far_desc;
+	document.form1._descltn.value=ltn_desc;
+}
+
+
+function calc_amnt()
+{
+	var _d1=document.form1._D1.value;
+	var _num=document.form1._num.value;
+	document.form1.main_amnt.value=0;
+	//------------------------------------------------------------------------------------
+	if (document.form1.rate_tour_calc_status.value>0 && document.form1.full_board.value>0)
+		full_board_nha=1;
+	else
+		full_board_nha=0;
+	//------------------------------------------------------------------------------------
+	switch (_d1)
+	{
+		case '1':
+			document.form1._amnt.value=document.form1._rate1.value*_num;
+			document.form1.main_amnt.value=document.form1.main_tour_rial.value*_num;
+    		break;
+		case '2':
+			document.form1._amnt.value=document.form1._rate2.value*_num;
+			document.form1.main_amnt.value=document.form1.main_gust_rial.value*_num;
+    	   	break;
+		case '3':
+            if (document.form1.kind_tax_service_amnt.value==1 && full_board_nha==0)
+    			document.form1._amnt.value=document.form1._tax.value*document.form1.main_tour_rial.value*_num/100;
+            else
+            	if (full_board_nha==1)
+            		document.form1._amnt.value=document.form1.Full_Board_Tax_Rate.value*_num;
+            	else
+    				document.form1._amnt.value=document.form1._tax.value*document.form1._rate1.value*_num/100;
+       		break;
+    	case '14':
+            if (document.form1.kind_tax_service_amnt.value==1 && full_board_nha==0)
+    			document.form1._amnt.value=document.form1._srvc.value*document.form1.main_tour_rial.value*_num/100;
+            else
+            	if (full_board_nha==1)
+            		document.form1._amnt.value=document.form1.Full_Board_Service_Rate.value*_num;
+            	else
+	        		document.form1._amnt.value=document.form1._srvc.value*document.form1._rate1.value*_num/100;
+        	break;
+    	case '18':
+    		document.form1._amnt.value=document.form1._parking.value*_num;
+        	break;
+    	case '24':
+    		document.form1._amnt.value=document.form1._breakf.value*_num;
+        	break;
+		case '27':
+            if (document.form1.kind_tax_service_amnt.value==1)
+    			document.form1._amnt.value=document.form1._tax.value*document.form1.main_gust_rial.value*_num/100;
+            else
+    			document.form1._amnt.value=document.form1._tax.value*document.form1._rate2.value*_num/100;
+       		break;
+    	case '28':
+            if (document.form1.kind_tax_service_amnt.value==1)
+    			document.form1._amnt.value=document.form1._srvc.value*document.form1.main_gust_rial.value*_num/100;
+            else
+        		document.form1._amnt.value=document.form1._srvc.value*document.form1._rate2.value*_num/100;
+        	break;
+    	case '51':
+   			document.form1._amnt.value=document.form1.Full_Board_Food_Rate.value*_num;
+        	break;
+    	default:
+    		document.form1._amnt.value=0;
+	}
+    if (document.form1.main_amnt.value=='' || document.form1.main_amnt.value=='0')
+    {
+        document.form1.main_amnt.value=document.form1._amnt.value;        
+    }
+
+
+}
+function skip_amnt()
+{
+	_d1=document.form1._D1.value;
+	txt_status=document.form1.txt_status.value;
+	
+    if (_d1!=38 && txt_status=='')
+    {
+    	if (_d1==1 ||_d1==2 || _d1==18 ||_d1==24 ||_d1==51)
+            document.form1.action.focus();
+    	else
+	      document.form1._amnt.select();
+    }
+   	else
+      document.form1._amnt.select();
+}
+//----------------------------------------------------------------------
+function valid_help_room(_cde)
+{
+	window.open('search_room1.php?code_id='+_cde,'_blank','width=800,height=600,scrollbars=1');
+}
+
+$(document).ready(function(){
+    changePossitionFavoriteBox('container_form', -70, 0);
+    $("#_room1").on('input',function ()
+    {
+        $("#_regs").val('');
+    });
+    changePossitionFavoriteBox('container_form', -70, 0);
+});
+</script>
+<style type="text/css">
+#container_form { width: 600px;}
+.div1 { display: none; margin: 0; padding: 0; }
+</style>    
+<style>body.tablesorter-disableSelection { -ms-user-select: none; -moz-user-select: -moz-none;-khtml-user-select: none; -webkit-user-select: none; user-select: none; }.tablesorter-resizable-container { position: relative; height: 1px; }.tablesorter-resizable-handle { position: absolute; display: inline-block; width: 8px;top: 1px; cursor: ew-resize; z-index: 3; user-select: none; -moz-user-select: none; }</style></head>
+<body>
+<script language="javascript">message_fire(1);</script><script language="javascript">message_fire(3);</script>    <script type="text/javascript">
+        var back_regs = '';
+    </script>
+	<div id="show_wait"></div>
+	
+	<div id="wrapper_favorites" style="display: none;">
+    <div id="cont_add_favorites">
+    <div id="close_windows" title="بستن پنجره"></div>
+    <table cellpadding="2" cellspacing="2">
+    <tbody><tr id="first_tr">
+        <td colspan="2" align="center" id="title_favorite">اضافه کردن صفحه جدید</td>
+    </tr>
+    <tr>
+        <td align="right"><input lang="fa" type="text" name="favorite_name" id="favorite_name" dir="rtl" style="width: 250px; border: 1px solid rgb(194, 201, 207) !important; text-align: right; direction: rtl;" maxlength="150" align="right"></td>
+        <td align="left" style="direction: rtl; white-space: nowrap;">عنوان صفحه : </td>
+    </tr>
+    <tr>
+        <td align="right"><input type="text" name="favorite_address" id="favorite_address" dir="ltr" style="width: 250px;border:1px solid #c2c9cf !important;" maxlength="200"></td>
+        <td align="left" style="direction: rtl;">آدرس صفحه : </td>
+    </tr>
+    <tr>
+        <td align="right"><input type="text" name="favorite_index" id="favorite_index" style="border:1px solid #c2c9cf !important;" dir="rtl" maxlength="3"></td>
+        <td align="left" style="direction: rtl;">اولویت : </td>
+    </tr>   
+    <tr>
+        <td colspan="2" align="left"><button id="btn_save_favorites"></button></td>
+    </tr>           
+    </tbody></table>
+    </div>
+	</div>
+	<div id="menu_left" class="no_print" style="left: 428.889px; top: 7.98611px; display: block;">
+    <div id="add_favorites" title="اضافه کردن این صفحه به صفحات مورد علاقه"></div>
+    <div id="favorite_box" title="صفحات مورد علاقه"></div>
+    <div id="footer_menu" title="کلیک کنید"></div>
+	</div>
+    
+	<div id="favorite_boxul" style="display: none; left: 488.889px; top: 7.98611px;">
+     <img src="./Room Additional Items_files/title_favorite.png">
+    <ul>
+        </ul>
+	</div>
+
+	<div id="cont_menu_footer" class="no_print" style="display: none; left: 478.889px; top: 7.98611px;">
+    <ul>
+        <li onclick="document.location = '../menu/recp1.php'"><div>پذیرش</div></li><li onclick="document.location = '../menu/recp1.php'"><div>صندوق</div></li><li onclick="document.location = '../menu/reserve1.php'"><div>رزرواسیون</div></li><li onclick="document.location = '../menu/reception_account1.php'"><div>گزارشات مدیریت</div></li><li onclick="document.location = '../menu/housekeeping1.php'"><div>خانه داری</div></li><li onclick="document.location = '../menu/engineering1.php'"><div>تاسیسات</div></li><li onclick="document.location = '../menu/ceremonies1.php'"><div>تشریفات</div></li><li onclick="document.location = '../menu/costcontrol1.php'"><div>کاست کنترل</div></li><li onclick="document.location = '../menu/telephone1.php'"><div>تلفن</div></li><li onclick="document.location = '../menu/laundry1.php'"><div>لاندری</div></li><li onclick="document.location = '../menu/restaurant1.php'"><div>رستوران</div></li><li onclick="document.location = '../menu/storage1.php'"><div>انبارداری</div></li><li onclick="document.location = '../menu/payment1.php'"><div>حقوق و دستمزد</div></li><li onclick="document.location = '/financial/'"><div>حسابداری هتل</div></li><li onclick="document.location = '../menu/asset1.php'"><div>حسابداری اموال</div></li><li onclick="document.location = '../menu/consumption1.php'"><div>درخواست کالا</div></li><li onclick="document.location = '../menu/crm1.php'"><div>خدمات مشتریان</div></li><li onclick="document.location = '../agency/agency.php'"><div>آژانسها - شرکتها</div></li><li onclick="document.location = '../menu/paperless1.php'"><div>مکاتبات داخلی</div></li><li onclick="document.location = '../menu/guestservice1.php'"><div>مدیریت درخواستها</div></li><li onclick="document.location = '../menu/hrm1.php'"><div>مدیریت منابع انسانی</div></li><li onclick="document.location = '../menu/daraee1.php'"><div>سامانه دارایی</div></li><li onclick="document.location = '../menu/hotspot1.php'"><div>اینترنت شارژینگ</div></li><li onclick="document.location = '../menu/inout1.php'"><div>حضور و غیاب</div></li><li onclick="document.location = '../menu/portal1.php'"><div>پورتال پرسنلی</div></li><li onclick="document.location = '../menu/archive1.php'"><div>آرشیو اسناد</div></li><li onclick="document.location = '../menu/revenue1.php'"><div>مدیریت درآمد</div></li><li onclick="document.location = '../menu/taxi_service1.php'"><div>تاکسی -گشت شهری</div></li><li onclick="document.location = '../menu/dashboard1.php'"><div>داشبورد مدیریت</div></li><li onclick="document.location = '../menu/supplier1.php'"><div>نرم افزار کارپردازی</div></li><li onclick="document.location = '../menu/keycard1.php'"><div>کلیدکارت</div></li><li onclick="document.location = '../menu/store1.php'"><div>فروشگاه</div></li><li onclick="document.location = '../menu/lakers1.php'"><div>مجموعه آبی</div></li><li onclick="document.location = '../menu/parking1.php'"><div>پارکینگ</div></li><li onclick="document.location = '../menu/ghasab1.php'"><div>قصابخانه قنادی</div></li><li onclick="document.location = '../menu/club1.php'"><div>کلوپ مشتریان</div></li><li onclick="document.location = '../menu/moaddian1.php'"><div>سامانه مودیان</div></li><li onclick="document.location = '/e-commerce/products'"><div>فروشگاه اینترنتی</div></li>        <li><div onclick="document.location = '../main.php'">صفحه اصلی</div></li>
+    </ul>
+	</div>
+
+	<div id="float_menu" style="display: none;">
+    <div style="margin-top: 4px;" id="edit_favorite"> تصحیح </div>
+    <div id="delete_favorite"> حذف </div>
+	</div>
+
+	<table id="floatingHeaderTab" class="no_print"></table>
+	
+	<div id="cmd" class="no_print" style="display: none;">
+    <div id="tit">دسترسی سریع به منوها</div>
+    <div style="text-align: right; padding: 3px;"><input lang="fa" type="text" id="cmd_inp" onfocus="this.select();" dir="rtl" align="right" style="text-align: right; direction: rtl;"></div>
+	</div>
+
+
+
+	<script type="text/javascript" src="./Room Additional Items_files/script_menu.js.download"></script>
+	<script type="text/javascript" src="./Room Additional Items_files/jquery.hoverIntent.js.download"></script>
+	<!-- <script type="text/javascript" src="../js/dynamicFindMenu.js"></script> -->
+	
+	<script type="text/javascript">
+	function binding() 
+	{
+    $('.favorite_boxli').bind("contextmenu", function(e) 
+    {                
+        $('#edit_favorite, #delete_favorite').attr('key', '0');
+        e.preventDefault(); 
+        var tmp_onclick = $(this).attr('onclick').replace('document.location = \'', '').replace('\'', '');        
+        $('#float_menu').css({'left':e.pageX, 'top':e.pageY}).slideDown('fast', 'linear', function(){});        
+        $('#edit_favorite, #delete_favorite').attr({'key':$(this).attr('find'), 'req_url':tmp_onclick, 'kind_index':$(this).attr('kind_index')});
+        tmp_input_for_favorite = $(this).text();
+    });  
+	} 
+	
+  
+	function changePossitionFavoriteBox(elem, posLeft, posTop)
+	{
+    var header_offset = $('#'+elem).offset();
+    $('#menu_left').css({'left':header_offset.left+posLeft, 'top':header_offset.top+posTop, 'display':'block'});
+    $('#cont_menu_footer').css({'left':header_offset.left+posLeft+50, 'top':header_offset.top+posTop});
+    $('#favorite_boxul').css({'left':header_offset.left+posLeft+60, 'top':header_offset.top+posTop});      
+	}
+
+	$(document).ready(function(){
+    $('#master_div').css('display', 'block');
+    binding();
+    var edit_mod = 0;
+    
+    $('#close_windows').click(function(){
+        edit_mod = 0;
+        if($('#wrraper_suggest').css('display') == 'block')
+            $('#inp_search').focus().val('');
+        
+        $('#wrapper_favorites, #show_wait, #wrraper_suggest, #cont_menu_footer').fadeOut('fast', function(){}); 
+        $('#cmd').hide();
+        setTimeout("$('body').removeClass('over_hidden');", 1000);
+    });
+    
+    
+    
+    $('#favorite_box').click
+    (
+        function()
+        {
+           $('#favorite_boxul').fadeIn('fast').focus();
+        }
+    );
+        
+    $(document).mousedown(function(e){
+        if($(e.target).attr('id') != 'li_favorite' && $(e.target).attr('id') != 'edit_favorite' && $(e.target).attr('id') != 'delete_favorite' && $(e.target).attr('id') != 'cont_menu_footer')
+        {
+            $('#favorite_boxul, #float_menu, #cont_menu_footer').fadeOut('fast');
+        }
+    });    
+    
+    $(document).keydown(function(e){
+        var key = e.which;
+        
+        if(e.ctrlKey  && !e.shiftKey)
+        {
+        	/*
+            $(document).scrollTop(0);
+            $('body').css('overflow', 'hidden');
+            
+            $('#menu').addClass('menuFocus');
+            $(window).focus();
+            $('#menu ul li[class^="level_"]').removeClass('first_li_hover').children('ul').hide();
+            $('#menu li:first').addClass('first_li_hover').children('ul').show();
+            $("#menu li").removeClass("menu_li_hover");  
+            */
+        }
+        /*
+        if($('#menu').hasClass('menuFocus'))
+        {
+            dynamicFindMenu(e, key);
+        }        
+               
+        if(e.ctrlKey && e.shiftKey)
+        {
+            $('#cmd').show('fast', function(){});
+            $('#cmd input').focus().val('');
+        }
+        */        
+        if(key == 27)
+        {
+            $('body').css('overflow', 'auto');
+            /*
+            $('#menu').removeClass('menuFocus');
+            $('#menu ul li[class^="level_"]').removeClass('first_li_hover').children('ul').hide();
+            */
+            $('#cont_menu_footer, #cmd').hide();
+            $('#menu_left').hide('fast', function(){
+                $('#show_favorite').show('fast'); 
+            });
+        }        
+        if(key == 13)
+        {
+            if( $(e.target).attr('id') == 'cmd_inp' )
+            {
+                command_promop('cmd_inp', e);
+            }
+        }                  
+    });
+    
+    $('#add_favorites').click(function(){
+        $('#title_favorite').text('اضافه کردن صفحه جدید');
+        $('body').addClass('over_hidden');
+        $('#show_wait').css('display', 'block');
+        $('#favorite_name').val('Room Additional Items').focus();
+        $('#favorite_address').val('/hotel/reception/fulio_new.php');
+        $('#favorite_index').val(1);
+        $('#wrapper_favorites').fadeIn('normal', function(){});
+    });
+    
+    $('#edit_favorite').click(function()
+    {
+        edit_mod = $(this).attr('key');
+        $('#title_favorite').text('تصحیح صفحات ذخیره شده');
+        $('body').addClass('over_hidden');
+        $('#show_wait').css('display', 'block');
+        $('#favorite_name').val($.trim(tmp_input_for_favorite)).focus();
+        $('#favorite_address').val($(this).attr('req_url'));
+        $('#favorite_index').val($(this).attr('kind_index'));  
+        $('#wrapper_favorites').fadeIn('normal', function(){});
+    });
+    
+    $('#delete_favorite').click(function()
+    {
+        var confirm_test = confirm('آیا کد مورد نظر حذف شود ؟ ');
+        if(confirm_test)
+        {
+            $.post('../suggest/loader_favorite_and_search.php', {
+                currClerk:148,
+                kindPage: 'DeleteFavorites',
+                id: $(this).attr('key')
+            }, function (data) {
+                
+                if(data.error > 0 )
+                {
+                    alert(data.msg);
+                    $('#close_windows').click();
+                    return;
+                }
+                else
+                {
+                    $('#float_menu').fadeOut('fast');
+                    $('#favorite_boxul ul').remove();
+                    $('#favorite_boxul').append(data.ul_li);
+                    alert(data.msg);
+                    $('#close_windows').click();
+                    binding();
+                }
+            }, 'json');             
+        }
+    });    
+        
+    $('#footer_menu').click
+    (
+        function()
+        {
+            if($('#cont_menu_footer').css('display') == 'none')
+                $('#cont_menu_footer').fadeIn('fast');
+            else
+                $('#cont_menu_footer').fadeOut('fast');
+        }
+    ); 
+    
+    $('#btn_save_favorites').click(function(){
+        if($.trim($('#favorite_name').val()) == '')
+        {
+            alert('عنوان صفحه مشخص نیست');
+            $('#favorite_name').focus();
+            return;
+        }
+        var patern2 = /^[1-9]\d*$/; 
+        var res = $('#favorite_index').val().match(patern2);
+        if( ! res)
+        {
+            alert('اولویت مشخص نیست');
+            $('#favorite_index').focus();
+            return;
+        }
+        $.post('../suggest/loader_favorite_and_search.php', {
+            favorite_name: $('#favorite_name').val(),
+            favorite_address: escape($('#favorite_address').val()),
+            favorite_index: $('#favorite_index').val(),
+            currClerk:148,
+            kindPage: 'Favorites',
+            edit_mod: edit_mod
+        }, function (data) {
+            
+            if(data.error > 0 )
+            {
+                alert(data.msg);
+                $('#close_windows').click();
+                return;
+            }
+            else
+            {
+                $('#favorite_boxul ul').remove();
+                $('#favorite_boxul').append(data.ul_li);
+                alert(data.msg);
+                $('#close_windows').click();
+                binding();
+            }
+        }, 'json');
+    }); 
+    
+    $('#show_favorite').click(function(){
+        $(this).hide('fast', function(){
+            $('#menu_left').show('fast'); 
+        });
+    });
+
+	});
+	</script>
+
+	<style type="text/css">
+
+	@media print{  
+    .no_print { display: none !important; }
+	table#main_tab td{ padding: 1px !important;} 
+    /* * { font-family: tahoma !important; font-size:13px !important; }*/
+	}
+
+	
+	/* motefareghe */
+	body { background: #f8fcfe; }
+	.btn { height: 30px; background: url('../images_new/cross/blue/btns.gif') repeat-x; border: 1px solid #acc9ef !important; border-radius:5px; font: 15px MH_NassimBold; cursor: pointer; }
+	.btn:hover { background: url('../images_new/cross/blue/btns2.gif'); }
+	#show_wait { position: absolute; width: 100%; height: 100%; left: 0; top: 0; background: #404040; opacity:.8; filter: alpha(opacity=80); z-index: 10; display: none; }
+	
+	/* menu */
+	#menu { background: white url(../images_new/cross/blue/menu_bg.gif); width: 99%; margin: -1px auto; margin-bottom: 5px; height: 40px; display: block; border: 1px solid #bbd2ff; border-bottom: 2px solid #bbd2ff; border-radius:5px; box-shadow:0px 0px 1px 0px gray;}
+	#menu ul li { position: relative; display: inline; float: right; }
+	#menu ul li a { display: block; padding:7px; padding-left: 9px; font: 18px MH_Nassim; border-left: 1px solid white; margin-right: 2px; text-decoration: none;}
+	#menu ul li ul { list-style: none; position: absolute; display: none; top: 40px; right: 0; background: white/*#f6f6f6*/; z-index: 500; border: 1px solid #CBCBCB; -webkit-border-radius: 5px; border-radius: 5px; -moz-box-shadow: 0 0 10px #77a4ff; -webkit-box-shadow: 0 0 10px #77a4ff; box-shadow: 0 0 8px gray; }
+	#menu ul li ul li { display: list-item; float: none; padding: 1px; padding-left: 30px; border-bottom: 1px dotted #CBCBCB; }
+	#menu ul li ul li a { font: 15px MH_Nassim; padding: 2px; display: block; white-space: nowrap; text-align: right; border: none;}
+	#menu ul li ul li ul { top: -35px; z-index: 600; }
+	#menu a { text-decoration: none; color: black; border: none; text-align: right; }
+	#menu ul li a:hover { color:black; }
+	#menu ul li ul li a:hover { color: black; border: none; } 
+	.has_childeren { background: white url(../images_new/cross/public/has_childeren.png) no-repeat center left; }
+	.menu_li_hover { background: #e2eeff ;  }
+	.first_li_hover { background: white !important;  }
+	.menuFocus { border: 1px dashed gray !important; }
+	
+	/* Cmd */
+	#cmd { width: 200px; height: 100px; background: #FFE0E0; border: 1px dashed red; box-shadow: 0 0 20px gray; border-radius: 7px; position: fixed; left: 0; bottom: 0; display: none; }
+	#cmd #tit { text-align: right; padding: 3px; font: 18px MH_NassimBold;  }
+	#cmd_inp { width: 180px; height: 30px; font: 18px MH_NassimBold; border:1px solid #c2c9cf !important; }
+	
+	/* Floating Header */
+	#floatingHeaderTab { position: fixed; top: 0; z-index: 2; height: 30px; background: url('../images_new/cross/blue/title_bg1.gif'); border-collapse: collapse; border:1px solid #BEADAD;  display: none; }
+	#floatingHeaderTab td { padding-left: 3px; padding: 1px; font: 15px MH_NassimBold,tahoma,Arial,Helvetica,sans-serif !important; text-align: center;}
+	
+	/* boxe naranji kenare list ha */
+	#show_favorite { background: url(../images_new/cross/public/show_favorite.png) no-repeat; width: 12px; height: 75px; position: fixed; left: 0; cursor: pointer; }
+	
+	/* lists */
+	
+	#master_div {width: 99%; margin: 5px auto; -webkit-box-shadow: 0 2px 6px 2px #9D9D9D; box-shadow: 0 2px 6px 2px #9D9D9D; border-radius: 5px; border:1px solid #a5c4ed; }
+	#body { background: #eef2f8 !important; border-top:none;  padding:4px; }
+	#main { border:1px solid #a5c4ed;  background: #e5ecf4; border-radius: 5px; }
+	#header_report{ background: url('../images_new/cross/blue/title_bg1.gif'); width: 100%; height: 30px; font:18px MH_NassimBold, Arial, Helvetica, sans-serif; text-align:right; border-bottom:1px solid #99bbe8; }  
+	.first_tr_report { background: url('../images_new/cross/blue/title_bg1.gif'); height: 20px; border-bottom: 1px solid #C5C5C5; font: 15px MH_NassimBold,tahoma,Arial,Helvetica,sans-serif !important; text-align: center; }
+	.first_tr_report td { padding: 1px !important; }
+
+/* sardar-e jadval: khod-e radif hengam-e scroll bala-ye safhe mimanad (ba hamin matn, arz va background) */
+@media screen {
+	tr.first_tr_report > td, tr.first_tr_report > th { position: sticky; top: 0; z-index: 3; background: inherit; box-shadow: inset 0 -1px 0 #BEADAD, inset -1px 0 0 #BEADAD; }
+}
+	table#main_tab{ border: 1px solid #c5c5c5; width: 100%; border-collapse: collapse; margin: 0 auto; }
+	table#main_tab td{ padding: 3px 3px; border:1px solid #BEADAD; }
+	.odd_tab_1{ background: #fafafa; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important;}
+	.odd_tab{ background: #fafafa; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important; height: 30px; }
+	.even_tab_1{ background: #FFF; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important; height: 15px; }
+	.even_tab{ background: #FFF; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important; height: 15px; }
+	#information { width: 100%; text-align: right; font:15px MH_NassimBold, tahoma !important; padding: 1px; }
+	.summary{ font:14px MH_NassimBold, tahoma !important; height: 20px !important; }
+	.odd_tab:hover, .even_tab:hover{ background: #ffffd5; cursor: default; text-shadow: 0.1em 0.1em 0.2em gray;}
+	.majmo { background: url('../images_new/cross/blue/majmo_bg.gif') repeat-x !important;}
+	#subject{width: 100%; text-align: center; font:15px MH_NassimBold, tahoma !important; margin-bottom: 5px;}
+	#topBoxTab { border:2px solid #9ec0ef; box-shadow: 0 4px 2px gray; background: white; margin-right:5px; padding: 3px; }
+	#topBoxTab td { padding: 5px; }
+	/* select input */
+	.newSelect { background: white url(../images_new/cross/blue/inp_active_bg.gif) repeat-x; }
+	
+	/* MenuContFooter */
+	#cont_menu_footer { border: 1px solid #C0C0C0; border-left: none; width: 980px; height: 474px;  padding: 1px; background: white; border-radius:5px; box-shadow: 0 0 20px gray; display: none; position: fixed; overflow: auto; overflow-x: hidden; z-index: 15;  }
+	#cont_menu_footer ul { direction: rtl; list-style: none; margin: 0; padding: 0; margin-top: 10px; }
+	#cont_menu_footer li { float: right; font: 18px MH_NassimBold; cursor: pointer; background: url(../images_new/cross/blue/each_li.png) no-repeat;width: 160px;height: 60px;text-align: center;vertical-align: middle;}
+	#cont_menu_footer li div { padding-top: 18px; }
+	#footer_menu { margin-top: 40px; margin-left: 10px; background: url(../images_new/cross/blue/footer_menu.png) no-repeat;  height: 70px; width: 30px; cursor: pointer;}
+	
+	/* Favorite Box*/
+	#menu_left { position: fixed; left: 0; top: 0; background: #d1e3f8; border: 1px solid #69afff; border-radius: 5px; box-shadow: 0 0 5px #B5B5B5; width: 55px; height: 200px; display: none; z-index: 3;  }
+	#favorite_boxul { width: 250px; position: fixed; top: 0; left: 0; display: none; z-index: 5; }
+	#favorite_boxul ul { direction: rtl; margin: 0; padding: 0; list-style: none; height:300px; background: white; border: 1px solid #E2E1E1;   overflow: auto; overflow-x: hidden;  }
+	.favorite_boxli { cursor: pointer; padding: 3px; text-align: right; font: 15px MH_Nassim; border-bottom: 1px dotted #E2E1E1; }
+	.favorite_boxli:hover { background: #e2eeff; }
+	#add_favorites { margin-top: 13px; margin-left: 10px; background: url(../images_new/cross/blue/add_favorites.png) no-repeat; width: 20px; height: 20px; cursor: pointer; }
+	#favorite_box { margin-top: 10px; margin-left: 10px; background: url(../images_new/cross/icons/favorite_box.png) no-repeat top right; width: 40px; height: 38px;  cursor: pointer; }
+	#wrapper_favorites { position: fixed; width: 100%; height: 100%; left: 0; top: 0; z-index: 11; display: none; }
+	#cont_add_favorites { width: 500px; height: 300px; margin: 30px auto; background: white ; border: 1px dashed gray; z-index: 12; border-radius:7px; -moz-box-shadow: 0 0 20px white; -webkit-box-shadow: 0 0 20px white; box-shadow: 0 0 20px white;  }
+	#cont_add_favorites table { margin: -2px auto; border: 3px solid #e8e8e8; border-radius:5px; background: #ebffe2; width: 300px; padding: 5px; }
+	#cont_add_favorites table td { padding: 5px; }
+	#cont_add_favorites table input { font: 16px MH_Nassim !important;  }
+	#btn_save_favorites { border: none; background: url(../images_new/cross/public/btn_save_favorites.png); width: 77px; height: 23px; cursor: pointer; }
+	#close_windows { background: url(../images_new/cross/icons/close_windows.png) top right; width: 35px; height: 33px; padding: 0; margin-left: 412px; margin-bottom: -5px; cursor: pointer; margin-top: 10px; }
+	#float_menu { position: absolute; z-index: 6; left: 0; top: 0; width: 88px; height: 58px; background: url(../images_new/cross/public/float_menu.png); display: none; }  
+	#float_menu div { text-align: right; padding: 2px; padding-right: 10px; cursor: pointer; margin-top: 1px; }
+	
+	/* Forms */
+	#first_tr { background: #9de3fb; font: 18px MH_NassimBold !important; }
+	table#main_tab_form td{ padding: 4px;}
+	table#main_tab_form tr { margin-top: 1px; border:1px solid #a5c4ed; }
+	table#main_tab_form tr:hover { cursor: default; text-shadow: 0.1em 0.1em 0.2em gray; }
+	#padd{ padding: 7px; }
+	#container_form { margin: 0 auto; border:1px solid #bbd2ff; background: #eef2f8; -webkit-box-shadow: 5px 5px 5px #adadad; box-shadow: 0px 0px 15px #adadad; }
+	#header_form { background: url('../images_new/cross/blue/title_bg1.gif'); width: 100%; height: 30px; font:17px MH_NassimBold, Arial, Helvetica, sans-serif; text-align:right; border-bottom:1px solid #99bbe8; }
+	table#main_tab_form { width: 100%; margin: 0px auto; border-collapse: collapse; border:1px solid #a5c4ed; background: #e5ecf4; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important; }   
+	input { border: 1px solid #acc9ef; background: white;} 
+	
+	/* Paging */
+	#paging { margin-top: 7px; margin-bottom: 7px; margin-left: auto; margin-right: auto; }
+	#paging button { padding: 4px; margin: 2px; font: 15px MH_NassimBold; background: white; border:2px solid #a5c4ed; cursor: pointer; border-radius:5px}
+	#paging button.numbers { padding-left: 7px; padding-right: 7px; }
+	.hoverPagingButton { background: #e2eeff  repeat !important; }
+	#paging button:hover { background: #e2eeff  repeat !important ; }
+	.pagesLineNumber { direction: ltr !important; font: 15px MH_NassimBold; margin-left: 5px; background: white; border: 1px solid gray; border-radius:5px; margin-bottom: 5px;}
+	.pagesLineNumber td {  padding: 2px;  }
+	</style>
+	    <script type="text/javascript" src="./Room Additional Items_files/jquery.maskedinput-1.14.js.download"></script>
+    <script type="text/javascript">
+    $(document).ready(function(){
+        $('#date_save').mask('0000/00/00', {placeholder: "____/__/__"});
+        $('#date_save_ltn').mask('0000-00-00', {placeholder: "____-__-__"});
+        $('#time_save').mask('00:00:00', {placeholder: "__:__:__"});
+    });    
+    </script>    
+    <form name="form1" method="post" action="http://192.168.133.146/hotel/reception/fulio_new.php">
+    <div id="container_form">
+        
+    <div id="header_form">
+            <a href="http://192.168.133.146/hotel/help/p22.htm"><img src="./Room Additional Items_files/help.png" width="25" height="25" style="float: left; padding-left: 5px;" title="Help"></a>
+        <div style="padding: 3px; padding-right: 5px;"> ثبت اقلام اضافی اتاق </div>
+        <div style="clear: both;"></div>
+        </div>
+
+        <div id="padd">
+        <table id="main_tab_form" border="0">
+        <tbody><tr>
+            <td align="right" nowrap="nowrap">
+            <select size="1" name="_D2" dir="rtl" tabindex="2" onchange="name_doc();calc_amnt();" class="right_bold_17">
+            <option value="0" selected="selected">ثبت درآمد هتل</option>
+            <option value="1">برگشت ازدرآمد</option>
+            </select>
+            </td>
+            <td align="left" nowrap="nowrap">: نوع ثبت</td>
+            <td align="right">
+            <select size="1" name="_D1" id="_D1" dir="rtl" tabindex="1" onblur="name_doc();calc_amnt();" class="right_bold_17"><option value="1">  درآمد فروش اتاقهای تور </option><option value="2">  درآمد فروش اتاق میهمان </option><option value="3">  مالیات بر ارزش افزوده </option><option value="14">  سرویس اتاقهای تور </option><option value="15">  تلفن هتل </option><option value="17">  تلفن کابین </option><option value="18">  درآمد پارکینگ </option><option value="25">  درآمد متفرقه </option><option value="27">  مالیات بر ارزش افزوده میهمان </option><option value="28">  سرویس اتاقهای میهمان </option><option value="43">  نفر اضافی تور </option><option value="44">  نفر اضافی میهمان </option><option value="45">  بیلیارد </option><option value="51">  درآمد غذای تضمینی فول برد  </option><option value="70">  درآمد صندلی ماساژ </option><option value="71">  درآمد خسارت </option><option value="72">  اینترنت </option><option value="74">  درآمد خانه داری </option><option value="76">  درآمد کارواش </option><option value="77">  اسنوکر </option><option value="78">  مالیات بر ارزش افزوده اینترنت </option><option value="100">  درآمد دیلی یوز </option><option value="101">  حق سرویس دیلی یوز </option><option value="102">  عوارض دیلی یوز </option><option value="103">  دیلی یوزمیهمان </option><option value="104">  حق سرویس دیلی یوزمیهمان </option><option value="105">  عوارض دیلی یوزمیهمان </option><option value="109">  عوارض نوشو </option><option value="110">  درآمد رستوران اتاق </option><option value="120">  ارزش افزوده فروش کالای آسیب رسان قندی </option><option value="121">  درآمدحاصل از فروش کالای آسیب رسان قندی </option><option value="122">  عوارض خسارت </option><option value="156">  مالیات بر ارزش افزوده-صبحانه میهمان </option><option value="157">  مالیات بر ارزش افزوده-صبحانه تور </option><option value="169">  انتقال مبلغ به اتاق دیگر - تقبل هزینه </option></select>            </td>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td align="right" nowrap="nowrap" colspan="3">
+            <input type="text" name="_roomname1" id="_roomname1" style="width: 385px;" dir="rtl" maxlength="75" value="" class="right_bold_17" readonly="readonly">
+            <img src="./Room Additional Items_files/b_search.png" onclick="valid_help_room(0);">
+            <input type="text" name="_room1" id="_room1" size="10" maxlength="10" dir="rtl" class="number" onblur="valid_temporary_checkout();" onfocus="this.select();" value="" tabindex="3"></td>
+            <td align="left" nowrap="nowrap">:اتاق</td>
+        </tr>
+        <tr>
+            <td align="right" nowrap="nowrap" colspan="3">
+            <input type="text" name="_roomname2" id="_roomname2" style="width: 402px;" dir="rtl" maxlength="75" value="" class="right_bold_17" readonly="readonly">
+            <input type="text" name="_num" size="10" maxlength="10" dir="rtl" class="number" onfocus="skip_num();" onblur="skip_num();amnt_text('_amnt','amnt_text');" onkeydown="return num_func(this,event)" value="" tabindex="4">
+            </td>
+            <td align="left" nowrap="nowrap">:تعداد</td>
+        </tr>
+        <tr>
+            <td align="right" nowrap="nowrap" colspan="3">
+            <input type="text" name="_descfar" size="70" class="right_bold_17" style="width: 500px; text-align: right; direction: rtl;" dir="rtl" lang="fa" maxlength="75" onfocus="this.select();" value="" tabindex="5" align="right">
+            </td>
+            <td align="left" nowrap="nowrap">: شرح فارسی</td>
+        </tr>
+        <tr>
+            <td align="right" nowrap="nowrap" colspan="3">
+            <input type="text" name="_descltn" size="70" dir="ltr" style="width: 500px;" class="right_bold_17" maxlength="75" onfocus="this.select();" value="" tabindex="6"></td>
+            <td align="left" nowrap="nowrap">: شرح لاتین</td>
+        </tr>
+        <tr>
+            <td align="right" colspan="1" nowrap="nowrap">
+            <div class="div1" style="display: none;">
+            <select size="1" name="_D4" id="_D4" dir="rtl" tabindex="8" class="right_bold_17"><option value="0" selected="">  </option><option value="1">  آقای باقری </option><option value="2">  تخفیف پرسنلی </option></select>            </div>
+            </td>
+            <td align="left" nowrap="nowrap"><div class="div1" style="display: none;"> : نام مدیر </div></td>
+
+            <td align="right" nowrap="nowrap" colspan="1">
+            ريال            <input type="text" name="_amnt" id="_amnt" size="14" maxlength="14" onfocus="skip_amnt();this.select();" onkeydown="return num_func(this,event)" onkeyup="comma(this, event);" class="number" value="" tabindex="7" onblur="amnt_text('_amnt','amnt_text');">
+            </td>
+            <td align="left" nowrap="nowrap">: مبلغ</td>
+        </tr>
+        <tr>
+                        <td align="right" colspan="3"> <span id="amnt_text" style="font-family: MH_NassimBold;">&nbsp;</span>&nbsp; </td>
+            <td align="left" nowrap="nowrap">&nbsp;</td>
+        </tr>
+        
+                <tr>
+                    <td align="right" colspan="1" nowrap="nowrap" dir="ltr">
+                       <input type="text" name="date_save" id="date_save" style="width: 100px;" dir="ltr" class="number" onfocus="this.select();" value="1405/09/03" tabindex="10" placeholder="____/__/__" maxlength="10">
+                    </td>
+                    <td align="left" nowrap="nowrap"> :تاریخ ثبت</td>
+                    <td align="right" colspan="1" nowrap="nowrap">
+                       <input type="text" name="_regs" id="_regs" size="10" onfocus="this.select();" value="" tabindex="9" onkeydown="return num_func()" class="right_bold_17">
+                    </td>
+                    <td align="left" nowrap="nowrap"> :رجیستر</td>
+                 </tr>
+                <tr>
+                    <td align="right" colspan="1" nowrap="nowrap" dir="ltr">
+                    <input type="text" name="date_save_ltn" id="date_save_ltn" style="width: 100px;" onfocus="this.select();" class="left_bold_17" value="2026-11-24" tabindex="12" disabled="disabled" placeholder="____-__-__" maxlength="10">
+                    </td>
+                    <td align="left" nowrap="nowrap"> :تاریخ ثبت لاتین</td>
+                    <td align="right" colspan="1" nowrap="nowrap" dir="rtl">
+                       <input type="text" name="time_save" id="time_save" dir="ltr" size="10" onfocus="this.select();" class="right_bold_17" value="18:23:38" tabindex="11" placeholder="__:__:__" maxlength="8">
+                    </td>
+                    <td align="left" nowrap="nowrap"> :زمان ثبت</td>
+                </tr>        <tr>
+            <td align="left" colspan="2" nowrap="nowrap"> کاربر ثبت : <span style="font-family: MH_NassimBold;">کیانوش قویدل</span></td>
+            
+                <td align="right" colspan="1" nowrap="nowrap">
+                   <input type="text" name="main_amnt" id="main_amnt" size="10" value="" class="right_bold_17" onfocus="this.select();" onkeydown="return num_func(this,event)" tabindex="13" onkeyup="comma(this, event);">
+                </td>            <td align="left" nowrap="nowrap">:نرخ اصلی</td>
+        </tr>
+            <tr>
+        <td align="center" colspan="4">
+        <input type="button" class="btn" name="action" id="action" value="ثبت شود" onclick="valid();" style="" tabindex="14">
+        <input type="hidden" name="beensubmited" value="true">
+        <input type="hidden" name="_rate1" id="_rate1" value="0">
+        <input type="hidden" name="_rate2" id="_rate2" value="0">
+        <input type="hidden" name="_tax" id="_tax" value="0">
+        <input type="hidden" name="_srvc" id="_srvc" value="0">
+        <input type="hidden" name="_parking" id="_parking" value="0">
+        <input type="hidden" name="_breakf" id="_breakf" value="0">
+        <input type="hidden" name="_tour" id="_tour" value="0">
+        <input type="hidden" name="test_valid" id="test_valid" value="0">
+        <input type="hidden" name="main_tour_rial" id="main_tour_rial" value="0">
+        <input type="hidden" name="main_gust_rial" id="main_gust_rial" value="0">
+        <input type="hidden" name="kind_tax_service_amnt" id="kind_tax_service_amnt" value="0">
+        <input type="hidden" name="txt_status" id="txt_status" value="سوپروایزوری">
+        <input type="hidden" name="register_discount_save_fulio" id="register_discount_save_fulio" value="0">
+        <input type="hidden" name="Full_Board_Food_Rate" id="Full_Board_Food_Rate" value="0">
+        <input type="hidden" name="_dir" id="_dir" value="0">
+        <input type="hidden" name="_symbol" id="_symbol" value="ريال">
+        <input type="hidden" name="full_board" id="full_board" value="0">
+        <input type="hidden" name="rate_tour_calc_status" id="rate_tour_calc_status" value="2">
+        <input type="hidden" name="Full_Board_Tax_Rate" id="Full_Board_Tax_Rate" value="0">
+        <input type="hidden" name="Full_Board_Service_Rate" id="Full_Board_Service_Rate" value="0">
+
+        <input type="hidden" name="lang_directory" value="farsi">
+
+        <input type="hidden" name="name_tur40" value="کد اتاق مشخص نیست">
+        <input type="hidden" name="name_tur41" value="شماره رجیستر کارت اتاق مشخص نیست">
+        <input type="hidden" name="name_tur42" value="مبلغ اصلی اتاق مشخص نیست">
+        <input type="hidden" name="name_tur43" value="مدیر مشخص نیست">
+        <input type="hidden" name="name_tur44" value="شرح مشخص نیست">
+        <input type="hidden" name="name_tur45" value="برگشت">
+        <input type="hidden" name="name_tur46" value="شب اقامت اتاق">
+        <input type="hidden" name="name_tur47" value="شب اقامت میهمان اتاق">
+        <input type="hidden" name="name_tur48" value="شب عوارض تور">
+        <input type="hidden" name="name_tur49" value="لاندری اتاق">
+        <input type="hidden" name="name_tur50" value="شب سرویس تور">
+        <input type="hidden" name="name_tur51" value="تلفن راه دور">
+        <input type="hidden" name="name_tur52" value="فاکس">
+        <input type="hidden" name="name_tur53" value="تلفن کابین">
+        <input type="hidden" name="name_tur54" value="شب پارکینگ">
+        <input type="hidden" name="name_tur55" value="هزینه هتل">
+        <input type="hidden" name="name_tur56" value="عددصبحانه">
+        <input type="hidden" name="name_tur57" value="شب عوارض میهمان">
+        <input type="hidden" name="name_tur58" value="شب سرویس میهمان">
+        <input type="hidden" name="name_tur59" value="نفر اضافی تور اتاق">
+        <input type="hidden" name="name_tur60" value="نفر اضافی میهمان اتاق">
+        <input type="hidden" name="name_tur61" value="عدد">
+        <input type="hidden" name="__token__" value="778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9">
+        <input type="hidden" name="name_tur73" value="سند درآمد date به حسابداری منتقل شده است">
+        <input type="hidden" name="name_tur74" value="شماره سند الحاقی : number">
+        </td>
+    </tr>
+    </tbody></table>
+    </div>
+    </div>
+    </form>
+   	<script type="text/javascript">tst_room1();document.form1._D1.focus();</script>
+	<br>
+<div align="center">
+    <input class="btn" type="button" name="Home" value="Back" onclick="document.location='guest_report_irn.php?code_id=10'+back_regs">
+</div>
+
+</body></html>

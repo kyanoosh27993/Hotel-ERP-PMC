@@ -504,4 +504,72 @@ body.reception-mode .content { padding: 0; }
   .reg-grid { grid-template-columns: 1fr; }
 }
 
+/* ═══════════════ نیاز ۱ — تنظیم اتاق‌ها (rooms-setup) ═══════════════ */
+.rs-wrap { max-width: 1080px; margin: 0 auto; }
+.rs-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-bottom: 2px solid #f2c14e; padding-bottom: 6px; margin-bottom: 10px; }
+.rs-head h3 { color: #b91c1c; }
+.rs-back { border: 1px solid #cbd5e1; background: #f8fafc; color: #124a8f; border-radius: 8px; padding: 6px 14px; font: inherit; font-size: .8rem; cursor: pointer; }
+.rs-msg { color: #166534; font-size: .82rem; font-weight: 700; }
+.rs-err { color: #b91c1c; font-size: .82rem; font-weight: 700; min-height: 1.2em; }
+.rs-box { border: 1px solid #cbd5e1; border-radius: 10px; background: linear-gradient(180deg, #fbfdff, #f3f8fd); padding: 10px 12px; margin-bottom: 14px; }
+.rs-box h4 { color: #124a8f; margin-bottom: 8px; }
+.rs-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+.rs-table th, .rs-table td { border: 1px solid #cbd5e1; padding: 5px 8px; font-size: .78rem; text-align: center; }
+.rs-table thead th { background: #dbe7fa; color: #124a8f; }
+.rs-table input, .rs-table select { width: 100%; min-width: 90px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 7px; font: inherit; font-size: .78rem; }
+.rs-save-btn { border: 1px solid #124a8f; background: #124a8f; color: #fff; border-radius: 6px; padding: 5px 14px; font: inherit; font-size: .76rem; cursor: pointer; white-space: nowrap; }
+.rs-save-btn:hover { background: #0d3a70; }
+.rs-mini-btn { border: 1px solid #cbd5e1; background: #f8fafc; color: #124a8f; border-radius: 6px; padding: 4px 10px; font: inherit; font-size: .74rem; cursor: pointer; margin-inline-start: 4px; }
+.rs-mini-btn:hover { background: #dbe7fa; }
+.rs-del-btn { color: #b91c1c; border-color: #fca5a5; }
+.rs-del-btn:hover { background: #fee2e2; }
+.rs-form-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.rs-form-row input, .rs-form-row select { border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 9px; font: inherit; font-size: .8rem; }
+
+/* ═══════════════ نیاز ۳ — گزارش ایرانی/خارجی ═══════════════ */
+.gr-wrap { margin-bottom: 14px; }
+.gr-wrap h3 { color: #b91c1c; border-bottom: 2px solid #f2c14e; padding-bottom: 6px; margin-bottom: 10px; }
+.gr-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 8px 12px; margin-bottom: 10px; }
+.gr-label { font-size: .8rem; color: #124a8f; }
+.gr-bar input, .gr-bar select { border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; font: inherit; font-size: .82rem; direction: ltr; text-align: center; }
+.gr-go { width: auto; padding: 6px 16px; }
+.gr-msg { font-size: .82rem; color: #b45309; font-weight: 700; min-height: 1.2em; }
+.gr-table { width: 100%; border-collapse: collapse; background: #fff; margin-bottom: 10px; }
+.gr-table th, .gr-table td { border: 1px solid #cbd5e1; padding: 6px 10px; font-size: .82rem; text-align: center; }
+.gr-table thead th { background: #dbe7fa; color: #124a8f; }
+.gr-nat-iranian { color: #166534; font-weight: 800; }
+.gr-nat-foreigner { color: #b45309; font-weight: 800; }
+.gr-nat-none { color: #64748b; }
+.gr-total td { background: #f1f5f9; font-weight: 800; color: #0f172a; }
+.gr-detail summary { font-size: .84rem; color: #124a8f; cursor: pointer; margin-bottom: 8px; }
+
+/* ═══════════════ R4 — فولیو (اقلام اضافی + صورتحساب باز) ═══════════════ */
+.fo-wrap { max-width: 1080px; margin: 0 auto; }
+.fo-box { border: 1px solid #cbd5e1; border-radius: 10px; background: linear-gradient(180deg, #fbfdff, #f3f8fd); padding: 10px 12px; margin-bottom: 14px; }
+.fo-box legend { font-size: .88rem; font-weight: 800; color: #124a8f; padding: 0 8px; }
+.fo-form-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.fo-form-row select, .fo-form-row input { border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 9px; font: inherit; font-size: .8rem; }
+.fo-form-row select { min-width: 210px; }
+.fo-add-btn { width: auto; padding: 6px 14px; }
+.fo-hint { font-size: .74rem; margin-top: 6px; }
+.fo-table { width: 100%; border-collapse: collapse; background: #fff; }
+.fo-table th, .fo-table td { border: 1px solid #cbd5e1; padding: 6px 9px; font-size: .78rem; text-align: center; }
+.fo-table thead th { background: #dbe7fa; color: #124a8f; }
+.fo-amount { color: #b91c1c; font-weight: 800; }
+.fo-out-btn { color: #b91c1c; border-color: #fca5a5; background: #fef2f2; }
+.fo-expand { background: #fffef2; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 6px 12px; margin: 4px 0; }
+.fo-item-line { font-size: .76rem; color: #334155; padding: 3px 0; border-bottom: 1px dotted #e2e8f0; }
+.fo-err { color: #b91c1c; font-size: .82rem; font-weight: 700; min-height: 1.2em; }
+.fo-ok { color: #166534; font-size: .82rem; font-weight: 700; min-height: 1.2em; }
+
+/* نیاز ۴ — اسکن مدارک در رجیستر */
+.reg-doc-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+.reg-doc-btn { border: 1px solid #124a8f; background: #124a8f; color: #fff; border-radius: 8px; padding: 7px 14px; font: inherit; font-size: .8rem; cursor: pointer; }
+.reg-doc-btn:hover { background: #0d3a70; }
+.reg-doc-list { margin-top: 8px; }
+.reg-doc-item { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; border-bottom: 1px dashed #e2e8f0; padding: 6px 2px; }
+.reg-doc-name { font-size: .78rem; color: #334155; flex: 1; min-width: 200px; }
+.reg-doc-thumb { width: 64px; height: 44px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; cursor: zoom-in; }
+
+
 

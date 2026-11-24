@@ -1,0 +1,181 @@
+function command_promop(srcElem, e)
+{
+    if(e)
+    {
+        var evt = e || window.event;
+        evt.preventDefault();
+    }
+    
+    var val_cmd = $.trim($('#'+srcElem).val());
+    var len_val = val_cmd.length;
+    
+    var patern2 = /^[1-9]\d*$/; 
+    var res = val_cmd.match(patern2);
+    if( ! res)
+    {
+        $('#'+srcElem).val('منو مشخص نیست').focus().select();
+        return;
+    }   
+    if(len_val > 3 || len_val <= 1)
+    {
+        $('#'+srcElem).val('طول عدد باید بین 2 تا 3 باشد').focus().select();
+        return;
+    }  
+    
+    var level1 = val_cmd.substr(0, 1);
+    var level2 = val_cmd.substr(1, 1);
+    var level3 = val_cmd.substr(2, 1); 
+                              
+    switch(len_val)
+    {
+        case 3:
+        {
+            if(level3 > 0)
+            {
+                //level3 -= 1; 
+            } 
+            var address = $(".level_"+level1+" .level_"+level1+"_"+level2+" li:eq("+level3+")").find('a').attr('href');
+            
+            if((typeof address == 'undefined') || (address == '' || address == '#') )
+            {
+                $('#'+srcElem).val('منو صحیح نمی باشد').focus().select();
+                return;
+            }                                                
+            document.location = address;
+        }
+        break;
+        case 2:
+        {
+            if(level2 > 0)
+            {
+                //level2 -= 1; 
+            }   
+            
+            var counter = -1;
+            $(".level_"+level1+" li").each(function(){
+                if($(this).parents('ul').length < 3)
+                {
+                    counter++;
+                    if(counter == level2)
+                    {
+                        if($(this).find('a').attr('href') != '#')
+                        {
+                            document.location = $(this).find('a').attr('href');
+                        }
+                        return;
+                    }
+                }
+            });
+            
+            setTimeout(function(){
+                
+                $('#'+srcElem).val('منو صحیح نمی باشد').focus().select(); 
+                                           
+            }, 450);                                         
+        } 
+        break;
+    }   
+    
+}    
+/*
+var str1 = '2011-01-01';
+var str2 = '2011-04-01';
+if(str2 > str1)
+{
+    alert( (new Date(str2) - new Date(str1)) / (24 * 60 * 60 * 1000)    );
+}
+*/
+
+$(document).ready(function(){ 
+    
+    $('#menu ul').children('li').each(function()
+    {
+        var submenu = $(this).children('ul');
+
+        if(submenu.parents("ul").length != 1 && submenu.parents("ul").length > 0)//yani li haye avali naboodand
+        {
+            $(this).addClass('has_childeren');
+        }
+    }); 
+
+    /*
+    $('#menu ul').children('li').hover
+    (
+        function()
+        {
+            $(this).children('ul').css('display', 'none').removeClass('menu_li_hover'); 
+            $(this).addClass('menu_li_hover');
+            var submenu = $(this).children('ul');
+
+            if(submenu[0])
+            {
+                if(submenu.parents("ul").length != 1)//yani li haye avali naboodand
+                {
+                    var parent = submenu.parents("ul").width();
+                    submenu.css({'margin-right':(parent)+'px' }); // defult 25
+                }
+                else
+                { 
+                    $(this).addClass('first_li_hover');
+                }
+                submenu.show(150);
+                //submenu.css('display', 'block');
+            }		
+    	} , 
+        function()
+        {
+            $(this).children('ul').css('display', 'none'); 	
+            $(this).removeClass('menu_li_hover');
+            $(this).removeClass('first_li_hover');
+    	}
+    );
+    */
+    
+    function showMenu()
+    {
+        $('#menu ul').children('li').removeClass('menu_li_hover');
+        $(this).addClass('menu_li_hover');
+        //$(this).children('ul').css('display', 'none').removeClass('menu_li_hover'); 
+        var submenu = $(this).children('ul');
+        var parent_menu = $(this);
+
+        if(submenu[0])
+        {
+            if(submenu.parents("ul").length != 1)//yani li haye avali naboodand
+            {
+                var parent = submenu.parents("ul").width();
+                if($(submenu).width() > $(parent_menu).offset().left ){
+                    var left = $(submenu).width();
+                    var top =  $(submenu).offset().top;
+                    $(submenu).css({top:top,right:-left,position:'absolute'});
+                }
+                else {
+                    submenu.css({'margin-right':(parent)+'px' }); // defult 25
+                }
+            
+            }
+            else
+            { 
+                $(this).addClass('first_li_hover');
+            }
+            submenu.show(150);
+        }		
+	}
+    function hideMenu()
+    {
+        $(this).children('ul').css('display', 'none');
+        $(this).removeClass('menu_li_hover');
+        $(this).removeClass('first_li_hover');
+	}   
+     
+    $('#menu ul').children('li').hoverIntent({
+        over: showMenu, 
+        timeout: 700,
+        //sensitivity: 1, // number = sensitivity threshold (must be 1 or higher)    
+        //interval: 200, // number = milliseconds for onMouseOver polling interval         
+        out: hideMenu
+	});
+      
+     
+
+});

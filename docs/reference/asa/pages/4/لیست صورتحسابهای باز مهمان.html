@@ -1,0 +1,1132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0053)http://192.168.133.146/hotel/reception/fulio_list.php -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script type="text/javascript">var tst_for_url_to_confirm = '0';</script>
+    
+    <meta name="author" content="ASA CO.">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+
+    <title>Open Invoices Guests List</title>    <link href="./لیست صورتحسابهای باز مهمان_files/fonts.css" rel="stylesheet" type="text/css" media="all">
+    <link href="./لیست صورتحسابهای باز مهمان_files/cross_style.css" rel="stylesheet" type="text/css" media="all">
+
+    <link rel="stylesheet" media="screen" type="text/css" href="./لیست صورتحسابهای باز مهمان_files/list_styles.css">
+    <link rel="stylesheet" media="print" type="text/css" href="./لیست صورتحسابهای باز مهمان_files/print_styles.css">
+    <link rel="stylesheet" media="screen" type="text/css" href="./لیست صورتحسابهای باز مهمان_files/auto_suggest.css">
+    <link rel="stylesheet" media="screen" type="text/css" href="./لیست صورتحسابهای باز مهمان_files/report_error_style.css">
+
+    <script language="javascript" src="./لیست صورتحسابهای باز مهمان_files/jqury_3.3.1.js.download"></script>
+    <script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/cross_script.js.download"></script>
+    <script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/valid_select_jquery.js.download"></script>
+            <script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/input_select_jquery_cross.js.download"></script>
+            <script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/farsitype.js.download"></script>
+            <script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/auto_suggest.js.download"></script>
+        <script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/auto_suggest(1).js.download"></script>
+        <script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/loadingoverlay.min.js.download"></script>
+    
+    <script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/jquery.fixedtableheader.min.js.download"></script>
+
+    <link rel="stylesheet" href="./لیست صورتحسابهای باز مهمان_files/theme.default.css">
+    <script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/jquery.tablesorter.min.js.download"></script>
+    <script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/jquery.tablesorter.widgets.min.js.download"></script>
+
+    <script language="javascript" src="./لیست صورتحسابهای باز مهمان_files/persianumber.min.js.download"></script>
+
+    <link rel="stylesheet" href="./لیست صورتحسابهای باز مهمان_files/smartnoti.css" type="text/css" media="screen">
+    <script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/smartnoti.js.download"></script>
+
+
+    <script type="text/javascript">
+        function numToSSColumnLetter(num) {
+            let columnLetter = "",
+                t;
+
+            while (num > 0) {
+                t = (num - 1) % 26;
+                columnLetter = String.fromCharCode(65 + t) + columnLetter;
+                num = (num - t) / 26 | 0;
+            }
+            return columnLetter || undefined;
+        }
+
+        $(document).ready(function () {
+
+            //change language by ctrl+space
+            document.onkeydown = function KeyPress(e) {
+                var evtobj = window.event ? event : e
+
+                if (evtobj.keyCode == 32 && evtobj.ctrlKey) {
+                    if (FarsiType.Type == true)
+                        FarsiType.Type = false;
+                    else
+                        FarsiType.Type = true;
+                }
+
+            };
+        });
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.number').on('keyup', function (e) {
+                var ids = e.target.id;
+                var ids_1 = '#' + ids;
+                var check_disable = true;
+                try {
+                    if ($(ids_1).hasAttr('readonly') || $(ids_1).hasAttr('disabled')) {
+                        check_disable=false;
+                    } else {
+                    }
+                } catch (e) {
+
+                }
+                if (check_disable == true) {
+                    if (isPersian(e.key)) {
+                        alert('لطفا کیبورد خود را انگلیسی کنید');
+                        var is_date = ids.indexOf('date') + ids.indexOf('Date') + ids.indexOf('DATE') +
+                            ids.indexOf('_dprtirn1') + ids.indexOf('_entryirn1') + ids.indexOf('_entryfrn1') + ids.indexOf('_dprtfrn1');
+                        if (ids.indexOf('date') > -1 || ids.indexOf('Date') > -1 || ids.indexOf('DATE') > -1 ||
+                            ids.indexOf('_dprtirn1') > -1 || ids.indexOf('_entryirn1') > -1 || ids.indexOf('_entryfrn1') > 0 || ids.indexOf('_dprtfrn1') > -1
+                            || ids.indexOf('dat') > -1 || ids.indexOf('Dat') > -1) {
+                            document.getElementById(ids).value = "";
+                        } else {
+                            var is_time = ids.indexOf('time') + ids.indexOf('Time') + ids.indexOf('time');
+                            if (is_time > -1) {
+                                document.getElementById(ids).value = "00:00";
+                            } else {
+                                document.getElementById(ids).value = "0";
+                            }
+                        }
+                        return false;
+                    }
+                }
+            });
+
+            function isEnglish(charCode) {
+                return (charCode >= 97 && charCode <= 122)
+                    || (charCode >= 65 && charCode <= 90);
+            }
+
+            function isPersian(key) {
+                var p = /^[\u0600-\u06FF\s]+$/;
+                return p.test(key) && key != ' ';
+            }
+
+            var tables = document.querySelectorAll("#main_tab");
+            [].forEach.call(tables, function (table) {
+                let __tableToExcel = table;
+                let __row = 1;
+                let __export = {};
+                let __merges = [];
+                let __tr = {};
+
+                // انتخاب تمام ردیف‌ها (هم thead و هم tbody را شامل شود)
+                let __trs = __tableToExcel.querySelectorAll('tr');
+
+                __trs.forEach((a) => {
+                    let __col = 1;
+                    let __td = {};
+                    // انتخاب th یا td برای اطمینان از خواندن هدرها
+                    let __tds = a.querySelectorAll('td, th');
+
+                    __tds.forEach((aa) => {
+                        let colspan = aa.getAttribute('colspan') || 1;
+
+                        // اصلاح اصلی: استفاده از innerText برای گرفتن تمام متن‌های داخل سلول
+                        // .trim() فاصله‌های خالی اضافه دور متن را پاک می‌کند
+                        let __content = aa.innerText ? aa.innerText.trim() : "";
+
+                        if (colspan > 1) {
+                            __merges.push(numToSSColumnLetter(__col) + __row + ':' + numToSSColumnLetter(__col + +colspan - 1) + __row);
+                            __td[__col] = {'val': __content};
+                            __col++;
+                            for (let __i = 1; __i < +colspan; __i++) {
+                                __td[__col] = {'val': ''};
+                                __col++;
+                            }
+                        } else {
+                            __td[__col] = {'val': __content};
+                            __col++;
+                        }
+                    });
+                    __tr[__row] = __td;
+                    __row++;
+                });
+
+                __export['file_name'] = document.title;
+                __export['merges'] = __merges;
+                __export['data'] = __tr;
+
+                __tableToExcel.outerHTML += '<br /><form method="post" action="../_export2.php" class="no_print" id="excel_export_js"><input type="hidden" name="data" value="' + btoa(unescape(encodeURIComponent(JSON.stringify(__export)))) + '"><input type="image" name="xlsx" src="../images/excel.png" style="width: 30px; height: 30px; border: none; margin-left: 10px" title="خروجی اکسل" /></form>';
+            });
+
+            $("a").each(function() {
+                if (this.href) {
+                    let _href = this.href;
+                    if (_href.indexOf('delete.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete.php\?/, 'delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&');
+                    }
+                    if (_href.indexOf('delete1.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete1.php\?/, 'delete1.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&');
+                    }
+                    if (_href.indexOf('delete2.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete2.php\?/, 'delete2.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&');
+                    }
+                    if (_href.indexOf('delete3.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete3.php\?/, 'delete3.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&');
+                    }
+                    if (_href.indexOf('delete4.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete4.php\?/, 'delete4.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&');
+                    }
+                }
+            });
+
+            $("form").each(function() {
+                if ($(this).find("input[name=__token__]").length === 0) {
+                    $(this).append('<input type="hidden" name="__token__" value="778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9" />');
+                }
+            })
+        });
+    </script><script language="javascript">
+    //-------------------------------------------------------------------------------------
+    function valid1() {
+        var mm2 = document.getElementById('_date1').value;
+        var mm3 = document.getElementById('_date2').value;
+        //---------------------------------------------
+        document.location = 'fulio_list.php?_date1=' + mm2 + '&_date2=' + mm3;
+    }
+
+    function valid2() {
+        var mm2 = document.getElementById('_date1').value;
+        document.getElementById('_date2').value = mm2;
+    }
+
+    //-------------------------------------------------------------------------------------
+</script>
+<style>body.tablesorter-disableSelection { -ms-user-select: none; -moz-user-select: -moz-none;-khtml-user-select: none; -webkit-user-select: none; user-select: none; }.tablesorter-resizable-container { position: relative; height: 1px; }.tablesorter-resizable-handle { position: absolute; display: inline-block; width: 8px;top: 1px; cursor: ew-resize; z-index: 3; user-select: none; -moz-user-select: none; }</style></head>
+<body>
+<script language="javascript">message_fire(1);</script><script language="javascript">message_fire(3);</script>	<div id="show_wait"></div>
+	
+	<div id="wrapper_favorites" style="display: none;">
+    <div id="cont_add_favorites">
+    <div id="close_windows" title="بستن پنجره"></div>
+    <table cellpadding="2" cellspacing="2">
+    <tbody><tr id="first_tr">
+        <td colspan="2" align="center" id="title_favorite">اضافه کردن صفحه جدید</td>
+    </tr>
+    <tr>
+        <td align="right"><input lang="fa" type="text" name="favorite_name" id="favorite_name" dir="rtl" style="width: 250px; border: 1px solid rgb(194, 201, 207) !important; text-align: right; direction: rtl;" maxlength="150" align="right"></td>
+        <td align="left" style="direction: rtl; white-space: nowrap;">عنوان صفحه : </td>
+    </tr>
+    <tr>
+        <td align="right"><input type="text" name="favorite_address" id="favorite_address" dir="ltr" style="width: 250px;border:1px solid #c2c9cf !important;" maxlength="200"></td>
+        <td align="left" style="direction: rtl;">آدرس صفحه : </td>
+    </tr>
+    <tr>
+        <td align="right"><input type="text" name="favorite_index" id="favorite_index" style="border:1px solid #c2c9cf !important;" dir="rtl" maxlength="3"></td>
+        <td align="left" style="direction: rtl;">اولویت : </td>
+    </tr>   
+    <tr>
+        <td colspan="2" align="left"><button id="btn_save_favorites"></button></td>
+    </tr>           
+    </tbody></table>
+    </div>
+	</div>
+	<div id="menu_left" class="no_print">
+    <div id="add_favorites" title="اضافه کردن این صفحه به صفحات مورد علاقه"></div>
+    <div id="favorite_box" title="صفحات مورد علاقه"></div>
+    <div id="footer_menu" title="کلیک کنید"></div>
+	</div>
+    
+	<div id="favorite_boxul" style="display: none;">
+     <img src="./لیست صورتحسابهای باز مهمان_files/title_favorite.png">
+    <ul>
+        </ul>
+	</div>
+
+	<div id="cont_menu_footer" class="no_print" style="display: none;">
+    <ul>
+        <li onclick="document.location = '../menu/recp1.php'"><div>پذیرش</div></li><li onclick="document.location = '../menu/recp1.php'"><div>صندوق</div></li><li onclick="document.location = '../menu/reserve1.php'"><div>رزرواسیون</div></li><li onclick="document.location = '../menu/reception_account1.php'"><div>گزارشات مدیریت</div></li><li onclick="document.location = '../menu/housekeeping1.php'"><div>خانه داری</div></li><li onclick="document.location = '../menu/engineering1.php'"><div>تاسیسات</div></li><li onclick="document.location = '../menu/ceremonies1.php'"><div>تشریفات</div></li><li onclick="document.location = '../menu/costcontrol1.php'"><div>کاست کنترل</div></li><li onclick="document.location = '../menu/telephone1.php'"><div>تلفن</div></li><li onclick="document.location = '../menu/laundry1.php'"><div>لاندری</div></li><li onclick="document.location = '../menu/restaurant1.php'"><div>رستوران</div></li><li onclick="document.location = '../menu/storage1.php'"><div>انبارداری</div></li><li onclick="document.location = '../menu/payment1.php'"><div>حقوق و دستمزد</div></li><li onclick="document.location = '/financial/'"><div>حسابداری هتل</div></li><li onclick="document.location = '../menu/asset1.php'"><div>حسابداری اموال</div></li><li onclick="document.location = '../menu/consumption1.php'"><div>درخواست کالا</div></li><li onclick="document.location = '../menu/crm1.php'"><div>خدمات مشتریان</div></li><li onclick="document.location = '../agency/agency.php'"><div>آژانسها - شرکتها</div></li><li onclick="document.location = '../menu/paperless1.php'"><div>مکاتبات داخلی</div></li><li onclick="document.location = '../menu/guestservice1.php'"><div>مدیریت درخواستها</div></li><li onclick="document.location = '../menu/hrm1.php'"><div>مدیریت منابع انسانی</div></li><li onclick="document.location = '../menu/daraee1.php'"><div>سامانه دارایی</div></li><li onclick="document.location = '../menu/hotspot1.php'"><div>اینترنت شارژینگ</div></li><li onclick="document.location = '../menu/inout1.php'"><div>حضور و غیاب</div></li><li onclick="document.location = '../menu/portal1.php'"><div>پورتال پرسنلی</div></li><li onclick="document.location = '../menu/archive1.php'"><div>آرشیو اسناد</div></li><li onclick="document.location = '../menu/revenue1.php'"><div>مدیریت درآمد</div></li><li onclick="document.location = '../menu/taxi_service1.php'"><div>تاکسی -گشت شهری</div></li><li onclick="document.location = '../menu/dashboard1.php'"><div>داشبورد مدیریت</div></li><li onclick="document.location = '../menu/supplier1.php'"><div>نرم افزار کارپردازی</div></li><li onclick="document.location = '../menu/keycard1.php'"><div>کلیدکارت</div></li><li onclick="document.location = '../menu/store1.php'"><div>فروشگاه</div></li><li onclick="document.location = '../menu/lakers1.php'"><div>مجموعه آبی</div></li><li onclick="document.location = '../menu/parking1.php'"><div>پارکینگ</div></li><li onclick="document.location = '../menu/ghasab1.php'"><div>قصابخانه قنادی</div></li><li onclick="document.location = '../menu/club1.php'"><div>کلوپ مشتریان</div></li><li onclick="document.location = '../menu/moaddian1.php'"><div>سامانه مودیان</div></li><li onclick="document.location = '/e-commerce/products'"><div>فروشگاه اینترنتی</div></li>        <li><div onclick="document.location = '../main.php'">صفحه اصلی</div></li>
+    </ul>
+	</div>
+
+	<div id="float_menu" style="display: none;">
+    <div style="margin-top: 4px;" id="edit_favorite"> تصحیح </div>
+    <div id="delete_favorite"> حذف </div>
+	</div>
+
+	<table id="floatingHeaderTab" class="no_print"></table>
+	
+	<div id="cmd" class="no_print" style="display: none;">
+    <div id="tit">دسترسی سریع به منوها</div>
+    <div style="text-align: right; padding: 3px;"><input lang="fa" type="text" id="cmd_inp" onfocus="this.select();" dir="rtl" align="right" style="text-align: right; direction: rtl;"></div>
+	</div>
+
+
+
+	<script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/script_menu.js.download"></script>
+	<script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/jquery.hoverIntent.js.download"></script>
+	<!-- <script type="text/javascript" src="../js/dynamicFindMenu.js"></script> -->
+	
+	<script type="text/javascript">
+	function binding() 
+	{
+    $('.favorite_boxli').bind("contextmenu", function(e) 
+    {                
+        $('#edit_favorite, #delete_favorite').attr('key', '0');
+        e.preventDefault(); 
+        var tmp_onclick = $(this).attr('onclick').replace('document.location = \'', '').replace('\'', '');        
+        $('#float_menu').css({'left':e.pageX, 'top':e.pageY}).slideDown('fast', 'linear', function(){});        
+        $('#edit_favorite, #delete_favorite').attr({'key':$(this).attr('find'), 'req_url':tmp_onclick, 'kind_index':$(this).attr('kind_index')});
+        tmp_input_for_favorite = $(this).text();
+    });  
+	} 
+	
+  
+	function changePossitionFavoriteBox(elem, posLeft, posTop)
+	{
+    var header_offset = $('#'+elem).offset();
+    $('#menu_left').css({'left':header_offset.left+posLeft, 'top':header_offset.top+posTop, 'display':'block'});
+    $('#cont_menu_footer').css({'left':header_offset.left+posLeft+50, 'top':header_offset.top+posTop});
+    $('#favorite_boxul').css({'left':header_offset.left+posLeft+60, 'top':header_offset.top+posTop});      
+	}
+
+	$(document).ready(function(){
+    $('#master_div').css('display', 'block');
+    binding();
+    var edit_mod = 0;
+    
+    $('#close_windows').click(function(){
+        edit_mod = 0;
+        if($('#wrraper_suggest').css('display') == 'block')
+            $('#inp_search').focus().val('');
+        
+        $('#wrapper_favorites, #show_wait, #wrraper_suggest, #cont_menu_footer').fadeOut('fast', function(){}); 
+        $('#cmd').hide();
+        setTimeout("$('body').removeClass('over_hidden');", 1000);
+    });
+    
+    
+    
+    $('#favorite_box').click
+    (
+        function()
+        {
+           $('#favorite_boxul').fadeIn('fast').focus();
+        }
+    );
+        
+    $(document).mousedown(function(e){
+        if($(e.target).attr('id') != 'li_favorite' && $(e.target).attr('id') != 'edit_favorite' && $(e.target).attr('id') != 'delete_favorite' && $(e.target).attr('id') != 'cont_menu_footer')
+        {
+            $('#favorite_boxul, #float_menu, #cont_menu_footer').fadeOut('fast');
+        }
+    });    
+    
+    $(document).keydown(function(e){
+        var key = e.which;
+        
+        if(e.ctrlKey  && !e.shiftKey)
+        {
+        	/*
+            $(document).scrollTop(0);
+            $('body').css('overflow', 'hidden');
+            
+            $('#menu').addClass('menuFocus');
+            $(window).focus();
+            $('#menu ul li[class^="level_"]').removeClass('first_li_hover').children('ul').hide();
+            $('#menu li:first').addClass('first_li_hover').children('ul').show();
+            $("#menu li").removeClass("menu_li_hover");  
+            */
+        }
+        /*
+        if($('#menu').hasClass('menuFocus'))
+        {
+            dynamicFindMenu(e, key);
+        }        
+               
+        if(e.ctrlKey && e.shiftKey)
+        {
+            $('#cmd').show('fast', function(){});
+            $('#cmd input').focus().val('');
+        }
+        */        
+        if(key == 27)
+        {
+            $('body').css('overflow', 'auto');
+            /*
+            $('#menu').removeClass('menuFocus');
+            $('#menu ul li[class^="level_"]').removeClass('first_li_hover').children('ul').hide();
+            */
+            $('#cont_menu_footer, #cmd').hide();
+            $('#menu_left').hide('fast', function(){
+                $('#show_favorite').show('fast'); 
+            });
+        }        
+        if(key == 13)
+        {
+            if( $(e.target).attr('id') == 'cmd_inp' )
+            {
+                command_promop('cmd_inp', e);
+            }
+        }                  
+    });
+    
+    $('#add_favorites').click(function(){
+        $('#title_favorite').text('اضافه کردن صفحه جدید');
+        $('body').addClass('over_hidden');
+        $('#show_wait').css('display', 'block');
+        $('#favorite_name').val('Open Invoices Guests List').focus();
+        $('#favorite_address').val('/hotel/reception/fulio_list.php');
+        $('#favorite_index').val(1);
+        $('#wrapper_favorites').fadeIn('normal', function(){});
+    });
+    
+    $('#edit_favorite').click(function()
+    {
+        edit_mod = $(this).attr('key');
+        $('#title_favorite').text('تصحیح صفحات ذخیره شده');
+        $('body').addClass('over_hidden');
+        $('#show_wait').css('display', 'block');
+        $('#favorite_name').val($.trim(tmp_input_for_favorite)).focus();
+        $('#favorite_address').val($(this).attr('req_url'));
+        $('#favorite_index').val($(this).attr('kind_index'));  
+        $('#wrapper_favorites').fadeIn('normal', function(){});
+    });
+    
+    $('#delete_favorite').click(function()
+    {
+        var confirm_test = confirm('آیا کد مورد نظر حذف شود ؟ ');
+        if(confirm_test)
+        {
+            $.post('../suggest/loader_favorite_and_search.php', {
+                currClerk:148,
+                kindPage: 'DeleteFavorites',
+                id: $(this).attr('key')
+            }, function (data) {
+                
+                if(data.error > 0 )
+                {
+                    alert(data.msg);
+                    $('#close_windows').click();
+                    return;
+                }
+                else
+                {
+                    $('#float_menu').fadeOut('fast');
+                    $('#favorite_boxul ul').remove();
+                    $('#favorite_boxul').append(data.ul_li);
+                    alert(data.msg);
+                    $('#close_windows').click();
+                    binding();
+                }
+            }, 'json');             
+        }
+    });    
+        
+    $('#footer_menu').click
+    (
+        function()
+        {
+            if($('#cont_menu_footer').css('display') == 'none')
+                $('#cont_menu_footer').fadeIn('fast');
+            else
+                $('#cont_menu_footer').fadeOut('fast');
+        }
+    ); 
+    
+    $('#btn_save_favorites').click(function(){
+        if($.trim($('#favorite_name').val()) == '')
+        {
+            alert('عنوان صفحه مشخص نیست');
+            $('#favorite_name').focus();
+            return;
+        }
+        var patern2 = /^[1-9]\d*$/; 
+        var res = $('#favorite_index').val().match(patern2);
+        if( ! res)
+        {
+            alert('اولویت مشخص نیست');
+            $('#favorite_index').focus();
+            return;
+        }
+        $.post('../suggest/loader_favorite_and_search.php', {
+            favorite_name: $('#favorite_name').val(),
+            favorite_address: escape($('#favorite_address').val()),
+            favorite_index: $('#favorite_index').val(),
+            currClerk:148,
+            kindPage: 'Favorites',
+            edit_mod: edit_mod
+        }, function (data) {
+            
+            if(data.error > 0 )
+            {
+                alert(data.msg);
+                $('#close_windows').click();
+                return;
+            }
+            else
+            {
+                $('#favorite_boxul ul').remove();
+                $('#favorite_boxul').append(data.ul_li);
+                alert(data.msg);
+                $('#close_windows').click();
+                binding();
+            }
+        }, 'json');
+    }); 
+    
+    $('#show_favorite').click(function(){
+        $(this).hide('fast', function(){
+            $('#menu_left').show('fast'); 
+        });
+    });
+
+	});
+	</script>
+
+	<style type="text/css">
+
+	@media print{  
+    .no_print { display: none !important; }
+	table#main_tab td{ padding: 1px !important;} 
+    /* * { font-family: tahoma !important; font-size:13px !important; }*/
+	}
+
+	
+	/* motefareghe */
+	body { background: #f8fcfe; }
+	.btn { height: 30px; background: url('../images_new/cross/blue/btns.gif') repeat-x; border: 1px solid #acc9ef !important; border-radius:5px; font: 15px MH_NassimBold; cursor: pointer; }
+	.btn:hover { background: url('../images_new/cross/blue/btns2.gif'); }
+	#show_wait { position: absolute; width: 100%; height: 100%; left: 0; top: 0; background: #404040; opacity:.8; filter: alpha(opacity=80); z-index: 10; display: none; }
+	
+	/* menu */
+	#menu { background: white url(../images_new/cross/blue/menu_bg.gif); width: 99%; margin: -1px auto; margin-bottom: 5px; height: 40px; display: block; border: 1px solid #bbd2ff; border-bottom: 2px solid #bbd2ff; border-radius:5px; box-shadow:0px 0px 1px 0px gray;}
+	#menu ul li { position: relative; display: inline; float: right; }
+	#menu ul li a { display: block; padding:7px; padding-left: 9px; font: 18px MH_Nassim; border-left: 1px solid white; margin-right: 2px; text-decoration: none;}
+	#menu ul li ul { list-style: none; position: absolute; display: none; top: 40px; right: 0; background: white/*#f6f6f6*/; z-index: 500; border: 1px solid #CBCBCB; -webkit-border-radius: 5px; border-radius: 5px; -moz-box-shadow: 0 0 10px #77a4ff; -webkit-box-shadow: 0 0 10px #77a4ff; box-shadow: 0 0 8px gray; }
+	#menu ul li ul li { display: list-item; float: none; padding: 1px; padding-left: 30px; border-bottom: 1px dotted #CBCBCB; }
+	#menu ul li ul li a { font: 15px MH_Nassim; padding: 2px; display: block; white-space: nowrap; text-align: right; border: none;}
+	#menu ul li ul li ul { top: -35px; z-index: 600; }
+	#menu a { text-decoration: none; color: black; border: none; text-align: right; }
+	#menu ul li a:hover { color:black; }
+	#menu ul li ul li a:hover { color: black; border: none; } 
+	.has_childeren { background: white url(../images_new/cross/public/has_childeren.png) no-repeat center left; }
+	.menu_li_hover { background: #e2eeff ;  }
+	.first_li_hover { background: white !important;  }
+	.menuFocus { border: 1px dashed gray !important; }
+	
+	/* Cmd */
+	#cmd { width: 200px; height: 100px; background: #FFE0E0; border: 1px dashed red; box-shadow: 0 0 20px gray; border-radius: 7px; position: fixed; left: 0; bottom: 0; display: none; }
+	#cmd #tit { text-align: right; padding: 3px; font: 18px MH_NassimBold;  }
+	#cmd_inp { width: 180px; height: 30px; font: 18px MH_NassimBold; border:1px solid #c2c9cf !important; }
+	
+	/* Floating Header */
+	#floatingHeaderTab { position: fixed; top: 0; z-index: 2; height: 30px; background: url('../images_new/cross/blue/title_bg1.gif'); border-collapse: collapse; border:1px solid #BEADAD;  display: none; }
+	#floatingHeaderTab td { padding-left: 3px; padding: 1px; font: 15px MH_NassimBold,tahoma,Arial,Helvetica,sans-serif !important; text-align: center;}
+	
+	/* boxe naranji kenare list ha */
+	#show_favorite { background: url(../images_new/cross/public/show_favorite.png) no-repeat; width: 12px; height: 75px; position: fixed; left: 0; cursor: pointer; }
+	
+	/* lists */
+	
+	#master_div {width: 99%; margin: 5px auto; -webkit-box-shadow: 0 2px 6px 2px #9D9D9D; box-shadow: 0 2px 6px 2px #9D9D9D; border-radius: 5px; border:1px solid #a5c4ed; }
+	#body { background: #eef2f8 !important; border-top:none;  padding:4px; }
+	#main { border:1px solid #a5c4ed;  background: #e5ecf4; border-radius: 5px; }
+	#header_report{ background: url('../images_new/cross/blue/title_bg1.gif'); width: 100%; height: 30px; font:18px MH_NassimBold, Arial, Helvetica, sans-serif; text-align:right; border-bottom:1px solid #99bbe8; }  
+	.first_tr_report { background: url('../images_new/cross/blue/title_bg1.gif'); height: 20px; border-bottom: 1px solid #C5C5C5; font: 15px MH_NassimBold,tahoma,Arial,Helvetica,sans-serif !important; text-align: center; }
+	.first_tr_report td { padding: 1px !important; }
+
+/* sardar-e jadval: khod-e radif hengam-e scroll bala-ye safhe mimanad (ba hamin matn, arz va background) */
+@media screen {
+	tr.first_tr_report > td, tr.first_tr_report > th { position: sticky; top: 0; z-index: 3; background: inherit; box-shadow: inset 0 -1px 0 #BEADAD, inset -1px 0 0 #BEADAD; }
+}
+	table#main_tab{ border: 1px solid #c5c5c5; width: 100%; border-collapse: collapse; margin: 0 auto; }
+	table#main_tab td{ padding: 3px 3px; border:1px solid #BEADAD; }
+	.odd_tab_1{ background: #fafafa; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important;}
+	.odd_tab{ background: #fafafa; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important; height: 30px; }
+	.even_tab_1{ background: #FFF; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important; height: 15px; }
+	.even_tab{ background: #FFF; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important; height: 15px; }
+	#information { width: 100%; text-align: right; font:15px MH_NassimBold, tahoma !important; padding: 1px; }
+	.summary{ font:14px MH_NassimBold, tahoma !important; height: 20px !important; }
+	.odd_tab:hover, .even_tab:hover{ background: #ffffd5; cursor: default; text-shadow: 0.1em 0.1em 0.2em gray;}
+	.majmo { background: url('../images_new/cross/blue/majmo_bg.gif') repeat-x !important;}
+	#subject{width: 100%; text-align: center; font:15px MH_NassimBold, tahoma !important; margin-bottom: 5px;}
+	#topBoxTab { border:2px solid #9ec0ef; box-shadow: 0 4px 2px gray; background: white; margin-right:5px; padding: 3px; }
+	#topBoxTab td { padding: 5px; }
+	/* select input */
+	.newSelect { background: white url(../images_new/cross/blue/inp_active_bg.gif) repeat-x; }
+	
+	/* MenuContFooter */
+	#cont_menu_footer { border: 1px solid #C0C0C0; border-left: none; width: 980px; height: 474px;  padding: 1px; background: white; border-radius:5px; box-shadow: 0 0 20px gray; display: none; position: fixed; overflow: auto; overflow-x: hidden; z-index: 15;  }
+	#cont_menu_footer ul { direction: rtl; list-style: none; margin: 0; padding: 0; margin-top: 10px; }
+	#cont_menu_footer li { float: right; font: 18px MH_NassimBold; cursor: pointer; background: url(../images_new/cross/blue/each_li.png) no-repeat;width: 160px;height: 60px;text-align: center;vertical-align: middle;}
+	#cont_menu_footer li div { padding-top: 18px; }
+	#footer_menu { margin-top: 40px; margin-left: 10px; background: url(../images_new/cross/blue/footer_menu.png) no-repeat;  height: 70px; width: 30px; cursor: pointer;}
+	
+	/* Favorite Box*/
+	#menu_left { position: fixed; left: 0; top: 0; background: #d1e3f8; border: 1px solid #69afff; border-radius: 5px; box-shadow: 0 0 5px #B5B5B5; width: 55px; height: 200px; display: none; z-index: 3;  }
+	#favorite_boxul { width: 250px; position: fixed; top: 0; left: 0; display: none; z-index: 5; }
+	#favorite_boxul ul { direction: rtl; margin: 0; padding: 0; list-style: none; height:300px; background: white; border: 1px solid #E2E1E1;   overflow: auto; overflow-x: hidden;  }
+	.favorite_boxli { cursor: pointer; padding: 3px; text-align: right; font: 15px MH_Nassim; border-bottom: 1px dotted #E2E1E1; }
+	.favorite_boxli:hover { background: #e2eeff; }
+	#add_favorites { margin-top: 13px; margin-left: 10px; background: url(../images_new/cross/blue/add_favorites.png) no-repeat; width: 20px; height: 20px; cursor: pointer; }
+	#favorite_box { margin-top: 10px; margin-left: 10px; background: url(../images_new/cross/icons/favorite_box.png) no-repeat top right; width: 40px; height: 38px;  cursor: pointer; }
+	#wrapper_favorites { position: fixed; width: 100%; height: 100%; left: 0; top: 0; z-index: 11; display: none; }
+	#cont_add_favorites { width: 500px; height: 300px; margin: 30px auto; background: white ; border: 1px dashed gray; z-index: 12; border-radius:7px; -moz-box-shadow: 0 0 20px white; -webkit-box-shadow: 0 0 20px white; box-shadow: 0 0 20px white;  }
+	#cont_add_favorites table { margin: -2px auto; border: 3px solid #e8e8e8; border-radius:5px; background: #ebffe2; width: 300px; padding: 5px; }
+	#cont_add_favorites table td { padding: 5px; }
+	#cont_add_favorites table input { font: 16px MH_Nassim !important;  }
+	#btn_save_favorites { border: none; background: url(../images_new/cross/public/btn_save_favorites.png); width: 77px; height: 23px; cursor: pointer; }
+	#close_windows { background: url(../images_new/cross/icons/close_windows.png) top right; width: 35px; height: 33px; padding: 0; margin-left: 412px; margin-bottom: -5px; cursor: pointer; margin-top: 10px; }
+	#float_menu { position: absolute; z-index: 6; left: 0; top: 0; width: 88px; height: 58px; background: url(../images_new/cross/public/float_menu.png); display: none; }  
+	#float_menu div { text-align: right; padding: 2px; padding-right: 10px; cursor: pointer; margin-top: 1px; }
+	
+	/* Forms */
+	#first_tr { background: #9de3fb; font: 18px MH_NassimBold !important; }
+	table#main_tab_form td{ padding: 4px;}
+	table#main_tab_form tr { margin-top: 1px; border:1px solid #a5c4ed; }
+	table#main_tab_form tr:hover { cursor: default; text-shadow: 0.1em 0.1em 0.2em gray; }
+	#padd{ padding: 7px; }
+	#container_form { margin: 0 auto; border:1px solid #bbd2ff; background: #eef2f8; -webkit-box-shadow: 5px 5px 5px #adadad; box-shadow: 0px 0px 15px #adadad; }
+	#header_form { background: url('../images_new/cross/blue/title_bg1.gif'); width: 100%; height: 30px; font:17px MH_NassimBold, Arial, Helvetica, sans-serif; text-align:right; border-bottom:1px solid #99bbe8; }
+	table#main_tab_form { width: 100%; margin: 0px auto; border-collapse: collapse; border:1px solid #a5c4ed; background: #e5ecf4; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important; }   
+	input { border: 1px solid #acc9ef; background: white;} 
+	
+	/* Paging */
+	#paging { margin-top: 7px; margin-bottom: 7px; margin-left: auto; margin-right: auto; }
+	#paging button { padding: 4px; margin: 2px; font: 15px MH_NassimBold; background: white; border:2px solid #a5c4ed; cursor: pointer; border-radius:5px}
+	#paging button.numbers { padding-left: 7px; padding-right: 7px; }
+	.hoverPagingButton { background: #e2eeff  repeat !important; }
+	#paging button:hover { background: #e2eeff  repeat !important ; }
+	.pagesLineNumber { direction: ltr !important; font: 15px MH_NassimBold; margin-left: 5px; background: white; border: 1px solid gray; border-radius:5px; margin-bottom: 5px;}
+	.pagesLineNumber td {  padding: 2px;  }
+	</style>
+	<div id="menu" class="no_print">
+    <ul>
+        <li class="level_1"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">رک اتاق ها</a>
+            <ul>
+        		                                  <li title="جستجوی سریع 10"><a href="http://192.168.133.146/hotel/reception/room_rack_new.php"><strong>روم رک </strong>هتل</a></li>
+                        		<li title="جستجوی سریع 378"><a href="http://192.168.133.146/hotel/reception/front_office_dashboard.php"><b>داشبورد مدیر فرانت آفیس</b></a></li>
+                <li title="جستجوی سریع 11"><a href="http://192.168.133.146/hotel/reception/room_rack.php">روم رک هتل به فرم <strong>ستونی</strong> ۱</a></li>
+                <li title="جستجوی سریع 12"><a href="http://192.168.133.146/hotel/reception/room_rack1.php">روم رک هتل به فرم <strong>ستونی</strong> ۲</a></li>
+                <li title="جستجوی سریع 13" class="has_childeren"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#"><strong>جستجوی</strong> نام میهمانان هتل</a>
+                    <ul class="level_1_2">
+                        <li title="جستجوی سریع 130"><a href="http://192.168.133.146/hotel/reception/search_name1.php?code_id=1">جستجوی نام میهمان مقیم بروش حرف اول نام</a></li>
+                        <li title="جستجوی سریع 131"><a href="http://192.168.133.146/hotel/reception/search_nation1.php?code_id=1">جستجوی ملیت میهمانان مقیم</a></li>
+                        <li title="جستجوی سریع 132"><a href="http://192.168.133.146/hotel/reception/search_name1_reserve.php?code_id=1">جستجوی حرف اول نام میهمانان رزروی فعال</a></li>
+                        <li title="جستجوی سریع 133"><a href="http://192.168.133.146/hotel/reception/search_name1_reserve.php?code_id=2">جستجوی حرف اول نام میهمانان رزروی غیرفعال</a></li>
+                        <li title="جستجوی سریع 134"><a href="http://192.168.133.146/hotel/reception/search_name1_reserve.php?code_id=3">جستجوی حرف اول میهمانان رزروی فعال وغیرفعال</a></li>
+                        <li title="جستجوی سریع 135"><a href="http://192.168.133.146/hotel/reception/search_name3.php?code_id=1">جستجوی نام میهمان مقیم بروش حرف کلی</a></li>
+                        <li title="جستجوی سریع 136"><a href="http://192.168.133.146/hotel/reception/search_name3.php?code_id=2">جستجوی نام میهمان غیر مقیم بروش حرف کلی</a></li>
+                        <li title="جستجوی سریع 137"><a href="http://192.168.133.146/hotel/reception/search_name3.php?code_id=3">جستجوی نام همه میهمان بروش حرف کلی</a></li>
+                        <li title="جستجوی سریع 138"><a href="http://192.168.133.146/hotel/reception/search_nation1.php?code_id=2">جستجوی ملیت میهمانان غیرمقیم</a></li>
+                        <li title="جستجوی سریع 139"><a href="http://192.168.133.146/hotel/reception/search_nation2.php?code_id=3">جستجوی ملیت میهمانان غیرمقیم طی بازه تاریخی</a></li>
+                        <li title="جستجوی سریع 137"><a href="http://192.168.133.146/hotel/reception/search_name4.php?code_id=3">جستجوی <strong>نام میهمان - شرح - آدرس </strong></a></li>
+					</ul>
+                </li>
+                <li title="جستجوی سریع 14"><a href="http://192.168.133.146/hotel/reception/room_rack_sum.php"><strong>خلاصه</strong> رک اتاقهای هتل درروزجاری</a></li>
+                <li title="جستجوی سریع 15"><a href="http://192.168.133.146/hotel/reception/room_date_checkout1.php">رک اتاقهای تخلیه تا تاریخ خاص</a></li>
+                <li title="جستجوی سریع 16"><a href="http://192.168.133.146/hotel/reception/room_date_checkout2.php">رک اتاقهای تخلیه در تاریخ خاص - قبل و بعد</a></li>
+
+                <li title="جستجوی سریع 161"><a href="http://192.168.133.146/hotel/reception/room_rack_backup_select.php">رک هتل در <strong>روزهای قبل</strong></a></li>
+
+                <li title="جستجوی سریع 17"><a href="http://192.168.133.146/hotel/reception/room_rack_message.php">رک اتاقهای دارای پیغام</a></li>
+                <li title="جستجوی سریع 18"><a href="http://192.168.133.146/hotel/massage/clerk_rack_massage_check.php">پیغامهای ارسالی <strong>مشاهده نشده</strong></a></li>
+				                <li title="جستجوی سریع 19"><a href="http://192.168.133.146/hotel/paperless/clerk_rack_massage_new1.php?night_editor=1">ثبت گزارش <strong> کاربر شب</strong></a></li>
+                <li title="جستجوی سریع 191"><a href="http://192.168.133.146/hotel/reception/save_new_date.php">ثبت <strong>روم شارژ</strong> و تعویض تاریخ نرم افزار</a></li>
+            </ul>
+        </li>
+        <li class="level_2"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">رجیستر</a>
+            <ul>
+                <li title="جستجوی سریع 20"><a href="http://192.168.133.146/hotel/reception/register_new1.php">ثبت <strong>رجیسترکارت</strong> میهمان </a></li>
+                <li title="جستجوی سریع 21"><a href="http://192.168.133.146/hotel/reception/register_list.php">رجیسترکارتهای <strong>مقیم</strong></a></li>
+                <li title="جستجوی سریع 22"><a href="http://192.168.133.146/hotel/reception/pasenger_liststay.php"><strong>همراهان</strong> میهمان مقیم</a></li>
+                <li title="جستجوی سریع 23"><a href="http://192.168.133.146/hotel/reception/register_checkout.php">رجیسترکارتهای غیرمقیم</a></li>
+                <li title="جستجوی سریع 24"><a href="http://192.168.133.146/hotel/reception/passenger_checkout.php">همراهان غیرمقیم</a></li>
+                <li title="جستجوی سریع 25"><a href="http://192.168.133.146/hotel/reception/fulio_checkout.php"><strong>فولیو</strong> میهمانان <strong>مقیم وغیرمقیم</strong></a></li>
+                <li title="جستجوی سریع 26"><a href="http://192.168.133.146/hotel/reception/save_block.php"><strong>بلوک کلی </strong>اتاق های هتل</a></li>
+            </ul>        
+        </li>
+        <li class="level_3"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">عملیات</a>
+            <ul>
+                <li title="جستجوی سریع 30"><a href="http://192.168.133.146/hotel/reception/fulio_new.php">ثبت اقلام <strong>اضافی </strong>صورتحساب اتاق</a></li>
+                <li title="جستجوی سریع 31"><a href="http://192.168.133.146/hotel/reception/fulio_list.php">اقلام اضافی صورتحساب میهمان</a></li>           
+                <li title="جستجوی سریع 32"><a href="http://192.168.133.146/hotel/reception/fulio_discount_new.php">ثبت <strong>تخفیف </strong>در فولیو میهمان مقیم</a></li>
+                <li title="جستجوی سریع 33"><a href="http://192.168.133.146/hotel/reception/change_room_new.php"><strong>تغییر اتاق</strong> میهمان مقیم</a></li>
+                <li title="جستجوی سریع 34"><a href="http://192.168.133.146/hotel/reception/change_room_list.php">اتاقهای تغییرداده شده میهمان</a></li>
+                <li class="has_childeren"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#"> اشیاء پیداشده درهتل</a>
+                    <ul class="level_3_5">
+                        <li title="جستجوی سریع 350"><a href="http://192.168.133.146/hotel/housekeeping/house_object_new.php?_kind=2"> ثبت اشیاء پیداشده</a></li>
+                        <li title="جستجوی سریع 351"><a href="http://192.168.133.146/hotel/housekeeping/house_object_list1.php?_kind=2">جستجوی اشیاء پیداشده</a></li>
+                        <li title="جستجوی سریع 352"><a href="http://192.168.133.146/hotel/housekeeping/house_object_list2.php?_kind=2">اشیاء تحویل داده شده به افراد</a></li>
+                    </ul>
+                </li>
+                <li class="has_childeren"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">اعلان <strong>خرابی</strong> به تاسیسات هتل</a>
+                    <ul class="level_3_6">
+                        <li title="جستجوی سریع 360"><a href="http://192.168.133.146/hotel/engineering/engin_new_all1.php?_kind=2"><strong>ثبت</strong> اعلان خرابی</a></li>
+                        <li title="جستجوی سریع 361"><a href="http://192.168.133.146/hotel/engineering/engin_list_all1.php?_kind=2">اعلان خرابیهای <strong>انجام نشده</strong></a></li>
+                        <li title="جستجوی سریع 362"><a href="http://192.168.133.146/hotel/engineering/engin_list_all2.php?_kind=2">اعلان خرابیهای <strong>دردستورکار</strong></a></li>
+                        <li title="جستجوی سریع 363"><a href="http://192.168.133.146/hotel/engineering/engin_list_all3.php?_kind=2">اعلان خرابیهای <strong>بایگانی شده</strong></a></li>
+                        <li title="جستجوی سریع 364"><a href="http://192.168.133.146/hotel/engineering/engin_list_all4.php?_kind=2">اعلان خرابیهای <strong>یک کاربر</strong></a></li>
+                    </ul>
+                </li>
+                <li class="has_childeren"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">کلید کارت هتل</a>
+                    <ul class="level_3_7">
+                        <li title="جستجوی سریع 370"><a href="http://192.168.133.146/hotel/keycard_link/keycard_block_list.php">کلیدکارتهای اتاقهای بلوک شده</a></li>
+                        <li title="جستجوی سریع 371"><a href="http://192.168.133.146/hotel/keycard_link/keycard_block_list1.php">گزارش از کلیدکارتهای صادره</a></li>
+                        <li title="جستجوی سریع 372"><a href="http://192.168.133.146/hotel/keycard_link/keycard_block_list2.php">کلیدکارتهای صادره موقت</a></li>
+                        <li title="جستجوی سریع 373"><a href="http://192.168.133.146/hotel/keycard_link/keycard_block_list3.php">کلیدکارتهای صادره یک اتاق</a></li>
+                    </ul>
+                </li>
+                <li title="جستجوی سریع 38"><a href="http://192.168.133.146/hotel/reception/parking_active_list.php">ماشینهای مقیم در پارکینگ</a></li>
+                <li title="جستجوی سریع 39"><a href="http://192.168.133.146/hotel/reception/safetybox_list.php">صندوق امانات میهمانان</a></li>
+            </ul>
+        </li>
+        <li class="level_4"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">تور و شرکت</a>
+            <ul>
+                <li title="جستجوی سریع 40"><a href="http://192.168.133.146/hotel/reception/fuliotour_active_list.php">نمایش <strong>فولیو</strong> تور شرکت</a></li>
+                <li title="جستجوی سریع 41"><a href="http://192.168.133.146/hotel/reception/tour_list.php">تورها وشرکتهای<strong> فعال</strong></a></li>
+                <li class="has_childeren"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">تورها شرکتها</a>
+                    <ul class="level_4_2">
+    	                <li title="جستجوی سریع 420"><a href="http://192.168.133.146/hotel/reception/tour_list1.php"><strong>مانده بدهی</strong> تورها وشرکتها</a></li>
+    	                <li title="جستجوی سریع 421"><a href="http://192.168.133.146/hotel/reception/tour_list1_print.php"><strong>مانده بدهی</strong> تورها وشرکتها به فرم چاپ</a></li>
+    	                <li title="جستجوی سریع 422"><a href="http://192.168.133.146/hotel/reception/fuliotour_new.php"><strong>ثبت </strong>اقلام اضافی تور شرکت</a></li>
+    	                <li title="جستجوی سریع 423"><a href="http://192.168.133.146/hotel/reception/fuliotour_discount_new.php">ثبت <strong>تخفیف </strong>به تور شرکت</a></li>
+    	                <li title="جستجوی سریع 424"><a href="http://192.168.133.146/hotel/reception/fuliotour_list.php">اقلام اضافی صورتحساب تور امروز</a></li>
+    	                <li title="جستجوی سریع 425"><a href="http://192.168.133.146/hotel/reception/fuliotour_old_list.php">اقلام اضافی صورتحساب تور طی بازه تاریخی</a></li>
+    	                <li title="جستجوی سریع 426"><a href="http://192.168.133.146/hotel/reception/masterroom_list.php?_it=1">سرگروههای<strong> تور مقیم دارای (IT)</strong> </a></li>
+    	                <li title="جستجوی سریع 428"><a href="http://192.168.133.146/hotel/reception/tourkind_list.php">طبقه بندی کل تورها وشرکتها</a></li>
+    	                <li title="جستجوی سریع 429"><a href="http://192.168.133.146/hotel/reception/tourkind2_list.php">طبقه بندی گارانتی تورها وشرکتها</a></li>
+                		<li title="جستجوی سریع 430"><a href="http://192.168.133.146/hotel/reception/tour_list_print.php"><strong>چاپ</strong> تورها وشرکتهای<strong> فعال</strong></a></li>
+    	                </ul>
+                </li>
+                <li title="جستجوی سریع 43"><a href="http://192.168.133.146/hotel/reception/tour_guest_list.php">اتاقهای <strong>تور مقیم </strong></a></li>
+                <li title="جستجوی سریع 44"><a href="http://192.168.133.146/hotel/reception/tour_guest_old_list.php">اتاقهای تور تاریخهای<strong> قبل</strong></a></li>
+                <li title="جستجوی سریع 45"><a href="http://192.168.133.146/hotel/reception/tour_room_stay_list.php"><strong>مانده بدهی</strong> تورهای مقیم</a></li>
+                
+                <li class="has_childeren"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#"><strong>بنکوئت</strong> هتل</a>
+                    <ul class="level_4_6">
+                        <li title="جستجوی سریع 460"><a href="http://192.168.133.146/hotel/reception/banquet_list.php?_active=1">سریال رزروهای بنکوئت</a></li>
+                        <li title="جستجوی سریع 461"><a href="http://192.168.133.146/hotel/reception/banquet_list2.php">مانده بدهی بنکوئت</a></li>
+                        <li title="جستجوی سریع 462"><a href="http://192.168.133.146/hotel/reception/fuliobanquet_active_list.php"><strong>فولیو</strong> بنکوئت</a></li>
+                        <li title="جستجوی سریع 463"><a href="http://192.168.133.146/hotel/reception/fuliobanquet_new.php">ثبت اقلام <strong>اضافی</strong> بنکوئت</a></li>
+                        <li title="جستجوی سریع 464"><a href="http://192.168.133.146/hotel/reception/fuliobanquet_discount_new.php">ثبت <strong>تخفیف </strong>بنکوئت</a></li>
+                        <li title="جستجوی سریع 465"><a href="http://192.168.133.146/hotel/reception/fuliobanquet_old_list.php">اقلام اضافی صورتحساب</a></li>                           
+                    </ul>
+                </li>
+                <li class="has_childeren"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#"><strong>پرسنل</strong> هتل</a>
+                    <ul class="level_4_7">
+                        <li title="جستجوی سریع 470"><a href="http://192.168.133.146/hotel/reception/personel_list.php">پرسنل <strong>فعال</strong></a></li>
+                        <li title="جستجوی سریع 471"><a href="http://192.168.133.146/hotel/reception/fuliopersonel_active_list.php"><strong> فولیو</strong> پرسنل</a></li>
+                        <li title="جستجوی سریع 472"><a href="http://192.168.133.146/hotel/reception/fuliopersonel_new.php">ثبت اقلام<strong> اضافی </strong> پرسنل</a></li>
+                        <li title="جستجوی سریع 473"><a href="http://192.168.133.146/hotel/reception/fuliopersonel_discount_new.php">ثبت <strong>تخفیف </strong>پرسنل</a></li>                           
+                    </ul>
+                </li>
+                <li title="جستجوی سریع 48"><a href="http://192.168.133.146/hotel/reception/amount_search.php"><strong>جستجوی مبلغ</strong> در نرم افزار</a></li>
+                <li title="جستجوی سریع 49"><a href="http://192.168.133.146/hotel/reception/guest_old_list_stay.php">گزارش از<strong> تنوع سنی </strong> میهمانان مقیم تورشرکت</a></li>
+                <li title="جستجوی سریع 491"><a href="http://192.168.133.146/hotel/reception/it_tour_list.php">گزارش از میزان استفاده <strong> IT </strong> تورشرکت</a></li>
+            </ul>
+        </li>
+        <li class="level_5"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">صندوق</a>
+            <ul>
+                <li title="جستجوی سریع 50"><a href="http://192.168.133.146/hotel/reception/centralcash_new1.php"><strong>ثبت </strong>عملیات نقد ونسیه صندوق</a></li>
+                <li title="جستجوی سریع 51"><a href="http://192.168.133.146/hotel/reception/centralcash_list.php">لیست صندوق<strong> باز</strong></a></li>
+                <li title="جستجوی سریع 52"><a href="http://192.168.133.146/hotel/reception/centralcash_close_shift.php"><strong>بستن شیفت</strong> صندوق وشروع شیفت بعد</a></li>
+                <li title="جستجوی سریع 53"><a href="http://192.168.133.146/hotel/reception/centralcash_main_closed.php">صندوق <strong>بسته شده</strong> روزهای قبل</a></li>
+                <li title="جستجوی سریع 54"><a href="http://192.168.133.146/hotel/reception/centralcash_new2.php"><strong>انتقال </strong>اقلام بین <strong>تور و اتاق</strong></a></li>
+                <li class="has_childeren"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">گزارشات دیگر صندوق</a>
+                    <ul class="level_5_5">
+		                <li title="جستجوی سریع 550"><a href="http://192.168.133.146/hotel/reception/centralcash_new4.php">انتقال اقلام بین صورتحسابهای یک اتاق</a></li>
+		                <li title="جستجوی سریع 551"><a href="http://192.168.133.146/hotel/reception/deposit_list1.php">پیش دریافتهای پذیرش تائید نشده</a></li>
+		                <li title="جستجوی سریع 552"><a href="http://192.168.133.146/hotel/reception/centralcash_other_list.php">موجودی دیگرصندوقهای فعال هتل</a></li>
+		                <li title="جستجوی سریع 553"><a href="http://192.168.133.146/hotel/reception/centralcash_personel_list.php">خلاصه موجودی کاربران صندوق مرکزی</a></li>
+                    </ul>
+                </li><li title="جستجوی سریع 56"><a href="http://192.168.133.146/hotel/reception/centralcash_new3.php">انتقال یک <strong>رزرو</strong> به اتاق مقیم یا تورشرکت</a></li>
+            </ul>
+        </li>
+        <li class="level_6"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">گزارشات ماهانه</a>
+            <ul>
+                <li title="جستجوی سریع 60"><a href="http://192.168.133.146/hotel/reception/room_income_list8.php"><strong>درصد اشغال</strong> اتاق به تفکیک <strong><font color="#F00000">روز</font></strong></a></li>
+                <li title="جستجوی سریع 61"><a href="http://192.168.133.146/hotel/reception/room_income_list11.php">درصد اشغال اتاق به تفکیک <strong><font color="#0000F0">ماه و فصل</font></strong></a></li>
+                <li title="جستجوی سریع 62"><a href="http://192.168.133.146/hotel/reception/room_income_list6.php">لیست ماهیانه مسافرین هتل ۱</a></li>
+                <li title="جستجوی سریع 63"><a href="http://192.168.133.146/hotel/reception/room_income_list7.php">لیست ماهیانه مسافرین هتل ۲</a></li>
+                <li title="جستجوی سریع 64"><a href="http://192.168.133.146/hotel/reception/room_income_list12.php">لیست ماهیانه مسافرین هتل ۳</a></li>
+                <li title="جستجوی سریع 65"><a href="http://192.168.133.146/hotel/reception/room_income_list5.php">گزارش کامل فروش اتاقها</a></li>
+                <li title="جستجوی سریع 66"><a href="http://192.168.133.146/hotel/reception/room_income_list4.php">گزارش از تنوع اتاقهای فروخته شده</a></li>
+                <li title="جستجوی سریع 67"><a href="http://192.168.133.146/hotel/reception/room_income_list10.php">گزارش میزان نفرات استفاده کننده از اتاق</a></li>
+                <li class="has_childeren"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">گزارشات دیگر</a>
+                    <ul class="level_6_8">
+		                <li title="جستجوی سریع 680"><a href="http://192.168.133.146/hotel/reception/nationality_guest_list.php">گزارش از ملیت میهمانان هتل</a></li>
+		                <li title="جستجوی سریع 681"><a href="http://192.168.133.146/hotel/reception/time_checkin_guest_list.php">گزارش از زمان ورود وخروج میهمانان</a></li>
+		                <li title="جستجوی سریع 682"><a href="http://192.168.133.146/hotel/reception/guest_old_list.php">گزارش از تنوع سنی میهمانان</a></li>
+		                <li title="جستجوی سریع 683"><a href="http://192.168.133.146/hotel/reception/time_birth_guest_list.php">گزارش از تاریخ تولد میهمانان مقیم وغیرمقیم</a></li>                                             
+		                <li title="جستجوی سریع 684"><a href="http://192.168.133.146/hotel/reception/nationality_guest_list3.php">گزارش از ورود میهمانان به تفکیک استان مبدا</a></li>
+		                <li title="جستجوی سریع 685"><a href="http://192.168.133.146/hotel/reception/nationality_guest_list1.php">گزارش از ورود میهمانان به تفکیک منطقه</a></li>
+		                <li title="جستجوی سریع 686"><a href="http://192.168.133.146/hotel/reception/city_guest_list.php">گزارش از ورود میهمانان به تفکیک شهر مبدا</a></li>
+		                <li title="جستجوی سریع 687"><a href="http://192.168.133.146/hotel/reception/reson_guest_list.php">گزارش ازمیهمانان به تفکیک وسیله سفروقصدازسفر</a></li>
+		                <li title="جستجوی سریع 688"><a href="http://192.168.133.146/hotel/reception/occutation_guest_list.php">گزارش ازمیهمانان به تفکیک شغل</a></li>
+                    </ul>
+				</li><li title="جستجوی سریع 69"><a href="http://192.168.133.146/hotel/reception/nationality_guest_list2.php">گزارش هفتگی ورود وخروج میهمانان</a></li>
+                <li title="جستجوی سریع 691"><a href="http://192.168.133.146/hotel/charts/room_income_charts.php"><strong>نمودارهای<font color="#F00000"> درصداشغال </font></strong> هتل</a></li>
+            </ul>
+        </li>
+        <li class="level_7"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">گزارشات روزانه</a>
+            <ul>
+				<li title="جستجوی سریع 70"><a href="http://192.168.133.146/hotel/reception/room_income_list1.php"><strong>خلاصه</strong> گزارش <strong>فروش </strong>روزانه اتاق</a></li>
+                <li title="جستجوی سریع 71"><a href="http://192.168.133.146/hotel/reception/room_income_list2.php">گزارش <strong>کامل</strong> فروش روزانه اتاق</a></li>
+                <li title="جستجوی سریع 72"><a href="http://192.168.133.146/hotel/reception/room_income_list3.php">خلاصه گزارش روزانه فروش اتاق بتاریخ <strong>میلادی</strong></a></li>
+                <li class="has_childeren"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">گزارشات و لیستهای <strong>اماکن</strong></a>
+                    <ul class="level_7_3">
+                        <li title="جستجوی سریع 730"><a href="http://192.168.133.146/hotel/reception/amaken_close.php"><strong>بستن </strong>لیست اماکن امروز</a></li>
+                        <li title="جستجوی سریع 731"><a href="http://192.168.133.146/hotel/reception/amaken_list1.php"><strong>ارائه لیست </strong>اماکن هتل</a></li>
+                        <li title="جستجوی سریع 732"><a href="http://192.168.133.146/hotel/reception/amaken_list1-1.php">ارائه لیست اماکن هتل به فرم <strong>خلاصه</strong></a></li>
+                        <li title="جستجوی سریع 733"><a href="http://192.168.133.146/hotel/reception/amaken_list2.php">مشخصات مسافرین <strong>اتباع خارجی</strong></a></li>
+                        <li title="جستجوی سریع 734"><a href="http://192.168.133.146/hotel/reception/amaken_police.php">ایجاد دیسکت <strong> واسط</strong> Police.Dbf</a></li>
+                        <li title="جستجوی سریع 735"><a href="http://192.168.133.146/hotel/reception/amaken_disket.php">ایجاد دیسکت اصلی اماکن هتل</a></li>
+                        <li title="جستجوی سریع 736"><a href="http://192.168.133.146/hotel/reception/amaken_pejvak.php">ارائه لیست پژواک</a></li>
+                        <li title="جستجوی سریع 737"><a href="http://192.168.133.146/hotel/reception/amaken_hotel.php">ایجاد فایل اماکن  Hotel.Dbf</a></li>
+                        <li title="جستجوی سریع 738"><a href="http://192.168.133.146/hotel/reception/amaken_on-line.php"><strong>ارسال</strong> فایل اماکن به روش <strong>XML</strong></a></li>
+                        <li title="جستجوی سریع 739"><a href="http://192.168.133.146/hotel/reception/amaken_on-line_list2.php">میهمانان <strong>ارسال شده</strong> به روش <strong>XML</strong></a></li>
+                    </ul>
+                </li>
+                <li title="جستجوی سریع 74"><a href="http://192.168.133.146/hotel/reception/guest_room_list.php"><strong>مانده بدهی کلی</strong> اتاقهای هتل</a></li>
+                <li title="جستجوی سریع 75"><a href="http://192.168.133.146/hotel/reception/guest_room_list2.php"><strong>مانده بدهی</strong> اتاقهای هتل واعمال <strong>اعتبار</strong></a></li>
+                <li class="has_childeren"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">گزارشات دیگر</a>
+                    <ul class="level_7_6">
+		                <li><a href="http://192.168.133.146/hotel/reception/chkinout_list.php">ارائه لیست<strong> ورود و خروج </strong>میهمانان</a></li>
+                        <li><a href="http://192.168.133.146/hotel/reception/chkinout_list_2.php">ارائه لیست<strong> ورود و خروج </strong>میهمانان (فرم ۲)</a></li>
+		                <li><a href="http://192.168.133.146/hotel/reception/chk_out_room_list.php">ارائه لیست<strong> ورود و خروج </strong> اتاق</a></li>
+		                <li><a href="http://192.168.133.146/hotel/reception/chk_out_list.php"><strong>مهمانانی </strong>که از هتل خارج شده اند</a></li>
+		                <li><a href="http://192.168.133.146/hotel/reception/chkin_list.php">مهمانانی که به هتل <strong>وارد </strong>شده اند</a></li>
+		                <li><a href="http://192.168.133.146/hotel/reception/register_discount_list.php">رجیسترهای دارای <strong>تخفیف متفرقه</strong></a></li>
+						<li><a href="http://192.168.133.146/hotel/reception/reception_report_list.php">گزارش<strong>تکمیلی</strong></a></li>
+		            </ul>
+                </li><li title="جستجوی سریع 77"><a href="http://192.168.133.146/hotel/reception/checkin_status_list.php"><strong>صورت وضعیت</strong> اتاقهای هتل ۱</a></li>
+                <li title="جستجوی سریع 78"><a href="http://192.168.133.146/hotel/reception/checkin_status_list2.php">صورت وضعیت اتاقهای هتل ۲</a></li>
+            	<li title="جستجوی سریع 79"><a href="http://192.168.133.146/hotel/reception/tomorrow_welcome_checkout.php">چاپ پیغام <strong> میهمانان تخلیه فردا </strong></a></li>            	
+            </ul>
+        </li>             
+        <li class="level_8"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">امکانات ۱</a>
+            <ul>
+                <li title="جستجوی سریع 80"><a href="http://192.168.133.146/hotel/change_year/change_year.php?_kind=1">تغییر<strong> سال مالی</strong> فعال </a></li>
+                <li title="جستجوی سریع 81"><a href="http://192.168.133.146/hotel/reception/clerk_password_change.php">تغییر <strong>کلمه عبور</strong> ورود</a></li>
+                <li title="جستجوی سریع 82"><a href="http://192.168.133.146/hotel/reception/clerk_list.php"><strong>کاربران</strong> برنامه</a></li>
+                <li class="has_childeren"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">کدینگها</a>
+                <ul class="level_8_3">
+                    <li title="جستجوی سریع 830"><a href="http://192.168.133.146/hotel/reception/roomkinds_list.php">انواع اتاقهای هتل</a></li>
+                    <li title="جستجوی سریع 831"><a href="http://192.168.133.146/hotel/reception/room_extra_list.php">مشخصه های اضافی اتاق</a></li>
+                    <li title="جستجوی سریع 832"><a href="http://192.168.133.146/hotel/reception/roomfloor_list.php">طبقه بندی اتاقهای هتل</a></li>
+                    <li title="جستجوی سریع 833"><a href="http://192.168.133.146/hotel/reception/room_list.php"> اتاقهای هتل</a></li>
+                    <li title="جستجوی سریع 834"><a href="http://192.168.133.146/hotel/reception/room_list1.php">قیمتهای ریالی ودلاری اتاقهای هتل</a></li>
+                    <li title="جستجوی سریع 835"><a href="http://192.168.133.146/hotel/reception/securitycodding_list.php">کدینگ اماکن</a></li>
+                    <li title="جستجوی سریع 836"><a href="http://192.168.133.146/hotel/reception/securitycoddingostan_list.php">کدینگ استانی اماکن</a></li>
+                    <li title="جستجوی سریع 837"><a href="http://192.168.133.146/hotel/reception/pasengergroup_list.php">کدینگ طبقه بندی اقشار میهمانان</a></li>
+                    <li title="جستجوی سریع 838"><a href="http://192.168.133.146/hotel/reception/securitycoddingarea_list.php">کدینگ نواحی کشورهای اماکن</a></li>
+                    <li title="جستجوی سریع 839"><a href="http://192.168.133.146/hotel/reception/gate_entry_list.php">کدینگ مرزهای ورود به کشور</a></li>
+                    <li title="جستجوی سریع 840"><a href="http://192.168.133.146/hotel/reception/airport_list.php">لیست فرودگاههای کشور</a></li>
+                    <li title="جستجوی سریع 841"><a href="http://192.168.133.146/hotel/reception/change_room_kind_list.php">لیست شرحهای ثابت تغییر اتاق میهمان</a></li>
+                                    </ul>
+                                    </li><li title="جستجوی سریع 84"><a href="http://192.168.133.146/hotel/reception/masterplan_list.php"><strong>پلان</strong>های هتل</a></li>
+                    
+                <li title="جستجوی سریع 85"><a href="http://192.168.133.146/hotel/reception/system_update.php">برابری <strong>نرخ ارز </strong>و تخت اضافه</a></li>
+
+                                    <li class="has_childeren"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">متن های ثابت</a>
+                        <ul class="level_8_6">
+                            <li title="جستجوی سریع 860"><a href="http://192.168.133.146/hotel/reception/system_welcome_update.php">متن خوش آمدگوئی میهمانان</a></li>
+                            <li title="جستجوی سریع 861"><a href="http://192.168.133.146/hotel/reception/system_welcome_checkout_update.php">متن ثابت میهمانان تخلیه فردا</a></li>
+
+                        </ul>
+                    </li>
+                    
+
+                <li title="جستجوی سریع 87"><a href="http://192.168.133.146/hotel/reception/managers_list.php"><strong>مدیران</strong> دارای مجوز <strong>تخفیف</strong></a></li>
+                <li title="جستجوی سریع 88"><a href="http://192.168.133.146/hotel/reception/discount_list.php"><strong>مجوز تخفیف </strong>صادره مدیریت</a></li>
+           </ul>
+        </li>
+        <li class="level_9"><a href="http://192.168.133.146/hotel/reception/fulio_list.php#">امکانات ۲</a>
+            <ul>
+                <li title="جستجوی سریع 90"><a href="http://192.168.133.146/hotel/massage/clerk_rack_massage.php">ثبت پیغام برای کارکنان وهمکاران</a></li>
+                <li title="جستجوی سریع 91"><a href="http://192.168.133.146/hotel/reception/clerk_report_number_row.php">تصحیح تعداد رکوردهای قابل نمایش</a></li>
+                                <li title="جستجوی سریع 93"><a href="http://192.168.133.146/hotel/reception/clerk_logs.php">لاگ های عملیاتی من</a></li>
+                                <li title="جستجوی سریع 94"><a href="http://192.168.133.146/hotel/reception/jana_manual_send.php">ارسال دستی اطلاعات با سامانه جانا</a></li>
+                                </ul>
+        </li>
+        <li>
+            <a href="http://192.168.133.146/hotel/front_logoff.php" onclick="return confirm('از حساب کاربری خارج می شوید؟');">خروج</a>
+        </li>
+    </ul>
+</div>
+
+<script type="text/javascript" src="./لیست صورتحسابهای باز مهمان_files/jquery.maskedinput-1.14.js.download"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#_date2, #_date1').mask('0000/00/00', {placeholder: "____/__/__"});
+    });
+</script>
+
+<div id="show_favorite" title=" نمایش صفحات مورد علاقه " class="no_print"></div>
+	<div id="master_div" style="display: block;">
+	<div id="header_report">
+	<a href="http://192.168.133.146/hotel/help/p22.htm" class="no_print"><img src="./لیست صورتحسابهای باز مهمان_files/help.png" width="27" height="27" style="float: left; padding-left: 5px; padding-top: 1px;" title="Help"></a>
+	<a href="http://192.168.133.146/hotel/menu/recp1.php" class="no_print"><img src="./لیست صورتحسابهای باز مهمان_files/home.png" width="27" height="27" style="float: left; padding-left: 5px; padding-top: 2px;" title="Home"></a>
+	<div style="padding: 2px 5px 5px 5px;">لیست صورتحسابهای باز میهمانان</div>
+	</div>   
+	<div id="body"> 
+	<div id="main">   
+
+	
+<div id="information">
+<table style="width: 100%;" border="0">
+<tbody><tr>
+    		<td align="left"><div style="padding-left: 2px; direction: ltr;">تاریخ : ۱۴۰۵/۰۹/۰۳</div></td>
+        <td rowspan="2" align="center"></td>
+        <td align="right"><div style="padding-right: 2px;">شرکت گردشگری و اقامتی آریان کویر رفسنجان</div></td>
+    	</tr>
+</tbody></table>
+</div>
+
+        <table id="topBoxTab" align="right" style="margin-bottom: 10px;margin-top:5px;" cellpadding="5" cellspacing="2">
+            <tbody><tr>
+                <td align="right">
+                    <button type="button" id="filterReport" onclick="valid1()" class="no_print btn" tabindex="3"> ثبت شود                    </button>
+                </td>
+
+                <td align="right">
+                    <input type="text" name="_date2" id="_date2" size="10" maxlength="10" dir="ltr" class="number" value="1405/09/03" tabindex="2" onfocus="this.select();" placeholder="____/__/__"></td>
+                <td align="left" nowrap="nowrap">: تا تاریخ</td>
+                <td align="right">
+                    <input type="text" name="_date1" id="_date1" size="10" maxlength="10" dir="ltr" class="number" value="1405/09/03" tabindex="1" onchange="valid2();" onfocus="this.select();" placeholder="____/__/__">
+                </td>
+                <td align="left" nowrap="nowrap">: از تاریخ</td>
+            </tr>
+        </tbody></table>
+
+        <table id="main_tab" class="persist-area" style="border: 1px solid #c5c5c5; width: 100%; border-collapse: collapse;" align="center">
+	<tbody><tr align="center" class="first_tr_report">
+		<td colspan="2">
+		<a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_new.php"><img style="width: 20px; height: 20px; cursor: pointer;" src="./لیست صورتحسابهای باز مهمان_files/icon_in.png" alt="اضافه" title="اضافه" border="0"></a>		</td>
+		<td>بستانکار</td>
+		<td>بدهکار</td>
+		<td>تعداد</td>
+		<td>شرح</td>
+		<td nowrap="nowrap">نام میهمان</td>
+		<td nowrap="nowrap">نام خانوادگی</td>
+		<td>اتاق</td>
+		<td>رجیستر</td>
+		<td>تاریخ</td>
+		<td>ردیف</td>
+	</tr>
+	<tr align="center" dir="rtl" class="even_tab" onclick="document.location='guest_report_irn.php?code_id=108730'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39341" onclick="return(window.confirm('آیا کد&lt; '+39341+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39341"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۶۵,۷۵۱,۰۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">اقامت اتاق ۲۱۰ </td>
+		<td align="right" nowrap="nowrap">افشین</td>
+		<td align="right" nowrap="nowrap">فتاح</td>
+		<td align="center" nowrap="nowrap">۲۱۰</td>
+		<td align="center" nowrap="nowrap">۸۷۳۰</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۱</td></tr><tr align="center" dir="rtl" class="odd_tab" onclick="document.location='guest_report_irn.php?code_id=108731'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39343" onclick="return(window.confirm('آیا کد&lt; '+39343+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39343"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۶۵,۷۵۱,۰۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">اقامت اتاق ۲۱۱ </td>
+		<td align="right" nowrap="nowrap">میلاد</td>
+		<td align="right" nowrap="nowrap">حمیدی عربلو</td>
+		<td align="center" nowrap="nowrap">۲۱۱</td>
+		<td align="center" nowrap="nowrap">۸۷۳۱</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۲</td></tr><tr align="center" dir="rtl" class="even_tab" onclick="document.location='guest_report_irn.php?code_id=108732'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39345" onclick="return(window.confirm('آیا کد&lt; '+39345+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39345"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۶۵,۷۵۱,۰۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">اقامت اتاق ۲۱۲ </td>
+		<td align="right" nowrap="nowrap">اسماعیل</td>
+		<td align="right" nowrap="nowrap">طالبی خامنه</td>
+		<td align="center" nowrap="nowrap">۲۱۲</td>
+		<td align="center" nowrap="nowrap">۸۷۳۲</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۳</td></tr><tr align="center" dir="rtl" class="odd_tab" onclick="document.location='guest_report_irn.php?code_id=108733'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39347" onclick="return(window.confirm('آیا کد&lt; '+39347+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39347"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۹۸,۹۵۲,۰۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">اقامت اتاق ۲۰۸ </td>
+		<td align="right" nowrap="nowrap">عادل</td>
+		<td align="right" nowrap="nowrap">بناکار</td>
+		<td align="center" nowrap="nowrap">۲۰۸</td>
+		<td align="center" nowrap="nowrap">۸۷۳۳</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۴</td></tr><tr align="center" dir="rtl" class="even_tab" onclick="document.location='guest_report_irn.php?code_id=108734'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39349" onclick="return(window.confirm('آیا کد&lt; '+39349+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39349"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۱۱۷,۹۲۴,۰۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">اقامت اتاق ۲۰۶ </td>
+		<td align="right" nowrap="nowrap">رسول</td>
+		<td align="right" nowrap="nowrap">سلیمی کاسین</td>
+		<td align="center" nowrap="nowrap">۲۰۶</td>
+		<td align="center" nowrap="nowrap">۸۷۳۴</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۵</td></tr><tr align="center" dir="rtl" class="odd_tab" onclick="document.location='guest_report_irn.php?code_id=108735'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39351" onclick="return(window.confirm('آیا کد&lt; '+39351+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39351"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۱۵۶,۷۰۵,۰۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">اقامت اتاق ۲۰۵ </td>
+		<td align="right" nowrap="nowrap">شهروز</td>
+		<td align="right" nowrap="nowrap">بزرگی</td>
+		<td align="center" nowrap="nowrap">۲۰۵</td>
+		<td align="center" nowrap="nowrap">۸۷۳۵</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۶</td></tr><tr align="center" dir="rtl" class="even_tab" onclick="document.location='guest_report_irn.php?code_id=108736'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39353" onclick="return(window.confirm('آیا کد&lt; '+39353+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39353"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۱۷۵,۶۷۷,۰۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">اقامت اتاق ۲۰۷ </td>
+		<td align="right" nowrap="nowrap">خداشناس</td>
+		<td align="right" nowrap="nowrap">خداشناس قراملکی</td>
+		<td align="center" nowrap="nowrap">۲۰۷</td>
+		<td align="center" nowrap="nowrap">۸۷۳۶</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۷</td></tr><tr align="center" dir="rtl" class="odd_tab" onclick="document.location='guest_report_irn.php?code_id=108737'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39355" onclick="return(window.confirm('آیا کد&lt; '+39355+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39355"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۱۷۵,۶۷۷,۰۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">اقامت اتاق ۲۱۴ </td>
+		<td align="right" nowrap="nowrap">رسول</td>
+		<td align="right" nowrap="nowrap">خریداری</td>
+		<td align="center" nowrap="nowrap">۲۱۴</td>
+		<td align="center" nowrap="nowrap">۸۷۳۷</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۸</td></tr><tr align="center" dir="rtl" class="even_tab" onclick="document.location='guest_report_irn.php?code_id=108738'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39357" onclick="return(window.confirm('آیا کد&lt; '+39357+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39357"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۱۷۵,۶۷۷,۰۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">اقامت اتاق ۲۱۵ </td>
+		<td align="right" nowrap="nowrap">امیرمحمد</td>
+		<td align="right" nowrap="nowrap">طهماسبی لیمونی</td>
+		<td align="center" nowrap="nowrap">۲۱۵</td>
+		<td align="center" nowrap="nowrap">۸۷۳۸</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۹</td></tr><tr align="center" dir="rtl" class="odd_tab" onclick="document.location='guest_report_irn.php?code_id=108730'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39359" onclick="return(window.confirm('آیا کد&lt; '+39359+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39359"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۶,۵۷۵,۱۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">مالیات بر ارزش افزوده</td>
+		<td align="right" nowrap="nowrap">افشین</td>
+		<td align="right" nowrap="nowrap">فتاح</td>
+		<td align="center" nowrap="nowrap">۲۱۰</td>
+		<td align="center" nowrap="nowrap">۸۷۳۰</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۱۰</td></tr><tr align="center" dir="rtl" class="even_tab" onclick="document.location='guest_report_irn.php?code_id=108731'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39360" onclick="return(window.confirm('آیا کد&lt; '+39360+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39360"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۶,۵۷۵,۱۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">مالیات بر ارزش افزوده</td>
+		<td align="right" nowrap="nowrap">میلاد</td>
+		<td align="right" nowrap="nowrap">حمیدی عربلو</td>
+		<td align="center" nowrap="nowrap">۲۱۱</td>
+		<td align="center" nowrap="nowrap">۸۷۳۱</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۱۱</td></tr><tr align="center" dir="rtl" class="odd_tab" onclick="document.location='guest_report_irn.php?code_id=108732'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39361" onclick="return(window.confirm('آیا کد&lt; '+39361+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39361"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۶,۵۷۵,۱۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">مالیات بر ارزش افزوده</td>
+		<td align="right" nowrap="nowrap">اسماعیل</td>
+		<td align="right" nowrap="nowrap">طالبی خامنه</td>
+		<td align="center" nowrap="nowrap">۲۱۲</td>
+		<td align="center" nowrap="nowrap">۸۷۳۲</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۱۲</td></tr><tr align="center" dir="rtl" class="even_tab" onclick="document.location='guest_report_irn.php?code_id=108733'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39362" onclick="return(window.confirm('آیا کد&lt; '+39362+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39362"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۹,۸۹۵,۲۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">مالیات بر ارزش افزوده</td>
+		<td align="right" nowrap="nowrap">عادل</td>
+		<td align="right" nowrap="nowrap">بناکار</td>
+		<td align="center" nowrap="nowrap">۲۰۸</td>
+		<td align="center" nowrap="nowrap">۸۷۳۳</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۱۳</td></tr><tr align="center" dir="rtl" class="odd_tab" onclick="document.location='guest_report_irn.php?code_id=108734'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39364" onclick="return(window.confirm('آیا کد&lt; '+39364+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39364"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۱۱,۷۹۲,۴۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">مالیات بر ارزش افزوده</td>
+		<td align="right" nowrap="nowrap">رسول</td>
+		<td align="right" nowrap="nowrap">سلیمی کاسین</td>
+		<td align="center" nowrap="nowrap">۲۰۶</td>
+		<td align="center" nowrap="nowrap">۸۷۳۴</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۱۴</td></tr><tr align="center" dir="rtl" class="even_tab" onclick="document.location='guest_report_irn.php?code_id=108735'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39365" onclick="return(window.confirm('آیا کد&lt; '+39365+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39365"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۱۵,۶۷۰,۵۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">مالیات بر ارزش افزوده</td>
+		<td align="right" nowrap="nowrap">شهروز</td>
+		<td align="right" nowrap="nowrap">بزرگی</td>
+		<td align="center" nowrap="nowrap">۲۰۵</td>
+		<td align="center" nowrap="nowrap">۸۷۳۵</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۱۵</td></tr><tr align="center" dir="rtl" class="odd_tab" onclick="document.location='guest_report_irn.php?code_id=108736'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39366" onclick="return(window.confirm('آیا کد&lt; '+39366+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39366"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۱۷,۵۶۷,۷۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">مالیات بر ارزش افزوده</td>
+		<td align="right" nowrap="nowrap">خداشناس</td>
+		<td align="right" nowrap="nowrap">خداشناس قراملکی</td>
+		<td align="center" nowrap="nowrap">۲۰۷</td>
+		<td align="center" nowrap="nowrap">۸۷۳۶</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۱۶</td></tr><tr align="center" dir="rtl" class="even_tab" onclick="document.location='guest_report_irn.php?code_id=108737'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39367" onclick="return(window.confirm('آیا کد&lt; '+39367+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39367"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۱۷,۵۶۷,۷۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">مالیات بر ارزش افزوده</td>
+		<td align="right" nowrap="nowrap">رسول</td>
+		<td align="right" nowrap="nowrap">خریداری</td>
+		<td align="center" nowrap="nowrap">۲۱۴</td>
+		<td align="center" nowrap="nowrap">۸۷۳۷</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۱۷</td></tr><tr align="center" dir="rtl" class="odd_tab" onclick="document.location='guest_report_irn.php?code_id=108738'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39368" onclick="return(window.confirm('آیا کد&lt; '+39368+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39368"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۱۷,۵۶۷,۷۰۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">مالیات بر ارزش افزوده</td>
+		<td align="right" nowrap="nowrap">امیرمحمد</td>
+		<td align="right" nowrap="nowrap">طهماسبی لیمونی</td>
+		<td align="center" nowrap="nowrap">۲۱۵</td>
+		<td align="center" nowrap="nowrap">۸۷۳۸</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۱۸</td></tr><tr align="center" dir="rtl" class="even_tab" onclick="document.location='guest_report_irn.php?code_id=108739'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39369" onclick="return(window.confirm('آیا کد&lt; '+39369+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39369"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۸۲,۱۸۸,۷۵۰</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">اقامت میهمان اتاق ۱۱۰ </td>
+		<td align="right" nowrap="nowrap">سعیدرضا</td>
+		<td align="right" nowrap="nowrap">ثابت رای شیرازی</td>
+		<td align="center" nowrap="nowrap">۱۱۰</td>
+		<td align="center" nowrap="nowrap">۸۷۳۹</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۱۹</td></tr><tr align="center" dir="rtl" class="odd_tab" onclick="document.location='guest_report_irn.php?code_id=108739'"><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_delete.php?__token__=778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9&amp;code_id=39370" onclick="return(window.confirm('آیا کد&lt; '+39370+' &gt;حذف شود؟'))"><img src="./لیست صورتحسابهای باز مهمان_files/icon_del.png" style="width: 20px; height: 20px; cursor:pointer" alt="حذف" title="حذف" border="0"></a>   </td><td><a class="no_print" href="http://192.168.133.146/hotel/reception/fulio_update.php?code_id=39370"><img src="./لیست صورتحسابهای باز مهمان_files/icon_up.png" style="width: 20px; height: 20px; cursor:pointer" alt="تصحیح" title="تصحیح" border="0"></a></td>
+		<td align="center" nowrap="nowrap">۰</td>
+		<td align="center" nowrap="nowrap">۸,۲۱۸,۸۷۵</td>
+		<td align="center" nowrap="nowrap">۱</td>
+		<td align="right">مالیات بر ارزش افزوده میهمان </td>
+		<td align="right" nowrap="nowrap">سعیدرضا</td>
+		<td align="right" nowrap="nowrap">ثابت رای شیرازی</td>
+		<td align="center" nowrap="nowrap">۱۱۰</td>
+		<td align="center" nowrap="nowrap">۸۷۳۹</td>
+		<td align="center" nowrap="nowrap">۱۴۰۵/۰۹/۰۳</td>
+		<td align="center" nowrap="nowrap">۲۰</td></tr>	</tbody></table><br><form method="post" action="http://192.168.133.146/hotel/_export2.php" class="no_print" id="excel_export_js"><input type="hidden" name="data" value="eyJmaWxlX25hbWUiOiJPcGVuIEludm9pY2VzIEd1ZXN0cyBMaXN0IiwibWVyZ2VzIjpbIkExOkIxIl0sImRhdGEiOnsiMSI6eyIxIjp7InZhbCI6IiJ9LCIyIjp7InZhbCI6IiJ9LCIzIjp7InZhbCI6Itio2LPYqtin2Ybaqdin2LEifSwiNCI6eyJ2YWwiOiLYqNiv2Yfaqdin2LEifSwiNSI6eyJ2YWwiOiLYqti52K/Yp9ivIn0sIjYiOnsidmFsIjoi2LTYsditIn0sIjciOnsidmFsIjoi2YbYp9mFINmF24zZh9mF2KfZhiJ9LCI4Ijp7InZhbCI6ItmG2KfZhSDYrtin2YbZiNin2K/ar9uMIn0sIjkiOnsidmFsIjoi2KfYqtin2YIifSwiMTAiOnsidmFsIjoi2LHYrNuM2LPYqtixIn0sIjExIjp7InZhbCI6Itiq2KfYsduM2K4ifSwiMTIiOnsidmFsIjoi2LHYr9uM2YEifX0sIjIiOnsiMSI6eyJ2YWwiOiIifSwiMiI6eyJ2YWwiOiIifSwiMyI6eyJ2YWwiOiLbsCJ9LCI0Ijp7InZhbCI6Itu227Us27fbtduxLNuw27DbsCJ9LCI1Ijp7InZhbCI6ItuxIn0sIjYiOnsidmFsIjoi2KfZgtin2YXYqiDYp9iq2KfZgiDbstux27AifSwiNyI6eyJ2YWwiOiLYp9mB2LTbjNmGIn0sIjgiOnsidmFsIjoi2YHYqtin2K0ifSwiOSI6eyJ2YWwiOiLbstux27AifSwiMTAiOnsidmFsIjoi27jbt9uz27AifSwiMTEiOnsidmFsIjoi27HbtNuw27Uv27DbuS/bsNuzIn0sIjEyIjp7InZhbCI6ItuxIn19LCIzIjp7IjEiOnsidmFsIjoiIn0sIjIiOnsidmFsIjoiIn0sIjMiOnsidmFsIjoi27AifSwiNCI6eyJ2YWwiOiLbttu1LNu327XbsSzbsNuw27AifSwiNSI6eyJ2YWwiOiLbsSJ9LCI2Ijp7InZhbCI6Itin2YLYp9mF2Kog2KfYqtin2YIg27LbsduxIn0sIjciOnsidmFsIjoi2YXbjNmE2KfYryJ9LCI4Ijp7InZhbCI6Itit2YXbjNiv24wg2LnYsdio2YTZiCJ9LCI5Ijp7InZhbCI6Ituy27HbsSJ9LCIxMCI6eyJ2YWwiOiLbuNu327PbsSJ9LCIxMSI6eyJ2YWwiOiLbsdu027DbtS/bsNu5L9uw27MifSwiMTIiOnsidmFsIjoi27IifX0sIjQiOnsiMSI6eyJ2YWwiOiIifSwiMiI6eyJ2YWwiOiIifSwiMyI6eyJ2YWwiOiLbsCJ9LCI0Ijp7InZhbCI6Itu227Us27fbtduxLNuw27DbsCJ9LCI1Ijp7InZhbCI6ItuxIn0sIjYiOnsidmFsIjoi2KfZgtin2YXYqiDYp9iq2KfZgiDbstux27IifSwiNyI6eyJ2YWwiOiLYp9iz2YXYp9i524zZhCJ9LCI4Ijp7InZhbCI6Iti32KfZhNio24wg2K7Yp9mF2YbZhyJ9LCI5Ijp7InZhbCI6Ituy27HbsiJ9LCIxMCI6eyJ2YWwiOiLbuNu327PbsiJ9LCIxMSI6eyJ2YWwiOiLbsdu027DbtS/bsNu5L9uw27MifSwiMTIiOnsidmFsIjoi27MifX0sIjUiOnsiMSI6eyJ2YWwiOiIifSwiMiI6eyJ2YWwiOiIifSwiMyI6eyJ2YWwiOiLbsCJ9LCI0Ijp7InZhbCI6Itu527gs27nbtduyLNuw27DbsCJ9LCI1Ijp7InZhbCI6ItuxIn0sIjYiOnsidmFsIjoi2KfZgtin2YXYqiDYp9iq2KfZgiDbstuw27gifSwiNyI6eyJ2YWwiOiLYudin2K/ZhCJ9LCI4Ijp7InZhbCI6Itio2YbYp9qp2KfYsSJ9LCI5Ijp7InZhbCI6Ituy27DbuCJ9LCIxMCI6eyJ2YWwiOiLbuNu327PbsyJ9LCIxMSI6eyJ2YWwiOiLbsdu027DbtS/bsNu5L9uw27MifSwiMTIiOnsidmFsIjoi27QifX0sIjYiOnsiMSI6eyJ2YWwiOiIifSwiMiI6eyJ2YWwiOiIifSwiMyI6eyJ2YWwiOiLbsCJ9LCI0Ijp7InZhbCI6Itux27Hbtyzbuduy27Qs27DbsNuwIn0sIjUiOnsidmFsIjoi27EifSwiNiI6eyJ2YWwiOiLYp9mC2KfZhdiqINin2KrYp9mCINuy27DbtiJ9LCI3Ijp7InZhbCI6Itix2LPZiNmEIn0sIjgiOnsidmFsIjoi2LPZhNuM2YXbjCDaqdin2LPbjNmGIn0sIjkiOnsidmFsIjoi27LbsNu2In0sIjEwIjp7InZhbCI6Itu427fbs9u0In0sIjExIjp7InZhbCI6Itux27TbsNu1L9uw27kv27DbsyJ9LCIxMiI6eyJ2YWwiOiLbtSJ9fSwiNyI6eyIxIjp7InZhbCI6IiJ9LCIyIjp7InZhbCI6IiJ9LCIzIjp7InZhbCI6ItuwIn0sIjQiOnsidmFsIjoi27Hbtdu2LNu327DbtSzbsNuw27AifSwiNSI6eyJ2YWwiOiLbsSJ9LCI2Ijp7InZhbCI6Itin2YLYp9mF2Kog2KfYqtin2YIg27LbsNu1In0sIjciOnsidmFsIjoi2LTZh9ix2YjYsiJ9LCI4Ijp7InZhbCI6Itio2LLYsdqv24wifSwiOSI6eyJ2YWwiOiLbstuw27UifSwiMTAiOnsidmFsIjoi27jbt9uz27UifSwiMTEiOnsidmFsIjoi27HbtNuw27Uv27DbuS/bsNuzIn0sIjEyIjp7InZhbCI6Itu2In19LCI4Ijp7IjEiOnsidmFsIjoiIn0sIjIiOnsidmFsIjoiIn0sIjMiOnsidmFsIjoi27AifSwiNCI6eyJ2YWwiOiLbsdu327Us27bbt9u3LNuw27DbsCJ9LCI1Ijp7InZhbCI6ItuxIn0sIjYiOnsidmFsIjoi2KfZgtin2YXYqiDYp9iq2KfZgiDbstuw27cifSwiNyI6eyJ2YWwiOiLYrtiv2KfYtNmG2KfYsyJ9LCI4Ijp7InZhbCI6Itiu2K/Yp9i02YbYp9izINmC2LHYp9mF2YTaqduMIn0sIjkiOnsidmFsIjoi27LbsNu3In0sIjEwIjp7InZhbCI6Itu427fbs9u2In0sIjExIjp7InZhbCI6Itux27TbsNu1L9uw27kv27DbsyJ9LCIxMiI6eyJ2YWwiOiLbtyJ9fSwiOSI6eyIxIjp7InZhbCI6IiJ9LCIyIjp7InZhbCI6IiJ9LCIzIjp7InZhbCI6ItuwIn0sIjQiOnsidmFsIjoi27Hbt9u1LNu227fbtyzbsNuw27AifSwiNSI6eyJ2YWwiOiLbsSJ9LCI2Ijp7InZhbCI6Itin2YLYp9mF2Kog2KfYqtin2YIg27Lbsdu0In0sIjciOnsidmFsIjoi2LHYs9mI2YQifSwiOCI6eyJ2YWwiOiLYrtix24zYr9in2LHbjCJ9LCI5Ijp7InZhbCI6Ituy27HbtCJ9LCIxMCI6eyJ2YWwiOiLbuNu327PbtyJ9LCIxMSI6eyJ2YWwiOiLbsdu027DbtS/bsNu5L9uw27MifSwiMTIiOnsidmFsIjoi27gifX0sIjEwIjp7IjEiOnsidmFsIjoiIn0sIjIiOnsidmFsIjoiIn0sIjMiOnsidmFsIjoi27AifSwiNCI6eyJ2YWwiOiLbsdu327Us27bbt9u3LNuw27DbsCJ9LCI1Ijp7InZhbCI6ItuxIn0sIjYiOnsidmFsIjoi2KfZgtin2YXYqiDYp9iq2KfZgiDbstux27UifSwiNyI6eyJ2YWwiOiLYp9mF24zYsdmF2K3ZhdivIn0sIjgiOnsidmFsIjoi2LfZh9mF2KfYs9io24wg2YTbjNmF2YjZhtuMIn0sIjkiOnsidmFsIjoi27Lbsdu1In0sIjEwIjp7InZhbCI6Itu427fbs9u4In0sIjExIjp7InZhbCI6Itux27TbsNu1L9uw27kv27DbsyJ9LCIxMiI6eyJ2YWwiOiLbuSJ9fSwiMTEiOnsiMSI6eyJ2YWwiOiIifSwiMiI6eyJ2YWwiOiIifSwiMyI6eyJ2YWwiOiLbsCJ9LCI0Ijp7InZhbCI6Itu2LNu127fbtSzbsduw27AifSwiNSI6eyJ2YWwiOiLbsSJ9LCI2Ijp7InZhbCI6ItmF2KfZhNuM2KfYqiDYqNixINin2LHYsti0INin2YHYstmI2K/ZhyJ9LCI3Ijp7InZhbCI6Itin2YHYtNuM2YYifSwiOCI6eyJ2YWwiOiLZgdiq2KfYrSJ9LCI5Ijp7InZhbCI6Ituy27HbsCJ9LCIxMCI6eyJ2YWwiOiLbuNu327PbsCJ9LCIxMSI6eyJ2YWwiOiLbsdu027DbtS/bsNu5L9uw27MifSwiMTIiOnsidmFsIjoi27HbsCJ9fSwiMTIiOnsiMSI6eyJ2YWwiOiIifSwiMiI6eyJ2YWwiOiIifSwiMyI6eyJ2YWwiOiLbsCJ9LCI0Ijp7InZhbCI6Itu2LNu127fbtSzbsduw27AifSwiNSI6eyJ2YWwiOiLbsSJ9LCI2Ijp7InZhbCI6ItmF2KfZhNuM2KfYqiDYqNixINin2LHYsti0INin2YHYstmI2K/ZhyJ9LCI3Ijp7InZhbCI6ItmF24zZhNin2K8ifSwiOCI6eyJ2YWwiOiLYrdmF24zYr9uMINi52LHYqNmE2YgifSwiOSI6eyJ2YWwiOiLbstux27EifSwiMTAiOnsidmFsIjoi27jbt9uz27EifSwiMTEiOnsidmFsIjoi27HbtNuw27Uv27DbuS/bsNuzIn0sIjEyIjp7InZhbCI6Itux27EifX0sIjEzIjp7IjEiOnsidmFsIjoiIn0sIjIiOnsidmFsIjoiIn0sIjMiOnsidmFsIjoi27AifSwiNCI6eyJ2YWwiOiLbtizbtdu327Us27HbsNuwIn0sIjUiOnsidmFsIjoi27EifSwiNiI6eyJ2YWwiOiLZhdin2YTbjNin2Kog2KjYsSDYp9ix2LLYtCDYp9mB2LLZiNiv2YcifSwiNyI6eyJ2YWwiOiLYp9iz2YXYp9i524zZhCJ9LCI4Ijp7InZhbCI6Iti32KfZhNio24wg2K7Yp9mF2YbZhyJ9LCI5Ijp7InZhbCI6Ituy27HbsiJ9LCIxMCI6eyJ2YWwiOiLbuNu327PbsiJ9LCIxMSI6eyJ2YWwiOiLbsdu027DbtS/bsNu5L9uw27MifSwiMTIiOnsidmFsIjoi27HbsiJ9fSwiMTQiOnsiMSI6eyJ2YWwiOiIifSwiMiI6eyJ2YWwiOiIifSwiMyI6eyJ2YWwiOiLbsCJ9LCI0Ijp7InZhbCI6Itu5LNu427nbtSzbstuw27AifSwiNSI6eyJ2YWwiOiLbsSJ9LCI2Ijp7InZhbCI6ItmF2KfZhNuM2KfYqiDYqNixINin2LHYsti0INin2YHYstmI2K/ZhyJ9LCI3Ijp7InZhbCI6Iti52KfYr9mEIn0sIjgiOnsidmFsIjoi2KjZhtin2qnYp9ixIn0sIjkiOnsidmFsIjoi27LbsNu4In0sIjEwIjp7InZhbCI6Itu427fbs9uzIn0sIjExIjp7InZhbCI6Itux27TbsNu1L9uw27kv27DbsyJ9LCIxMiI6eyJ2YWwiOiLbsduzIn19LCIxNSI6eyIxIjp7InZhbCI6IiJ9LCIyIjp7InZhbCI6IiJ9LCIzIjp7InZhbCI6ItuwIn0sIjQiOnsidmFsIjoi27HbsSzbt9u527Is27TbsNuwIn0sIjUiOnsidmFsIjoi27EifSwiNiI6eyJ2YWwiOiLZhdin2YTbjNin2Kog2KjYsSDYp9ix2LLYtCDYp9mB2LLZiNiv2YcifSwiNyI6eyJ2YWwiOiLYsdiz2YjZhCJ9LCI4Ijp7InZhbCI6Itiz2YTbjNmF24wg2qnYp9iz24zZhiJ9LCI5Ijp7InZhbCI6Ituy27DbtiJ9LCIxMCI6eyJ2YWwiOiLbuNu327PbtCJ9LCIxMSI6eyJ2YWwiOiLbsdu027DbtS/bsNu5L9uw27MifSwiMTIiOnsidmFsIjoi27HbtCJ9fSwiMTYiOnsiMSI6eyJ2YWwiOiIifSwiMiI6eyJ2YWwiOiIifSwiMyI6eyJ2YWwiOiLbsCJ9LCI0Ijp7InZhbCI6Itux27Us27bbt9uwLNu127DbsCJ9LCI1Ijp7InZhbCI6ItuxIn0sIjYiOnsidmFsIjoi2YXYp9mE24zYp9iqINio2LEg2KfYsdiy2LQg2KfZgdiy2YjYr9mHIn0sIjciOnsidmFsIjoi2LTZh9ix2YjYsiJ9LCI4Ijp7InZhbCI6Itio2LLYsdqv24wifSwiOSI6eyJ2YWwiOiLbstuw27UifSwiMTAiOnsidmFsIjoi27jbt9uz27UifSwiMTEiOnsidmFsIjoi27HbtNuw27Uv27DbuS/bsNuzIn0sIjEyIjp7InZhbCI6Itux27UifX0sIjE3Ijp7IjEiOnsidmFsIjoiIn0sIjIiOnsidmFsIjoiIn0sIjMiOnsidmFsIjoi27AifSwiNCI6eyJ2YWwiOiLbsdu3LNu127bbtyzbt9uw27AifSwiNSI6eyJ2YWwiOiLbsSJ9LCI2Ijp7InZhbCI6ItmF2KfZhNuM2KfYqiDYqNixINin2LHYsti0INin2YHYstmI2K/ZhyJ9LCI3Ijp7InZhbCI6Itiu2K/Yp9i02YbYp9izIn0sIjgiOnsidmFsIjoi2K7Yr9in2LTZhtin2LMg2YLYsdin2YXZhNqp24wifSwiOSI6eyJ2YWwiOiLbstuw27cifSwiMTAiOnsidmFsIjoi27jbt9uz27YifSwiMTEiOnsidmFsIjoi27HbtNuw27Uv27DbuS/bsNuzIn0sIjEyIjp7InZhbCI6Itux27YifX0sIjE4Ijp7IjEiOnsidmFsIjoiIn0sIjIiOnsidmFsIjoiIn0sIjMiOnsidmFsIjoi27AifSwiNCI6eyJ2YWwiOiLbsdu3LNu127bbtyzbt9uw27AifSwiNSI6eyJ2YWwiOiLbsSJ9LCI2Ijp7InZhbCI6ItmF2KfZhNuM2KfYqiDYqNixINin2LHYsti0INin2YHYstmI2K/ZhyJ9LCI3Ijp7InZhbCI6Itix2LPZiNmEIn0sIjgiOnsidmFsIjoi2K7YsduM2K/Yp9ix24wifSwiOSI6eyJ2YWwiOiLbstux27QifSwiMTAiOnsidmFsIjoi27jbt9uz27cifSwiMTEiOnsidmFsIjoi27HbtNuw27Uv27DbuS/bsNuzIn0sIjEyIjp7InZhbCI6Itux27cifX0sIjE5Ijp7IjEiOnsidmFsIjoiIn0sIjIiOnsidmFsIjoiIn0sIjMiOnsidmFsIjoi27AifSwiNCI6eyJ2YWwiOiLbsdu3LNu127bbtyzbt9uw27AifSwiNSI6eyJ2YWwiOiLbsSJ9LCI2Ijp7InZhbCI6ItmF2KfZhNuM2KfYqiDYqNixINin2LHYsti0INin2YHYstmI2K/ZhyJ9LCI3Ijp7InZhbCI6Itin2YXbjNix2YXYrdmF2K8ifSwiOCI6eyJ2YWwiOiLYt9mH2YXYp9iz2KjbjCDZhNuM2YXZiNmG24wifSwiOSI6eyJ2YWwiOiLbstux27UifSwiMTAiOnsidmFsIjoi27jbt9uz27gifSwiMTEiOnsidmFsIjoi27HbtNuw27Uv27DbuS/bsNuzIn0sIjEyIjp7InZhbCI6Itux27gifX0sIjIwIjp7IjEiOnsidmFsIjoiIn0sIjIiOnsidmFsIjoiIn0sIjMiOnsidmFsIjoi27AifSwiNCI6eyJ2YWwiOiLbuNuyLNux27jbuCzbt9u127AifSwiNSI6eyJ2YWwiOiLbsSJ9LCI2Ijp7InZhbCI6Itin2YLYp9mF2Kog2YXbjNmH2YXYp9mGINin2KrYp9mCINux27HbsCJ9LCI3Ijp7InZhbCI6Itiz2LnbjNiv2LHYttinIn0sIjgiOnsidmFsIjoi2KvYp9io2Kog2LHYp9uMINi024zYsdin2LLbjCJ9LCI5Ijp7InZhbCI6Itux27HbsCJ9LCIxMCI6eyJ2YWwiOiLbuNu327PbuSJ9LCIxMSI6eyJ2YWwiOiLbsdu027DbtS/bsNu5L9uw27MifSwiMTIiOnsidmFsIjoi27HbuSJ9fSwiMjEiOnsiMSI6eyJ2YWwiOiIifSwiMiI6eyJ2YWwiOiIifSwiMyI6eyJ2YWwiOiLbsCJ9LCI0Ijp7InZhbCI6Itu4LNuy27HbuCzbuNu327UifSwiNSI6eyJ2YWwiOiLbsSJ9LCI2Ijp7InZhbCI6ItmF2KfZhNuM2KfYqiDYqNixINin2LHYsti0INin2YHYstmI2K/ZhyDZhduM2YfZhdin2YYifSwiNyI6eyJ2YWwiOiLYs9i524zYr9ix2LbYpyJ9LCI4Ijp7InZhbCI6Itir2KfYqNiqINix2KfbjCDYtNuM2LHYp9iy24wifSwiOSI6eyJ2YWwiOiLbsdux27AifSwiMTAiOnsidmFsIjoi27jbt9uz27kifSwiMTEiOnsidmFsIjoi27HbtNuw27Uv27DbuS/bsNuzIn0sIjEyIjp7InZhbCI6Ituy27AifX19fQ=="><input type="image" name="xlsx" src="./لیست صورتحسابهای باز مهمان_files/excel.png" style="width: 30px; height: 30px; border: none; margin-left: 10px" title="خروجی اکسل"><input type="hidden" name="__token__" value="778caad0f2dad542d21d6cafd0a0524fddface542fd089427a8e703aa94ad2b9"></form>
+	</div>
+</div>
+</div>
+<br>
+<div align="center">
+    <input type="button" class="btn no_print" name="Room Rack" value="روم رک هتل" onclick="document.location='../reception/room_rack_new.php'" style="CURSOR: pointer"> 
+    <input type="button" class="btn no_print" name="Home" value="بازگشت" onclick="document.location='../menu/recp1.php'" style="CURSOR: pointer">
+</div>
+
+
+
+
+</body></html>
