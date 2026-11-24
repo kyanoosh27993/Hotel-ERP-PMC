@@ -408,3 +408,100 @@ body.reception-mode .content { padding: 0; }
   .asa-clock, .rec-clock { display: none; }
 }
 
+/* ═══════════════ R1 — روم‌رک آسا (کاشی پوشه‌ای) ═══════════════ */
+.rr-wrap { padding: 4px 2px; }
+.rr-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: linear-gradient(180deg, #ffffff, #eaf2fc); border: 1px solid #cbd5e1; border-radius: 10px; padding: 8px 12px; margin-bottom: 10px; }
+.rr-occ { font-size: .9rem; color: #124a8f; }
+.rr-occ b { color: #b91c1c; font-size: 1.05rem; }
+.rr-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rr-tools input[type=search] { border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; font: inherit; font-size: .82rem; width: 150px; }
+.rr-tools select { border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 8px; font: inherit; font-size: .82rem; }
+.rr-tool-btn { border: 1px solid #cbd5e1; background: #fff; color: #124a8f; border-radius: 8px; padding: 6px 12px; font: inherit; font-size: .8rem; cursor: pointer; }
+.rr-tool-btn:hover { background: #dbe7fa; }
+.rr-body { display: flex; gap: 12px; align-items: stretch; }
+.rr-map {
+  flex: 1; background: #eef4f2; border: 2px solid #2e8b8b; border-radius: 12px;
+  padding: 18px; display: flex; flex-wrap: wrap; gap: 22px; align-content: flex-start; min-height: 320px;
+}
+.rr-floor { display: flex; flex-wrap: wrap; gap: 12px; align-content: flex-start; }
+.rr-floor-col { flex-direction: column; flex-wrap: nowrap; min-width: 130px; }
+.rr-floor-title { font-size: .74rem; font-weight: 800; color: #0f5e5e; background: #d5ebe9; border-radius: 6px; padding: 2px 8px; width: fit-content; }
+/* کاشی پوشه‌ای — شکل پوشه با زبانه */
+.rr-tile {
+  position: relative; width: 96px; height: 38px; border: 0; cursor: pointer; font: inherit;
+  border-radius: 4px 8px 8px 8px; box-shadow: 0 3px 6px rgba(0,0,0,.25); transition: transform .12s ease-in-out;
+}
+.rr-tile::before { content: ''; position: absolute; top: -7px; inset-inline-start: 0; width: 42%; height: 12px; border-radius: 6px 10px 0 0; background: inherit; filter: brightness(.92); }
+.rr-tile:hover { transform: translateY(-2px) scale(1.04); z-index: 5; }
+.rr-tile-no { font-size: .95rem; font-weight: 800; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.4); }
+.rr-pin { position: absolute; top: -4px; inset-inline-end: 2px; font-size: .7rem; }
+.rr-blue { background: linear-gradient(180deg, #2e9be0, #1668b8); }
+.rr-grey { background: linear-gradient(180deg, #cfd4da, #a9b0b8); }
+.rr-grey .rr-tile-no { color: #fff; }
+.rr-green { background: linear-gradient(180deg, #66c26a, #1a9e56); }
+.rr-purple { background: linear-gradient(180deg, #c877e0, #b44fd8); }
+.rr-red { background: linear-gradient(180deg, #e04b4b, #c81e1e); }
+/* تول‌تیپ جزئیات — مثل آسا */
+.rr-tip {
+  display: none; position: absolute; top: calc(100% + 10px); inset-inline-start: 0; z-index: 30;
+  width: 300px; background: #fffef2; border: 1px solid #94a3b8; border-radius: 8px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.28); padding: 8px 10px; font-size: .76rem; color: #1f2937; line-height: 1.9;
+}
+.rr-tile:hover .rr-tip, .rr-tile:focus .rr-tip { display: block; }
+.rr-tile:last-child .rr-tip { inset-inline-start: auto; inset-inline-end: 0; }
+/* راهنمای عمودی سمت راست — مثل اسکرین‌شات آسا */
+.rr-legend { width: 150px; background: linear-gradient(180deg, #ffffff, #eef4f2); border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 8px; }
+.rr-legend-row { display: flex; align-items: center; gap: 8px; font-size: .76rem; color: #334155; padding: 5px 2px; border-bottom: 1px dashed #e2e8f0; }
+.rr-legend-sq { width: 20px; height: 20px; border-radius: 4px; flex: 0 0 auto; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+/* پنل عملیات اتاق */
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 60; display: flex; align-items: center; justify-content: center; padding: 16px; }
+.rr-panel { width: min(420px, 94vw); max-height: 86vh; overflow: auto; background: #fff; border-radius: 14px; box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+.rr-act-btn { display: block; width: 100%; margin: 6px 0; border: 1px solid #cbd5e1; background: #f8fafc; color: #124a8f; border-radius: 8px; padding: 8px 12px; font: inherit; font-size: .84rem; cursor: pointer; text-align: right; }
+.rr-act-btn:hover { background: #dbe7fa; }
+.rr-act-btn:disabled { opacity: .45; cursor: not-allowed; }
+.rr-act-close { background: #124a8f; color: #fff; border-color: #124a8f; text-align: center; }
+.rr-note-row { display: flex; gap: 6px; margin: 8px 0; }
+.rr-note-row input { flex: 1; border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 10px; font: inherit; font-size: .82rem; }
+.rr-err { color: #b91c1c; font-size: .8rem; min-height: 1em; }
+.rr-panel h3 { color: #b91c1c; }
+
+/* ═══════════════ R3 — فرم ثبت رجیستر آسا ═══════════════ */
+.reg-form { max-width: 980px; margin: 0 auto; }
+.reg-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-bottom: 2px solid #f2c14e; padding-bottom: 6px; margin-bottom: 10px; }
+.reg-head h3 { color: #b91c1c; font-size: 1.15rem; }
+.reg-date { font-size: .8rem; color: #124a8f; direction: ltr; }
+.reg-section { border: 1px solid #cbd5e1; border-radius: 10px; background: linear-gradient(180deg, #fbfdff, #f3f8fd); margin-bottom: 12px; padding: 10px 12px; }
+.reg-section legend { font-size: .84rem; font-weight: 800; color: #124a8f; padding: 0 8px; }
+.reg-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 6px 14px; }
+.reg-row { display: flex; align-items: center; gap: 8px; }
+.reg-row-tall { align-items: flex-start; }
+.reg-label { font-size: .78rem; color: #124a8f; min-width: 96px; }
+.reg-row input, .reg-row select, .reg-row textarea {
+  flex: 1; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 9px; font: inherit; font-size: .82rem; background: #fff;
+}
+.reg-row input:focus, .reg-row select:focus, .reg-row textarea:focus { outline: 2px solid #1d4ed8; }
+.reg-num { width: 90px; flex: 0 0 auto; text-align: center; }
+.reg-inline { display: flex; align-items: center; gap: 6px; font-size: .8rem; color: #124a8f; }
+.reg-rate-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+.reg-rate-table th, .reg-rate-table td { border: 1px solid #cbd5e1; padding: 4px 6px; font-size: .74rem; text-align: center; }
+.reg-rate-table thead th { background: #dbe7fa; color: #124a8f; }
+.reg-rate-table tbody th { background: #eef3fb; color: #0f172a; width: 64px; }
+.reg-rate-table td input { width: 100%; border: 1px solid #e2e8f0; border-radius: 4px; padding: 4px; font: inherit; font-size: .78rem; text-align: center; direction: ltr; }
+.reg-rate-table td input.reg-total { background: #f1f5f9; }
+.reg-actions { display: flex; gap: 10px; justify-content: center; margin: 14px 0; }
+.reg-actions .submitbtn { width: 180px; }
+.reg-actions .rr-act-btn { width: auto; margin: 0; padding: 8px 18px; text-align: center; }
+.reg-err { color: #b91c1c; font-size: .82rem; font-weight: 700; text-align: center; min-height: 1em; }
+.reg-ok { color: #166534; font-size: .82rem; font-weight: 700; text-align: center; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 6px; }
+
+/* ریسپانسیو R1/R3 */
+@media (max-width: 720px) {
+  .rr-body { flex-direction: column-reverse; }
+  .rr-legend { width: 100%; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+  .rr-legend-row { border-bottom: 0; }
+  .rr-map { padding: 12px; }
+  .rr-tile { width: 84px; }
+  .reg-grid { grid-template-columns: 1fr; }
+}
+
+

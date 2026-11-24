@@ -75,7 +75,15 @@
     }
   }
 
-  function rackTab(panel) { mountModule(panel, 'frontdesk', 'رک اتاق‌ها'); }
+  function rackTab(panel) {
+    /* R1 — روم‌رک واقعی آسا (کاشی‌های پوشه‌ای + عملیات اتاق)؛ اگر ماژول نبود، پذیرش فعلی */
+    panel.innerHTML = '';
+    if (global.Modules && global.Modules.roomrack) {
+      var wrap = el('div', 'rec-module-mount');
+      panel.appendChild(wrap);
+      global.Modules.roomrack.render(wrap);
+    } else mountModule(panel, 'frontdesk', 'رک اتاق‌ها');
+  }
   function cashTab(panel) { mountModule(panel, 'treasury', 'صندوق'); }
   function reportsMTab(panel) { mountModule(panel, 'bi', 'گزارشات ماهانه'); }
   function reportsDTab(panel) { mountModule(panel, 'dashboard', 'گزارشات روزانه'); }
@@ -96,12 +104,19 @@
     ]);
   }
   function registerTab(panel) {
-    panelStub(panel, 'رجیستر — ثبت کارت مهمان جدید', 'New_Registration.html', 'R3', [
-      'مشخصات کامل مهمان: نام/نام‌خانوادگی لاتین، کد ملی/پاسپورت، ملیت، تلفن',
-      'اقامت: تاریخ ورود/خروج، اتاق، نرخ، نفرات، همراهان',
-      'چاپ کارت مهمان + ثبت پلیس (ادارهٔ اتباع)',
-      'فعلاً برای ثبت اقامت از تب «رک اتاق‌ها» استفاده کنید (پذیرش فعلی برنامه).',
-    ]);
+    /* R3 — فرم ثبت رجیستر جدید با فیلدهای دقیق آسا؛ ثبت به POST /pms/reservations یا پیش‌نویس */
+    panel.innerHTML = '';
+    if (global.Modules && global.Modules.register) {
+      var wrap = el('div', 'rec-module-mount');
+      panel.appendChild(wrap);
+      global.Modules.register.render(wrap);
+    } else {
+      panelStub(panel, 'رجیستر — ثبت کارت مهمان جدید', 'New_Registration.html', 'R3', [
+        'مشخصات کامل مهمان: نام/نام‌خانوادگی لاتین، کد ملی/پاسپورت، ملیت، تلفن',
+        'اقامت: تاریخ ورود/خروج، اتاق، نرخ، نفرات، همراهان',
+        'چاپ کارت مهمان + ثبت پلیس (ادارهٔ اتباع)',
+      ]);
+    }
   }
 
   /* ── شل اصلی ── */

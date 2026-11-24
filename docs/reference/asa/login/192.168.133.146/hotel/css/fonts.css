@@ -1,0 +1,60 @@
+@font-face {
+	  font-family: "MH_Nassim";
+	  src: url("../fonts/nassimreqular/nassim-regular.eot");
+	  src: local("☺"),
+	    url("../fonts/nassimreqular/nassim-regular.woff") format("woff"),
+	    url("../fonts/nassimreqular/nassim-regular.ttf") format("truetype");
+	  font-weight: normal;
+	  font-style: normal;
+}
+
+@font-face {
+  font-family: "MH_NassimBold";
+  src: url("../fonts/nassimbold/nassim-bold.eot");
+  src: local("☺"),
+	url("../fonts/nassimbold/nassim-bold.woff") format("woff"),
+	url("../fonts/nassimbold/nassim-bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "MH_BZar";
+  src: url("../fonts/bzar/bzar.eot");
+  src: local("☺"),
+	url("../fonts/bzar/bzar.woff") format("woff"),
+	url("../fonts/bzar/bzar.ttf") format("truetype");
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "MH_BLotus";
+  src: url("../fonts/blotus/blotus.eot");
+  src: local("☺"),
+	url("fonts/blotus/blotus.woff") format("woff"),
+	url("fonts/blotus/blotus.ttf") format("truetype");
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "MH_BLotusBold";
+  src: url("fonts/blotusb/blotusb.eot");
+  src: local("☺"),
+	url("fonts/blotusb/blotusb.woff") format("woff"),
+	url("fonts/blotusb/blotusb.ttf") format("truetype");
+  font-style: normal;
+}
+
+@font-face {
+    font-family: "Georgian";
+    src: url("../fonts/Georgian/NotoSerifGeorgian-ExtraCondensedLight.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "GeorgianBold";
+    src: url("../fonts/Georgian/NotoSerifGeorgian-ExtraCondensedMedium.ttf") format("truetype");
+    font-weight: bold;
+    font-style: normal;
+}

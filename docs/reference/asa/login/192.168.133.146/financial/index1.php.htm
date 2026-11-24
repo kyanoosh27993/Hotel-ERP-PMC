@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta content="fa" http-equiv="Content-Language"/>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+<title>نرم افزار جامع حسابداری آسا سیستم یگانه</title>
+
+
+    <link rel="stylesheet" href="login/css/font/font-awesome.css" />
+    <link href="login/css/font/font_roboto.css" rel="stylesheet">
+    <!--<link rel="stylesheet" href="login/css/style.css">-->
+    <link rel="stylesheet" href="login/css/style1.php">
+
+</head>
+<script type="text/javascript" src="javascript/jquery.js"></script>
+<script type="text/javascript">
+
+function change_visible(kind)
+{
+    document.getElementById('user').disabled = kind;
+    document.getElementById('pass').disabled = kind;
+    //document.getElementById('remmeber').disabled = kind;
+    document.getElementById('sub').disabled = kind;
+}
+
+window.onload = function(){
+    $('#user, #pass, #captcha_value').keydown(function(e){
+        var key = e.which;
+        if(key == 13)
+        {
+            if($(e.target).attr('id') == 'user')
+                $('#pass').focus();
+            else if($(e.target).attr('id') == 'pass')
+                $('#captcha_value').focus();
+            else
+                $('#sub').focus();
+        }
+    })
+    $('#user').focus();
+
+    $('#sub').click(function valid()
+    {
+        var user = $('#user').val();
+        var pass = $('#pass').val();
+        /*var show_captcha = $('#show_captcha').val();*/
+        var captcha_value = $('#captcha_value').val();
+
+        if(user == '')
+        {
+            alert('نام کاربری خالی میباشد');
+            $('#user').focus();
+            return;
+        }
+        if(pass == '')
+        {
+            alert('کلمه عبور خالی میباشد');
+            $('#pass').focus();
+            return;
+        }
+        /*if(show_captcha == 1 && captcha_value == '')*/
+        if(captcha_value == '')
+        {
+            alert('حروف امنیتی را وارد نمایید');
+            $('#captcha_value').focus();
+            return;
+        }
+
+        change_visible(1);
+
+        $('#deactive').css('display', 'none');
+        $('#blacklist').css('display', 'none');
+        $('#error_ip').css('display', 'none');
+        $('#error').css('display', 'none');
+        $('#error_captcha').css('display', 'none');
+        $('#error_login').css('display', 'none');
+        $('#loader').css('display', 'table-row');
+
+        /*$.post('../financial/check_password.php', {user:user, pass:pass, show_captcha:show_captcha,
+            captcha_value:captcha_value}, function(data){*/
+        $.post('check_password.php', {user:user, pass:pass, captcha_value:captcha_value},
+            function(data){
+                if(data.error > 0)
+                {
+                    change_visible(0);
+
+                    if(data.error == 1)
+                    {
+                        $('#loader').css('display', 'none');
+                        $('#error_captcha').css('display', 'table-row');
+                        $('#captcha_value').focus();
+                    }
+                    else if(data.error == 4)
+                    {
+                        $('#loader').css('display', 'none');
+                        $('#error_ip').css('display', 'table-row');
+                        $('#user').focus();
+                    }
+                    else if(data.error == 5)
+                    {
+                        $('#loader').css('display', 'none');
+                        $('#error_login').css('display', 'table-row');
+                        $('#user').focus();
+
+                        _data = 'در حال حاضر تعداد ورود همزمان مجاز برای این کاربر به حداکثر رسیده است.\n\n';
+                        _data += 'تعداد ورودهای همزمان فعلی: ' + data.cur_logins + '\n';
+                        _data += 'شما میتوانید تا پایان فعالیت های قبلی منتظر بمانید\n\n';
+                        _data += 'و یا آنها را به اجبار متوقف کنید.\n\n';
+                        _data += 'آیا میخواهید نشستهای کاربری قبلی را لغو کنید؟';
+                        if(confirm(_data) == true)
+                        {
+                            $.ajax({
+                                url: 'financial/log_out.php',
+                                method: 'POST',
+                                type: 'POST',
+                                data: 'user=' + user,
+                                complete: function() {
+                                    alert('نشستهای قبلی کاربر لغو شد. اکنون میتوانید وارد شوید.');
+                                },
+                            });
+                        }
+                    }
+                    else if(data.error == 99)
+                    {
+                        window.location = 'otp.php';
+                    }
+                    else if(data.error == 11)
+                    {
+                        $('#loader').css('display', 'none');
+                        $('#blacklist').css('display', 'table-row');
+                        $('#user').focus();
+                    }
+                    else if(data.error == 12)
+                    {
+                        $('#loader').css('display', 'none');
+                        $('#deactive').css('display', 'table-row');
+                        $('#user').focus();
+                    }
+                    else
+                    {
+                        $('#loader').css('display', 'none');
+                        $('#error').css('display', 'table-row');
+                        $('#user').val('');
+                        $('#pass').val('');
+                        $('#user').focus();
+
+                        /*if(data.error == 3)
+                        {
+                            $('#captcha').css('display', 'table-row');
+                            $('#show_captcha').val(1);
+                        }*/
+                    }
+
+                    if (data.captcha)
+                        ReactDOM.render(React.createElement(Modal,
+                        {onClick: this.modalToggle,onLoad: this.modalToggle, status: true, data : data.captcha}),
+                        document.getElementById('main'));
+                }
+                else
+                {
+                    if(data.show == 1)
+                    {
+                        alert(data.message);
+                    }
+                    document.location = 'menu/index_header.php';
+                }
+            }, 'json');
+    });
+
+
+    $('.img-refresh').click( function () {
+        $.post('refresh_captcha.php', {action:'refresh'},
+            function(data)
+            {
+                if(data.error == 1)
+                {
+                    ReactDOM.render(React.createElement(Modal,
+                        {onClick: this.modalToggle,onLoad: this.modalToggle, status: true, data : data.captcha.image_src}),
+                        document.getElementById('main'));
+                }
+            }, 'json');
+    });
+}
+</script>
+
+
+<body>
+
+<div id="main""></div>
+
+<script src='login/js/react.min.js'></script>
+<script src='login/js/react-dom.min.js'></script>
+<script src="login/js/index.php?eJyrVkpOLChJzkhUslIyVNJRyk0syQAylWoBZcIHWA=="></script>
+
+<script type="text/javascript">
+
+    ReactDOM.render(React.createElement(Modal,
+        {onClick: this.modalToggle,onLoad: this.modalToggle, status: true, data : '/financial/captcha/simple-php-captcha.php?_CAPTCHA&amp;t=0.80069900+1795529558'}),
+        document.getElementById('main'));
+
+    $(document).ready( function() {
+
+        var time_zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        document.cookie = "time_zone =" + time_zone;
+
+    });
+</script>
+</body>
+</html>

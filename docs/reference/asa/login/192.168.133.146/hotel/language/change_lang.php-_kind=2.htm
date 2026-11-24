@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta content="fa" http-equiv="Content-Language"/>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+    <title>Asa System Yeganeh</title>
+
+
+    <link rel="stylesheet" href="login/css/font/font-awesome.css" />
+    <link href="login/css/font/font_roboto.css" rel="stylesheet">
+    <!--<link rel="stylesheet" href="login/css/style.css">-->
+    <link rel="stylesheet" href="login/css/style1.php">
+
+</head>
+<script src='login/js/react.min.js'></script>
+<script src='login/js/react-dom.min.js'></script>
+<script src="login/js/index.php?eJyrVkpOLChJzkhUslIyVNJRyk0syQAylWoBZcIHWA=="></script>
+<script type="text/javascript" src="login/js/jquery.min.js"></script>
+<script type="text/javascript">
+
+    function change_visible_reg(kind)
+    {
+        document.getElementById('user_reg').disabled = kind;
+        document.getElementById('pass_reg').disabled = kind;
+        document.getElementById('captcha_value_reg').disabled = kind;
+        document.getElementById('sub_reg').disabled = kind;
+    }
+
+    window.onload = function(){
+        $('#user_reg, #pass_reg, #captcha_value_reg').keydown(function(e){
+            var key = e.which;
+            if(key == 13)
+            {
+                if($(e.target).attr('id') == 'user_reg')
+                    $('#pass_reg').focus();
+                else if($(e.target).attr('id') == 'pass_reg')
+                    $('#captcha_value_reg').focus();
+                                else
+                    $('#sub_reg').focus();
+            }
+        });
+
+        $('#user_reg').focus();
+
+        $('#sub_reg').click(function valid()
+        {
+            var user = $('#user_reg').val();
+            var pass = $('#pass_reg').val();
+            /*var show_captcha = $('#show_captcha').val();*/
+            var captcha_value = $('#captcha_value_reg').val();
+
+            if(user == '')
+            {
+                alert('empty username');
+                $('#user_reg').focus();
+                return;
+            }
+            if(pass == '')
+            {
+                alert('empty password');
+                $('#pass_reg').focus();
+                return;
+            }
+                        if (captcha_value == '') {
+                alert('empty captcha');
+                $('#captcha_value_reg').focus();
+                return;
+            }
+            
+            change_visible_reg(1);
+
+            $('#expire_reg').css('display', 'none');
+            $('#deactive_reg').css('display', 'none');
+            $('#blacklist_reg').css('display', 'none');
+            $('#error_ip_reg').css('display', 'none');
+            $('#error_reg').css('display', 'none');
+            $('#error_captcha_reg').css('display', 'none');
+            $('#error_login_reg').css('display', 'none');
+            $('#loader_reg').css('display', 'table-row');
+
+            $.post('check_password.php', {user:user, pass:pass, captcha_value:captcha_value},
+                function(data){
+                    if(data.error > 0)
+                    {
+                        change_visible_reg(0);
+
+                        if(data.error == 1)
+                        {
+                            $('#loader_reg').css('display', 'none');
+                            $('#error_captcha_reg').css('display', 'table-row');
+                            $('#captcha_value_reg').focus();
+                        }
+                        else if(data.error == 4)
+                        {
+                            $('#loader_reg').css('display', 'none');
+                            $('#error_ip_reg').css('display', 'table-row');
+                            $('#user_reg').focus();
+                        }
+                        else if(data.error == 5)
+                        {
+                            $('#loader_reg').css('display', 'none');
+                            $('#error_login_reg').css('display', 'table-row');
+                            $('#user_reg').focus();
+
+                            _data = 'در حال حاضر تعداد ورود همزمان مجاز برای این کاربر به حداکثر رسیده است.\n\n';
+                            _data += 'تعداد ورودهای همزمان فعلی: ' + data.front_cur_logins + '\n';
+                            _data += 'شما میتوانید تا پایان فعالیت های قبلی منتظر بمانید\n\n';
+                            _data += 'و یا آنها را به اجبار متوقف کنید.\n\n';
+                            _data += 'آیا میخواهید نشستهای کاربری قبلی را لغو کنید؟';
+                            if(confirm(_data) == true)
+                            {
+                                $.ajax({
+                                    url: 'front_logoff.php',
+                                    method: 'POST',
+                                    type: 'POST',
+                                    data: 'user=' + user,
+                                    complete: function() {
+                                        alert('نشستهای قبلی کاربر لغو شد. اکنون میتوانید وارد شوید.');
+                                    },
+                                });
+                            }
+                        }
+                        else if(data.error == 99)
+                        {
+                            document.location = 'otp.php';
+                        }
+                        else if(data.error == 11)
+                        {
+                            $('#loader_reg').css('display', 'none');
+                            $('#blacklist_reg').css('display', 'table-row');
+                            $('#user_reg').focus();
+                        }
+                        else if(data.error == 12)
+                        {
+                            $('#loader_reg').css('display', 'none');
+                            $('#deactive_reg').css('display', 'table-row');
+                            $('#user_reg').focus();
+                        }
+                        else if(data.error == 37)
+                        {
+                            $('#loader_reg').css('display', 'none');
+                            $('#expire_reg').css('display', 'table-row');
+                            $('#user_reg').focus();
+                        }
+                        else
+                        {
+                            $('#loader_reg').css('display', 'none');
+                            $('#error_reg').css('display', 'table-row');
+                            $('#user_reg').val('');
+                            $('#pass_reg').val('');
+                            $('#user_reg').focus();
+                        }
+
+                        if (data.captcha) {
+                            $(".img").attr('src', data.captcha);
+                            $('#captcha_value_reg').val('');
+                        }
+                    }
+                    else
+                    {
+                        document.location = '/hotel/index1.php';
+                    }
+                }, 'json');
+        });
+
+
+        $('.img-refresh-reg').click( function () {
+            $.post('refresh_captcha.php', {action:'refresh'},
+                function(data)
+                {
+                    $(".img").attr('src' , data.captcha.image_src);
+                }, 'json');
+        });
+    }
+</script>
+
+
+<body>
+
+<div data-reactroot="" class="modal" data-status="true">
+    <div class="modal-left"><a href="/hotel/index.php"><span class="price-tag"></span></a></div>
+    <div class="modal-right"><h2>Login</h2>
+        <p id="loader_reg" dir="rtl" class="blue hidden">please wait</p>
+        <p id="error_reg" dir="rtl" class="red hidden">incorrect username or password.<br/>or username maybe blocked.
+        </p>
+        <p id="error_captcha_reg" dir="rtl" class="red hidden">incorrect captcha</p>
+        <p id="error_ip_reg" dir="rtl" class="red hidden">اجازه ورود به سیستم با این IP را ندارید.</p>
+        <p id="error_login_reg" dir="rtl" class="red hidden">این نام کاربری در سیستم لاگین است.</p>
+        <p id="blacklist_reg" dir="rtl" class="red hidden">دسترسی شما به این سامانه مسدود شده است. لطفا با مدیر سیستم تماس بگیرید.</p>
+        <p id="expire_reg" dir="rtl" class="red hidden">اعتبار حساب کاربری شما به پایان رسیده است.</p>
+        <form class="ContactForm" autocomplete="off">
+            <input type="text" placeholder="username" name="user_reg" id="user_reg" dir="ltr" autocomplete="off">
+            <input type="password" placeholder="password" name="pass_reg" id="pass_reg" dir="ltr" autocomplete="off">
+                    <div class="captcah-images">
+        <img src="/hotel/captcha/simple-php-captcha.php?_CAPTCHA&amp;t=0.73334400+1795529555" class="img"><img
+                src="login/css/financialImage/refresh_1.png"
+                class="img-refresh-reg"></div>
+        <input type="text" placeholder="Captcha" name="captcha_value" id="captcha_value_reg" dir="ltr">
+        <br>
+                    <button type="button" id="sub_reg" style="font-weight: bold; float:left">Submit</button>
+
+        </form>
+        <button class="close"><span class="fa fa-close"></span></button>
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(document).ready( function() {
+
+        var time_zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        document.cookie = "time_zone =" + time_zone;
+
+    });
+</script>
+</body>
+</html>

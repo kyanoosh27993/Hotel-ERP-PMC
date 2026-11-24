@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta content="fa" http-equiv="Content-Language"/>
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
+    <title>نرم افزار خزانه داری آسا سیستم یگانه</title>
+
+
+    <link rel="stylesheet" href="login/css/font/font-awesome.css" />
+    <link href="login/css/font/font_roboto.css" rel="stylesheet">
+    <!--<link rel="stylesheet" href="login/css/style.css">-->
+    <link rel="stylesheet" href="login/css/style1.php">
+
+</head>
+<script type="text/javascript" src="javascript/jquery.js"></script>
+<script type="text/javascript">
+
+    function change_visible_khazaneh(kind)
+    {
+        document.getElementById('user_khazaneh').disabled = kind;
+        document.getElementById('pass_khazaneh').disabled = kind;
+        document.getElementById('captcha_value_khazaneh').disabled = kind;
+        document.getElementById('sub_khazaneh').disabled = kind;
+    }
+
+    window.onload = function(){
+        $('#user_khazaneh, #pass_khazaneh, #captcha_value_khazaneh').keydown(function(e){
+            var key = e.which;
+            if(key == 13)
+            {
+                if($(e.target).attr('id') == 'user_khazaneh')
+                    $('#pass_khazaneh').focus();
+                else if($(e.target).attr('id') == 'pass_khazaneh')
+                    $('#captcha_value_khazaneh').focus();
+                else
+                    $('#sub_khazaneh').focus();
+            }
+        })
+        $('#user_khazaneh').focus();
+
+        $('#sub_khazaneh').click(function valid()
+        {
+            var user = $('#user_khazaneh').val();
+            var pass = $('#pass_khazaneh').val();
+            /*var show_captcha = $('#show_captcha').val();*/
+            var captcha_value = $('#captcha_value_khazaneh').val();
+
+            if(user == '')
+            {
+                alert('نام کاربری خالی میباشد');
+                $('#user_khazaneh').focus();
+                return;
+            }
+            if(pass == '')
+            {
+                alert('کلمه عبور خالی میباشد');
+                $('#pass_khazaneh').focus();
+                return;
+            }
+            if(captcha_value == '')
+            {
+                alert('حروف امنیتی را وارد نمایید');
+                $('#captcha_value_khazaneh').focus();
+                return;
+            }
+
+            change_visible_khazaneh(1);
+
+            $('#blacklist_khazaneh').css('display', 'none');
+            $('#error_ip_khazaneh').css('display', 'none');
+            $('#error_khazaneh').css('display', 'none');
+            $('#error_captcha_khazaneh').css('display', 'none');
+            $('#error_login_khazaneh').css('display', 'none');
+            $('#loader_khazaneh').css('display', 'table-row');
+
+            /*$.post('../financial/check_password.php', {user:user, pass:pass, show_captcha:show_captcha,
+                captcha_value:captcha_value}, function(data){*/
+            $.post('../financial/check_password.php', {user:user, pass:pass, captcha_value:captcha_value},
+                function(data){
+                    if(data.error > 0)
+                    {
+                        change_visible_khazaneh(0);
+
+                        if(data.error == 1)
+                        {
+                            $('#loader_khazaneh').css('display', 'none');
+                            $('#error_captcha_khazaneh').css('display', 'table-row');
+                            $('#captcha_value_khazaneh').focus();
+                        }
+                        else if(data.error == 4)
+                        {
+                            $('#loader_khazaneh').css('display', 'none');
+                            $('#error_ip_khazaneh').css('display', 'table-row');
+                            $('#user_khazaneh').focus();
+                        }
+                        else if(data.error == 5)
+                        {
+                            $('#loader_khazaneh').css('display', 'none');
+                            $('#error_login_khazaneh').css('display', 'table-row');
+                            $('#user_khazaneh').focus();
+
+                            _data = 'در حال حاضر تعداد ورود همزمان مجاز برای این کاربر به حداکثر رسیده است.\n\n';
+                            _data += 'تعداد ورودهای همزمان فعلی: ' + data.cur_logins + '\n';
+                            _data += 'شما میتوانید تا پایان فعالیت های قبلی منتظر بمانید\n\n';
+                            _data += 'و یا آنها را به اجبار متوقف کنید.\n\n';
+                            _data += 'آیا میخواهید نشستهای کاربری قبلی را لغو کنید؟';
+                            if(confirm(_data) == true)
+                            {
+                                $.ajax({
+                                    url: 'financial/log_out_khazaneh.php',
+                                    method: 'POST',
+                                    type: 'POST',
+                                    data: 'user=' + user,
+                                    complete: function() {
+                                        alert('نشستهای قبلی کاربر لغو شد. اکنون میتوانید وارد شوید.');
+                                    },
+                                });
+                            }
+                        }
+                        else if(data.error == 99)
+                        {
+                            window.location = 'otp.php';
+                        }
+                        else if(data.error == 11)
+                        {
+                            $('#loader_khazaneh').css('display', 'none');
+                            $('#blacklist_khazaneh').css('display', 'table-row');
+                            $('#user_khazaneh').focus();
+                        }
+                        else
+                        {
+                            $('#loader_khazaneh').css('display', 'none');
+                            $('#error_khazaneh').css('display', 'table-row');
+                            $('#user_khazaneh').val('');
+                            $('#pass_khazaneh').val('');
+                            $('#user_khazaneh').focus();
+
+                        }
+
+                        if (data.captcha)
+                            ReactDOM.render(React.createElement(ModalKh,
+                            {onClick: this.modalToggle,onLoad: this.modalToggle, status: true, data : data.captcha}),
+                            document.getElementById('mainKh'));
+                    }
+                    else
+                    {
+                        if(data.show == 1)
+                        {
+                            alert(data.message);
+                        }
+                        document.location = '../financial/menu/header_khazaneh.php';
+                    }
+                }, 'json');
+        });
+
+
+        $('.img-refresh-khazaneh').click( function () {
+            $.post('refresh_captcha.php', {action:'refresh'},
+                function(data)
+                {
+                    if(data.error == 1)
+                    {
+                        ReactDOM.render(React.createElement(ModalKh,
+                            {onClick: this.modalToggle,onLoad: this.modalToggle, status: true, data : data.captcha.image_src}),
+                            document.getElementById('mainKh'));
+                    }
+                }, 'json');
+        });
+    }
+</script>
+
+
+<body>
+
+<div id="mainKh"></div>
+
+<script src='login/js/react.min.js'></script>
+<script src='login/js/react-dom.min.js'></script>
+<script src="login/js/index.php?eJyrVkpOLChJzkhUslIyVNJRyk0syQAylWoBZcIHWA=="></script>
+
+<script type="text/javascript">
+
+    ReactDOM.render(React.createElement(ModalKh,
+        {onClick: this.modalToggle,onLoad: this.modalToggle, status: true, data : '/financial/captcha/simple-php-captcha.php?_CAPTCHA&amp;t=0.48157500+1795529555'}),
+        document.getElementById('mainKh'));
+
+    $(document).ready( function() {
+
+        var time_zone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        document.cookie = "time_zone =" + time_zone;
+
+    });
+</script>
+</body>
+</html>
