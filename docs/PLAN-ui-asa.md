@@ -344,3 +344,8 @@ transform-origin: left top / left center;
 - ورود واقعی admin با کپچای سرور (خواندن تصویر SVG) — MFA نقش‌محور: برای تست محلی `roles.sensitiveMfa=false` شد (فقط DB تست؛ کد دست‌نخورده).
 - نکته: seed رمز پیش‌فرض `ChangeMe_Str0ng!` است (متغیر SEED_ADMIN_PASSWORD)؛ مستند INSTALL-WINDOWS رمزهای دسکتاپ جداگانه دارد.
 - همهٔ ۸ قابلیت بالا با مرورگر به‌صورت کاربر واقعی اجرا و تأیید شد.
+
+### رلیز v3.0.0 (پایان سشن ۴)
+- Release گیت‌هاب: Setup.exe ویندوز (۶۵MB) + APK اندروید (۴MB) + زیپ سورس کامل — هر سه در Release تگ v3.0.0.
+- رفع‌های CI در همین مسیر: کپچای e2e (specs + seed CI) و انتقال env کپچا به boot.cmd بازراه‌اندازی محدود دسکتاپ + env سطح job برای smoke دوم.
+- هر سه workflow (CI، APK، Setup.exe) روی کامیت d3da89d سبز شدند.
