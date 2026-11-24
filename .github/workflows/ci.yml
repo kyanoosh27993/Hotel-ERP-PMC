@@ -71,6 +71,10 @@ jobs:
         run: npm run prisma:migrate -w apps/api
       - name: Seed (roles/matrix/users/rules/payroll)
         run: npm run db:seed -w apps/api
+        env:
+          # e2e با نقش‌های حساس (MFA) لاگین می‌کند — همان secret که specها استفاده می‌کنند
+          MFA_TEST_SECRET: JBSWY3DPEHPK3PXPE2ETEST
+          SEED_ADMIN_PASSWORD: ChangeMe_Str0ng!
       - name: E2E tests (auth/RBAC/outbox/concurrency/POS→journal/payroll→journal)
         run: npm run test:e2e -w apps/api
 
