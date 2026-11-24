@@ -20,12 +20,12 @@ const PG_PORT = 5434;
 const WEB_PORT = 3000;
 const WIN = process.platform === 'win32';
 // لینوکس: باینری‌ها مستقیم در native/ — ویندوز: در native/bin
-const PG_BIN_SNAP = path.join(__dirname, '..', 'node_modules', '@embedded-postgres', WIN ? 'windows-x64' : 'linux-x64', 'native', WIN ? 'bin' : '.');
-const ENGINE_SNAP = path.join(__dirname, '..', 'node_modules', '.prisma', 'client', WIN ? 'query_engine-windows.dll.node' : 'libquery_engine-debian-openssl-3.0.x.so.node');
-const WEB_SNAP = path.join(__dirname, '..', 'web');
+const PG_BIN_SNAP = path.join(__dirname, 'assets-stage', WIN ? 'pg-win' : 'pg-linux');
+const ENGINE_SNAP = path.join(__dirname, 'assets-stage', 'engines', WIN ? 'query_engine-windows.dll.node' : 'libquery_engine-debian-openssl-3.0.x.so.node');
+const WEB_SNAP = path.join(__dirname, 'assets-stage', 'web');
 const MIG_SNAP = path.join(__dirname, 'prisma', 'migrations');
 const PGDATA = path.join(DATA_DIR, 'pgdata');
-const PGBIN = path.join(DATA_DIR, 'pg');
+const PGBIN = path.join(DATA_DIR, 'pg', 'bin');
 const SOCK = path.join(DATA_DIR, 'pg-sock');
 const LOG = (m) => console.log('[HotelERP] ' + m);
 
@@ -62,7 +62,7 @@ function extractRuntime() {
   const exeName = WIN ? 'postgres.exe' : 'postgres';
   if (!fs.existsSync(path.join(PGBIN, exeName))) {
     LOG('استخراج Postgres جاسازی‌شده…');
-    copyTree(PG_BIN_SNAP, PGBIN);
+    copyTree(PG_BIN_SNAP, path.join(DATA_DIR, 'pg'));
     copied = true;
   }
   if (!fs.existsSync(path.join(DATA_DIR, 'engine', path.basename(ENGINE_SNAP)))) {
@@ -99,11 +99,10 @@ function startPostgres(cfg) {
   ensureDir(SOCK);
   const r = spawnSync(pgctl, ['-D', PGDATA, '-w', 'start', '-o', `-p ${PG_PORT} -k "${SOCK}" -c listen_addresses=127.0.0.1`], { stdio: 'ignore' });
   if (r.status !== 0) LOG('pg_ctl start status=' + r.status + ' — احتمالاً از قبل روشن است؛ ادامه…');
-  // ساخت دیتابیس اگر نیست
-  spawnSync(psql, ['-h', '127.0.0.1', '-p', String(PG_PORT), '-U', 'hotel', '-d', 'postgres', '-c', 'CREATE DATABASE hotel_erp'], { stdio: 'ignore' });
-  const dbUrl = `postgresql://hotel@127.0.0.1:${PG_PORT}/hotel_erp`;
-  LOG('دیتابیس آماده روی پورت ' + PG_PORT);
-  return dbUrl;
+  // URL ادمین — ساخت دیتابیس در main() با کلاینت Node (psql در پکیج embedded نیست)
+  const adminUrl = `postgresql://hotel@127.0.0.1:${PG_PORT}/postgres`;
+  LOG('کلاستر آماده روی پورت ' + PG_PORT);
+  return adminUrl;
 }
 
 async function applyMigrations(dbUrl) {
@@ -136,13 +135,21 @@ async function seedIfEmpty(dbUrl, adminPassword) {
   LOG('دادهٔ اولیه (نقش‌ها/کاربران/حساب‌ها/اتاق‌ها/قواعد)…');
   process.env.SEED_ADMIN_PASSWORD = adminPassword;
   // seed کامپایل‌شده — از snapshot اجرا می‌شود (بدون native وابستگی)
-  require('./build-seed/prisma/seed.js');
+  await require('./build-seed/prisma/seed.js');
 }
 
 async function main() {
   const cfg = loadConfig();
   extractRuntime();
-  const dbUrl = startPostgres(cfg);
+  const adminUrl = startPostgres(cfg);
+  // ساخت hotel_erp اگر نیست
+  const { Client } = require('pg');
+  const ac = new Client({ connectionString: adminUrl });
+  await ac.connect();
+  const exists = await ac.query(`SELECT 1 FROM pg_database WHERE datname='hotel_erp'`);
+  if (!exists.rows.length) { LOG('ساخت دیتابیس hotel_erp…'); await ac.query(`CREATE DATABASE hotel_erp`); }
+  await ac.end();
+  const dbUrl = adminUrl.replace('/postgres', '/hotel_erp');
   process.env.DATABASE_URL = dbUrl;
   process.env.PRISMA_QUERY_ENGINE_LIBRARY = path.join(DATA_DIR, 'engine', path.basename(ENGINE_SNAP));
   process.env.PORT = String(WEB_PORT);
@@ -156,6 +163,15 @@ async function main() {
 
   await applyMigrations(dbUrl);
   await seedIfEmpty(dbUrl, cfg.adminPassword);
+  // نسخهٔ دسکتاپ: MFA خاموش (طبق INSTALL-WINDOWS-FA.md) — نقش‌های حساس بدون عامل دوم
+  try {
+    const { Client: C2 } = require('pg');
+    const c2 = new C2({ connectionString: dbUrl });
+    await c2.connect();
+    await c2.query(`UPDATE roles SET "sensitiveMfa" = false`);
+    await c2.end();
+    LOG('MFA نسخهٔ دسکتاپ: خاموش');
+  } catch (e) { LOG('MFA-off skip: ' + e.message); }
   LOG('اجرای سرور روی http://localhost:' + WEB_PORT + ' — این پنجره سرور است؛ بستنش = خاموش شدن برنامه');
   require('./dist/main.js');
 }

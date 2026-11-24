@@ -63,11 +63,7 @@
       "build-seed/**/*.js"
     ],
     "assets": [
-      "../web/**/*",
-      "../node_modules/@embedded-postgres/windows-x64/native/**/*",
-      "../node_modules/@embedded-postgres/linux-x64/native/**/*",
-      "../node_modules/.prisma/client/query_engine-windows.dll.node",
-      "../node_modules/.prisma/client/libquery_engine-debian-openssl-3.0.x.so.node",
+      "assets-stage/**/*",
       "prisma/migrations/**/*"
     ],
     "targets": [

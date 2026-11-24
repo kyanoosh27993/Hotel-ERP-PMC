@@ -1,0 +1,195 @@
+/* main.css — Hotel ERP (RTL، سه تم، ریسپانسیو موبایل/دسکتاپ — قوانین ۱، ۶، ۱۱، ۱۲، ۱۳) */
+:root {
+  --bg: #f5f6f8; --bg-panel: #fff; --bg-header: #fff;
+  --text: #1c2536; --muted: #67718a;
+  --primary: #0e7c66; --primary-2: #0a5c4c; --accent: #c99a2e;
+  --border: #dde1e8; --danger: #c0392b; --success: #1e8e3e;
+  --hover: rgba(14,124,102,.08); --shadow: 0 1px 4px rgba(20,30,50,.08);
+  --header-text: #1c2536;
+  --font-text: Vazirmatn, Estedad, Tahoma, sans-serif;
+  --font-number: Vazirmatn, Consolas, sans-serif;
+  --font-size: 14px; --radius: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: var(--font-size); }
+body {
+  font-family: var(--font-text);
+  background: var(--bg); color: var(--text);
+  direction: rtl; min-height: 100vh;
+}
+/* اعداد همیشه با فونت اعداد — قانون ۱۱ */
+.clock-time, .clock-date, .kpi-value, .dt td, .num { font-family: var(--font-number); }
+
+/* شل */
+#shell { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 240px; flex-shrink: 0; background: var(--bg-panel);
+  border-inline-start: none; border-inline-end: 1px solid var(--border);
+  display: flex; flex-direction: column; box-shadow: var(--shadow);
+}
+.brand { padding: 18px 16px 10px; }
+.brand-title { font-size: 1.25rem; font-weight: 800; color: var(--primary); letter-spacing: .5px; }
+.brand-sub { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+.nav { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 8px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  background: none; border: none; color: var(--text);
+  padding: 10px 12px; border-radius: var(--radius); cursor: pointer;
+  font-family: inherit; font-size: .95rem; text-align: start; width: 100%;
+}
+.nav-item:hover { background: var(--hover); }
+.nav-item.active { background: var(--primary); color: #fff; }
+.nav-icon { width: 20px; text-align: center; }
+.sidebar-ver { padding: 12px 16px; font-size: .7rem; color: var(--muted); border-top: 1px solid var(--border); }
+
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg-header); color: var(--header-text);
+  padding: 10px 18px; border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow); position: sticky; top: 0; z-index: 10;
+}
+.topbar-title { font-size: 1.05rem; font-weight: 700; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.topbar-clock { display: flex; gap: 10px; align-items: center; font-size: .85rem; color: var(--muted); }
+.clock-time { font-weight: 700; color: var(--primary); }
+.burger { display: none; background: none; border: 1px solid var(--border); border-radius: var(--radius); font-size: 1.1rem; padding: 4px 10px; cursor: pointer; color: var(--text); }
+.content { padding: 18px; display: flex; flex-direction: column; gap: 16px; max-width: 1400px; width: 100%; margin: 0 auto; }
+
+/* پنل و KPI */
+.panel {
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow);
+}
+.panel h3 { margin-bottom: 10px; font-size: .98rem; color: var(--primary); }
+.kpi-row { display: flex; gap: 12px; flex-wrap: wrap; }
+.kpi {
+  flex: 1; min-width: 150px; background: var(--bg-panel);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 14px; box-shadow: var(--shadow);
+}
+.kpi-label { font-size: .75rem; color: var(--muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.kpi-value { font-size: 1.15rem; font-weight: 800; color: var(--primary); margin-top: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+.note-list { margin-inline-start: 18px; line-height: 1.9; font-size: .92rem; }
+
+/* دکمه و فرم */
+.btn {
+  background: var(--bg-panel); color: var(--text);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 7px 14px; cursor: pointer; font-family: inherit; font-size: .88rem;
+}
+.btn:hover { background: var(--hover); }
+.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary-2); }
+.btn-primary:hover { background: var(--primary-2); }
+.row-actions { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.form-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.form-row label { font-size: .85rem; color: var(--muted); }
+input, select {
+  font-family: inherit; font-size: .88rem; color: var(--text);
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 7px 10px;
+}
+input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: -1px; }
+
+/* تب‌ها */
+.tabbar { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+.tabbtn {
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: var(--radius) var(--radius) 0 0; padding: 8px 16px;
+  cursor: pointer; font-family: inherit; font-size: .9rem; color: var(--text);
+}
+.tabbtn.active { background: var(--primary); color: #fff; border-color: var(--primary-2); }
+.tabbody { min-height: 200px; }
+
+/* جدول استاندارد — قانون ۱۲ */
+.dt-host { width: 100%; }
+.dt-wrap { width: 100%; }
+.dt-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-panel); }
+.dt { width: 100%; border-collapse: collapse; font-size: .85rem; min-width: 720px; }
+.dt th {
+  background: var(--bg-header); color: var(--text); padding: 8px 10px;
+  border-bottom: 2px solid var(--primary); text-align: center; white-space: nowrap;
+  position: sticky; top: 0;
+}
+.dt th.dt-sorted { color: var(--primary); }
+.dt .dt-arrow { font-size: .65rem; margin-inline-start: 4px; }
+.dt-filter-cell { background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 4px 6px; }
+.dt-filter-cell .dt-search { width: 100%; min-width: 80px; padding: 4px 8px; font-size: .78rem; margin-bottom: 3px; }
+.dt-filter-cell .dt-select { width: 100%; min-width: 80px; padding: 3px 8px; font-size: .78rem; }
+.dt td { padding: 7px 10px; border-bottom: 1px solid var(--border); text-align: center; max-width: 220px; }
+.dt tbody tr:hover { background: var(--hover); }
+.dt tbody tr.dt-odd { background: color-mix(in srgb, var(--hover) 40%, transparent); }
+.dt-empty { text-align: center; color: var(--muted); padding: 18px !important; }
+.dt tfoot td { background: var(--bg-header); font-weight: 700; border-top: 2px solid var(--primary); }
+.dt-sum { color: var(--primary); }
+.dt-pager { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 8px; font-size: .8rem; color: var(--muted); }
+.dt-page { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; cursor: pointer; color: var(--text); font-family: var(--font-number); }
+.dt-page.active { background: var(--primary); color: #fff; }
+
+/* Shrink-to-fit — قانون ۱۳ */
+.fit { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 100%; display: inline-block; max-width: 100%; }
+td .fit, th .fit, .kpi-value, .kpi-label { display: block; }
+
+/* تقویم */
+.jcal-panel { max-width: 720px; }
+.jcal-nav { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.jcal-title { font-weight: 800; font-size: 1rem; margin-inline: 6px; min-width: 120px; text-align: center; }
+.jcal-btn { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px 12px; cursor: pointer; color: var(--text); font-family: inherit; }
+.jcal-btn:hover { background: var(--hover); }
+.jcal-today { color: var(--primary); font-weight: 700; }
+.jcal-go { display: flex; gap: 4px; }
+.jcal-input { width: 110px; }
+.jcal-invalid { border-color: var(--danger) !important; }
+.jcal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.jcal-dow { font-size: .72rem; color: var(--muted); text-align: center; padding: 4px 0; font-weight: 700; }
+.jcal-dow.jcal-fri { color: var(--danger); }
+.jcal-day {
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: 8px; padding: 9px 0; cursor: pointer;
+  font-family: var(--font-number); font-size: .9rem; color: var(--text);
+  position: relative;
+}
+.jcal-day:hover { background: var(--hover); }
+.jcal-day.jcal-fri, .jcal-day.jcal-holiday { color: var(--danger); }
+.jcal-day.jcal-event::after {
+  content: ''; position: absolute; bottom: 3px; inset-inline-start: 50%;
+  transform: translateX(50%); width: 5px; height: 5px; border-radius: 50%;
+  background: var(--success);
+}
+.jcal-day.jcal-today-cell { outline: 2px solid var(--accent); }
+.jcal-day.jcal-selected { background: var(--primary); color: #fff; }
+.jcal-hint { font-size: .72rem; color: var(--muted); margin-top: 8px; }
+.jcal-info { margin-top: 10px; font-size: .9rem; color: var(--primary); font-weight: 700; }
+
+/* مودال */
+.modal-back { position: fixed; inset: 0; background: rgba(10,15,25,.5); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 12px; }
+.modal { background: var(--bg-panel); color: var(--text); border-radius: var(--radius); padding: 20px; max-width: 640px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow); }
+.modal h3 { margin-bottom: 12px; color: var(--primary); }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.form-item { display: flex; flex-direction: column; gap: 4px; }
+.form-item label { font-size: .78rem; color: var(--muted); }
+.form-item input { width: 100%; }
+.muted { color: var(--muted); font-size: .88rem; line-height: 1.8; }
+
+/* نمودار */
+.chart { width: 100%; height: 240px; display: block; }
+
+/* ریسپانسیو موبایل — قانون ۶ */
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed; inset-inline-start: -260px; top: 0; bottom: 0; z-index: 40;
+    transition: inset-inline-start .25s ease; width: 250px;
+  }
+  body.sidebar-open .sidebar { inset-inline-start: 0; }
+  .burger { display: block; }
+  .content { padding: 12px; }
+  .topbar { padding: 8px 12px; }
+  .kpi { min-width: 100%; }
+  .modal { padding: 14px; }
+  .jcal-go { margin-inline-start: auto; }
+  .dt td, .dt th { padding: 6px; font-size: .8rem; }
+}
+@media (min-width: 901px) {
+  body.sidebar-open .sidebar { inset-inline-start: 0; }
+}
+/* نقاب درخواست صندلی بزرگ‌تر جداول روی موبایل: اسکرول افقی داخل کانتینر (dt-scroll) */

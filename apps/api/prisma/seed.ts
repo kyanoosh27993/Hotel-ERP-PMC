@@ -663,10 +663,16 @@ async function main() {
   console.log('✅ seed complete: roles/users/accounts/periods/rooms/rules/payroll/cash-accounts/linen/ancillary (wave-1) + warehouses/stock/recipes/menu/tables/suppliers (wave-2) + closing accounts/cost-centers/event-mappings/law-rules (wave-3) + workflow-defs (F8-T6, F9-T4)');
 }
 
-main()
-  .catch((e) => {
-    // eslint-disable-next-line no-console
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());
+if (require.main === module) {
+  main()
+    .catch((e) => {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      process.exit(1);
+    })
+    .finally(() => prisma.$disconnect());
+} else {
+  // اجرا به‌عنوان ماژول (bootstrap نسخهٔ دسکتاپ) — پرامیس awaitable
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (module as any).exports = main();
+}
