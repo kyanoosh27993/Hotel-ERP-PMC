@@ -193,3 +193,218 @@ td .fit, th .fit, .kpi-value, .kpi-label { display: block; }
   body.sidebar-open .sidebar { inset-inline-start: 0; }
 }
 /* نقاب درخواست صندلی بزرگ‌تر جداول روی موبایل: اسکرول افقی داخل کانتینر (dt-scroll) */
+
+/* ═══════════════ U1/U2/U3 — بازطراحی سبک «هتلداری آسا» ═══════════════ */
+
+/* ── U1 صفحهٔ ورود (اولین صفحه) ── */
+.login-page {
+  flex: 1 1 100%; width: 100%;
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #0d3a70 0%, #124a8f 55%, #0a2c56 100%);
+  padding: 16px;
+}
+.login-card {
+  width: min(400px, 94vw); background: #fff; border-radius: 14px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.35); padding: 26px 24px 18px; text-align: center;
+}
+.login-logo img { display: block; margin: 0 auto 8px; }
+.login-title {
+  font-size: 1.25rem; font-weight: 800; margin: 4px 0 2px;
+  background: linear-gradient(90deg, #0d3a70, #1d4ed8);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.login-sub { font-size: .78rem; color: #64748b; margin-bottom: 10px; }
+.login-heading { font-size: 1rem; color: #124a8f; border-bottom: 2px solid #f2c14e; display: inline-block; padding-bottom: 4px; margin-bottom: 12px; }
+.login-msg { font-size: .82rem; margin: 4px 0; }
+.login-msg.red { color: #b91c1c; font-weight: 700; }
+.login-msg.blue { color: #1d4ed8; }
+.login-msg.SmallBlue { color: #1d4ed8; font-size: .8rem; }
+.ContactForm { display: flex; flex-direction: column; gap: 9px; margin-top: 8px; }
+.ContactForm input {
+  border: 1px solid #cbd5e1; border-radius: 8px; padding: 9px 12px; font: inherit;
+  background: #f8fafc; text-align: right;
+}
+.ContactForm input:focus { outline: 2px solid #1d4ed8; background: #fff; }
+.captcah-images { display: flex; align-items: center; gap: 8px; direction: ltr; }
+.captcah-images .login-captcha-img { flex: 1; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #eef3fb; min-height: 48px; display: flex; align-items: center; }
+.captcah-images .login-captcha-img svg { width: 100%; height: 48px; display: block; }
+.img-refresh-reg {
+  width: 38px; height: 38px; border: 1px solid #cbd5e1; border-radius: 8px; background: #f1f5f9;
+  font-size: 1.25rem; color: #1d4ed8; cursor: pointer; line-height: 1;
+}
+.img-refresh-reg:hover { background: #dbe7fa; }
+.submitbtn {
+  background: linear-gradient(90deg, #124a8f, #1d4ed8); color: #fff; border: 0; border-radius: 8px;
+  padding: 10px; font: inherit; font-weight: 700; cursor: pointer; letter-spacing: .06em;
+}
+.submitbtn:hover { filter: brightness(1.08); }
+.login-hint { font-size: .72rem; color: #64748b; }
+.login-demo-note { font-size: .72rem; color: #b45309; background: #fef3c7; border-radius: 6px; padding: 5px 8px; }
+.login-last { margin-top: 12px; font-size: .78rem; color: #0f172a; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 8px; line-height: 1.9; }
+
+/* ── U2 صفحهٔ اصلی آسا ── */
+.asa-home { padding: 10px 14px 90px; }
+.asa-head {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+  background: linear-gradient(180deg, #ffffff, #eaf2fc); border: 1px solid #cbd5e1;
+  border-radius: 12px; padding: 10px 14px; margin-bottom: 12px;
+}
+.asa-brand, .rec-brand { display: flex; align-items: center; gap: 10px; }
+.asa-logo { width: 46px; height: 46px; border-radius: 10px; }
+.asa-logotype {
+  font-size: clamp(1.1rem, 3.2vw, 1.7rem); font-weight: 900; letter-spacing: .01em;
+  background: linear-gradient(90deg, #0d3a70, #1d4ed8 60%, #e8a427);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.asa-logotype-en { font-size: .72rem; color: #64748b; letter-spacing: .14em; direction: ltr; text-align: right; }
+.asa-head-left, .rec-head-left { display: flex; align-items: center; gap: 14px; margin-inline-start: auto; }
+.asa-themes { display: flex; gap: 5px; }
+.asa-theme { width: 18px; height: 18px; border-radius: 4px; border: 2px solid rgba(255,255,255,.7); cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.asa-clock, .rec-clock { font-size: .82rem; color: #124a8f; text-align: left; line-height: 1.7; }
+.asa-clock-time, .rec-clock-time { font-weight: 700; color: #0f172a; }
+.asa-group { margin-bottom: 14px; }
+.asa-group-title {
+  font-size: .82rem; font-weight: 800; color: #124a8f; margin: 4px 2px 8px;
+  display: inline-block; border-bottom: 2px solid #f2c14e; padding-bottom: 2px;
+}
+.asa-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.asa-tile {
+  width: 108px; background: linear-gradient(180deg, #ffffff, #f4f8fd);
+  border: 1px solid #d7e3f4; border-radius: 12px; padding: 12px 6px 8px; text-align: center;
+  cursor: pointer; position: relative; box-shadow: 0 2px 6px rgba(13,58,112,.08);
+  transition: box-shadow .15s ease-in-out, border-color .15s ease-in-out;
+}
+.asa-tile:hover, .asa-tile:focus-visible {
+  border-color: #1d4ed8; box-shadow: 0 6px 18px rgba(29,78,216,.25); outline: none;
+}
+/* انیمیشن flip سه‌بعدی آسا — مقادیر استخراج‌شده از style2.php: rotateY(-80deg)→0، scale(.8)→1، .45s ease-in-out */
+.asa-tile .top { height: 66px; display: flex; align-items: center; justify-content: center; perspective: 600px; }
+.asa-tile .top img { width: 58px; height: 58px; object-fit: contain; transform-origin: left center; }
+.asa-tile:hover .top img, .asa-tile:focus-visible .top img { animation: asa-flip .45s ease-in-out; }
+@keyframes asa-flip {
+  from { transform: rotateY(-80deg) scale(.8); }
+  to   { transform: rotateY(0deg) scale(1); }
+}
+.asa-tile .down { font-size: .82rem; font-weight: 700; color: #b91c1c; margin-top: 6px; }
+.asa-tile-stub { opacity: .82; }
+.asa-phase {
+  position: absolute; top: 6px; inset-inline-end: 6px; font-size: .6rem; color: #64748b;
+  background: #e2e8f0; border-radius: 4px; padding: 1px 5px;
+}
+.asa-userbar, .rec-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.asa-userbar {
+  position: fixed; bottom: 0; inset-inline: 0; padding: 8px 16px; z-index: 30;
+  background: linear-gradient(180deg, rgba(255,255,255,.97), #eaf2fc);
+  border-top: 1px solid #cbd5e1;
+}
+.asa-userinfo { display: flex; align-items: center; gap: 10px; }
+.asa-avatar { width: 44px; height: 44px; border-radius: 10px; border: 2px solid #1d4ed8; object-fit: cover; }
+.asa-username { font-size: .9rem; font-weight: 800; color: #b91c1c; }
+.asa-userpos { font-size: .76rem; color: #475569; }
+.asa-useractions { display: flex; gap: 8px; }
+.asa-mini-btn {
+  border: 1px solid #cbd5e1; background: #fff; color: #124a8f; border-radius: 8px;
+  padding: 6px 12px; font: inherit; font-size: .8rem; cursor: pointer;
+}
+.asa-mini-btn:hover { background: #dbe7fa; }
+.asa-logout { color: #b91c1c; border-color: #fca5a5; }
+.asa-logout:hover { background: #fee2e2; }
+
+/* تم‌های آسا روی بدنه */
+body[data-asa-theme="green"] { --asa-accent: #2e8b57; }
+body[data-asa-theme="blue"] { --asa-accent: #1d4ed8; }
+body[data-asa-theme="red"] { --asa-accent: #b91c1c; }
+body[data-asa-theme] .asa-tile:hover, body[data-asa-theme] .asa-tile:focus-visible { border-color: var(--asa-accent); box-shadow: 0 6px 18px color-mix(in srgb, var(--asa-accent) 30%, transparent); }
+
+/* ── U3 شل پذیرش ── */
+body.reception-mode .sidebar, body.reception-mode .topbar { display: none; }
+body.reception-mode .main { margin: 0; max-width: none; }
+body.reception-mode .content { padding: 0; }
+.rec-shell { position: relative; min-height: 100vh; padding-bottom: 64px; }
+.rec-head {
+  background: linear-gradient(180deg, #ffffff, #eaf2fc);
+  border-bottom: 2px solid #f2c14e; padding: 8px 14px;
+}
+.rec-head-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.rec-toolbar { margin-top: 6px; }
+.rec-logotype {
+  font-size: clamp(1.05rem, 3vw, 1.5rem); font-weight: 900; color: #124a8f;
+}
+.rec-logotype-en { font-size: .68rem; color: #64748b; letter-spacing: .12em; direction: ltr; }
+.rec-tool {
+  display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid #cbd5e1;
+  border-radius: 8px; padding: 4px 10px; font: inherit; font-size: .78rem; color: #124a8f; cursor: pointer;
+}
+.rec-tool img { width: 20px; height: 20px; }
+.rec-tool:hover { background: #dbe7fa; }
+.rec-search { display: flex; gap: 6px; margin-inline-start: auto; }
+.rec-search input { border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px 10px; font: inherit; font-size: .8rem; min-width: 150px; }
+.rec-search-btn { background: #124a8f; color: #fff; border: 0; border-radius: 6px; padding: 5px 14px; font: inherit; font-size: .8rem; cursor: pointer; }
+.rec-tabs { display: flex; gap: 2px; flex-wrap: nowrap; overflow-x: auto; background: linear-gradient(180deg, #dbe7fa, #c3d6f1); border-bottom: 2px solid #124a8f; padding: 4px 8px 0; }
+.rec-tab {
+  display: inline-flex; align-items: center; gap: 6px; border: 1px solid #b9c9e4; border-bottom: 0;
+  background: linear-gradient(180deg, #ffffff, #eaf2fc); color: #124a8f; font: inherit; font-size: .8rem;
+  padding: 7px 12px; border-radius: 8px 8px 0 0; cursor: pointer; white-space: nowrap;
+}
+.rec-tab img { width: 18px; height: 18px; }
+.rec-tab:hover { background: #fff; }
+.rec-tab.active { background: #fff; border-color: #124a8f; font-weight: 800; color: #b91c1c; }
+.rec-panel {
+  position: relative; margin: 16px; padding: 16px; border-radius: 14px;
+  border: 2px solid #f2c14e; background: linear-gradient(180deg, #fffdf5, #fff); min-height: 380px;
+}
+.rec-panel-cap { text-align: center; margin-bottom: 18px; }
+.rec-panel-title { font-size: clamp(1.2rem, 3.4vw, 1.9rem); font-weight: 900; color: #b91c1c; }
+.rec-panel-sub { display: block; font-size: .85rem; color: #124a8f; margin-top: 4px; }
+.rec-cards { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+.rec-card {
+  width: 168px; background: #fff; border: 1px solid #d7e3f4; border-radius: 14px;
+  padding: 18px 8px 10px; text-align: center; cursor: pointer; font: inherit;
+  box-shadow: 0 3px 10px rgba(13,58,112,.10); transition: all .15s ease-in-out;
+}
+.rec-card-top { height: 92px; display: flex; align-items: center; justify-content: center; perspective: 700px; }
+.rec-card-top img { width: 84px; height: 84px; object-fit: contain; transform-origin: left center; }
+.rec-card:hover .rec-card-top img { animation: asa-flip .45s ease-in-out; }
+.rec-card:hover { border-color: #f2c14e; box-shadow: 0 8px 22px rgba(232,164,39,.3); transform: translateY(-3px); }
+.rec-card-down { font-size: .92rem; font-weight: 800; color: #b91c1c; margin-top: 10px; }
+.rec-strip {
+  position: fixed; inset-inline-start: 6px; top: 34%; z-index: 40; display: flex; flex-direction: column;
+  align-items: center; gap: 6px; background: linear-gradient(180deg, #eaf2fc, #ffffff);
+  border: 1px solid #cbd5e1; border-radius: 12px; padding: 8px 6px;
+}
+.rec-strip-btn {
+  width: 34px; height: 34px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff;
+  color: #124a8f; font-size: 1.05rem; cursor: pointer; line-height: 1;
+}
+.rec-strip-btn:hover { background: #dbe7fa; }
+.rec-strip-list { display: none; flex-direction: column; gap: 4px; max-height: 46vh; overflow: auto; }
+.rec-strip-list.open { display: flex; }
+.rec-strip-fav {
+  border: 1px solid #cbd5e1; background: #fff; color: #124a8f; border-radius: 6px;
+  padding: 4px 8px; font: inherit; font-size: .72rem; cursor: pointer; white-space: nowrap;
+}
+.rec-foot {
+  position: fixed; bottom: 0; inset-inline: 0; padding: 8px 16px; z-index: 30;
+  background: linear-gradient(180deg, rgba(255,255,255,.97), #eaf2fc); border-top: 1px solid #cbd5e1;
+}
+.rec-police {
+  display: inline-flex; align-items: center; gap: 8px; border: 0; background: transparent;
+  font: inherit; font-size: .8rem; color: #334155; cursor: pointer;
+}
+.rec-police-ico { font-size: 1.5rem; }
+.rec-stub { max-width: 720px; margin: 10px auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; }
+.rec-stub-list { margin: 8px 20px 0 0; line-height: 2; font-size: .86rem; color: #334155; }
+.rec-module-mount { margin-top: 8px; }
+
+/* ── ریسپانسیو U1/U2/U3 ── */
+@media (max-width: 640px) {
+  .asa-tile { width: 92px; }
+  .asa-tile .top img { width: 46px; height: 46px; }
+  .rec-cards { gap: 10px; }
+  .rec-card { width: 46%; min-width: 140px; }
+  .rec-panel { margin: 10px; }
+  .rec-search input { min-width: 90px; }
+  .rec-strip { top: auto; bottom: 64px; }
+  .asa-clock, .rec-clock { display: none; }
+}
+

@@ -33,6 +33,7 @@
   }
 
   var NAV = [
+    { id: 'home', title: 'صفحهٔ اصلی (آسا)', icon: '🏠' },
     { id: 'dashboard', title: 'داشبورد مدیر AI', icon: '▦' },
     { id: 'frontdesk', title: 'نقشه اتاق (فاز ۴)', icon: '🛏' },
     { id: 'treasury', title: 'خزانه‌داری و صندوق (فاز ۵)', icon: '💰' },
@@ -87,12 +88,16 @@
     shell.appendChild(sidebar); shell.appendChild(main);
 
     function go(id) {
+      if (id !== 'reception') document.body.classList.remove('reception-mode');
       nav.querySelectorAll('.nav-item').forEach(function (b) { b.classList.toggle('active', b.dataset.id === id); });
       content.innerHTML = '';
       var mod = NAV.find(function (m) { return m.id === id; });
-      title.textContent = mod.title;
+      if (mod) title.textContent = mod.title;
+      else title.textContent = id === 'reception' ? 'نرم‌افزار پذیرش' : '';
       try {
-        if (id === 'calendar') moduleCalendar(content);
+        if (id === 'home') AsaHome.render(content);
+        else if (id === 'reception') AsaReception.render(content);
+        else if (id === 'calendar') moduleCalendar(content);
         else Modules[id].render(content);
       } catch (e) {
         content.appendChild(el('div', 'panel', 'خطا در بارگذاری ماژول: ' + e.message));
@@ -110,9 +115,19 @@
     }
     tick(); setInterval(tick, 30000);
 
-    go('dashboard');
-    global.App = { go: go };
+    go('home'); /* U2 — پس از ورود، صفحهٔ اصلی آسا */
+    global.App = { go: go, boot: boot };
   }
 
-  document.addEventListener('DOMContentLoaded', boot);
+  /* U1 — ورودی برنامه: اولین صفحه همیشه ورود است؛ پس از موفقیت، شل اصلی */
+  function start() {
+    var shell = document.getElementById('shell');
+    if (!shell) return;
+    if (!global.Auth) { boot(); return; } /* امنیت: بدون auth.js شل مستقیم */
+    if (global.Auth.session()) { boot(); return; }
+    shell.innerHTML = '';
+    global.Auth.renderLogin(shell, function () { boot(); });
+  }
+
+  document.addEventListener('DOMContentLoaded', start);
 })(window);

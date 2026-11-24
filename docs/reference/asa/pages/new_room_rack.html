@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="author" content="asa-system-yeganeh">
+<meta http-equiv="refresh" content="120">
+<title>new room rack</title>
+<style data-tippy-stylesheet="">.tippy-box[data-animation=fade][data-state=hidden]{opacity:0}[data-tippy-root]{max-width:calc(100vw - 10px)}.tippy-box{position:relative;background-color:#333;color:#fff;border-radius:4px;font-size:14px;line-height:1.4;white-space:normal;outline:0;transition-property:transform,visibility,opacity}.tippy-box[data-placement^=top]>.tippy-arrow{bottom:0}.tippy-box[data-placement^=top]>.tippy-arrow:before{bottom:-7px;left:0;border-width:8px 8px 0;border-top-color:initial;transform-origin:center top}.tippy-box[data-placement^=bottom]>.tippy-arrow{top:0}.tippy-box[data-placement^=bottom]>.tippy-arrow:before{top:-7px;left:0;border-width:0 8px 8px;border-bottom-color:initial;transform-origin:center bottom}.tippy-box[data-placement^=left]>.tippy-arrow{right:0}.tippy-box[data-placement^=left]>.tippy-arrow:before{border-width:8px 0 8px 8px;border-left-color:initial;right:-7px;transform-origin:center left}.tippy-box[data-placement^=right]>.tippy-arrow{left:0}.tippy-box[data-placement^=right]>.tippy-arrow:before{left:-7px;border-width:8px 8px 8px 0;border-right-color:initial;transform-origin:center right}.tippy-box[data-inertia][data-state=visible]{transition-timing-function:cubic-bezier(.54,1.5,.38,1.11)}.tippy-arrow{width:16px;height:16px;color:#333}.tippy-arrow:before{content:"";position:absolute;border-color:transparent;border-style:solid}.tippy-content{position:relative;padding:5px 9px;z-index:1}</style><link rel="stylesheet" media="all" type="text/css" href="new%20room%20rack_files/crossBrowserCss_X0i-.css">
+<link rel="stylesheet" media="all" type="text/css" href="new%20room%20rack_files/tipsy_X0i-.css">
+
+<link rel="stylesheet" href="new%20room%20rack_files/tipsy_bundle_X0i-.css">
+
+<link rel="stylesheet" id="common_rack" media="all" type="text/css" href="new%20room%20rack_files/common_rack_bed_X0i-.css">
+<link rel="stylesheet" id="page_face" media="all" type="text/css" href="new%20room%20rack_files/horizantal_X0i-.css">
+<link rel="stylesheet" media="all" type="text/css" href="new%20room%20rack_files/fonts_X0i-.css">
+<style type="text/css">
+	#float_menu { position: absolute; z-index: 6; left: 0; top: 0; width: 100px; display: none; background-color: white; padding: 2px }
+	#float_menu a { text-align: right; cursor: pointer; font: 13px MH_Nassim; text-decoration: none; color: black; width: 100%; display: block; line-height: 200%}
+	#float_menu a:hover { background-color: #DEDEDE;}
+	#float_menu a span { float: left; margin-left: 5px }
+</style>
+</head><body><div id="float_menu">
+	    <a id="damage">
+        خسارت($)        <span>💰</span>
+    </a>
+    <a id="add">
+        شارژ اضافی        <span>➕</span>
+    </a>
+    <a id="discount">
+        ثبت تخفیف        <span>➖</span>
+    </a>
+    <a id="checkout">
+        بستن اتاق        <span>🚪</span>
+    </a>
+    <a id="print">
+        چاپ        <span>🖨️</span>
+    </a>
+    <a id="clean_priority">
+        اولویت نظافت        <span>🧹</span>
+    </a>
+    <a id="dirty_room">
+        درخواست نظافت        <span>🗑️</span>
+    </a>
+    <a id="room_message">
+        پیغام اتاق        <span>✉️</span>
+    </a>
+</div>
+<script type="text/javascript">
+var defaultViewPage = 'horizantal';
+var lang_align      = '0';
+var lang_directory  = 'farsi';
+var page_dir = 'rtl';
+var page_align = 'right';
+</script>
+
+<script type="text/javascript" src="new%20room%20rack_files/jquery_X0i-.js"></script>
+<script type="text/javascript" src="new%20room%20rack_files/popper.min_X0i-.js"></script>
+<script type="text/javascript" src="new%20room%20rack_files/tippy-bundle.umd_X0i-.js"></script>
+<script type="text/javascript" src="new%20room%20rack_files/room_rack_X0i-.js"></script>
+<script type="text/javascript" src="new%20room%20rack_files/farsitype_X0i-.js"></script>
+<link rel="stylesheet" href="new%20room%20rack_files/smartnoti_X0i-.css" type="text/css" media="screen">
+<script type="text/javascript" src="new%20room%20rack_files/smartnoti_X0i-.js"></script>
+
+<script language="javascript">
+    function noification(){
+        $("#note_5").smartNotification({
+            mainTitle: 'شما یک پیغام از سیستم دارید',
+            mainContent: '<a href="#"><img src="../images/alert.png" width="30" height="30"></a>شما میبایست ابتدا شارژ اتاقها را ثبت نمائید<br><a href="../reception/save_new_date.php" class="link_1">ثبت روم شارژ</a>'
+        });
+    }
+
+    function noification_en(){
+        $("#note_5").smartNotification({
+            mainTitle: 'You Have A Message From The System',
+            mainContent: '<a href="#"><img src="../images/alert.png" width="30" height="30"></a>You Should First Charge The Rooms<br><a href="../reception/save_new_date.php" class="link_1">Room Charge Registration</a>',
+        });
+    }
+
+    function taskPending(count_requests = 0, link = ''){
+        let contentText = count_requests === 0
+            ? 'درخواستهای جدیدی منتظر بررسی شما هستند'
+            : count_requests + ' درخواست جدید منتظر بررسی شما هستند';
+
+        if (link && link.trim() !== '') {
+            contentText += '<br><a target="_blank" href="' + link + '" class="link_1">بررسی درخواست‌های جدید</a>';
+        }
+
+        $("#note_5").smartNotification({
+            mainTitle: 'شما یک پیغام از سیستم دارید',
+            mainContent: '<img src="../images/alert.png" width="30" height="30">' + contentText
+        });
+    }
+
+    function taskPending_en(count_requests = 0, link = ''){
+        let contentText = count_requests === 0
+            ? 'There are pending tasks awaiting your triage.'
+            : count_requests + ' new task' + (count_requests > 1 ? 's' : '') + ' awaiting your triage.';
+
+        if (link && link.trim() !== '') {
+            contentText += '<br><a target="_blank" href="' + link + '" class="link_1">Review pending tasks</a>';
+        }
+
+        $("#note_5").smartNotification({
+            mainTitle: 'You Have A Message From The System',
+            mainContent: contentText
+        });
+    }
+
+</script>
+
+<span id="note_5"></span>
+<script id="clientEventHandlersJS" language="javascript">$('#note_5').click();</script><script type="text/javascript">
+
+	$(document).ready(function(){
+		$("#wrraper-room-rack").click(function(){
+			$('#float_menu').hide();
+		});
+	})
+    $(document).on('mouseover','.room-number',function(e){
+		$(this).bind("contextmenu", function(e){
+			$('#clean, #damage').attr('name', '');
+			e.preventDefault();
+			room_number = $(this).text();
+			description = 'خرابی';
+			rdf_room=$(this).attr('code_id');
+			rdf_page=$(this).attr('rdf_page');
+			rid = $(this).attr('rdf_room');
+
+			RegisterID = $(this).attr('reg_id');
+            _doc_h = $(document).height();
+            _top = e.pageY;
+
+
+            if(_top+200> _doc_h)
+                _top = _top-200;
+
+            $('#float_menu').css({'left':e.pageX, 'top':_top}).slideDown('fast', 'linear', function(){});
+			//$('#clean, #damage').attr({'key':$(this).attr('find'), 'req_url':tmp_onclick, 'kind_index':$(this).attr('kind_index')});
+			$('#clean').attr({'name':room_number});
+			$('#damage').attr({"onclick":"document.location='damage_new2.php?rdf_room="+room_number+"&rdf_clean=0&rdf_regs="+RegisterID+"&rdf_rack=3'"});
+			$('#ooo').attr({"onclick":"document.location='house_change_ooo.php?code_id="+rid+"&_desc="+description+"'"});
+			$('#add').attr({'onclick':'document.location= "fulio_new.php?rdf_room='+room_number+'"'});
+			$('#discount').attr({'onclick':'document.location= "fulio_discount_new.php?code_id='+room_number+'"'});
+			$('#checkout').attr({'onclick':'document.location= "room_checkout.php?rdf_regs='+RegisterID+'&man_regs=0"'});
+			if (lang_align==1)
+				$('#print').attr({'onclick':'document.location= "guest_report_frn_print.php?code_id=11'+RegisterID+'"'});
+			else
+				$('#print').attr({'onclick':'document.location= "guest_report_irn_print.php?code_id=11'+RegisterID+'"'});
+
+			$('#block').attr({'onclick':'document.location="view_block.php?code_id='+rid+'&rdf_page='+2+'&_rsrv1='+""+'&detail_date_id='+""+'"'});
+			$('#clean_priority').attr({'onclick':'document.location="clean_priority.php?code_id='+rid+'&rdf_page='+2+'&_rsrv1='+""+'&detail_date_id='+""+'"'});
+			$('#dirty_room').attr({'onclick':'document.location="dirty_room.php?code_id='+rid+'&rdf_page='+2+'&_rsrv1='+""+'&detail_date_id='+""+'"'});
+
+            $('#room_message').attr({'onclick':'document.location="room_message_irn.php?code_id=1'+RegisterID+'"'});
+		});
+	});
+	function clean_room(){
+		url = 'clean_room.php';
+		$.post(url, {clkID: clkID, date: date,room_number :room_number}, function(data){
+			document.location=document.location;
+		}, 'json');
+	}
+	function damage_room(){
+		url = 'damage_room.php';
+		$.post(url, {clkID: clkID, date: date,room_number :room_number}, function(data){
+			document.location=document.location;
+		}, 'json');
+	}
+	function ooo_room(){
+		url = 'ooo_room.php';
+		$.post(url, {clkID: clkID, date: date,room_number :room_number}, function(data){
+			document.location=document.location;
+		}, 'json');
+	}
+	function block_room(){
+		url = 'view_block.php';
+		$.post(url, {clkID: clkID, date: date,rdf_room :rdf_room}, function(data){
+			document.location=document.location;
+		}, 'json');
+	}
+	function clean_priority(){
+		url = 'clean_priority.php';
+		$.post(url, {clkID: clkID, date: date,rdf_room :rdf_room}, function(data){
+			document.location=document.location;
+		}, 'json');
+	}
+$(document).ready(function()
+{
+	var ourlocation = location.href;
+	var thisstuff = ourlocation.split("?");
+	
+	if(typeof (thisstuff[1]) != 'undefined')
+	{
+		var id = thisstuff[1];
+		var idary = id.split("&");
+		if(idary[0] == 'id=23') //اگر از صفحه رزرو امروز آمده
+		{
+			var idary2 = idary[1].split("=");
+			var idary3 = idary[2].split("=");
+			var idary4 = idary[3].split("=");
+			var param2 = idary[0];
+			var param3 = idary[1];
+			var param4 = idary[2];
+			var param5 = idary2[1];
+			var param6 = idary3[1];	
+			var param7 = idary4[1];
+			
+			manageRoomRackAjaxRequest('room_rack_data.php', {rack_view:'3',defaultView:'horizantal', reserve_id: param5, detail_date_id: param6, lang_align:0,lang_directory:'farsi',detail_date_id:param6,from:param7}, function(){setDisplayLoader('hide')})
+		}
+		else
+		{ 
+			if(idary[0] == 'id=17')
+			{//کاربر شب
+				manageRoomRackAjaxRequest('room_rack_data.php', {rack_view:'3',defaultView:'horizantal', night_control:'1', lang_align:0,lang_directory:'farsi'}, function(){setDisplayLoader('hide')});
+			}
+		}
+	}
+	else
+	{
+		manageRoomRackAjaxRequest('room_rack_data.php', {firstLoad:'1',rack_view:'3', defaultView:'horizantal', lang_align:0,lang_directory:'farsi'}, function(){setDisplayLoader('hide')})
+	}
+    $.post('save_rack_view.php', {'new_rack_view':'3'});
+});
+
+function dynamic_search()
+{
+    if($.trim($('#inp_search').val()) != '')
+    {
+        var statusForAjax = '';
+        var orgVal = $('#inp_search').val();
+        
+        var room_reg = /^0[1-9]\d*$/;
+        var res = orgVal.match(room_reg);
+        if(res)
+        {
+            statusForAjax = 'room';
+        }
+        else
+        {
+            statusForAjax = 'search';
+        }
+        
+        if(statusForAjax == 'search')
+        {
+            $('#content_suggest').html('');
+            $('#wrraper_suggest').fadeIn('fast', function(){}); 
+            $('#content_suggest').html('<div id="loader_suggest"><div>لطفا صبر کنید ... </div></div>');
+        }
+        else
+        {
+            $('#inp_search').removeClass('select').addClass('whaiting_romm');
+        }
+
+        $.post('../suggest/loader_favorite_and_search.php', {
+            inp_search: $('#inp_search').val(),
+            currClerk:148,
+            statusForAjax: statusForAjax,
+            kindPage: 'search'
+        }, function (data)
+        {
+            if(data.error == 1)
+            {
+                alert(data.msg);
+                $('#close_windows').click();
+                return;
+            }
+            else
+            {
+                if(statusForAjax == 'room')
+                {
+                    
+                    if(data.response == 'OK')
+                    {
+                            document.location = '../reception/guest_report_irn.php?code_id=11'+data.register_id;
+                        return;
+                    }
+                    else
+                    {
+                        if(data.response == 'اتاق خالیست')
+                        {
+                            document.location = '../reception/view_block.php?code_id='+data.rooms_id+'&rdf_page=2&reserve_id=0';
+                            return;                                        
+                            
+                        }
+                        else
+                        {
+                            $('#wrraper_suggest').fadeOut('fast', function(){});
+                            alert(data.response);
+                        }
+                    }
+                    
+                }
+                else
+                {
+                    
+                    $('#content_suggest').focus();
+                    $('#content_suggest').html(data.response);
+                    $('#master_data').width('100%');
+                
+                }
+            }
+        }, 'json');                
+    }
+}
+
+$(document).keydown(function(event) {
+	if(event.which == 32){
+		$("#search_box").css("visibility", "visible");
+		$("#search_box").slideDown(1000,function(){
+			$(this).css("border", "2px red inset");
+			$("#inp_search").focus();
+		});
+	}
+	if(event.which == 27){
+		$('#wrraper_suggest').css("display", "none");
+		$("#search_box").slideUp(1000,function(){
+			$(this).css("visibility", "hidden");
+		});
+	}
+	if(event.which == 13 && $("#search_box").css("visibility") == 'visible'){
+		$(this).css("visibility", "hidden");
+		dynamic_search();		
+	}
+});
+
+</script>
+
+	<script type="text/javascript">
+		var clkID    = '148';
+		var date     = '';
+	</script>
+		<script type="text/javascript">
+		$(document).ready(function(){
+			$("#wrraper-room-rack").click(function(){
+				$('#float_menu').hide();
+			});
+		})
+        $(document).on('mouseover','.room-number',function(e){
+            $(this).bind("contextmenu", function(e){
+				$('#clean, #damage').attr('name', '');
+				e.preventDefault();
+				room_number = $(this).text();
+				description = 'خرابی';
+				rdf_room=$(this).attr('code_id');
+				rdf_page=$(this).attr('rdf_page');
+				rid = $(this).attr('rdf_room');
+				//_rsrv1=$(this).attr('reserve_id');
+				//detail_date_id=$(this).attr('detail_date_id');
+
+				RegisterID = $(this).attr('reg_id');
+
+                _doc_h = $(document).height();
+                _top = e.pageY;
+                if(_top+200> _doc_h)
+                    _top = _top-200;
+                $('#float_menu').css({'left':e.pageX, 'top':_top}).slideDown('fast', 'linear', function(){});
+				//$('#clean, #damage').attr({'key':$(this).attr('find'), 'req_url':tmp_onclick, 'kind_index':$(this).attr('kind_index')});
+				$('#clean').attr({'name':room_number});
+				$('#damage').attr({"onclick":"document.location='damage_new2.php?rdf_room="+room_number+"&rdf_clean=0&rdf_regs="+RegisterID+"&rdf_rack=3'"});
+				$('#ooo').attr({"onclick":"document.location='house_change_ooo.php?code_id="+rid+"&_desc="+description+"'"});
+				$('#add').attr({'onclick':'document.location= "fulio_new.php?rdf_room='+room_number+'"'});
+				$('#discount').attr({'onclick':'document.location= "fulio_discount_new.php?code_id='+room_number+'"'});
+				$('#checkout').attr({'onclick':'document.location= "room_checkout.php?rdf_regs='+RegisterID+'&man_regs=0"'});
+				if(lang_align==1)
+					$('#print').attr({'onclick':'document.location= "guest_report_frn_print.php?code_id=11'+RegisterID+'"'});
+				else
+					$('#print').attr({'onclick':'document.location= "guest_report_irn_print.php?code_id=11'+RegisterID+'"'});
+				
+				$('#block').attr({'onclick':'document.location="view_block.php?code_id='+rid+'&rdf_page='+2+'&_rsrv1='+""+'&detail_date_id='+""+'"'});
+				$('#clean_priority').attr({'onclick':'document.location="clean_priority.php?code_id='+rid+'&rdf_page='+2+'&_rsrv1='+""+'&detail_date_id='+""+'"'});
+
+				$('#room_message').attr({'onclick':'document.location="room_message_irn.php?code_id=1'+RegisterID+'"'});
+			});
+		});
+		function clean_room(){
+			url = 'clean_room.php';
+            $.post(url, {clkID: clkID, date: date, room_number: room_number}, function (data) {
+				document.location=document.location;
+			}, 'json');
+		}
+		function damage_room(){
+			url = 'damage_room.php';
+            $.post(url, {clkID: clkID, date: date, room_number: room_number}, function (data) {
+				document.location=document.location;
+			}, 'json');
+		}
+		function ooo_room(){
+			url = 'ooo_room.php';
+            $.post(url, {clkID: clkID, date: date, room_number: room_number}, function (data) {
+				document.location=document.location;
+			}, 'json');
+		}
+		function block_room(){
+			url = 'view_block.php';
+            $.post(url, {clkID: clkID, date: date, rdf_room: rdf_room}, function (data) {
+				document.location=document.location;
+			}, 'json');
+		}
+		function clean_priority(){
+			url = 'clean_priority.php';
+            $.post(url, {clkID: clkID, date: date, rdf_room: rdf_room}, function (data) {
+				document.location=document.location;
+			}, 'json');
+		}
+		/*$(document).ready(function(){
+			var ourlocation = location.href;
+			var thisstuff = ourlocation.split("?");
+			if(typeof (thisstuff[1]) != 'undefined')
+			{
+				var id = thisstuff[1];
+				var idary = id.split("&");
+				if(idary[0] == 'id=23')
+				{//اگر از صفحه رزرو امروز آمده
+					var idary2 = idary[1].split("=");
+					var idary3 = idary[2].split("=");
+					var param2 = idary[0];
+					var param3 = idary[1];
+					var param4 = idary[2];
+					var param5 = idary2[1];
+					var param6 = idary3[1];
+
+					manageRoomRackAjaxRequest('room_rack_data.php', {defaultView:'horizantal', reserve_id: param5, detail_date_id: param6}, function(){setDisplayLoader('hide')})
+				}
+				else 
+				{
+					if(idary[0] == 'id=17')
+					{//کاربر شب
+						manageRoomRackAjaxRequest('room_rack_data.php', {defaultView:'horizantal', night_control:'1'}, function(){setDisplayLoader('hide')});
+					}
+				}
+			}
+			else
+			{
+				manageRoomRackAjaxRequest('room_rack_data.php', {firstLoad:'1', defaultView:'horizantal'}, function(){setDisplayLoader('hide')})
+			}
+			$.post('save_rack_view.php', {'new_rack_view':'3'});
+		});*/
+		function dynamic_search()
+		{
+			if($.trim($('#inp_search').val()) != '')
+			{
+				var statusForAjax = '';
+				var orgVal = $('#inp_search').val();
+
+				var room_reg = /^0[1-9]\d*$/;
+				var res = orgVal.match(room_reg);
+				if(res)
+				{
+					statusForAjax = 'room';
+				}
+				else
+				{
+					statusForAjax = 'search';
+				}
+
+				if(statusForAjax == 'search')
+				{
+					$('#content_suggest').html('');
+					$('#wrraper_suggest').fadeIn('fast', function(){});
+					$('#content_suggest').html('<div id="loader_suggest"><div>لطفا صبر کنيد ... </div></div>');
+				}
+				else
+				{
+					$('#inp_search').removeClass('select').addClass('whaiting_romm');
+				}
+
+                $.post('../suggest/loader_favorite_and_search.php', {
+                    inp_search: $('#inp_search').val(),
+                    currClerk:148,
+                    statusForAjax: statusForAjax,
+                    kindPage: 'search'
+                }, function (data)
+				{
+					if(data.error == 1)
+					{
+						alert(data.msg);
+						$('#close_windows').click();
+						return;
+					}
+					else
+					{
+						if(statusForAjax == 'room')
+						{
+
+							if(data.response == 'OK')
+							{
+								document.location = '../reception/guest_report_irn.php?code_id=11'+data.register_id;
+								return;
+							}
+							else
+							{
+								if(data.response == 'اتاق خاليست')
+								{
+									document.location = '../reception/view_block.php?code_id='+data.rooms_id+'&rdf_page=2&reserve_id=0';
+									return;
+
+								}
+								else
+								{
+									$('#wrraper_suggest').fadeOut('fast', function(){});
+									alert(data.response);
+								}
+							}
+
+						}
+						else
+						{
+
+							$('#content_suggest').focus();
+							$('#content_suggest').html(data.response);
+							$('#master_data').width('100%');
+
+						}
+					}
+				}, 'json');
+			}
+		}
+
+		$(document).keydown(function(event) {
+			if(event.which == 32){
+				$("#search_box").css("visibility", "visible");
+				$("#search_box").slideDown(1000,function(){
+					$(this).css("border", "2px red inset");
+					$("#inp_search").focus();
+				});
+			}
+			if(event.which == 27){
+				$('#wrraper_suggest').css("display", "none");
+				$("#search_box").slideUp(1000,function(){
+					$(this).css("visibility", "hidden");
+				});
+			}
+			if(event.which == 13 && $("#search_box").css("visibility") == 'visible'){
+				$(this).css("visibility", "hidden");
+				dynamic_search();
+			}
+		});
+
+	</script>
+
+<style type="text/css">
+#search_box{ background:#cfd; margin:0 auto; width:100%; height:25px;position: absolute;
+text-align:center;  cursor:pointer;
+border:2px outset black; font-weight:bolder; display:none;
+}
+#wrraper_suggest {
+    background: none repeat scroll 0 0 white;
+    border: 1px dashed gray;
+    border-radius: 7px 7px 7px 7px;
+    box-shadow: 0 0 20px gray;
+    display: none;
+    height: 500px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 900px;
+    z-index: 20;
+}
+#content_suggest {
+    height: 500px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 100%;
+}
+#loader_suggest {
+    background: none repeat scroll 0 0 #F3F3F3;
+    height: 100%;
+    opacity: 0.8;
+    width: 100%;
+}
+#loader_suggest div {
+    color: black;
+    direction: rtl;
+    font: 18px MH_NassimBold;
+    padding-top: 50px;
+    text-align: center;
+}
+#data_grid {
+    margin: 0 auto;
+    width: 99%;
+}
+#data_grid table {
+    border-collapse: collapse;
+    width: 100%;
+}
+#data_grid #info {
+    background: none repeat scroll 0 0 #F2F2F2;
+    border: 1px solid #C0C0C0;
+    direction: rtl;
+    margin-top: 5px;
+}
+#master_data {
+    margin-top: 5px;
+}
+#master_data #first_tr_mater_data {
+    background: url("../images_new/public/dataTitles_bg.gif") repeat scroll 0 0 transparent;
+    border-bottom: 1px solid #C5C5C5;
+    border-left: 1px solid #C5C5C5;
+    direction: rtl;
+    font: 15px MH_NassimBold;
+    height: 25px;
+    text-align: center;
+    white-space: nowrap;
+}
+#master_data td {
+    border: 1px solid #BEADAD;
+}
+.odd_tab {
+    background: none repeat scroll 0 0 #FAFAFA;
+    font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important;
+    height: 35px;
+}
+.even_tab {
+    background: none repeat scroll 0 0 #FFFFFF;
+    font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important;
+    height: 35px;
+}
+.odd_tab td, .even_tab td {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.odd_tab:hover, .even_tab:hover {
+    background: none repeat scroll 0 0 #FFFFD5;
+    cursor: default;
+    text-shadow: 0.1em 0.1em 0.2em gray;
+}
+.matched {
+    background: none repeat scroll 0 0 #BCEB8F !important;
+    color: black !important;
+    font-weight: normal !important;
+}
+#left_tab, #right_tab {
+    float: right;
+}
+#inp_search {
+    background: none repeat scroll 0 0 transparent;
+    border: medium none;
+    direction: rtl;
+    font: 17px MH_NassimBold;
+    height: 20px;
+    margin-left: -20px;
+    margin-top: 9px;
+    width: 140px;
+}
+#search_box {
+    background: url("../images_new/public/search_box.png") no-repeat scroll 0 0 transparent;
+    height: 45px;
+    left: 100px;
+    position: absolute;
+    top: 0;
+    width: 250px;
+}
+#cmd {
+    background: none repeat scroll 0 0 #FFE0E0;
+    border: 1px dashed red;
+    border-radius: 7px 7px 7px 7px;
+    box-shadow: 0 0 20px gray;
+    display: none;
+    height: 100px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 200px;
+}
+#cmd #tit {
+    font: 18px MH_NassimBold;
+    padding: 3px;
+    text-align: right;
+}
+#cmd_inp {
+    border: 1px solid #C2C9CF !important;
+    font: 18px MH_NassimBold;
+    height: 30px;
+    width: 180px;
+}
+#top_txt{
+	color :red;
+}
+</style>
+
+
+
+
+
+<div id="search_box">
+    <input lang="fa" type="text" id="inp_search" class="faNum" dir="rtl" align="right" style="text-align: right; direction: rtl;">
+</div>
+
+
+<div id="wrraper_suggest">
+    <div id="content_suggest"></div>
+</div>
+
+    
+<div id="show_wait"></div>
+
+<div id="show_blank_page"></div>
+<div id="show_tour_filter_wrraper">
+    <div id="tour_filter_canceller" title="close"></div>
+    <div id="show_tour_filter_inner">
+        <div id="inner_text">
+			            <div id="header_filter"> <span>تورهای مقیم</span> </div>
+			            <ul id="wrraper_filter_icon_tour">
+				<li id="tour-wrraper" onclick='sendTourID("2&amp;");'>
+						<div class="img_filter">
+						<span id="tour"></span>
+						</div>
+						 
+						<div class="text_filter">متفرقه - واریزی های نامشخص <br>۲</div>
+						</li><li id="tour-wrraper" onclick='sendTourID("1793&amp;");'>
+						<div class="img_filter">
+						<span id="tour"></span>
+						</div>
+						 
+						<div class="text_filter">صنایع مس افق کرمان <br>۱</div>
+						</li><li id="tour-wrraper" onclick='sendTourID("2777&amp;");'>
+						<div class="img_filter">
+						<span id="tour"></span>
+						</div>
+						 
+						<div class="text_filter">باشگاه فرهنگی ورزشی مس سونگون ورزقان <br>۹</div>
+						</li>            
+            </ul>
+        </div>
+    </div>
+</div><div id="show_blank_page"></div>
+<div id="show_room_filter_wrraper">
+    <div id="room_filter_canceller" title="close"></div>
+    <div id="show_room_filter_inner">
+        <div id="inner_text">
+    			            <div id="header_filter"> <span>نوع اتاق </span> </div>
+			            <ul id="wrraper_filter_icon_room">
+				<li id="kind-room-wrraper" onclick='sendKindRoomID("1");'>
+						<div class="img_filter">
+						<span id="kind-room"></span>
+						</div>
+						<div class="text_filter">دبل<br>۳</div>
+						</li><li id="kind-room-wrraper" onclick='sendKindRoomID("2");'>
+						<div class="img_filter">
+						<span id="kind-room"></span>
+						</div>
+						<div class="text_filter">تویین<br>۹</div>
+						</li><li id="kind-room-wrraper" onclick='sendKindRoomID("3");'>
+						<div class="img_filter">
+						<span id="kind-room"></span>
+						</div>
+						<div class="text_filter">اتاق یک خوابه 2 تخته<br>۲</div>
+						</li><li id="kind-room-wrraper" onclick='sendKindRoomID("4");'>
+						<div class="img_filter">
+						<span id="kind-room"></span>
+						</div>
+						<div class="text_filter">اتاق یک خوابه 3 تخته<br>۲</div>
+						</li><li id="kind-room-wrraper" onclick='sendKindRoomID("6");'>
+						<div class="img_filter">
+						<span id="kind-room"></span>
+						</div>
+						<div class="text_filter">اتاق/دو خوابه 5 تخته<br>۲</div>
+						</li><li id="kind-room-wrraper" onclick='sendKindRoomID("7");'>
+						<div class="img_filter">
+						<span id="kind-room"></span>
+						</div>
+						<div class="text_filter">VIP<br>۱</div>
+						</li><li id="kind-room-wrraper" onclick='sendKindRoomID("8");'>
+						<div class="img_filter">
+						<span id="kind-room"></span>
+						</div>
+						<div class="text_filter">اتاق کنفرانس<br>۱</div>
+						</li>            
+            </ul>
+        </div>
+    </div>
+</div>
+<div id="show_blank_page"></div>
+<div id="block_room_filter_wrraper" style="display: none;">
+    <div id="block_filter_canceller" title="close"></div>
+    <div id="show_room_filter_inner">
+        <div id="inner_text">
+    			            <div id="header_filter"> <span>نوع اتاق </span> </div>
+			            <ul id="wrraper_filter_icon_room">
+                <li id="kind-room-wrraper" onclick="sendBlockRoomID(-1);">
+                            <div class="toolbar-top-icon">
+                                <span id="block-room-icon"></span>
+                            </div>
+                            <div class="text_filter">همه<br>۱</div>
+                            </li>                <li id="kind-room-wrraper" onclick='sendBlockRoomID("0");'>
+                        <div class="toolbar-top-icon">
+                            <span id="block-room-icon"></span>
+                        </div>
+						<div class="text_filter">عادی<br>۱</div>
+						</li>            
+            </ul>
+        </div>
+    </div>
+</div>
+<div id="show_blank_page"></div>
+<div id="show_caption_filter_wrraper">
+    <div id="caption_filter_canceller" title="close"></div>
+    <div id="show_caption_filter_inner">
+        <div id="inner_text">
+			            <div id="header_filter"> <span>سرگروه ها</span> </div>
+			            <ul id="wrraper_filter_icon_tour">
+				            
+            </ul>
+        </div>
+    </div>
+</div><div id="show_blank_page"></div>
+<div id="show_other_filter_wrraper">
+    <div id="other_filter_canceller" title="close"></div>
+    <div id="show_other_filter_inner">
+        <div id="inner_text">
+			<div id="header_filter"> <span>دیگر فیلترها</span> </div>            <ul id="wrraper_filter_icon">
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="wakeup"></span>
+                    </div>
+            			<div class="text_filter">ساعت بیداری</div>                </li>
+                <li id="night-control-wrraper">
+                    <div class="img_filter">
+                        <span id="night_control"></span>
+                    </div>
+        			<div class="text_filter">کنترل شب</div>                </li>
+                <li id="no-disturb-wrraper">
+                    <div class="img_filter">
+                        <span id="no-disturb"></span>
+                    </div>
+					<div class="text_filter">مزاحم نشوید</div>
+                </li>
+                <li id="vip-guest-wrraper">
+                    <div class="img_filter">
+                        <span id="vip_guest"></span>
+                    </div>
+					<div class="text_filter">V.I.P ۰</div>                </li>
+                <li id="cmp-guest-wrraper">
+                    <div class="img_filter">
+                        <span id="cmp_guest"></span>
+                    </div>
+					<div class="text_filter">افتخاری ۰</div>                </li>
+                <li id="clean-room-wrraper">
+                    <div class="img_filter">
+                        <span id="clean_room"></span>
+                    </div>
+					<div class="text_filter">نظافت شده(*) </div>                </li>
+                <li id="tassisat-wrraper">
+                    <div class="img_filter">
+                        <span id="tassisat-room"></span>
+                    </div>
+					<div class="text_filter"> تاسیساتی۰</div>                </li>
+                <li id="damage-wrraper">
+                    <div class="img_filter">
+                        <span id="damage-room"></span>
+                    </div>
+					<div class="text_filter"> خسارت($)۰</div>                </li>
+                <li id="message-wrraper">
+                    <div class="img_filter">
+                        <span id="message-room"></span>
+                    </div>
+					<div class="text_filter"> پیغام</div>                </li>
+                <li id="nezafat2-wrraper">
+                    <div class="img_filter">
+                        <span id="nezafat2-room"></span>
+                    </div>
+					<div class="text_filter">نظافت</div>                </li>
+                <li id="caption-filter-wrraper">
+                    <div class="img_filter">
+                        <span id="caption-filter"></span>
+                    </div>
+					<div class="text_filter">سرگروه</div>                </li>
+                <li id="rack_hozoor-wrraper">
+                    <div class="img_filter">
+                        <span id="rack_hozoor"></span>
+                    </div>
+					<div class="text_filter">رک مکانیزه اتاق</div>                </li>
+                <li id="rack_unsaleable-wrraper">
+                    <div class="img_filter">
+                        <span id="no-disturb"></span>
+                    </div>
+					<div class="text_filter">غیرقابل فروش</div>                </li>
+
+            </ul>
+        </div>
+    </div>
+</div>
+<div id="show_building-wrraper">
+    <div id="building_canceller" title="close"></div>
+    <div id="show_other_filter_inner">
+        <div id="inner_text">
+			<div id="header_filter"> <span>لیست ساختمان ها</span> </div>            <ul id="wrraper_filter_icon">
+                            </ul>
+        </div>
+    </div>
+</div>
+<div id="show_helper_wrraper" style="display: none">
+    <div id="helper_canceller" title="close"></div>
+    <div id="show_other_filter_inner">
+        <div id="inner_text">
+            <div id="header_filter"> <span>راهنمای علامت ها</span> </div>
+            <ul id="wrraper_filter_icon">
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="tasisat"></span>
+                    </div>
+                    <div style="text-align: center">تاسیسات</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="wakeup"></span>
+                    </div>
+                    <div style="text-align: center">اعلام ساعت</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="nezafat"></span>
+                    </div>
+                    <div style="text-align: center">نیاز به نظافت</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="is-message"></span>
+                    </div>
+                    <div style="text-align: center">نامه مهمان</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="income-today"></span>
+                    </div>
+                    <div style="text-align: center">ورودی امروز</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="out-today"></span>
+                    </div>
+                    <div style="text-align: center">تخلیه امروز</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="vertical-rack-show"></span>
+                    </div>
+                    <div style="text-align: center">عمودی طبقه</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="horizantal-show"></span>
+                    </div>
+                    <div style="text-align: center">افقی طبقه</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="is-damage"></span>
+                    </div>
+                    <div style="text-align: center">زدن خسارت</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="readytosale-room-icon"></span>
+                    </div>
+                    <div style="text-align: center">آماده فروش</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="no-disturb"></span>
+                    </div>
+                    <div style="text-align: center">عدم مزاحمت</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span class="birthday" style="margin: 10px 28px;"></span>
+                    </div>
+                    <div style="text-align: center">تولد مهمان</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span class="guest-stay-hotel" style="margin: 20px 0px 0px 35px;"></span>
+                    </div>
+                    <div style="text-align: center">حضور در اتاق</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span class="text-icon" style="margin: 20px 0px 0px 35px;">F</span>
+                    </div>
+                    <div style="text-align: center">فول برد</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span class="text-icon" style="margin: 20px 0px 0px 35px;">H</span>
+                    </div>
+                    <div style="text-align: center">هاف برد</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="kharej-az-service"></span>
+                    </div>
+                    <div style="text-align: center">خارج سرویس</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="por-iran"></span>
+                    </div>
+                    <div style="text-align: center">ایرانی</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="por-latin"></span>
+                    </div>
+                    <div style="text-align: center">خارجی</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="block-room-icon"></span>
+                    </div>
+                    <div style="text-align: center">بلوک شده</div>
+                </li>
+                <li id="wakeup-wrraper">
+                    <div class="img_filter">
+                        <span id="empty-room-icon"></span>
+                    </div>
+                    <div style="text-align: center">خالی</div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div id="page-loading-wrraper" style="position: absolute; left: 0px; top: 0px; width: 100%; height: 100%; background: url(&quot;../images_new/room_rack/shadow.png&quot;); z-index: 2; opacity: 0.5; display: none;"></div>
+<div id="page-loader-box" style="position: absolute; inset: 0px; margin: auto; width: 250px; height: 40px; background: rgb(240, 240, 240); border: 1px solid rgb(186, 186, 186); box-shadow: gray 0px 0px 14px; border-radius: 5px; z-index: 3; padding: 10px; display: none;">
+    <div style="color: black; font:bold 12px tahoma; direction: rtl; text-align: right; margin-right: 21px; margin-bottom: 5px; font-family:MH_NassimBold;"> ... در حال بارگذاری ... </div>    <div style="background: url(../images_new/room_rack/page_loading.gif) no-repeat; width: 220px; height: 20px; margin: 0 auto;"></div>
+</div>
+<table style="margin-left: 100px;" id="page-header">
+	<tbody><tr>
+		<td width="30%" rowspan="2" id="left-header-image"><img src="new%20room%20rack_files/123_X0i-.png" width="180" height="60" onclick="document.location='../menu/recp1.php'" title="صفحه اصلی"></td>
+					<td width="30%" align="center" id="hotel_name">شرکت گردشگری و اقامتی آریان کویر رفسنجان</td>
+					
+			
+							<td width="15%" align="right" rowspan="1" id="left-header-image" style="text-align: center" other-filter="">
+				<img src="new%20room%20rack_files/user_name_blue_X0i-.png" width="60" height="40" onclick="document.location='../menu/recp1.php'" title="کیانوش قویدل">
+				</td>
+				<td width="15%" rowspan="1" align="right" id="date-header-farsi">تاریخ شمسی : ۱۴۰۵/۰۹/۰۳</td>
+				</tr>
+				<tr>
+				<td width="30%" align="center" id="occupy_percent">درصد اشغالی : ۳۸.۷۱</td>
+				<td width="10%" align="right" rowspan="1" id="left-header-image" style="text-align: center"><img src="new%20room%20rack_files/help_X0i-.png" width="25" id="helper_wrraper"></td>
+				<td width="10%" rowspan="1" align="right" id="date-header-latin">تاریخ میلادی : 24-11-2026</td>
+				</tr>
+					<tr>
+		<td width="30%" align="center" id="top_txt_l"></td>
+		<td width="10%" align="center" rowspan="1" id="top_txt"></td>
+		<td width="10%" rowspan="1" align="right" id="top_txt_r"></td>
+	</tr>
+	</tbody></table>
+	
+<div id="left-toolbar-wrraper" class="toolbar-common">
+    <div class="toolbar-icon-wrraper-left-top"> 
+        <div class="toolbar-top-icon" style="height: 35px;">
+            <span id="vertical-show"></span>
+        </div>
+			<div class="toolbar-bottom-icon-text">رزرو امروز</div>    </div>
+    <div id="left-box">
+        <div class="toolbar-icon-wrraper guest_in-wrraper" id="icon-1">
+            <div class="toolbar-top-icon">
+                <span id="guest_in"></span>
+            </div>
+  			<div class="toolbar-bottom-icon-text">مهمان مقیم ۳۰ </div>        </div>
+        <div class="toolbar-icon-wrraper readytosale-room-icon-wrraper" id="icon-2">
+            <div class="toolbar-top-icon">
+                <span id="readytosale-room-icon"></span>
+            </div>
+   			<div class="toolbar-bottom-icon-text">آماده فروش ۲۰</div>    	</div>
+        <div class="toolbar-icon-wrraper today-birth-wrraper" id="icon-3">
+            <div class="toolbar-top-icon">
+                <span id="today-birth"></span>
+            </div>
+			<div class="toolbar-bottom-icon-text">تولد امروز  ۰</div>        </div>
+        <div class="toolbar-icon-wrraper kind-room-wrraper" id="icon-4">
+            <div class="toolbar-top-icon">
+                <span id="kind-room"></span>
+            </div>
+			<div class="toolbar-bottom-icon-text">تنوع اتاق</div>        </div>
+        <div class="toolbar-icon-wrraper tour-filter-wrraper" id="icon-5">
+            <div class="toolbar-top-icon">
+                <span id="tour-filter"></span>
+            </div>
+            <div class="toolbar-bottom-icon-text">تورهای مقیم</div>        </div>
+        <div class="toolbar-icon-wrraper income-today-wrraper" id="icon-6">
+            <div class="toolbar-top-icon">
+                <span id="income-today"></span>
+            </div>
+           			<div class="toolbar-bottom-icon-text">ورودی امروز</div>        </div>
+        <div class="toolbar-icon-wrraper out-today-wrraper" id="icon-7">
+            <div class="toolbar-top-icon">
+                <span id="out-today"></span>
+            </div>
+			<div class="toolbar-bottom-icon-text">تخلیه امروز ۰</div>        </div>
+        <div class="toolbar-icon-wrraper other-filter-wrraper" id="icon-8">
+            <div class="toolbar-top-icon">
+                <span id="other-filter"></span>
+            </div>
+			<div class="toolbar-bottom-icon-text">دیگر فیلترها</div>        </div>
+            </div>
+    <div id="right-box">
+        <div class="felesh" id="felesh-1"></div>
+        <div class="felesh" id="felesh-2"></div>
+        <div class="felesh" id="felesh-3"></div>
+        <div class="felesh" id="felesh-4"></div>
+        <div class="felesh" id="felesh-5"></div>
+        <div class="felesh" id="felesh-6"></div>
+        <div class="felesh" id="felesh-7"></div>
+        <div class="felesh" id="felesh-8"></div>
+        <div class="felesh" id="felesh-9"></div>
+    </div>
+    <div class="cls"></div>
+</div>
+
+<div id="right-toolbar-wrraper" class="toolbar-common">
+    <div class="toolbar-icon-wrraper-right-top"> 
+        <div class="toolbar-top-icon" style="height: 35px;">
+            <span id="horizantal-show"></span>
+        </div>
+			        <div class="toolbar-bottom-icon-text" id="switch_view">افقی تنوع اتاق</div>  
+			  
+    </div>
+    <div id="right-box">
+        <div class="toolbar-icon-wrraper-right kharej-az-service-wrraper" id="icon-1">
+            <div class="toolbar-top-icon">
+                <span id="kharej-az-service"></span>
+            </div>
+        	<div class="toolbar-bottom-icon-text">خارج سرویس ۰</div>        </div>
+        <div class="toolbar-icon-wrraper-right por-iran-wrraper" id="icon-2">
+            <div class="toolbar-top-icon">
+                <span id="por-iran"></span>
+            </div>
+   			<div class="toolbar-bottom-icon-text">فارسی ۱۱</div>        </div>
+        <div class="toolbar-icon-wrraper-right por-latin-wrraper" id="icon-3">
+            <div class="toolbar-top-icon">
+                <span id="por-latin"></span>
+            </div>
+    		<div class="toolbar-bottom-icon-text">خارجی ۱</div>        </div>
+        <div class="toolbar-icon-wrraper-right block-room-icon-wrraper" id="icon-4">
+            <div class="toolbar-top-icon">
+                <span id="block-room-icon"></span>
+            </div>
+    			<div class="toolbar-bottom-icon-text">بلوک شده ۱</div>        </div>
+        <div class="toolbar-icon-wrraper-right nezafat-wrraper" id="icon-5">
+            <div class="toolbar-top-icon">
+                <span id="nezafat"></span>
+            </div>
+			<div class="toolbar-bottom-icon-text">خالی و نا آماده ۰</div>        </div>
+        <div class="toolbar-icon-wrraper-right empty-room-icon-wrraper" id="icon-6">
+            <div class="toolbar-top-icon">
+                <span id="empty-room-icon"></span>
+            </div>
+			<div class="toolbar-bottom-icon-text">خالی ۱۹</div>        </div>
+        <div class="toolbar-icon-wrraper-right occupy-room-icon-wrraper" id="icon-7">
+            <div class="toolbar-top-icon">
+                <span id="occupy-room-icon"></span>
+            </div>
+			<div class="toolbar-bottom-icon-text" id="room_ocupy_text">پر ۱۲</div>        </div>
+        	        <div class="toolbar-icon-wrraper-right occupy-room-icon-wrraper" id="icon-8" onclick="window.location='register_list.php?_D1=6'">
+            <div class="toolbar-top-icon">
+                <span id="occupy-room-icon"></span>
+            </div>
+			<div class="toolbar-bottom-icon-text" id="room_ocupy_text">تخلیه موقت ۰</div>    	    </div>
+    	        </div>
+    <div id="left-box">
+        <div class="felesh-right" id="felesh-right-1"></div>
+        <div class="felesh-right" id="felesh-right-2"></div>
+        <div class="felesh-right" id="felesh-right-3"></div>
+        <div class="felesh-right" id="felesh-right-4"></div>
+        <div class="felesh-right" id="felesh-right-5"></div>
+        <div class="felesh-right" id="felesh-right-6"></div>
+        <div class="felesh-right" id="felesh-right-7"></div>
+        <div class="felesh-right" id="felesh-right-8"></div>
+    </div>
+    <div class="cls"></div>
+</div>
+
+<div id="wrraper-master-div" style="width: 1225px; height: 624px; display: block;">
+    <div id="wrraper-room-rack"><ul class="tabaghe">
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 201 db خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=16&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="16" class="room-number" reg_id="0">201</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 202 db خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=17&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="17" class="room-number" reg_id="0">202</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 203 db خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=18&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="18" class="room-number" reg_id="0">203</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room blue_room" title-hover="&lt;div&gt;&lt;span class='left-arrow'&gt;&lt;/span&gt;204 db پر&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; مهدی . عاشوری&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رجیستر : ۸۶۷۹&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تعداد نفرات : ۱&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; قیمت اتاق : ۸۲,۱۸۸,۷۵۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; درصد تخفیف : %۰.۰۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ورود : ۱۴۰۵/۰۸/۲۵&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt;  خروج : ۱۴۰۵/۰۹/۰۵&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تور : صنایع مس افق کرمان&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='guest_report_irn.php?code_id=118679'">
+			<div class="room-star"> <br></div>
+			<div rdf_room="19" class="room-number" reg_id="8679">204</div>
+			<div class="icon-list">
+			
+			<div class="cls"></div>
+			</div>
+			</li><div class="cls"></div></ul><br><ul class="tabaghe">
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 101 tw خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=1&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="1" class="room-number" reg_id="0">101</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 102 tw خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=2&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="2" class="room-number" reg_id="0">102</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 103 tw خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=3&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="3" class="room-number" reg_id="0">103</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 104 tw خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=4&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="4" class="room-number" reg_id="0">104</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 109 tw خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=9&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="9" class="room-number" reg_id="0">109</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 110 tw خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=10&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="10" class="room-number" reg_id="0">110</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 111 tw خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=11&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="11" class="room-number" reg_id="0">111</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 112 tw خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=12&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="12" class="room-number" reg_id="0">112</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 209 tw خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=24&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="24" class="room-number" reg_id="0">209</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room blue_room" title-hover="&lt;div&gt;&lt;span class='left-arrow'&gt;&lt;/span&gt;210 tw پر&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; افشین . فتاح&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; سید مرصاد . آقاجانی میر&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رجیستر : ۸۷۳۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تعداد نفرات : ۲&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; قیمت اتاق : ۸۲,۱۸۸,۷۵۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; درصد تخفیف : %۰.۰۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ورود : ۱۴۰۵/۰۹/۰۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt;  خروج : ۱۴۰۵/۰۹/۰۴&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تور : باشگاه فرهنگی ورزشی مس سونگون ورزقان&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='guest_report_irn.php?code_id=118730'">
+			<div class="room-star"> <br></div>
+			<div rdf_room="25" class="room-number" reg_id="8730">210</div>
+			<div class="icon-list">
+			
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room blue_room" title-hover="&lt;div&gt;&lt;span class='left-arrow'&gt;&lt;/span&gt;211 tw پر&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; میلاد . حمیدی عربلو&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; توحید  . صمدی &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رجیستر : ۸۷۳۱&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تعداد نفرات : ۲&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; قیمت اتاق : ۸۲,۱۸۸,۷۵۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; درصد تخفیف : %۰.۰۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ورود : ۱۴۰۵/۰۹/۰۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt;  خروج : ۱۴۰۵/۰۹/۰۴&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تور : باشگاه فرهنگی ورزشی مس سونگون ورزقان&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='guest_report_irn.php?code_id=118731'" aria-expanded="false">
+			<div class="room-star"> <br></div>
+			<div rdf_room="26" class="room-number" reg_id="8731">211</div>
+			<div class="icon-list">
+			
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room blue_room" title-hover="&lt;div&gt;&lt;span class='left-arrow'&gt;&lt;/span&gt;212 tw پر&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اسماعیل . طالبی خامنه&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; میربابک  . موسوی گرگری &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رجیستر : ۸۷۳۲&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تعداد نفرات : ۲&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; قیمت اتاق : ۸۲,۱۸۸,۷۵۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; درصد تخفیف : %۰.۰۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ورود : ۱۴۰۵/۰۹/۰۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt;  خروج : ۱۴۰۵/۰۹/۰۴&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تور : باشگاه فرهنگی ورزشی مس سونگون ورزقان&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی
+&lt;/div&gt;" onclick="document.location='guest_report_irn.php?code_id=118732'">
+			<div class="room-star"> <br></div>
+			<div rdf_room="27" class="room-number" reg_id="8732">212</div>
+			<div class="icon-list">
+			
+			<div class="cls"></div>
+			</div>
+			</li><div class="cls"></div></ul><br><ul class="tabaghe">
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 108 Room خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=8&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="8" class="room-number" reg_id="0">108</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room block_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 113 Room خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; بلوک توسط : فاطمه دهشیری
+ ( اقامت آقای آجل لو )&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=13&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="13" class="room-number" reg_id="0">113</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room blue_room" title-hover="&lt;div&gt;&lt;span class='left-arrow'&gt;&lt;/span&gt;208 Room پر&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; عادل . بناکار&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رجیستر : ۸۷۳۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تعداد نفرات : ۱&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; قیمت اتاق : ۱۲۳,۶۹۰,۰۰۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; درصد تخفیف : %۰.۰۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ورود : ۱۴۰۵/۰۹/۰۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt;  خروج : ۱۴۰۵/۰۹/۰۴&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تور : باشگاه فرهنگی ورزشی مس سونگون ورزقان&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رو به خیابان چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='guest_report_irn.php?code_id=118733'">
+			<div class="room-star"> <br></div>
+			<div rdf_room="23" class="room-number" reg_id="8733">208</div>
+			<div class="icon-list">
+			
+			<div class="cls"></div>
+			</div>
+			</li><div class="cls"></div></ul><br><ul class="tabaghe">
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 106 Romm خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=6&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="6" class="room-number" reg_id="0">106</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room blue_room" title-hover="&lt;div&gt;&lt;span class='left-arrow'&gt;&lt;/span&gt;206 Romm پر&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رسول . سلیمی کاسین&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ناصر . نادری&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رجیستر : ۸۷۳۴&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تعداد نفرات : ۲&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; قیمت اتاق : ۱۴۷,۴۰۵,۰۰۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; درصد تخفیف : %۰.۰۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ورود : ۱۴۰۵/۰۹/۰۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt;  خروج : ۱۴۰۵/۰۹/۰۴&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تور : باشگاه فرهنگی ورزشی مس سونگون ورزقان&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رو به خیابان چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='guest_report_irn.php?code_id=118734'">
+			<div class="room-star"> <br></div>
+			<div rdf_room="21" class="room-number" reg_id="8734">206</div>
+			<div class="icon-list">
+			
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 216 Romm خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=31&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="31" class="room-number" reg_id="0">216</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li><div class="cls"></div></ul><br><ul class="tabaghe">
+			<li class="room green_room" title-hover="&lt;div&gt;&lt;span class='left-arrow'&gt;&lt;/span&gt;105 suite پر&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; JIA . WANG&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ZHANG . KUNMING&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; CHENG . HAODONG&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رجیستر : ۸۶۷۶&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تعداد نفرات : ۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; قیمت اتاق : ۱۹۵,۸۸۱,۲۵۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; درصد تخفیف : %۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ورود : ۱۴۰۵/۰۸/۲۵&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt;  خروج : ۱۴۰۵/۰۹/۱۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تور : متفرقه - واریزی های نامشخص&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رو به خیابان چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='guest_report_frn.php?code_id=218676'">
+			<div class="room-star"> <br></div>
+			<div rdf_room="5" class="room-number" reg_id="8676">105</div>
+			<div class="icon-list">
+			
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room blue_room" title-hover="&lt;div&gt;&lt;span class='left-arrow'&gt;&lt;/span&gt;205 suite پر&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; شهروز . بزرگی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; محمد . عمده غیاثی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; وحید . صادقی ملکی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رجیستر : ۸۷۳۵&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تعداد نفرات : ۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; قیمت اتاق : ۱۹۵,۸۸۱,۲۵۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; درصد تخفیف : %۰.۰۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ورود : ۱۴۰۵/۰۹/۰۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt;  خروج : ۱۴۰۵/۰۹/۰۴&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تور : باشگاه فرهنگی ورزشی مس سونگون ورزقان&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رو به خیابان چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='guest_report_irn.php?code_id=118735'">
+			<div class="room-star"> <br></div>
+			<div rdf_room="20" class="room-number" reg_id="8735">205</div>
+			<div class="icon-list">
+			
+			<div class="cls"></div>
+			</div>
+			</li><div class="cls"></div></ul><br><ul class="tabaghe">
+			<li class="room blue_room" title-hover="&lt;div&gt;&lt;span class='left-arrow'&gt;&lt;/span&gt;107 suite پر&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; همایون . بابامرادی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; حیدر . کسائیان&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رجیستر : ۸۶۸۷&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تعداد نفرات : ۲&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; قیمت اتاق : ۲۱۹,۵۹۶,۲۵۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; درصد تخفیف : %۰.۰۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ورود : ۱۴۰۵/۰۸/۲۶&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt;  خروج : ۱۴۰۵/۰۹/۱۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تور : متفرقه - واریزی های نامشخص&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='guest_report_irn.php?code_id=118687'">
+			<div class="room-star"> <br></div>
+			<div rdf_room="7" class="room-number" reg_id="8687">107</div>
+			<div class="icon-list">
+			
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 114 suite خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=14&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="14" class="room-number" reg_id="0">114</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 115 suite خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=15&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="15" class="room-number" reg_id="0">115</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room blue_room" title-hover="&lt;div&gt;&lt;span class='left-arrow'&gt;&lt;/span&gt;207 suite پر&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; خداشناس . خداشناس قراملکی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; سعید . امینی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; علی رضا . رهبری دوست&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; علیرضا . مهدوی ایلخچی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رجیستر : ۸۷۳۶&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تعداد نفرات : ۴&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; قیمت اتاق : ۲۱۹,۵۹۶,۲۵۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; درصد تخفیف : %۰.۰۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ورود : ۱۴۰۵/۰۹/۰۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt;  خروج : ۱۴۰۵/۰۹/۰۴&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تور : باشگاه فرهنگی ورزشی مس سونگون ورزقان&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رو به خیابان چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='guest_report_irn.php?code_id=118736'">
+			<div class="room-star"> <br></div>
+			<div rdf_room="22" class="room-number" reg_id="8736">207</div>
+			<div class="icon-list">
+			
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room blue_room" title-hover="&lt;div&gt;&lt;span class='left-arrow'&gt;&lt;/span&gt;214 suite پر&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رسول . خریداری&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; محمدرضا . آل جلیل&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ابوالفضل . مهدیان&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; مهدی  . بیاتی &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رجیستر : ۸۷۳۷&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تعداد نفرات : ۴&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; قیمت اتاق : ۲۱۹,۵۹۶,۲۵۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; درصد تخفیف : %۰.۰۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ورود : ۱۴۰۵/۰۹/۰۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt;  خروج : ۱۴۰۵/۰۹/۰۴&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تور : باشگاه فرهنگی ورزشی مس سونگون ورزقان&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رو به خیابان چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='guest_report_irn.php?code_id=118737'">
+			<div class="room-star"> <br></div>
+			<div rdf_room="29" class="room-number" reg_id="8737">214</div>
+			<div class="icon-list">
+			
+			<div class="cls"></div>
+			</div>
+			</li>
+			<li class="room blue_room" title-hover="&lt;div&gt;&lt;span class='left-arrow'&gt;&lt;/span&gt;215 suite پر&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; امیرمحمد . طهماسبی لیمونی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; غلیرضا . اکبرنیا&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; علی . عشقی نور&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; علی . ولی زاده&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رجیستر : ۸۷۳۸&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تعداد نفرات : ۴&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; قیمت اتاق : ۲۱۹,۵۹۶,۲۵۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; درصد تخفیف : %۰.۰۰&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; ورود : ۱۴۰۵/۰۹/۰۳&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt;  خروج : ۱۴۰۵/۰۹/۰۴&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; تور : باشگاه فرهنگی ورزشی مس سونگون ورزقان&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='guest_report_irn.php?code_id=118738'">
+			<div class="room-star"> <br></div>
+			<div rdf_room="30" class="room-number" reg_id="8738">215</div>
+			<div class="icon-list">
+			
+			<div class="cls"></div>
+			</div>
+			</li><div class="cls"></div></ul><br><ul class="tabaghe">
+			<li class="room normal_room" title-hover="&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; 213 VIP خالی&lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; اتاق آماده است &lt;/div&gt;&lt;div&gt; &lt;span class='left-arrow'&gt;&lt;/span&gt; رو به خیابان چای ساز سرویس فرنگی سرویس ایرانی
+&lt;/div&gt;" onclick="document.location='view_block.php?code_id=28&amp;rdf_page=2&amp;reserve_id=&amp;detail_date_id='">
+			<div class="room-star"> <br></div>
+			<div rdf_room="28" class="room-number" reg_id="0">213</div>
+			<div class="icon-list">
+			<div class="ready_to_sale"></div>
+			<div class="cls"></div>
+			</div>
+			</li><div class="cls"></div></ul><br><ul class="tabaghe"><div class="cls"></div></ul><br></div>
+</div>
+<input type="hidden" id="date_far" value="03/09/1405">
+<input type="hidden" id="date_ltn" value="2026-11-24">
+<input type="hidden" id="Special_Print_Form" value="0">
+<input type="hidden" id="Room_Icon_Width" value="92px">
+<input type="hidden" id="rack_view_id" value="3"><div style="display: none;">
+	<img src="new%20room%20rack_files/bg_X0i-.jpg" onload="">
+</div>
+	
+
+
+</body></html>

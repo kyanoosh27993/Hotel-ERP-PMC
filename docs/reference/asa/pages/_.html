@@ -1,0 +1,1178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html style="" class=" js flexbox canvas canvastext webgl no-touch geolocation postmessage no-websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients no-cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers no-applicationcache svg inlinesvg smil svgclippaths"><head><script type="text/javascript">var tst_for_url_to_confirm = '0';</script>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="author" content="ASA CO.">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="-1">
+
+    <title>ثبت پیغام جدید کاربر</title>    <link href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/fonts_xQdz.css" rel="stylesheet" type="text/css" media="all">
+    <link href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/cross_style_xQdz.css" rel="stylesheet" type="text/css" media="all">
+
+    <link rel="stylesheet" media="screen" type="text/css" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/list_styles_xQdz.css">
+    <link rel="stylesheet" media="print" type="text/css" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/print_styles_xQdz.css">
+    <link rel="stylesheet" media="screen" type="text/css" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/auto_suggest_xQdz.css">
+    <link rel="stylesheet" media="screen" type="text/css" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/report_error_style_xQdz.css">
+
+    <script language="javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/jqury_3.3.1_xQdz.js"></script>
+    <script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/cross_script_xQdz.js"></script>
+    <script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/valid_select_jquery_xQdz.js"></script>
+            <script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/input_select_jquery_cross_xQdz.js"></script>
+            <script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/farsitype_xQdz.js"></script>
+            <script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/auto_suggest_002_xQdz.js"></script>
+        <script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/auto_suggest_xQdz.js"></script>
+        <script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/loadingoverlay.min_xQdz.js"></script>
+    
+    <script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/jquery.fixedtableheader.min_xQdz.js"></script>
+
+    <link rel="stylesheet" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/theme.default_xQdz.css">
+    <script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/jquery.tablesorter.min_xQdz.js"></script>
+    <script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/jquery.tablesorter.widgets.min_xQdz.js"></script>
+
+    <script language="javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/persianumber.min_xQdz.js"></script>
+
+    <link rel="stylesheet" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/smartnoti_xQdz.css" type="text/css" media="screen">
+    <script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/smartnoti_xQdz.js"></script>
+
+
+    <script type="text/javascript">
+        function numToSSColumnLetter(num) {
+            let columnLetter = "",
+                t;
+
+            while (num > 0) {
+                t = (num - 1) % 26;
+                columnLetter = String.fromCharCode(65 + t) + columnLetter;
+                num = (num - t) / 26 | 0;
+            }
+            return columnLetter || undefined;
+        }
+
+        $(document).ready(function () {
+
+            //change language by ctrl+space
+            document.onkeydown = function KeyPress(e) {
+                var evtobj = window.event ? event : e
+
+                if (evtobj.keyCode == 32 && evtobj.ctrlKey) {
+                    if (FarsiType.Type == true)
+                        FarsiType.Type = false;
+                    else
+                        FarsiType.Type = true;
+                }
+
+            };
+        });
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.number').on('keyup', function (e) {
+                var ids = e.target.id;
+                var ids_1 = '#' + ids;
+                var check_disable = true;
+                try {
+                    if ($(ids_1).hasAttr('readonly') || $(ids_1).hasAttr('disabled')) {
+                        check_disable=false;
+                    } else {
+                    }
+                } catch (e) {
+
+                }
+                if (check_disable == true) {
+                    if (isPersian(e.key)) {
+                        alert('لطفا کیبورد خود را انگلیسی کنید');
+                        var is_date = ids.indexOf('date') + ids.indexOf('Date') + ids.indexOf('DATE') +
+                            ids.indexOf('_dprtirn1') + ids.indexOf('_entryirn1') + ids.indexOf('_entryfrn1') + ids.indexOf('_dprtfrn1');
+                        if (ids.indexOf('date') > -1 || ids.indexOf('Date') > -1 || ids.indexOf('DATE') > -1 ||
+                            ids.indexOf('_dprtirn1') > -1 || ids.indexOf('_entryirn1') > -1 || ids.indexOf('_entryfrn1') > 0 || ids.indexOf('_dprtfrn1') > -1
+                            || ids.indexOf('dat') > -1 || ids.indexOf('Dat') > -1) {
+                            document.getElementById(ids).value = "";
+                        } else {
+                            var is_time = ids.indexOf('time') + ids.indexOf('Time') + ids.indexOf('time');
+                            if (is_time > -1) {
+                                document.getElementById(ids).value = "00:00";
+                            } else {
+                                document.getElementById(ids).value = "0";
+                            }
+                        }
+                        return false;
+                    }
+                }
+            });
+
+            function isEnglish(charCode) {
+                return (charCode >= 97 && charCode <= 122)
+                    || (charCode >= 65 && charCode <= 90);
+            }
+
+            function isPersian(key) {
+                var p = /^[\u0600-\u06FF\s]+$/;
+                return p.test(key) && key != ' ';
+            }
+
+            var tables = document.querySelectorAll("#main_tab");
+            [].forEach.call(tables, function (table) {
+                let __tableToExcel = table;
+                let __row = 1;
+                let __export = {};
+                let __merges = [];
+                let __tr = {};
+
+                // انتخاب تمام ردیف‌ها (هم thead و هم tbody را شامل شود)
+                let __trs = __tableToExcel.querySelectorAll('tr');
+
+                __trs.forEach((a) => {
+                    let __col = 1;
+                    let __td = {};
+                    // انتخاب th یا td برای اطمینان از خواندن هدرها
+                    let __tds = a.querySelectorAll('td, th');
+
+                    __tds.forEach((aa) => {
+                        let colspan = aa.getAttribute('colspan') || 1;
+
+                        // اصلاح اصلی: استفاده از innerText برای گرفتن تمام متن‌های داخل سلول
+                        // .trim() فاصله‌های خالی اضافه دور متن را پاک می‌کند
+                        let __content = aa.innerText ? aa.innerText.trim() : "";
+
+                        if (colspan > 1) {
+                            __merges.push(numToSSColumnLetter(__col) + __row + ':' + numToSSColumnLetter(__col + +colspan - 1) + __row);
+                            __td[__col] = {'val': __content};
+                            __col++;
+                            for (let __i = 1; __i < +colspan; __i++) {
+                                __td[__col] = {'val': ''};
+                                __col++;
+                            }
+                        } else {
+                            __td[__col] = {'val': __content};
+                            __col++;
+                        }
+                    });
+                    __tr[__row] = __td;
+                    __row++;
+                });
+
+                __export['file_name'] = document.title;
+                __export['merges'] = __merges;
+                __export['data'] = __tr;
+
+                __tableToExcel.outerHTML += '<br /><form method="post" action="../_export2.php" class="no_print" id="excel_export_js"><input type="hidden" name="data" value="' + btoa(unescape(encodeURIComponent(JSON.stringify(__export)))) + '"><input type="image" name="xlsx" src="../images/excel.png" style="width: 30px; height: 30px; border: none; margin-left: 10px" title="خروجی اکسل" /></form>';
+            });
+
+            $("a").each(function() {
+                if (this.href) {
+                    let _href = this.href;
+                    if (_href.indexOf('delete.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete.php\?/, 'delete.php?__token__=7239577313209a230a35030638f2f2b30b55cd242de273c97a5361348efcb1c9&');
+                    }
+                    if (_href.indexOf('delete1.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete1.php\?/, 'delete1.php?__token__=7239577313209a230a35030638f2f2b30b55cd242de273c97a5361348efcb1c9&');
+                    }
+                    if (_href.indexOf('delete2.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete2.php\?/, 'delete2.php?__token__=7239577313209a230a35030638f2f2b30b55cd242de273c97a5361348efcb1c9&');
+                    }
+                    if (_href.indexOf('delete3.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete3.php\?/, 'delete3.php?__token__=7239577313209a230a35030638f2f2b30b55cd242de273c97a5361348efcb1c9&');
+                    }
+                    if (_href.indexOf('delete4.php') > -1 && _href.indexOf('__token__') === -1) {
+                        this.href = _href.replace(/delete4.php\?/, 'delete4.php?__token__=7239577313209a230a35030638f2f2b30b55cd242de273c97a5361348efcb1c9&');
+                    }
+                }
+            });
+
+            $("form").each(function() {
+                if ($(this).find("input[name=__token__]").length === 0) {
+                    $(this).append('<input type="hidden" name="__token__" value="7239577313209a230a35030638f2f2b30b55cd242de273c97a5361348efcb1c9" />');
+                }
+            })
+        });
+    </script><link rel="stylesheet" type="text/css" media="all" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/file_type_img_xQdz.css" title="Aqua">
+
+<link rel="stylesheet" type="text/css" media="all" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/jquery-ui-1.10.4.custom.min_xQdz.css" title="Aqua">
+<link rel="stylesheet" type="text/css" media="all" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/main_xQdz.css" title="Aqua">
+<script src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/modernizr-2.6.2.min_xQdz.js"></script>
+<script src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/jquery-1.10.2.min_xQdz.js"></script>
+<script src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/jquery-ui-1.10.4.custom.min_xQdz.js"></script>
+<script src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/jquery.autocomplete.multiselect_xQdz.js"></script>
+<script src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/main_xQdz.js"></script>
+<script src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/notify.min_xQdz.js"></script><style type="text/css" id="notify-bootstrap">.notifyjs-bootstrap-base {
+	font-weight: bold;
+	padding: 8px 15px 8px 14px;
+	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+	background-color: #fcf8e3;
+	border: 1px solid #fbeed5;
+	-webkit-border-radius: 4px;
+	-moz-border-radius: 4px;
+	border-radius: 4px;
+	white-space: nowrap;
+	padding-left: 25px;
+	background-repeat: no-repeat;
+	background-position: 3px 7px;
+}
+.notifyjs-bootstrap-error {
+	color: #B94A48;
+	background-color: #F2DEDE;
+	border-color: #EED3D7;
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAtRJREFUeNqkVc1u00AQHq+dOD+0poIQfkIjalW0SEGqRMuRnHos3DjwAH0ArlyQeANOOSMeAA5VjyBxKBQhgSpVUKKQNGloFdw4cWw2jtfMOna6JOUArDTazXi/b3dm55socPqQhFka++aHBsI8GsopRJERNFlY88FCEk9Yiwf8RhgRyaHFQpPHCDmZG5oX2ui2yilkcTT1AcDsbYC1NMAyOi7zTX2Agx7A9luAl88BauiiQ/cJaZQfIpAlngDcvZZMrl8vFPK5+XktrWlx3/ehZ5r9+t6e+WVnp1pxnNIjgBe4/6dAysQc8dsmHwPcW9C0h3fW1hans1ltwJhy0GxK7XZbUlMp5Ww2eyan6+ft/f2FAqXGK4CvQk5HueFz7D6GOZtIrK+srupdx1GRBBqNBtzc2AiMr7nPplRdKhb1q6q6zjFhrklEFOUutoQ50xcX86ZlqaZpQrfbBdu2R6/G19zX6XSgh6RX5ubyHCM8nqSID6ICrGiZjGYYxojEsiw4PDwMSL5VKsC8Yf4VRYFzMzMaxwjlJSlCyAQ9l0CW44PBADzXhe7xMdi9HtTrdYjFYkDQL0cn4Xdq2/EAE+InCnvADTf2eah4Sx9vExQjkqXT6aAERICMewd/UAp/IeYANM2joxt+q5VI+ieq2i0Wg3l6DNzHwTERPgo1ko7XBXj3vdlsT2F+UuhIhYkp7u7CarkcrFOCtR3H5JiwbAIeImjT/YQKKBtGjRFCU5IUgFRe7fF4cCNVIPMYo3VKqxwjyNAXNepuopyqnld602qVsfRpEkkz+GFL1wPj6ySXBpJtWVa5xlhpcyhBNwpZHmtX8AGgfIExo0ZpzkWVTBGiXCSEaHh62/PoR0p/vHaczxXGnj4bSo+G78lELU80h1uogBwWLf5YlsPmgDEd4M236xjm+8nm4IuE/9u+/PH2JXZfbwz4zw1WbO+SQPpXfwG/BBgAhCNZiSb/pOQAAAAASUVORK5CYII=);
+}
+.notifyjs-bootstrap-success {
+	color: #468847;
+	background-color: #DFF0D8;
+	border-color: #D6E9C6;
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAutJREFUeNq0lctPE0Ecx38zu/RFS1EryqtgJFA08YCiMZIAQQ4eRG8eDGdPJiYeTIwHTfwPiAcvXIwXLwoXPaDxkWgQ6islKlJLSQWLUraPLTv7Gme32zoF9KSTfLO7v53vZ3d/M7/fIth+IO6INt2jjoA7bjHCJoAlzCRw59YwHYjBnfMPqAKWQYKjGkfCJqAF0xwZjipQtA3MxeSG87VhOOYegVrUCy7UZM9S6TLIdAamySTclZdYhFhRHloGYg7mgZv1Zzztvgud7V1tbQ2twYA34LJmF4p5dXF1KTufnE+SxeJtuCZNsLDCQU0+RyKTF27Unw101l8e6hns3u0PBalORVVVkcaEKBJDgV3+cGM4tKKmI+ohlIGnygKX00rSBfszz/n2uXv81wd6+rt1orsZCHRdr1Imk2F2Kob3hutSxW8thsd8AXNaln9D7CTfA6O+0UgkMuwVvEFFUbbAcrkcTA8+AtOk8E6KiQiDmMFSDqZItAzEVQviRkdDdaFgPp8HSZKAEAL5Qh7Sq2lIJBJwv2scUqkUnKoZgNhcDKhKg5aH+1IkcouCAdFGAQsuWZYhOjwFHQ96oagWgRoUov1T9kRBEODAwxM2QtEUl+Wp+Ln9VRo6BcMw4ErHRYjH4/B26AlQoQQTRdHWwcd9AH57+UAXddvDD37DmrBBV34WfqiXPl61g+vr6xA9zsGeM9gOdsNXkgpEtTwVvwOklXLKm6+/p5ezwk4B+j6droBs2CsGa/gNs6RIxazl4Tc25mpTgw/apPR1LYlNRFAzgsOxkyXYLIM1V8NMwyAkJSctD1eGVKiq5wWjSPdjmeTkiKvVW4f2YPHWl3GAVq6ymcyCTgovM3FzyRiDe2TaKcEKsLpJvNHjZgPNqEtyi6mZIm4SRFyLMUsONSSdkPeFtY1n0mczoY3BHTLhwPRy9/lzcziCw9ACI+yql0VLzcGAZbYSM5CCSZg1/9oc/nn7+i8N9p/8An4JMADxhH+xHfuiKwAAAABJRU5ErkJggg==);
+}
+.notifyjs-bootstrap-info {
+	color: #3A87AD;
+	background-color: #D9EDF7;
+	border-color: #BCE8F1;
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QYFAhkSsdes/QAAA8dJREFUOMvVlGtMW2UYx//POaWHXg6lLaW0ypAtw1UCgbniNOLcVOLmAjHZolOYlxmTGXVZdAnRfXQm+7SoU4mXaOaiZsEpC9FkiQs6Z6bdCnNYruM6KNBw6YWewzl9z+sHImEWv+vz7XmT95f/+3/+7wP814v+efDOV3/SoX3lHAA+6ODeUFfMfjOWMADgdk+eEKz0pF7aQdMAcOKLLjrcVMVX3xdWN29/GhYP7SvnP0cWfS8caSkfHZsPE9Fgnt02JNutQ0QYHB2dDz9/pKX8QjjuO9xUxd/66HdxTeCHZ3rojQObGQBcuNjfplkD3b19Y/6MrimSaKgSMmpGU5WevmE/swa6Oy73tQHA0Rdr2Mmv/6A1n9w9suQ7097Z9lM4FlTgTDrzZTu4StXVfpiI48rVcUDM5cmEksrFnHxfpTtU/3BFQzCQF/2bYVoNbH7zmItbSoMj40JSzmMyX5qDvriA7QdrIIpA+3cdsMpu0nXI8cV0MtKXCPZev+gCEM1S2NHPvWfP/hL+7FSr3+0p5RBEyhEN5JCKYr8XnASMT0xBNyzQGQeI8fjsGD39RMPk7se2bd5ZtTyoFYXftF6y37gx7NeUtJJOTFlAHDZLDuILU3j3+H5oOrD3yWbIztugaAzgnBKJuBLpGfQrS8wO4FZgV+c1IxaLgWVU0tMLEETCos4xMzEIv9cJXQcyagIwigDGwJgOAtHAwAhisQUjy0ORGERiELgG4iakkzo4MYAxcM5hAMi1WWG1yYCJIcMUaBkVRLdGeSU2995TLWzcUAzONJ7J6FBVBYIggMzmFbvdBV44Corg8vjhzC+EJEl8U1kJtgYrhCzgc/vvTwXKSib1paRFVRVORDAJAsw5FuTaJEhWM2SHB3mOAlhkNxwuLzeJsGwqWzf5TFNdKgtY5qHp6ZFf67Y/sAVadCaVY5YACDDb3Oi4NIjLnWMw2QthCBIsVhsUTU9tvXsjeq9+X1d75/KEs4LNOfcdf/+HthMnvwxOD0wmHaXr7ZItn2wuH2SnBzbZAbPJwpPx+VQuzcm7dgRCB57a1uBzUDRL4bfnI0RE0eaXd9W89mpjqHZnUI5Hh2l2dkZZUhOqpi2qSmpOmZ64Tuu9qlz/SEXo6MEHa3wOip46F1n7633eekV8ds8Wxjn37Wl63VVa+ej5oeEZ/82ZBETJjpJ1Rbij2D3Z/1trXUvLsblCK0XfOx0SX2kMsn9dX+d+7Kf6h8o4AIykuffjT8L20LU+w4AZd5VvEPY+XpWqLV327HR7DzXuDnD8r+ovkBehJ8i+y8YAAAAASUVORK5CYII=);
+}
+.notifyjs-bootstrap-warn {
+	color: #C09853;
+	background-color: #FCF8E3;
+	border-color: #FBEED5;
+	background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAMAAAC6V+0/AAABJlBMVEXr6eb/2oD/wi7/xjr/0mP/ykf/tQD/vBj/3o7/uQ//vyL/twebhgD/4pzX1K3z8e349vK6tHCilCWbiQymn0jGworr6dXQza3HxcKkn1vWvV/5uRfk4dXZ1bD18+/52YebiAmyr5S9mhCzrWq5t6ufjRH54aLs0oS+qD751XqPhAybhwXsujG3sm+Zk0PTwG6Shg+PhhObhwOPgQL4zV2nlyrf27uLfgCPhRHu7OmLgAafkyiWkD3l49ibiAfTs0C+lgCniwD4sgDJxqOilzDWowWFfAH08uebig6qpFHBvH/aw26FfQTQzsvy8OyEfz20r3jAvaKbhgG9q0nc2LbZxXanoUu/u5WSggCtp1anpJKdmFz/zlX/1nGJiYmuq5Dx7+sAAADoPUZSAAAAAXRSTlMAQObYZgAAAAFiS0dEAIgFHUgAAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfdBgUBGhh4aah5AAAAlklEQVQY02NgoBIIE8EUcwn1FkIXM1Tj5dDUQhPU502Mi7XXQxGz5uVIjGOJUUUW81HnYEyMi2HVcUOICQZzMMYmxrEyMylJwgUt5BljWRLjmJm4pI1hYp5SQLGYxDgmLnZOVxuooClIDKgXKMbN5ggV1ACLJcaBxNgcoiGCBiZwdWxOETBDrTyEFey0jYJ4eHjMGWgEAIpRFRCUt08qAAAAAElFTkSuQmCC);
+}
+</style>
+<link type="text/css" rel="stylesheet" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/notify_xQdz.css">
+
+<link rel="stylesheet" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/smartnoti_xQdz.css" type="text/css" media="screen">
+<script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/smartnoti_xQdz.js"></script>
+
+
+<script src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/ajaxupload_xQdz.js" type="text/javascript"></script>
+
+<script language="javascript">
+    function getCaret(el) {
+        if (el.selectionStart) {
+            return el.selectionStart;
+        } else if (document.selection) {
+            el.focus();
+
+            var r = document.selection.createRange();
+            if (r == null) {
+                return 0;
+            }
+
+            var re = el.createTextRange(),
+                rc = re.duplicate();
+            re.moveToBookmark(r.getBookmark());
+            rc.setEndPoint('EndToStart', re);
+
+            return rc.text.length;
+        }
+        return 0;
+    }
+
+    function setCaretPosition(ctrl, pos) {
+
+        if (ctrl.setSelectionRange) {
+            ctrl.focus();
+            ctrl.setSelectionRange(pos, pos);
+        } else if (ctrl.createTextRange) {
+            var range = ctrl.createTextRange();
+            range.collapse(true);
+            range.moveEnd('character', pos);
+            range.moveStart('character', pos);
+            range.select();
+        }
+    }
+
+    $(document).ready(function () {
+        /*var textarea = document.getElementById('irn_desc'),
+            status = document.getElementById('status');
+
+        textarea.onmouseup = textarea.onkeyup = function () {
+          status.innerHTML = getCaret(textarea);
+        };
+          $('#irn_desc').keydown(function(e) {
+              var key = e.which;
+              if(key == 13)
+              {
+                  e.preventDefault();
+                  if($(this).val() == '')
+                  {
+                      alert("empty");
+                  }
+                  else
+                  {
+                      $(this).val(document.getElementById("irn_desc").value.substring(0,status.innerHTML)+"\n"+document.getElementById("irn_desc").value.substring(status.innerHTML));
+                      status.innerHTML++;
+                      setCaretPosition(document.getElementById('irn_desc'),status.innerHTML);
+                  }
+              }
+          });*/
+        $('#send_user').keyup(function (e) {
+            var key = e.which;
+            if ($(this).val() != '') {
+                if ($(this).hasClass('accept_class')) {
+                    var key = e.which;
+                    var enter_counter = '';
+                    if (key == 13) {
+                        $("#add_btn").click();
+                    }
+                }
+            } else {
+                if (key == 13) {
+                    $("#irn_desc").focus();
+                }
+            }
+        });
+        $('#is_private').click(function () {
+            if (this.checked) {
+                $('#unlocked').css('visibility', 'hidden');
+                $('#locked').css('visibility', 'visible');
+            } else {
+                $('#unlocked').css('visibility', 'visible');
+                $('#locked').css('visibility', 'hidden');
+            }
+        });
+    });
+
+    function valid() {
+        if ($('.ui-autocomplete-multiselect-item').length < 1) {
+            alert("کاربر مقصد مشخص نیست");
+            document.form1.myAutocomplete.select();
+            return false;
+        }
+
+        if (document.form1.irn_desc.value.length < 1) {
+            alert("شرح مشخص نیست");
+            document.form1.irn_desc.select();
+            return false;
+        }
+        //--------------------
+        valid_select_jquery();
+        //--------------------
+        document.form1.submit();
+    }
+
+    //----------------------------------------------------------------------
+    function fill(thisValue, id_value, kind_tran) {
+        $(document).ready(
+            function () {
+                if (kind_tran == 1)//یعنی اطلاعات درست است
+                {
+                    $('#send_user').val(thisValue).removeClass("select").removeClass("error_class").addClass("accept_class");
+                    $('#send_user_id').val(id_value);
+                    $('#suggestions').fadeOut();
+                    //window.document.form1.send_user.focus();
+                } else {
+                    $('#send_user').removeClass("accept_class").addClass("error_class");
+                    $('#send_user_id').val(0);
+                    $('#suggestions').fadeOut();
+                }
+            });
+    }
+
+    //----------------
+    var myUser = new Array();
+
+    function add_to_list() {
+        if ($("#send_user_id_all").val() != '') {
+            if ($("#send_user_id").val() != '' && $("#send_user_id").val() != '0') {
+                $("#send_user_id_all").val($("#send_user_id_all").val() + "," + $("#send_user_id").val());
+                $("#preview_username").val($("#preview_username").val() + " ;\t" + $("#send_user").val());
+                //  Developed by Roshan Bhattarai
+                //getting height and width of the message box
+                var height = $('#popuup_div').height();
+                var width = $('#popuup_div').width();
+                //calculating offset for displaying popup message
+                leftVal = $("body").pageX - (width) + "px";
+                topVal = $("body").pageY - (height) + "px";
+                //show the popup message and hide with fading effect
+                $('#popuup_div').css({left: leftVal, top: topVal}).show().fadeOut(1000);
+            }
+        } else {
+            if ($("#send_user_id").val() != '' && $("#send_user_id").val() != '0') {
+                //  Developed by Roshan Bhattarai
+                //getting height and width of the message box
+                var height = $('#popuup_div').height();
+                var width = $('#popuup_div').width();
+                //calculating offset for displaying popup message
+                leftVal = $("body").pageX - (width / 2) + "px";
+                topVal = $("body").pageY - (height / 2) + "px";
+                //show the popup message and hide with fading effect
+                $('#popuup_div').css({left: leftVal, top: topVal}).show().fadeOut(1000);
+                $("#send_user_id_all").val($("#send_user_id").val());
+            }
+            $("#preview_username").val($("#send_user").val());
+        }
+
+
+        $("#send_user").val('').removeClass("accept_class");
+        $("#send_user_id").val('');
+    }
+
+    var isCtrl = false;
+    $(document).keyup(function (e) {
+        if (e.which == 17) isCtrl = false;
+    }).keydown(function (e) {
+        if (e.which == 17) isCtrl = true;
+        if (e.which == 32 && isCtrl == true) {
+            if ($("#chng_type").val() == 'لاتین') {
+                $("#chng_type").val('فارسی');
+            } else {
+                $("#chng_type").val('لاتین');
+            }
+        }
+    });
+</script>
+
+<script language="javascript">message_fire(1);</script><script language="javascript">message_fire(3);</script>
+<script type="text/javascript">/*<![CDATA[*/
+    function attach_valid(param) {
+        url = 'save_draft.php';
+        $.post(url, {allParam: param}, function (data) {
+            //alert(data+"----"+$('#draft_id_input').val());
+            if ($('#draft_id_input').val() == 'empty') {
+                $('#draft_id_input').val(data);
+            }
+        }, 'json');
+    }
+
+    $(document).ready(function () {
+        var button = $('#button1'), interval;
+        /* Example 2 */
+        new AjaxUpload('button2', {
+            action: 'do-upload.php',
+            data: {
+                'key1': "This data won't",
+                'key2': "be send because",
+                'key3': "we will overwrite it"
+            },
+            accepts: '.jpg,.jpeg,.gif,.png,.xls,.xlsx,.doc,.docx,.zip,.rar,.txt,.pdf',
+            onSubmit: function (file, ext) {
+                // Allow only images. You should add security check on the server-side.
+                /* Setting data */
+                if (ext == 'jpg' || ext=='jpeg' || ext=='gif' || ext=='png' || ext=='xls' || ext=='xlsx' || ext=='doc' || ext=='docx' || ext=='zip' || ext=='rar' || ext=='txt' || ext=='pdf') {
+                    $('#error_send').show();
+                    this.setData({
+                        'key': 'D_' + $('#draft_id_input').val() + "_" + "148_"
+                    });
+                    // Uploding -> Uploading. -> Uploading...
+                    interval = window.setInterval(function () {
+                        var text = button.text();
+                        if (text.length < 15) {
+                            button.text('.' + text);
+                        } else {
+                            button.text('در حال آپلود');
+                        }
+                    }, 200);
+                } else {
+                    $.notify("فایل انتخاب شده، پشتیبانی نمیشود", {
+                        clickToHide: false,
+                        autoHide: true,
+                        autoHideDelay: 3000,
+                        arrowShow: true,
+                        arrowSize: 5,
+                        elementPosition: 'bottom left',
+                        globalPosition: 'bottom right',
+                        className: 'error',
+                        showAnimation: 'slideDown',
+                        showDuration: 400,
+                        hideAnimation: 'slideUp',
+                        hideDuration: 200,
+                        gap: 2
+                    });
+
+                    return false;
+                }
+            },
+            onComplete: function (file, aa) {
+                $('#error_send').hide();
+                button.text('آپلود');
+                window.clearInterval(interval);
+                if (aa == 'success') {
+                    var src = 'D_' + $('#draft_id_input').val() + "_" + "148_" + file;
+                    var new_li = $("<li>").css({"float": "right", "padding": "20px 0 0 10px"}).append(
+                        $("<a></a>")
+                            .attr({href: 'clerk_rack_massage_attach_view.php?file2=' + src, target: '_blank'})
+                            .text(file));
+                    $("#draft_id").append(new_li);
+                    //'key': 'D_'+$('#draft_id_input').val()+"_"+"148_"
+                    $('form').append('<input type="hidden" name="files[]" value="D_' + $('#draft_id_input').val() + '_148_' + file + '">');
+                } else {
+                    $.notify(aa, {
+                        clickToHide: false,
+                        autoHide: true,
+                        autoHideDelay: 3000,
+                        arrowShow: true,
+                        arrowSize: 5,
+                        elementPosition: 'bottom left',
+                        globalPosition: 'bottom right',
+                        className: 'error',
+                        showAnimation: 'slideDown',
+                        showDuration: 400,
+                        hideAnimation: 'slideUp',
+                        hideDuration: 200,
+                        gap: 2
+                    });
+                }
+            }
+        });
+        $("#action2").click(function () {
+            $(this).fadeOut();
+            $("#attached_toggle").toggle("slow");
+            tinyMCE.triggerSave();
+            attach_valid({
+                irn_desc: $("#irn_desc").val(),
+                user: $("#send_user_id_all").val(),
+                Active_ClerkID: '148',
+                draft_id_input: $("#draft_id_input").val()
+            });
+        });
+
+    });
+</script>
+<style>.cke{visibility:hidden;}</style><script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/config_xQdz.js"></script><style>body.tablesorter-disableSelection { -ms-user-select: none; -moz-user-select: -moz-none;-khtml-user-select: none; -webkit-user-select: none; user-select: none; }.tablesorter-resizable-container { position: relative; height: 1px; }.tablesorter-resizable-handle { position: absolute; display: inline-block; width: 8px;top: 1px; cursor: ew-resize; z-index: 3; user-select: none; -moz-user-select: none; }</style><style type="text/css" id="core-notify">.notifyjs-corner {
+	position: fixed;
+	margin: 5px;
+	z-index: 1050;
+}
+
+.notifyjs-corner .notifyjs-wrapper,
+.notifyjs-corner .notifyjs-container {
+	position: relative;
+	display: block;
+	height: inherit;
+	width: inherit;
+	margin: 3px;
+}
+
+.notifyjs-wrapper {
+	z-index: 1;
+	position: absolute;
+	display: inline-block;
+	height: 0;
+	width: 0;
+}
+
+.notifyjs-container {
+	display: none;
+	z-index: 1;
+	position: absolute;
+}
+
+.notifyjs-hidable {
+	cursor: pointer;
+}
+
+[data-notify-text],[data-notify-html] {
+	position: relative;
+}
+
+.notifyjs-arrow {
+	position: absolute;
+	z-index: 2;
+	width: 0;
+	height: 0;
+}</style><link rel="stylesheet" type="text/css" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/editor_gecko_xQdz.css"><script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/fa_xQdz.js"></script><script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/styles_xQdz.js"></script><link rel="stylesheet" type="text/css" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/scayt_xQdz.css"><link rel="stylesheet" type="text/css" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/dialog_002_xQdz.css"><link rel="stylesheet" type="text/css" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/tableselection_xQdz.css"><link rel="stylesheet" type="text/css" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/wsc_xQdz.css"><link rel="stylesheet" type="text/css" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/dialog_xQdz.css"><link rel="stylesheet" type="text/css" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/copyformatting_xQdz.css"></head>
+
+<body>
+	<div id="show_wait"></div>
+	
+	<div id="wrapper_favorites" style="display: none;">
+    <div id="cont_add_favorites">
+    <div id="close_windows" title="بستن پنجره"></div>
+    <table cellpadding="2" cellspacing="2">
+    <tbody><tr id="first_tr">
+        <td colspan="2" align="center" id="title_favorite">اضافه کردن صفحه جدید</td>
+    </tr>
+    <tr>
+        <td align="right"><input lang="fa" type="text" name="favorite_name" id="favorite_name" dir="rtl" style="width: 250px; border: 1px solid rgb(194, 201, 207) !important; text-align: right; direction: rtl;" maxlength="150" align="right"></td>
+        <td align="left" style="direction: rtl; white-space: nowrap;">عنوان صفحه : </td>
+    </tr>
+    <tr>
+        <td align="right"><input type="text" name="favorite_address" id="favorite_address" dir="ltr" style="width: 250px;border:1px solid #c2c9cf !important;" maxlength="200"></td>
+        <td align="left" style="direction: rtl;">آدرس صفحه : </td>
+    </tr>
+    <tr>
+        <td align="right"><input type="text" name="favorite_index" id="favorite_index" style="border:1px solid #c2c9cf !important;" dir="rtl" maxlength="3"></td>
+        <td align="left" style="direction: rtl;">اولویت : </td>
+    </tr>   
+    <tr>
+        <td colspan="2" align="left"><button id="btn_save_favorites"></button></td>
+    </tr>           
+    </tbody></table>
+    </div>
+	</div>
+	<div id="menu_left" class="no_print" style="left: 137px; top: 47px; display: block;">
+    <div id="add_favorites" title="اضافه کردن این صفحه به صفحات مورد علاقه"></div>
+    <div id="favorite_box" title="صفحات مورد علاقه"></div>
+    <div id="footer_menu" title="کلیک کنید"></div>
+	</div>
+    
+	<div id="favorite_boxul" style="display: none; left: 197px; top: 47px;">
+     <img src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/title_favorite_xQdz.png">
+    <ul>
+        </ul>
+	</div>
+
+	<div id="cont_menu_footer" class="no_print" style="display: none; left: 187px; top: 47px;">
+    <ul>
+        <li onclick="document.location = '../menu/recp1.php'"><div>پذیرش</div></li><li onclick="document.location = '../menu/recp1.php'"><div>صندوق</div></li><li onclick="document.location = '../menu/reserve1.php'"><div>رزرواسیون</div></li><li onclick="document.location = '../menu/reception_account1.php'"><div>گزارشات مدیریت</div></li><li onclick="document.location = '../menu/housekeeping1.php'"><div>خانه داری</div></li><li onclick="document.location = '../menu/engineering1.php'"><div>تاسیسات</div></li><li onclick="document.location = '../menu/ceremonies1.php'"><div>تشریفات</div></li><li onclick="document.location = '../menu/costcontrol1.php'"><div>کاست کنترل</div></li><li onclick="document.location = '../menu/telephone1.php'"><div>تلفن</div></li><li onclick="document.location = '../menu/laundry1.php'"><div>لاندری</div></li><li onclick="document.location = '../menu/restaurant1.php'"><div>رستوران</div></li><li onclick="document.location = '../menu/storage1.php'"><div>انبارداری</div></li><li onclick="document.location = '../menu/payment1.php'"><div>حقوق و دستمزد</div></li><li onclick="document.location = '/financial/'"><div>حسابداری هتل</div></li><li onclick="document.location = '../menu/asset1.php'"><div>حسابداری اموال</div></li><li onclick="document.location = '../menu/consumption1.php'"><div>درخواست کالا</div></li><li onclick="document.location = '../menu/crm1.php'"><div>خدمات مشتریان</div></li><li onclick="document.location = '../agency/agency.php'"><div>آژانسها - شرکتها</div></li><li onclick="document.location = '../menu/paperless1.php'"><div>مکاتبات داخلی</div></li><li onclick="document.location = '../menu/guestservice1.php'"><div>مدیریت درخواستها</div></li><li onclick="document.location = '../menu/hrm1.php'"><div>مدیریت منابع انسانی</div></li><li onclick="document.location = '../menu/daraee1.php'"><div>سامانه دارایی</div></li><li onclick="document.location = '../menu/hotspot1.php'"><div>اینترنت شارژینگ</div></li><li onclick="document.location = '../menu/inout1.php'"><div>حضور و غیاب</div></li><li onclick="document.location = '../menu/portal1.php'"><div>پورتال پرسنلی</div></li><li onclick="document.location = '../menu/archive1.php'"><div>آرشیو اسناد</div></li><li onclick="document.location = '../menu/revenue1.php'"><div>مدیریت درآمد</div></li><li onclick="document.location = '../menu/taxi_service1.php'"><div>تاکسی -گشت شهری</div></li><li onclick="document.location = '../menu/dashboard1.php'"><div>داشبورد مدیریت</div></li><li onclick="document.location = '../menu/supplier1.php'"><div>نرم افزار کارپردازی</div></li><li onclick="document.location = '../menu/keycard1.php'"><div>کلیدکارت</div></li><li onclick="document.location = '../menu/store1.php'"><div>فروشگاه</div></li><li onclick="document.location = '../menu/lakers1.php'"><div>مجموعه آبی</div></li><li onclick="document.location = '../menu/parking1.php'"><div>پارکینگ</div></li><li onclick="document.location = '../menu/ghasab1.php'"><div>قصابخانه قنادی</div></li><li onclick="document.location = '../menu/club1.php'"><div>کلوپ مشتریان</div></li><li onclick="document.location = '../menu/moaddian1.php'"><div>سامانه مودیان</div></li><li onclick="document.location = '/e-commerce/products'"><div>فروشگاه اینترنتی</div></li>        <li><div onclick="document.location = '../main.php'">صفحه اصلی</div></li>
+    </ul>
+	</div>
+
+	<div id="float_menu" style="display: none;">
+    <div style="margin-top: 4px;" id="edit_favorite"> تصحیح </div>
+    <div id="delete_favorite"> حذف </div>
+	</div>
+
+	<table id="floatingHeaderTab" class="no_print"></table>
+	
+	<div id="cmd" class="no_print" style="display: none;">
+    <div id="tit">دسترسی سریع به منوها</div>
+    <div style="text-align: right; padding: 3px;"><input lang="fa" type="text" id="cmd_inp" onfocus="this.select();" dir="rtl" align="right" style="text-align: right; direction: rtl;"></div>
+	</div>
+
+
+
+	<script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/script_menu_xQdz.js"></script>
+	<script type="text/javascript" src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/jquery.hoverIntent_xQdz.js"></script>
+	<!-- <script type="text/javascript" src="../js/dynamicFindMenu.js"></script> -->
+	
+	<script type="text/javascript">
+	function binding() 
+	{
+    $('.favorite_boxli').bind("contextmenu", function(e) 
+    {                
+        $('#edit_favorite, #delete_favorite').attr('key', '0');
+        e.preventDefault(); 
+        var tmp_onclick = $(this).attr('onclick').replace('document.location = \'', '').replace('\'', '');        
+        $('#float_menu').css({'left':e.pageX, 'top':e.pageY}).slideDown('fast', 'linear', function(){});        
+        $('#edit_favorite, #delete_favorite').attr({'key':$(this).attr('find'), 'req_url':tmp_onclick, 'kind_index':$(this).attr('kind_index')});
+        tmp_input_for_favorite = $(this).text();
+    });  
+	} 
+	
+  
+	function changePossitionFavoriteBox(elem, posLeft, posTop)
+	{
+    var header_offset = $('#'+elem).offset();
+    $('#menu_left').css({'left':header_offset.left+posLeft, 'top':header_offset.top+posTop, 'display':'block'});
+    $('#cont_menu_footer').css({'left':header_offset.left+posLeft+50, 'top':header_offset.top+posTop});
+    $('#favorite_boxul').css({'left':header_offset.left+posLeft+60, 'top':header_offset.top+posTop});      
+	}
+
+	$(document).ready(function(){
+    $('#master_div').css('display', 'block');
+    binding();
+    var edit_mod = 0;
+    
+    $('#close_windows').click(function(){
+        edit_mod = 0;
+        if($('#wrraper_suggest').css('display') == 'block')
+            $('#inp_search').focus().val('');
+        
+        $('#wrapper_favorites, #show_wait, #wrraper_suggest, #cont_menu_footer').fadeOut('fast', function(){}); 
+        $('#cmd').hide();
+        setTimeout("$('body').removeClass('over_hidden');", 1000);
+    });
+    
+    
+    
+    $('#favorite_box').click
+    (
+        function()
+        {
+           $('#favorite_boxul').fadeIn('fast').focus();
+        }
+    );
+        
+    $(document).mousedown(function(e){
+        if($(e.target).attr('id') != 'li_favorite' && $(e.target).attr('id') != 'edit_favorite' && $(e.target).attr('id') != 'delete_favorite' && $(e.target).attr('id') != 'cont_menu_footer')
+        {
+            $('#favorite_boxul, #float_menu, #cont_menu_footer').fadeOut('fast');
+        }
+    });    
+    
+    $(document).keydown(function(e){
+        var key = e.which;
+        
+        if(e.ctrlKey  && !e.shiftKey)
+        {
+        	/*
+            $(document).scrollTop(0);
+            $('body').css('overflow', 'hidden');
+            
+            $('#menu').addClass('menuFocus');
+            $(window).focus();
+            $('#menu ul li[class^="level_"]').removeClass('first_li_hover').children('ul').hide();
+            $('#menu li:first').addClass('first_li_hover').children('ul').show();
+            $("#menu li").removeClass("menu_li_hover");  
+            */
+        }
+        /*
+        if($('#menu').hasClass('menuFocus'))
+        {
+            dynamicFindMenu(e, key);
+        }        
+               
+        if(e.ctrlKey && e.shiftKey)
+        {
+            $('#cmd').show('fast', function(){});
+            $('#cmd input').focus().val('');
+        }
+        */        
+        if(key == 27)
+        {
+            $('body').css('overflow', 'auto');
+            /*
+            $('#menu').removeClass('menuFocus');
+            $('#menu ul li[class^="level_"]').removeClass('first_li_hover').children('ul').hide();
+            */
+            $('#cont_menu_footer, #cmd').hide();
+            $('#menu_left').hide('fast', function(){
+                $('#show_favorite').show('fast'); 
+            });
+        }        
+        if(key == 13)
+        {
+            if( $(e.target).attr('id') == 'cmd_inp' )
+            {
+                command_promop('cmd_inp', e);
+            }
+        }                  
+    });
+    
+    $('#add_favorites').click(function(){
+        $('#title_favorite').text('اضافه کردن صفحه جدید');
+        $('body').addClass('over_hidden');
+        $('#show_wait').css('display', 'block');
+        $('#favorite_name').val('ثبت پیغام جدید کاربر').focus();
+        $('#favorite_address').val('/hotel/paperless/clerk_rack_massage_new1.php?night_editor=1');
+        $('#favorite_index').val(1);
+        $('#wrapper_favorites').fadeIn('normal', function(){});
+    });
+    
+    $('#edit_favorite').click(function()
+    {
+        edit_mod = $(this).attr('key');
+        $('#title_favorite').text('تصحیح صفحات ذخیره شده');
+        $('body').addClass('over_hidden');
+        $('#show_wait').css('display', 'block');
+        $('#favorite_name').val($.trim(tmp_input_for_favorite)).focus();
+        $('#favorite_address').val($(this).attr('req_url'));
+        $('#favorite_index').val($(this).attr('kind_index'));  
+        $('#wrapper_favorites').fadeIn('normal', function(){});
+    });
+    
+    $('#delete_favorite').click(function()
+    {
+        var confirm_test = confirm('آیا کد مورد نظر حذف شود ؟ ');
+        if(confirm_test)
+        {
+            $.post('../suggest/loader_favorite_and_search.php', {
+                currClerk:148,
+                kindPage: 'DeleteFavorites',
+                id: $(this).attr('key')
+            }, function (data) {
+                
+                if(data.error > 0 )
+                {
+                    alert(data.msg);
+                    $('#close_windows').click();
+                    return;
+                }
+                else
+                {
+                    $('#float_menu').fadeOut('fast');
+                    $('#favorite_boxul ul').remove();
+                    $('#favorite_boxul').append(data.ul_li);
+                    alert(data.msg);
+                    $('#close_windows').click();
+                    binding();
+                }
+            }, 'json');             
+        }
+    });    
+        
+    $('#footer_menu').click
+    (
+        function()
+        {
+            if($('#cont_menu_footer').css('display') == 'none')
+                $('#cont_menu_footer').fadeIn('fast');
+            else
+                $('#cont_menu_footer').fadeOut('fast');
+        }
+    ); 
+    
+    $('#btn_save_favorites').click(function(){
+        if($.trim($('#favorite_name').val()) == '')
+        {
+            alert('عنوان صفحه مشخص نیست');
+            $('#favorite_name').focus();
+            return;
+        }
+        var patern2 = /^[1-9]\d*$/; 
+        var res = $('#favorite_index').val().match(patern2);
+        if( ! res)
+        {
+            alert('اولویت مشخص نیست');
+            $('#favorite_index').focus();
+            return;
+        }
+        $.post('../suggest/loader_favorite_and_search.php', {
+            favorite_name: $('#favorite_name').val(),
+            favorite_address: escape($('#favorite_address').val()),
+            favorite_index: $('#favorite_index').val(),
+            currClerk:148,
+            kindPage: 'Favorites',
+            edit_mod: edit_mod
+        }, function (data) {
+            
+            if(data.error > 0 )
+            {
+                alert(data.msg);
+                $('#close_windows').click();
+                return;
+            }
+            else
+            {
+                $('#favorite_boxul ul').remove();
+                $('#favorite_boxul').append(data.ul_li);
+                alert(data.msg);
+                $('#close_windows').click();
+                binding();
+            }
+        }, 'json');
+    }); 
+    
+    $('#show_favorite').click(function(){
+        $(this).hide('fast', function(){
+            $('#menu_left').show('fast'); 
+        });
+    });
+
+	});
+	</script>
+
+	<style type="text/css">
+
+	@media print{  
+    .no_print { display: none !important; }
+	table#main_tab td{ padding: 1px !important;} 
+    /* * { font-family: tahoma !important; font-size:13px !important; }*/
+	}
+
+	
+	/* motefareghe */
+	body { background: #f8fcfe; }
+	.btn { height: 30px; background: url('../images_new/cross/blue/btns.gif') repeat-x; border: 1px solid #acc9ef !important; border-radius:5px; font: 15px MH_NassimBold; cursor: pointer; }
+	.btn:hover { background: url('../images_new/cross/blue/btns2.gif'); }
+	#show_wait { position: absolute; width: 100%; height: 100%; left: 0; top: 0; background: #404040; opacity:.8; filter: alpha(opacity=80); z-index: 10; display: none; }
+	
+	/* menu */
+	#menu { background: white url(../images_new/cross/blue/menu_bg.gif); width: 99%; margin: -1px auto; margin-bottom: 5px; height: 40px; display: block; border: 1px solid #bbd2ff; border-bottom: 2px solid #bbd2ff; border-radius:5px; box-shadow:0px 0px 1px 0px gray;}
+	#menu ul li { position: relative; display: inline; float: right; }
+	#menu ul li a { display: block; padding:7px; padding-left: 9px; font: 18px MH_Nassim; border-left: 1px solid white; margin-right: 2px; text-decoration: none;}
+	#menu ul li ul { list-style: none; position: absolute; display: none; top: 40px; right: 0; background: white/*#f6f6f6*/; z-index: 500; border: 1px solid #CBCBCB; -webkit-border-radius: 5px; border-radius: 5px; -moz-box-shadow: 0 0 10px #77a4ff; -webkit-box-shadow: 0 0 10px #77a4ff; box-shadow: 0 0 8px gray; }
+	#menu ul li ul li { display: list-item; float: none; padding: 1px; padding-left: 30px; border-bottom: 1px dotted #CBCBCB; }
+	#menu ul li ul li a { font: 15px MH_Nassim; padding: 2px; display: block; white-space: nowrap; text-align: right; border: none;}
+	#menu ul li ul li ul { top: -35px; z-index: 600; }
+	#menu a { text-decoration: none; color: black; border: none; text-align: right; }
+	#menu ul li a:hover { color:black; }
+	#menu ul li ul li a:hover { color: black; border: none; } 
+	.has_childeren { background: white url(../images_new/cross/public/has_childeren.png) no-repeat center left; }
+	.menu_li_hover { background: #e2eeff ;  }
+	.first_li_hover { background: white !important;  }
+	.menuFocus { border: 1px dashed gray !important; }
+	
+	/* Cmd */
+	#cmd { width: 200px; height: 100px; background: #FFE0E0; border: 1px dashed red; box-shadow: 0 0 20px gray; border-radius: 7px; position: fixed; left: 0; bottom: 0; display: none; }
+	#cmd #tit { text-align: right; padding: 3px; font: 18px MH_NassimBold;  }
+	#cmd_inp { width: 180px; height: 30px; font: 18px MH_NassimBold; border:1px solid #c2c9cf !important; }
+	
+	/* Floating Header */
+	#floatingHeaderTab { position: fixed; top: 0; z-index: 2; height: 30px; background: url('../images_new/cross/blue/title_bg1.gif'); border-collapse: collapse; border:1px solid #BEADAD;  display: none; }
+	#floatingHeaderTab td { padding-left: 3px; padding: 1px; font: 15px MH_NassimBold,tahoma,Arial,Helvetica,sans-serif !important; text-align: center;}
+	
+	/* boxe naranji kenare list ha */
+	#show_favorite { background: url(../images_new/cross/public/show_favorite.png) no-repeat; width: 12px; height: 75px; position: fixed; left: 0; cursor: pointer; }
+	
+	/* lists */
+	
+	#master_div {width: 99%; margin: 5px auto; -webkit-box-shadow: 0 2px 6px 2px #9D9D9D; box-shadow: 0 2px 6px 2px #9D9D9D; border-radius: 5px; border:1px solid #a5c4ed; }
+	#body { background: #eef2f8 !important; border-top:none;  padding:4px; }
+	#main { border:1px solid #a5c4ed;  background: #e5ecf4; border-radius: 5px; }
+	#header_report{ background: url('../images_new/cross/blue/title_bg1.gif'); width: 100%; height: 30px; font:18px MH_NassimBold, Arial, Helvetica, sans-serif; text-align:right; border-bottom:1px solid #99bbe8; }  
+	.first_tr_report { background: url('../images_new/cross/blue/title_bg1.gif'); height: 20px; border-bottom: 1px solid #C5C5C5; font: 15px MH_NassimBold,tahoma,Arial,Helvetica,sans-serif !important; text-align: center; }
+	.first_tr_report td { padding: 1px !important; }
+
+/* sardar-e jadval: khod-e radif hengam-e scroll bala-ye safhe mimanad (ba hamin matn, arz va background) */
+@media screen {
+	tr.first_tr_report > td, tr.first_tr_report > th { position: sticky; top: 0; z-index: 3; background: inherit; box-shadow: inset 0 -1px 0 #BEADAD, inset -1px 0 0 #BEADAD; }
+}
+	table#main_tab{ border: 1px solid #c5c5c5; width: 100%; border-collapse: collapse; margin: 0 auto; }
+	table#main_tab td{ padding: 3px 3px; border:1px solid #BEADAD; }
+	.odd_tab_1{ background: #fafafa; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important;}
+	.odd_tab{ background: #fafafa; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important; height: 30px; }
+	.even_tab_1{ background: #FFF; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important; height: 15px; }
+	.even_tab{ background: #FFF; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important; height: 15px; }
+	#information { width: 100%; text-align: right; font:15px MH_NassimBold, tahoma !important; padding: 1px; }
+	.summary{ font:14px MH_NassimBold, tahoma !important; height: 20px !important; }
+	.odd_tab:hover, .even_tab:hover{ background: #ffffd5; cursor: default; text-shadow: 0.1em 0.1em 0.2em gray;}
+	.majmo { background: url('../images_new/cross/blue/majmo_bg.gif') repeat-x !important;}
+	#subject{width: 100%; text-align: center; font:15px MH_NassimBold, tahoma !important; margin-bottom: 5px;}
+	#topBoxTab { border:2px solid #9ec0ef; box-shadow: 0 4px 2px gray; background: white; margin-right:5px; padding: 3px; }
+	#topBoxTab td { padding: 5px; }
+	/* select input */
+	.newSelect { background: white url(../images_new/cross/blue/inp_active_bg.gif) repeat-x; }
+	
+	/* MenuContFooter */
+	#cont_menu_footer { border: 1px solid #C0C0C0; border-left: none; width: 980px; height: 474px;  padding: 1px; background: white; border-radius:5px; box-shadow: 0 0 20px gray; display: none; position: fixed; overflow: auto; overflow-x: hidden; z-index: 15;  }
+	#cont_menu_footer ul { direction: rtl; list-style: none; margin: 0; padding: 0; margin-top: 10px; }
+	#cont_menu_footer li { float: right; font: 18px MH_NassimBold; cursor: pointer; background: url(../images_new/cross/blue/each_li.png) no-repeat;width: 160px;height: 60px;text-align: center;vertical-align: middle;}
+	#cont_menu_footer li div { padding-top: 18px; }
+	#footer_menu { margin-top: 40px; margin-left: 10px; background: url(../images_new/cross/blue/footer_menu.png) no-repeat;  height: 70px; width: 30px; cursor: pointer;}
+	
+	/* Favorite Box*/
+	#menu_left { position: fixed; left: 0; top: 0; background: #d1e3f8; border: 1px solid #69afff; border-radius: 5px; box-shadow: 0 0 5px #B5B5B5; width: 55px; height: 200px; display: none; z-index: 3;  }
+	#favorite_boxul { width: 250px; position: fixed; top: 0; left: 0; display: none; z-index: 5; }
+	#favorite_boxul ul { direction: rtl; margin: 0; padding: 0; list-style: none; height:300px; background: white; border: 1px solid #E2E1E1;   overflow: auto; overflow-x: hidden;  }
+	.favorite_boxli { cursor: pointer; padding: 3px; text-align: right; font: 15px MH_Nassim; border-bottom: 1px dotted #E2E1E1; }
+	.favorite_boxli:hover { background: #e2eeff; }
+	#add_favorites { margin-top: 13px; margin-left: 10px; background: url(../images_new/cross/blue/add_favorites.png) no-repeat; width: 20px; height: 20px; cursor: pointer; }
+	#favorite_box { margin-top: 10px; margin-left: 10px; background: url(../images_new/cross/icons/favorite_box.png) no-repeat top right; width: 40px; height: 38px;  cursor: pointer; }
+	#wrapper_favorites { position: fixed; width: 100%; height: 100%; left: 0; top: 0; z-index: 11; display: none; }
+	#cont_add_favorites { width: 500px; height: 300px; margin: 30px auto; background: white ; border: 1px dashed gray; z-index: 12; border-radius:7px; -moz-box-shadow: 0 0 20px white; -webkit-box-shadow: 0 0 20px white; box-shadow: 0 0 20px white;  }
+	#cont_add_favorites table { margin: -2px auto; border: 3px solid #e8e8e8; border-radius:5px; background: #ebffe2; width: 300px; padding: 5px; }
+	#cont_add_favorites table td { padding: 5px; }
+	#cont_add_favorites table input { font: 16px MH_Nassim !important;  }
+	#btn_save_favorites { border: none; background: url(../images_new/cross/public/btn_save_favorites.png); width: 77px; height: 23px; cursor: pointer; }
+	#close_windows { background: url(../images_new/cross/icons/close_windows.png) top right; width: 35px; height: 33px; padding: 0; margin-left: 412px; margin-bottom: -5px; cursor: pointer; margin-top: 10px; }
+	#float_menu { position: absolute; z-index: 6; left: 0; top: 0; width: 88px; height: 58px; background: url(../images_new/cross/public/float_menu.png); display: none; }  
+	#float_menu div { text-align: right; padding: 2px; padding-right: 10px; cursor: pointer; margin-top: 1px; }
+	
+	/* Forms */
+	#first_tr { background: #9de3fb; font: 18px MH_NassimBold !important; }
+	table#main_tab_form td{ padding: 4px;}
+	table#main_tab_form tr { margin-top: 1px; border:1px solid #a5c4ed; }
+	table#main_tab_form tr:hover { cursor: default; text-shadow: 0.1em 0.1em 0.2em gray; }
+	#padd{ padding: 7px; }
+	#container_form { margin: 0 auto; border:1px solid #bbd2ff; background: #eef2f8; -webkit-box-shadow: 5px 5px 5px #adadad; box-shadow: 0px 0px 15px #adadad; }
+	#header_form { background: url('../images_new/cross/blue/title_bg1.gif'); width: 100%; height: 30px; font:17px MH_NassimBold, Arial, Helvetica, sans-serif; text-align:right; border-bottom:1px solid #99bbe8; }
+	table#main_tab_form { width: 100%; margin: 0px auto; border-collapse: collapse; border:1px solid #a5c4ed; background: #e5ecf4; font: 16px MH_Nassim,tahoma,Arial,Helvetica,sans-serif !important; }   
+	input { border: 1px solid #acc9ef; background: white;} 
+	
+	/* Paging */
+	#paging { margin-top: 7px; margin-bottom: 7px; margin-left: auto; margin-right: auto; }
+	#paging button { padding: 4px; margin: 2px; font: 15px MH_NassimBold; background: white; border:2px solid #a5c4ed; cursor: pointer; border-radius:5px}
+	#paging button.numbers { padding-left: 7px; padding-right: 7px; }
+	.hoverPagingButton { background: #e2eeff  repeat !important; }
+	#paging button:hover { background: #e2eeff  repeat !important ; }
+	.pagesLineNumber { direction: ltr !important; font: 15px MH_NassimBold; margin-left: 5px; background: white; border: 1px solid gray; border-radius:5px; margin-bottom: 5px;}
+	.pagesLineNumber td {  padding: 2px;  }
+	</style>
+	<div id="menu" class="no_print">    
+	<ul>
+        <li class="level_1"><a href="#">عملیات جاری</a>
+            <ul>
+				<li title="جستجوی سریع 10"><a href="http://192.168.133.146/hotel/paperless/clerk_rack_massage_new1.php">نوشتن <strong>پیام جدید</strong></a></li>
+				<li title="جستجوی سریع 12"><a href="http://192.168.133.146/hotel/paperless/clerk_rack_massage_check.php">صندوق <strong>ورودی</strong></a></li>
+				<li title="جستجوی سریع 14"><a href="http://192.168.133.146/hotel/paperless/clerk_send_massage_already.php">پیغامهای <strong>ارسال شده</strong></a></li>
+				<li title="جستجوی سریع 15"><a href="http://192.168.133.146/hotel/paperless/clerk_rack_massage_already.php">پیغامهای ورودی <strong>مشاهده شده</strong></a></li>
+				<li title="جستجوی سریع 16"><a href="http://192.168.133.146/hotel/paperless/clerk_rack_massage.php">لیست <strong> کلی </strong>پیغامهای کاربران</a></li>	
+				<li title="جستجوی سریع 17"><a href="http://192.168.133.146/hotel/paperless/clerk_draft.php">نامه های <strong> ذخیره </strong> موقت</a></li>	
+				<li title="جستجوی سریع 18"><a href="http://192.168.133.146/hotel/paperless/clerk_send_massage_old6.php">پیغامهای ارسال شده منتظر تایید <strong>درخواست کننده</strong></a></li>	
+				<li title="جستجوی سریع 19"><a href="http://192.168.133.146/hotel/reserve/reserve_confirmation.php">رزروهای فعال<strong>تائید نشده </strong>مدیریت</a></li>	
+				<li title="جستجوی سریع 19"><a href="http://192.168.133.146/hotel/reserve/reserve_confirmation_ok.php">رزروهای فعال تائید شده و<strong> آماده ارسال</strong> </a></li>	
+				<li title="جستجوی سریع 19"><a href="http://192.168.133.146/hotel/reserve/reserve_confirmation_faxed.php">رزروهای فعال<strong>تائید شده بایگانی</strong></a></li>	
+			</ul>
+        </li>
+		
+			<li class="level_2"><a href="#">اتوماسیون اداری</a>
+		    	<ul>
+					<li title="جستجوی سریع 20"><a href="http://192.168.133.146/hotel/paperless/clerk_rack_massage_new3.php"><strong> نوشتن پیام </strong> (اتوماسیون اداری)‏</a></li>
+					<li title="جستجوی سریع 21"><a href="http://192.168.133.146/hotel/paperless/clerk_rack_massage_check3.php">صندوق <strong>ورودی</strong>(اتوماسیون اداری)‏</a></li>
+					<li title="جستجوی سریع 22"><a href="http://192.168.133.146/hotel/paperless/clerk_rack_massage_check4.php">صندوق <strong>صادره</strong>(اتوماسیون اداری)‏</a></li>
+					<li title="جستجوی سریع 23"><a href="http://192.168.133.146/hotel/paperless/clerk_send_massage_list_4.php">پیغامهای ارسال شده <strong>در دست اقدام</strong>(اتوماسیون اداری)‏</a></li>
+					<li title="جستجوی سریع 24"><a href="http://192.168.133.146/hotel/paperless/clerk_send_massage_list_5.php">پیغامهای ارسال شده منتظر <strong>تایید درخواست کننده</strong>(اتوماسیون اداری)‏</a></li>
+					<li title="جستجوی سریع 25"><a href="http://192.168.133.146/hotel/paperless/clerk_send_massage_list_7.php">پیغامهای ارسال شده منتظر <strong>تایید مدیریت</strong>(اتوماسیون اداری)‏</a></li>
+					<li title="جستجوی سریع 26"><a href="http://192.168.133.146/hotel/paperless/clerk_send_massage_list_8.php">پیغامهای ارسال شده <strong>در دست ارسال</strong>(اتوماسیون اداری)‏</a></li>
+					<li title="جستجوی سریع 27"><a href="http://192.168.133.146/hotel/paperless/search_paperless3.php"><strong> جستجوی پارامتریک </strong> در نامه ها(اتوماسیون اداری)‏</a></li>
+				</ul>
+			</li>        
+        <li class="level_3"><a href="#">مخاطبین</a>
+            <ul>
+                <li title="جستجوی سریع 30"><a href="http://192.168.133.146/hotel/paperless/contacts_list.php">لیست <strong>گروههای مخاطبین</strong></a></li>
+                <li title="جستجوی سریع 31"><a href="http://192.168.133.146/hotel/paperless/internal_units_list.php">لیست <strong>دوائر داخلی مرتبط</strong></a></li>
+            </ul>
+        </li>
+        <li class="level_3"><a href="#">امکانات</a>
+            <ul>
+                <li title="جستجوی سریع 30"><a href="http://192.168.133.146/hotel/reception/clerk_list.php?_soft=8">کاربران برنامه</a></li>
+                <li title="جستجوی سریع 31"><a href="http://192.168.133.146/hotel/paperless/group_list.php">گروه های نامه - طبقه بندی نامه ها</a></li>
+                <li title="جستجوی سریع 32"><a href="http://192.168.133.146/hotel/paperless/search_paperless.php"><strong>جستجوی پارامتریک </strong>در نامه ها</a></li>
+				<li title="جستجوی سریع 33"><a href="http://192.168.133.146/hotel/paperless/clerk_send_massage_old1.php">نامه های ارسال شده - بایگانی</a></li>
+				<li title="جستجوی سریع 34"><a href="http://192.168.133.146/hotel/paperless/clerk_rack_massage_old1.php">نامه های ورودی - بایگانی</a></li>
+				<li title="جستجوی سریع 35"><a href="http://192.168.133.146/hotel/engineering/engin_new_all1.php?_kind=4"> <strong>ثبت اعلان خرابی</strong> به تاسیسات</a></li>
+				<li title="جستجوی سریع 36"><a href="http://192.168.133.146/hotel/engineering/engin_list_all4.php?_kind=1">نمایش اعلان خرابیهای <strong>یک کاربر</strong></a></li>
+            </ul>
+        </li>
+        <li class="level_4"><a href="#">تماس با ما</a>
+            <ul>
+                <li title="جستجوی سریع 40"><a href="http://192.168.133.146/hotel/ticket/ticket_new.php"><font color="#F00000"><strong>ثبت درخواست جدید</strong></font> آسا</a></li>
+            	<li title="جستجوی سریع 41"><a href="http://192.168.133.146/hotel/ticket/ticket_list1.php">نمایش درخواستهای <font color="#0000F0"><strong>دردست اقدام</strong></font> آسا</a></li>
+            	<li title="جستجوی سریع 42"><a href="http://192.168.133.146/hotel/ticket/ticket_list2.php">نمایش درخواستهای <strong>بایگانی</strong> آسا</a></li>
+            	<li title="جستجوی سریع 43"><a href="http://192.168.133.146/hotel/ticket/ticket_list3.php">ثبت <strong>انتقادات پیشنهادات</strong> آسا</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="http://192.168.133.146/hotel/front_logoff.php" onclick="return confirm('از حساب کاربری خارج می شوید؟');">خروج</a>
+        </li>
+    </ul>
+</div>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            changePossitionFavoriteBox('container_form', -70, 0);
+        });
+    </script>
+
+    <style type="text/css">
+        #container_form {
+            width: 1024px;
+        }
+
+        .popup_msg {
+            position: absolute;
+            z-index: 100;
+            width: 152px;
+            height: 40px;
+            text-align: center;
+            color: red;
+            font: 24px mh_nassim, Arial, Helvetica, sans-serif;
+            background: white;
+            display: none;
+        }
+
+        #locked {
+            visibility: hidden;
+        }
+
+    </style>
+    <script src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/ckeditor_xQdz.js"></script>
+    <script src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/sample_xQdz.js"></script>
+    <link rel="stylesheet" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/samples_xQdz.css">
+    <link rel="stylesheet" href="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/neo_xQdz.css">
+    <form name="form1" method="post" action="">
+        <div id="container_form">
+            <div id="popuup_div" class="popup_msg">اضافه شد</div>
+
+            <div id="header_form">
+                <!--<a href="../help/p36.htm"><img src="../images_new/cross/blue/help.png" width="25" height="25" style="float: left; padding-left: 5px;" title="Help" /></a>-->
+                <div style="padding: 3px; padding-right: 5px;">ثبت پیغام جدید کاربر</div>
+                <div style="clear: both;"></div>
+            </div>
+
+            <div id="padd">
+                <input type="hidden" name="reply_to" id="reply_to" value="0">
+                <input type="hidden" name="paraph_text" id="paraph_text" value="">
+                <table id="main_tab_form" border="0">
+                    <tbody><tr>
+                        <td colspan="4" align="right" style="direction: rtl;">اولویت :
+                            عادی<input type="radio" name="imp_kind" id="normal" checked="checked" value="0">
+                            فوری<input type="radio" name="imp_kind" id="emergancy" value="1">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right" colspan="2">
+                            <!--<textarea type="text" name="preview_username" id="preview_username" style="width: 670px;" dir="rtl" onfocus="this.select();" class="right_bold_17" readonly="readonly"></textarea>-->
+                            <div class="ui-autocomplete-multiselect ui-state-default ui-widget" style="width: 688px;"><input id="myAutocomplete" name="myAutocomplete" type="text" lang="fa" style="background-image: none !important; width: 13px; text-align: right; direction: rtl;" dir="rtl" align="right" class="ui-autocomplete-input" autocomplete="off"></div>
+                        </td>
+                        <td nowrap="nowrap" colspan="2">:کاربران مقصد</td>
+                    </tr>
+
+                    <tr>
+                                                <td align="right" colspan="2">
+                            <b></b>
+                                                    </td>
+                        <td align="right" nowrap="nowrap" colspan="2">: شرح</td>
+                    </tr>
+                    <tr>
+                        <td align="right" nowrap="nowrap" colspan="2">
+                            <textarea id="editor" name="irn_desc" style="visibility: hidden; display: none;">                                                    بسمه تعالی
+ مدیریت محترم فرانت آفیس
+
+ با سلام واحترام
+  گزارش کنترلی شیفت شب به حضور جنابعالی اعلام می گردد:
+
+1-
+2-
+3-
+4-
+5-
+6-
+7-
+8-
+9-
+</textarea><div id="cke_editor" class="cke_1 cke cke_reset cke_chrome cke_editor_editor cke_rtl cke_browser_gecko" dir="rtl" lang="fa" role="application" aria-labelledby="cke_editor_arialbl" style="width: auto;"><span id="cke_editor_arialbl" class="cke_voice_label">ویرایش‌گر متن غنی, editor</span><div class="cke_inner cke_reset" role="presentation"><span id="cke_1_top" class="cke_top cke_reset_all" role="presentation" style="height: auto; user-select: none;"><span id="cke_11" class="cke_voice_label">نوار ابزارهای ویرایش‌گر</span><span id="cke_1_toolbox" class="cke_toolbox" role="group" aria-labelledby="cke_11" onmousedown="return false;"><span id="cke_16" class="cke_toolbar" aria-labelledby="cke_16_label" role="toolbar"><span id="cke_16_label" class="cke_voice_label">حافظه موقت/برگشت</span><span class="cke_toolbar_start"></span><span class="cke_toolgroup" role="presentation"><a id="cke_17" class="cke_button cke_button__cut cke_button_disabled " title="برش (کنترل+X)" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_17_label" aria-describedby="cke_17_description" aria-haspopup="false" aria-disabled="true" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(2,event);" onfocus="return CKEDITOR.tools.callFunction(3,event);" onclick="CKEDITOR.tools.callFunction(4,this);return false;"><span class="cke_button_icon cke_button__cut_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -288px;background-size:auto;">&nbsp;</span><span id="cke_17_label" class="cke_button_label cke_button__cut_label" aria-hidden="false">برش</span><span id="cke_17_description" class="cke_button_label" aria-hidden="false">میانبر صفحه کلید کنترل+X</span></a><a id="cke_18" class="cke_button cke_button__copy cke_button_disabled " title="رونوشت (کنترل+C)" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_18_label" aria-describedby="cke_18_description" aria-haspopup="false" aria-disabled="true" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(5,event);" onfocus="return CKEDITOR.tools.callFunction(6,event);" onclick="CKEDITOR.tools.callFunction(7,this);return false;"><span class="cke_button_icon cke_button__copy_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -240px;background-size:auto;">&nbsp;</span><span id="cke_18_label" class="cke_button_label cke_button__copy_label" aria-hidden="false">رونوشت</span><span id="cke_18_description" class="cke_button_label" aria-hidden="false">میانبر صفحه کلید کنترل+C</span></a><a id="cke_19" class="cke_button cke_button__paste cke_button_off" title="چسباندن (کنترل+V)" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_19_label" aria-describedby="cke_19_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(8,event);" onfocus="return CKEDITOR.tools.callFunction(9,event);" onclick="CKEDITOR.tools.callFunction(10,this);return false;"><span class="cke_button_icon cke_button__paste_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -336px;background-size:auto;">&nbsp;</span><span id="cke_19_label" class="cke_button_label cke_button__paste_label" aria-hidden="false">چسباندن</span><span id="cke_19_description" class="cke_button_label" aria-hidden="false">میانبر صفحه کلید کنترل+V</span></a><a id="cke_20" class="cke_button cke_button__pastetext cke_button_off" title="چسباندن به عنوان متن ساده (کنترل+تعویض+V)" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_20_label" aria-describedby="cke_20_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(11,event);" onfocus="return CKEDITOR.tools.callFunction(12,event);" onclick="CKEDITOR.tools.callFunction(13,this);return false;"><span class="cke_button_icon cke_button__pastetext_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -1536px;background-size:auto;">&nbsp;</span><span id="cke_20_label" class="cke_button_label cke_button__pastetext_label" aria-hidden="false">چسباندن به عنوان متن ساده</span><span id="cke_20_description" class="cke_button_label" aria-hidden="false">میانبر صفحه کلید کنترل+تعویض+V</span></a><a id="cke_21" class="cke_button cke_button__pastefromword cke_button_off" title="چسباندن از Word" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_21_label" aria-describedby="cke_21_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(14,event);" onfocus="return CKEDITOR.tools.callFunction(15,event);" onclick="CKEDITOR.tools.callFunction(16,this);return false;"><span class="cke_button_icon cke_button__pastefromword_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -1584px;background-size:auto;">&nbsp;</span><span id="cke_21_label" class="cke_button_label cke_button__pastefromword_label" aria-hidden="false">چسباندن از Word</span><span id="cke_21_description" class="cke_button_label" aria-hidden="false"></span></a><span class="cke_toolbar_separator" role="separator"></span><a id="cke_22" class="cke_button cke_button__undo cke_button_disabled " title="واچیدن (کنترل+Z)" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_22_label" aria-describedby="cke_22_description" aria-haspopup="false" aria-disabled="true" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(17,event);" onfocus="return CKEDITOR.tools.callFunction(18,event);" onclick="CKEDITOR.tools.callFunction(19,this);return false;"><span class="cke_button_icon cke_button__undo_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -1992px;background-size:auto;">&nbsp;</span><span id="cke_22_label" class="cke_button_label cke_button__undo_label" aria-hidden="false">واچیدن</span><span id="cke_22_description" class="cke_button_label" aria-hidden="false">میانبر صفحه کلید کنترل+Z</span></a><a id="cke_23" class="cke_button cke_button__redo cke_button_disabled " title="بازچیدن (کنترل+Y)" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_23_label" aria-describedby="cke_23_description" aria-haspopup="false" aria-disabled="true" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(20,event);" onfocus="return CKEDITOR.tools.callFunction(21,event);" onclick="CKEDITOR.tools.callFunction(22,this);return false;"><span class="cke_button_icon cke_button__redo_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -1944px;background-size:auto;">&nbsp;</span><span id="cke_23_label" class="cke_button_label cke_button__redo_label" aria-hidden="false">بازچیدن</span><span id="cke_23_description" class="cke_button_label" aria-hidden="false">میانبر صفحه کلید کنترل+Y</span></a></span><span class="cke_toolbar_end"></span></span><span id="cke_24" class="cke_toolbar" aria-labelledby="cke_24_label" role="toolbar"><span id="cke_24_label" class="cke_voice_label">در حال ویرایش</span><span class="cke_toolbar_start"></span><span class="cke_toolgroup" role="presentation"><a id="cke_25" class="cke_button cke_button__find cke_button_off" title="جستجو" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_25_label" aria-describedby="cke_25_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(23,event);" onfocus="return CKEDITOR.tools.callFunction(24,event);" onclick="CKEDITOR.tools.callFunction(25,this);return false;"><span class="cke_button_icon cke_button__find_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -528px;background-size:auto;">&nbsp;</span><span id="cke_25_label" class="cke_button_label cke_button__find_label" aria-hidden="false">جستجو</span><span id="cke_25_description" class="cke_button_label" aria-hidden="false"></span></a><a id="cke_26" class="cke_button cke_button__replace cke_button_off" title="جایگزینی" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_26_label" aria-describedby="cke_26_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(26,event);" onfocus="return CKEDITOR.tools.callFunction(27,event);" onclick="CKEDITOR.tools.callFunction(28,this);return false;"><span class="cke_button_icon cke_button__replace_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -576px;background-size:auto;">&nbsp;</span><span id="cke_26_label" class="cke_button_label cke_button__replace_label" aria-hidden="false">جایگزینی</span><span id="cke_26_description" class="cke_button_label" aria-hidden="false"></span></a></span><span class="cke_toolbar_end"></span></span><span id="cke_27" class="cke_toolbar" aria-labelledby="cke_27_label" role="toolbar"><span id="cke_27_label" class="cke_voice_label">سبک‌های پایه</span><span class="cke_toolbar_start"></span><span class="cke_toolgroup" role="presentation"><a id="cke_28" class="cke_button cke_button__bold cke_button_off" title="درشت (کنترل+B)" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_28_label" aria-describedby="cke_28_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(29,event);" onfocus="return CKEDITOR.tools.callFunction(30,event);" onclick="CKEDITOR.tools.callFunction(31,this);return false;"><span class="cke_button_icon cke_button__bold_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -24px;background-size:auto;">&nbsp;</span><span id="cke_28_label" class="cke_button_label cke_button__bold_label" aria-hidden="false">درشت</span><span id="cke_28_description" class="cke_button_label" aria-hidden="false">میانبر صفحه کلید کنترل+B</span></a><a id="cke_29" class="cke_button cke_button__italic cke_button_off" title="خمیده (کنترل+I)" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_29_label" aria-describedby="cke_29_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(32,event);" onfocus="return CKEDITOR.tools.callFunction(33,event);" onclick="CKEDITOR.tools.callFunction(34,this);return false;"><span class="cke_button_icon cke_button__italic_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -48px;background-size:auto;">&nbsp;</span><span id="cke_29_label" class="cke_button_label cke_button__italic_label" aria-hidden="false">خمیده</span><span id="cke_29_description" class="cke_button_label" aria-hidden="false">میانبر صفحه کلید کنترل+I</span></a><a id="cke_30" class="cke_button cke_button__underline cke_button_off" title="زیرخط‌دار (کنترل+U)" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_30_label" aria-describedby="cke_30_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(35,event);" onfocus="return CKEDITOR.tools.callFunction(36,event);" onclick="CKEDITOR.tools.callFunction(37,this);return false;"><span class="cke_button_icon cke_button__underline_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -144px;background-size:auto;">&nbsp;</span><span id="cke_30_label" class="cke_button_label cke_button__underline_label" aria-hidden="false">زیرخط‌دار</span><span id="cke_30_description" class="cke_button_label" aria-hidden="false">میانبر صفحه کلید کنترل+U</span></a><a id="cke_31" class="cke_button cke_button__strike cke_button_off" title="خط‌خورده" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_31_label" aria-describedby="cke_31_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(38,event);" onfocus="return CKEDITOR.tools.callFunction(39,event);" onclick="CKEDITOR.tools.callFunction(40,this);return false;"><span class="cke_button_icon cke_button__strike_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -72px;background-size:auto;">&nbsp;</span><span id="cke_31_label" class="cke_button_label cke_button__strike_label" aria-hidden="false">خط‌خورده</span><span id="cke_31_description" class="cke_button_label" aria-hidden="false"></span></a><a id="cke_32" class="cke_button cke_button__subscript cke_button_off" title="زیرنویس" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_32_label" aria-describedby="cke_32_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(41,event);" onfocus="return CKEDITOR.tools.callFunction(42,event);" onclick="CKEDITOR.tools.callFunction(43,this);return false;"><span class="cke_button_icon cke_button__subscript_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -96px;background-size:auto;">&nbsp;</span><span id="cke_32_label" class="cke_button_label cke_button__subscript_label" aria-hidden="false">زیرنویس</span><span id="cke_32_description" class="cke_button_label" aria-hidden="false"></span></a><a id="cke_33" class="cke_button cke_button__superscript cke_button_off" title="بالانویس" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_33_label" aria-describedby="cke_33_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(44,event);" onfocus="return CKEDITOR.tools.callFunction(45,event);" onclick="CKEDITOR.tools.callFunction(46,this);return false;"><span class="cke_button_icon cke_button__superscript_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -120px;background-size:auto;">&nbsp;</span><span id="cke_33_label" class="cke_button_label cke_button__superscript_label" aria-hidden="false">بالانویس</span><span id="cke_33_description" class="cke_button_label" aria-hidden="false"></span></a></span><span class="cke_toolbar_end"></span></span><span id="cke_34" class="cke_toolbar" aria-labelledby="cke_34_label" role="toolbar"><span id="cke_34_label" class="cke_voice_label">بند</span><span class="cke_toolbar_start"></span><span class="cke_toolgroup" role="presentation"><a id="cke_35" class="cke_button cke_button__numberedlist cke_button_off" title="فهرست شماره​دار" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_35_label" aria-describedby="cke_35_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(47,event);" onfocus="return CKEDITOR.tools.callFunction(48,event);" onclick="CKEDITOR.tools.callFunction(49,this);return false;"><span class="cke_button_icon cke_button__numberedlist_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -1368px;background-size:auto;">&nbsp;</span><span id="cke_35_label" class="cke_button_label cke_button__numberedlist_label" aria-hidden="false">فهرست شماره​دار</span><span id="cke_35_description" class="cke_button_label" aria-hidden="false"></span></a><a id="cke_36" class="cke_button cke_button__bulletedlist cke_button_off" title="فهرست نقطه​ای" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_36_label" aria-describedby="cke_36_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(50,event);" onfocus="return CKEDITOR.tools.callFunction(51,event);" onclick="CKEDITOR.tools.callFunction(52,this);return false;"><span class="cke_button_icon cke_button__bulletedlist_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -1320px;background-size:auto;">&nbsp;</span><span id="cke_36_label" class="cke_button_label cke_button__bulletedlist_label" aria-hidden="false">فهرست نقطه​ای</span><span id="cke_36_description" class="cke_button_label" aria-hidden="false"></span></a><span class="cke_toolbar_separator" role="separator"></span><a id="cke_37" class="cke_button cke_button__outdent cke_button_disabled " title="کاهش تورفتگی" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_37_label" aria-describedby="cke_37_description" aria-haspopup="false" aria-disabled="true" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(53,event);" onfocus="return CKEDITOR.tools.callFunction(54,event);" onclick="CKEDITOR.tools.callFunction(55,this);return false;"><span class="cke_button_icon cke_button__outdent_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -1032px;background-size:auto;">&nbsp;</span><span id="cke_37_label" class="cke_button_label cke_button__outdent_label" aria-hidden="false">کاهش تورفتگی</span><span id="cke_37_description" class="cke_button_label" aria-hidden="false"></span></a><a id="cke_38" class="cke_button cke_button__indent cke_button_off" title="افزایش تورفتگی" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_38_label" aria-describedby="cke_38_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(56,event);" onfocus="return CKEDITOR.tools.callFunction(57,event);" onclick="CKEDITOR.tools.callFunction(58,this);return false;"><span class="cke_button_icon cke_button__indent_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -984px;background-size:auto;">&nbsp;</span><span id="cke_38_label" class="cke_button_label cke_button__indent_label" aria-hidden="false">افزایش تورفتگی</span><span id="cke_38_description" class="cke_button_label" aria-hidden="false"></span></a><span class="cke_toolbar_separator" role="separator"></span><a id="cke_39" class="cke_button cke_button__blockquote cke_button_off" title="بلوک نقل قول" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_39_label" aria-describedby="cke_39_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(59,event);" onfocus="return CKEDITOR.tools.callFunction(60,event);" onclick="CKEDITOR.tools.callFunction(61,this);return false;"><span class="cke_button_icon cke_button__blockquote_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -216px;background-size:auto;">&nbsp;</span><span id="cke_39_label" class="cke_button_label cke_button__blockquote_label" aria-hidden="false">بلوک نقل قول</span><span id="cke_39_description" class="cke_button_label" aria-hidden="false"></span></a><span class="cke_toolbar_separator" role="separator"></span><a id="cke_40" class="cke_button cke_button__justifyleft cke_button_off" title="چپ چین" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_40_label" aria-describedby="cke_40_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(62,event);" onfocus="return CKEDITOR.tools.callFunction(63,event);" onclick="CKEDITOR.tools.callFunction(64,this);return false;"><span class="cke_button_icon cke_button__justifyleft_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -1152px;background-size:auto;">&nbsp;</span><span id="cke_40_label" class="cke_button_label cke_button__justifyleft_label" aria-hidden="false">چپ چین</span><span id="cke_40_description" class="cke_button_label" aria-hidden="false"></span></a><a id="cke_41" class="cke_button cke_button__justifycenter cke_button_off" title="وسط" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_41_label" aria-describedby="cke_41_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(65,event);" onfocus="return CKEDITOR.tools.callFunction(66,event);" onclick="CKEDITOR.tools.callFunction(67,this);return false;"><span class="cke_button_icon cke_button__justifycenter_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -1128px;background-size:auto;">&nbsp;</span><span id="cke_41_label" class="cke_button_label cke_button__justifycenter_label" aria-hidden="false">وسط</span><span id="cke_41_description" class="cke_button_label" aria-hidden="false"></span></a><a id="cke_42" class="cke_button cke_button__justifyright cke_button_off" title="راست چین" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_42_label" aria-describedby="cke_42_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(68,event);" onfocus="return CKEDITOR.tools.callFunction(69,event);" onclick="CKEDITOR.tools.callFunction(70,this);return false;"><span class="cke_button_icon cke_button__justifyright_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -1176px;background-size:auto;">&nbsp;</span><span id="cke_42_label" class="cke_button_label cke_button__justifyright_label" aria-hidden="false">راست چین</span><span id="cke_42_description" class="cke_button_label" aria-hidden="false"></span></a><a id="cke_43" class="cke_button cke_button__justifyblock cke_button_off" title="بلوک چین" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_43_label" aria-describedby="cke_43_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(71,event);" onfocus="return CKEDITOR.tools.callFunction(72,event);" onclick="CKEDITOR.tools.callFunction(73,this);return false;"><span class="cke_button_icon cke_button__justifyblock_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -1104px;background-size:auto;">&nbsp;</span><span id="cke_43_label" class="cke_button_label cke_button__justifyblock_label" aria-hidden="false">بلوک چین</span><span id="cke_43_description" class="cke_button_label" aria-hidden="false"></span></a></span><span class="cke_toolbar_end"></span></span><span class="cke_toolbar_break"></span><span id="cke_44" class="cke_toolbar" aria-labelledby="cke_44_label" role="toolbar"><span id="cke_44_label" class="cke_voice_label">سبک‌ها</span><span class="cke_toolbar_start"></span><span id="cke_12" class="cke_combo cke_combo__styles cke_combo_off" role="presentation"><span id="cke_12_label" class="cke_combo_label">سبک</span><a class="cke_combo_button" title="سبکهای قالببندی" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_12_label" aria-haspopup="listbox" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(75,event,this);" onfocus="return CKEDITOR.tools.callFunction(76,event);" onclick="CKEDITOR.tools.callFunction(74,this);return false;"><span id="cke_12_text" class="cke_combo_text cke_combo_inlinelabel">سبک</span><span class="cke_combo_open"><span class="cke_combo_arrow"></span></span></a></span><span id="cke_13" class="cke_combo cke_combo__format cke_combo_off" role="presentation"><span id="cke_13_label" class="cke_combo_label">قالب</span><a class="cke_combo_button" title="قالب بند" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_13_label" aria-haspopup="listbox" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(78,event,this);" onfocus="return CKEDITOR.tools.callFunction(79,event);" onclick="CKEDITOR.tools.callFunction(77,this);return false;"><span id="cke_13_text" class="cke_combo_text cke_combo_inlinelabel">قالب</span><span class="cke_combo_open"><span class="cke_combo_arrow"></span></span></a></span><span id="cke_14" class="cke_combo cke_combo__font cke_combo_off" role="presentation"><span id="cke_14_label" class="cke_combo_label">قلم</span><a class="cke_combo_button" title="نام قلم" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_14_label" aria-haspopup="listbox" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(81,event,this);" onfocus="return CKEDITOR.tools.callFunction(82,event);" onclick="CKEDITOR.tools.callFunction(80,this);return false;"><span id="cke_14_text" class="cke_combo_text cke_combo_inlinelabel">قلم</span><span class="cke_combo_open"><span class="cke_combo_arrow"></span></span></a></span><span id="cke_15" class="cke_combo cke_combo__fontsize cke_combo_off" role="presentation"><span id="cke_15_label" class="cke_combo_label">اندازه</span><a class="cke_combo_button" title="اندازه قلم" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_15_label" aria-haspopup="listbox" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(84,event,this);" onfocus="return CKEDITOR.tools.callFunction(85,event);" onclick="CKEDITOR.tools.callFunction(83,this);return false;"><span id="cke_15_text" class="cke_combo_text cke_combo_inlinelabel">اندازه</span><span class="cke_combo_open"><span class="cke_combo_arrow"></span></span></a></span><span class="cke_toolbar_end"></span></span><span id="cke_45" class="cke_toolbar" aria-labelledby="cke_45_label" role="toolbar"><span id="cke_45_label" class="cke_voice_label">رنگ​ها</span><span class="cke_toolbar_start"></span><span class="cke_toolgroup" role="presentation"><a id="cke_46" class="cke_button cke_button__textcolor cke_button_expandable cke_button_off" title="رنگ متن" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_46_label" aria-describedby="cke_46_description" aria-haspopup="listbox" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(86,event);" onfocus="return CKEDITOR.tools.callFunction(87,event);" onclick="CKEDITOR.tools.callFunction(88,this);return false;" aria-expanded="false"><span class="cke_button_icon cke_button__textcolor_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -408px;background-size:auto;">&nbsp;</span><span id="cke_46_label" class="cke_button_label cke_button__textcolor_label" aria-hidden="false">رنگ متن</span><span id="cke_46_description" class="cke_button_label" aria-hidden="false"></span><span class="cke_button_arrow"></span></a><a id="cke_47" class="cke_button cke_button__bgcolor cke_button_expandable cke_button_off" title="رنگ پس​زمینه" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_47_label" aria-describedby="cke_47_description" aria-haspopup="listbox" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(89,event);" onfocus="return CKEDITOR.tools.callFunction(90,event);" onclick="CKEDITOR.tools.callFunction(91,this);return false;" aria-expanded="false"><span class="cke_button_icon cke_button__bgcolor_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -384px;background-size:auto;">&nbsp;</span><span id="cke_47_label" class="cke_button_label cke_button__bgcolor_label" aria-hidden="false">رنگ پس​زمینه</span><span id="cke_47_description" class="cke_button_label" aria-hidden="false"></span><span class="cke_button_arrow"></span></a></span><span class="cke_toolbar_end"></span></span><span id="cke_48" class="cke_toolbar" aria-labelledby="cke_48_label" role="toolbar"><span id="cke_48_label" class="cke_voice_label">ابزارها</span><span class="cke_toolbar_start"></span><span class="cke_toolgroup" role="presentation"><a id="cke_49" class="cke_button cke_button__maximize cke_button_off" title="بیشنه کردن" tabindex="-1" hidefocus="true" role="button" aria-labelledby="cke_49_label" aria-describedby="cke_49_description" aria-haspopup="false" aria-disabled="false" onblur="this.style.cssText = this.style.cssText;" onkeydown="return CKEDITOR.tools.callFunction(92,event);" onfocus="return CKEDITOR.tools.callFunction(93,event);" onclick="CKEDITOR.tools.callFunction(94,this);return false;"><span class="cke_button_icon cke_button__maximize_icon" style="background-image:url('http://192.168.133.146/hotel/ckeditor/plugins/icons.png?t=K5H9');background-position:0 -1416px;background-size:auto;">&nbsp;</span><span id="cke_49_label" class="cke_button_label cke_button__maximize_label" aria-hidden="false">بیشنه کردن</span><span id="cke_49_description" class="cke_button_label" aria-hidden="false"></span></a></span><span class="cke_toolbar_end"></span></span></span></span><div id="cke_1_contents" class="cke_contents cke_reset" role="presentation" style="height: 150px;"><span id="cke_55" class="cke_voice_label">کلید Alt+0 را برای راهنمایی بفشارید</span><iframe src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/clerk_rack_massage_new1_xQdz.htm" frameborder="0" style="width: 100%; height: 100%;" class="cke_wysiwyg_frame cke_reset" title="ویرایش‌گر متن غنی, editor" aria-describedby="cke_55" tabindex="0" allowtransparency="true"></iframe></div><span id="cke_1_bottom" class="cke_bottom cke_reset_all" role="presentation" style="user-select: none;"><span id="cke_1_resizer" class="cke_resizer cke_resizer_vertical cke_resizer_ltr" title="تغییر اندازه" onmousedown="CKEDITOR.tools.callFunction(0, event)">◢</span><span id="cke_1_path_label" class="cke_voice_label">مسیر عناصر</span><span id="cke_1_path" class="cke_path" role="group" aria-labelledby="cke_1_path_label"><span class="cke_path_empty">&nbsp;</span></span></span></div></div>
+                        </td>
+                        <td align="right" nowrap="nowrap" colspan="2">: متن پیام
+                            <div id="status" style="display: none;">Move the caret on the text:</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="left" nowrap="nowrap" colspan="1"><input type="text" name="chng_type" id="chng_type" size="5" maxlength="5" dir="rtl" value="فارسی" class="right_bold_17" disabled="disabled"></td>
+                        <td align="right"><b>کیانوش قویدل</b>
+                            <input type="hidden" id="_name" name="_name" value="کیانوش قویدل">
+                        </td>
+                        <td align="right">: کاربر مبدا</td>
+                    </tr>
+                    <tr>
+                        <td>
+                                                    </td>
+                        <td align="right" colspan="2">
+                            <div id="file-uploader-demo1" colspan="1">
+                                <input type="button" class="btn" name="action2" id="action2" value="ذخیره و الصاق فایل" onclick="" style="" tabindex="3">
+                                <ul style="display:none" id="attached_toggle">
+                                    <li id="button2" class="example">
+                                        <a href="#" id="button22">
+                                            <div id="button1" class="button">آپلود</div>
+                                            <img src="%D8%AB%D8%A8%D8%AA%20%DA%AF%D8%B2%D8%A7%D8%B1%D8%B4%20%D8%B4%DB%8C%D9%81%D8%AA%20%D8%B4%D8%A8%20%D8%A8%D8%B1%D8%A7%DB%8C%20%D8%A7%D8%B4%D8%AE%D8%A7%D8%B5%20%DB%8C%D8%A7%20%D9%85%D8%AF%DB%8C%D8%B1%D8%A7%D9%86_files/upload_xQdz.png" width="24" height="24" style="margin-bottom: -9px;"></a>
+                                    </li>
+                                    <li id="example3" class="example" style="line-height: 32px;">
+                                    </li>
+
+                                </ul>
+                            </div>
+                            <div id="file-uploader-draft_new" colspan="10">
+                                <ul style="line-height: 0px;" id="draft_new_pic"></ul>
+                            </div>
+                            <div id="file-uploader-draft" colspan="10">
+                                <ul style="line-height: 79px;" id="draft_id">
+                                                                    </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="3">
+                            <div><p id="error_send" style="font-weight: bold;color: red; direction: rtl; display: none;">لطفا تا آپلود
+                                    کامل فایل صبر کنید، در غیر این صورت فایل الحاق نخواهد شد.</p></div>
+                            <input type="button" class="btn" name="action" id="action" value="ثبت و ارسال" onclick="valid();" style="" tabindex="4">
+                            <br>
+                            <input type="hidden" name="beensubmited" value="true">
+                            <input type="hidden" name="_desc" value="">
+                            <input type="hidden" id="draft_id_input" name="draft_id_input" value="empty_20261124171328">
+                            <input type="hidden" id="messege_id" name="messege_id" value="">
+                                <input type="hidden" id="text_id" name="text_id" value="">
+                        </td>
+                    </tr>
+                    
+                </tbody></table>
+            </div>
+        </div>
+                    <input type="hidden" name="__token__" value="7239577313209a230a35030638f2f2b30b55cd242de273c97a5361348efcb1c9"></form>
+    <script type="text/javascript">document.form1.myAutocomplete.focus();</script>
+    <script>
+        initSample();
+    </script>
+    <br>
+<div align="center">
+    <input type="button" class="btn" style="cursor: pointer;" name="Home" value=" بازگشت " onclick="document.location='clerk_rack_massage_check.php'">
+</div>
+
+
+<ul id="ui-id-1" tabindex="0" class="ui-menu ui-widget ui-widget-content ui-autocomplete ui-front" style="display: none;"></ul><div role="status" aria-live="assertive" aria-relevant="additions" class="ui-helper-hidden-accessible"></div><div class="cke_screen_reader_only cke_copyformatting_notification"><div aria-live="polite"></div></div></body></html>

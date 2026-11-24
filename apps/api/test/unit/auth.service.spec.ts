@@ -2,7 +2,9 @@
  * auth.service.spec.ts — Argon2id + چرخش refresh با تشخیص استفاده مجدد + MFA (بدون DB واقعی).
  */
 import { AuthService } from '../../src/auth/auth.service';
+import { CaptchaService } from '../../src/auth/captcha.service';
 import { authenticator } from 'otplib';
+import { BadRequestException } from '@nestjs/common';
 import type { PrismaService } from '../../src/prisma.service';
 import type { JwtService } from '@nestjs/jwt';
 
@@ -68,10 +70,17 @@ const ADMIN = {
 describe('AuthService — ورود و چرخش توکن', () => {
   let service: AuthService;
   let prismaMock: ReturnType<typeof makePrismaMock>;
+  let captchaMock: { verify: jest.Mock };
 
   beforeEach(async () => {
     prismaMock = makePrismaMock();
-    const svc = new AuthService(prismaMock.prisma as unknown as PrismaService, makeJwtMock() as unknown as JwtService);
+    captchaMock = { verify: jest.fn() }; // پیش‌فرض: کپچا خاموش (env) — mock فقط برای سازنده
+    process.env.AUTH_CAPTCHA_REQUIRED = 'false';
+    const svc = new AuthService(
+      prismaMock.prisma as unknown as PrismaService,
+      makeJwtMock() as unknown as JwtService,
+      captchaMock as unknown as CaptchaService,
+    );
     ADMIN.passwordHash = await svc.hashPassword('ChangeMe_Str0ng!');
     service = svc;
     // توجه: jest.clearAllMocks() اینجا نباید صدا شود — mockها در هر تست تازه‌اند و clear پیاده‌سازی‌ها را می‌زد
@@ -131,5 +140,31 @@ describe('AuthService — ورود و چرخش توکن', () => {
     await expect(service.rotateRefreshToken('nonexistent.token.value')).rejects.toMatchObject({
       response: { code: 'UNAUTHORIZED' },
     });
+  });
+
+  /* ── U1: کپچا و قفل‌شدگی (الگوی آسا) ── */
+
+  it('کپچا فعال + عدم تطابق → CAPTCHA_MISMATCH (بدون رساندن به بررسی گذرواژه)', async () => {
+    process.env.AUTH_CAPTCHA_REQUIRED = 'true';
+    captchaMock.verify.mockImplementation(() => {
+      throw new BadRequestException({ code: 'CAPTCHA_MISMATCH', message: 'حروف امنیتی مطابقت ندارند.' });
+    });
+    const totp = authenticator.generate(ADMIN.mfaSecret as string);
+    await expect(service.login('admin', 'ChangeMe_Str0ng!', totp, { captchaId: 'x', captchaText: 'wrong' }))
+      .rejects.toMatchObject({ response: { code: 'CAPTCHA_MISMATCH' } });
+    expect(captchaMock.verify).toHaveBeenCalledTimes(1);
+    process.env.AUTH_CAPTCHA_REQUIRED = 'false';
+  });
+
+  it('۵ تلاش ناموفق → قفل ۱۵ دقیقه‌ای (LOCKED) حتی با گذرواژه صحیح', async () => {
+    process.env.AUTH_CAPTCHA_REQUIRED = 'true'; // قفل‌شدگی فقط در حالت کپچا فعال
+    const totp = authenticator.generate(ADMIN.mfaSecret as string);
+    for (let i = 0; i < 5; i++) {
+      await expect(service.login('admin', 'wrong-password', totp, { captchaId: 'c', captchaText: 'ok' }))
+        .rejects.toMatchObject({ response: { code: 'UNAUTHORIZED' } });
+    }
+    await expect(service.login('admin', 'ChangeMe_Str0ng!', totp, { captchaId: 'c', captchaText: 'ok' }))
+      .rejects.toMatchObject({ response: { code: 'LOCKED' } });
+    process.env.AUTH_CAPTCHA_REQUIRED = 'false';
   });
 });

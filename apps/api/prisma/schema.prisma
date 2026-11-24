@@ -22,6 +22,12 @@ model User {
   mfaSecret    String?
   mfaEnabled   Boolean  @default(false)
   isActive     Boolean  @default(true)
+  // U0 — نوار کاربر صفحهٔ اصلی: عکس پرسنلی و سمت شغلی (الگوی آسا)
+  photoUrl     String?
+  position     String?
+  // U1 — «اطلاعات آخرین ورود شما به سیستم» (الگوی آسا)
+  lastLoginAt  DateTime?
+  lastLoginIp  String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

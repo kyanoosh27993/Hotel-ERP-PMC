@@ -16,6 +16,7 @@ import { AllExceptionsFilter } from '../../src/common/all-exceptions.filter';
 import { ConflictException } from '@nestjs/common';
 import { buildIranIban } from '@hotel-erp/payroll';
 
+process.env.AUTH_CAPTCHA_REQUIRED ??= 'false'; // U1: کپچا در e2e خاموش
 process.env.JWT_ACCESS_SECRET ??= 'e2e-access-secret-change-me';
 process.env.MFA_TEST_SECRET ??= 'JBSWY3DPEHPK3PXPE2ETEST';
 const MFA_SECRET = process.env.MFA_TEST_SECRET;
