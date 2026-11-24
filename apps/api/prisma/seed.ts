@@ -4,10 +4,24 @@
  * اجرا: npm run db:seed -w apps/api
  */
 import { PrismaClient, Prisma } from '@prisma/client';
-import { hash } from '@node-rs/argon2';
+import { randomBytes } from 'node:crypto';
+import { argon2id } from 'hash-wasm';
 import { PERMISSIONS, PERMISSION_CATALOG, ROLE_MATRIX } from '../src/iam/permissions';
 
 const prisma = new PrismaClient();
+
+/** همان پارامترهای OWASP auth.service — PHC سازگار با argon2Verify */
+async function hash(plain: string): Promise<string> {
+  return argon2id({
+    password: plain,
+    salt: randomBytes(16),
+    parallelism: 1,
+    iterations: 3,
+    memorySize: 19456,
+    hashLength: 32,
+    outputType: 'encoded',
+  });
+}
 
 async function main() {
   // ── مجوزها ──

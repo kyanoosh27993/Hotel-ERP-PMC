@@ -172,8 +172,17 @@ export class ProcurementService {
     });
   }
 
+  /** شناسهٔ PO: هم UUID و هم شمارهٔ PO-… (فرم وب با شماره کار می‌کند) */
+  private async resolvePoId(idOrNo: string): Promise<string> {
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrNo)) return idOrNo;
+    const po = await this.prisma.purchaseOrder.findUnique({ where: { poNo: idOrNo }, select: { id: true } });
+    if (!po) throw new NotFoundException(`سفارش خرید ${idOrNo} یافت نشد`);
+    return po.id;
+  }
+
   /** تأیید PO — رویداد تعهد خرید (غیرپولی) */
-  async approvePurchaseOrder(poId: string, userId?: string) {
+  async approvePurchaseOrder(poIdOrNo: string, userId?: string) {
+    const poId = await this.resolvePoId(poIdOrNo);
     const [po] = await this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM "purchase_orders" WHERE id = ${poId}::uuid FOR UPDATE`;
       const row = await tx.purchaseOrder.findUnique({ where: { id: poId }, include: { supplier: true, lines: { include: { stockItem: true } } } });

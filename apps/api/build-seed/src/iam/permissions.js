@@ -1,0 +1,327 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ROLE_MATRIX = exports.PERMISSION_CATALOG = exports.PERMISSIONS = void 0;
+/**
+ * permissions.ts — فهرست مجوزها و ماتریس نقش‌ها (RBAC) — سمت سرور اعمال می‌شود.
+ * نمونه الزامی قرارداد: حسابدار می‌تواند مشاهده/پیش‌نویس/ویرایش/ارسال به تأیید؛
+ * نمی‌تواند خودتأییری/حذف قطعی/تغییر حساب حساس/مشاهده داشبورد مدیرعامل.
+ */
+exports.PERMISSIONS = {
+    JOURNAL_VIEW: 'journal.view',
+    JOURNAL_CREATE_DRAFT: 'journal.create_draft',
+    JOURNAL_EDIT_DRAFT: 'journal.edit_draft',
+    JOURNAL_SUBMIT: 'journal.submit_for_approval',
+    JOURNAL_APPROVE: 'journal.approve',
+    JOURNAL_REVERSE: 'journal.reverse',
+    SENSITIVE_ACCOUNTS_EDIT: 'sensitive_accounts.edit',
+    PERIOD_LOCK: 'period.lock',
+    RESERVATION_CREATE: 'reservation.create',
+    ROOM_VIEW: 'room.view',
+    POS_ORDER_CREATE: 'pos.order.create',
+    INTEGRATIONS_VIEW: 'integrations.view',
+    DASHBOARD_CEO_VIEW: 'dashboard.ceo.view',
+    AUDIT_VIEW: 'audit.view',
+    // فاز ۲ — حقوق و دستمزد
+    PERSONNEL_VIEW: 'personnel.view',
+    PERSONNEL_EDIT: 'personnel.edit',
+    PAYROLL_VIEW: 'payroll.view',
+    PAYROLL_CALCULATE: 'payroll.calculate',
+    PAYROLL_APPROVE: 'payroll.approve',
+    // فاز ۴ — PMS: نقشه اتاق، رزرو، پذیرش، خانه‌داری، حسابرسی شبانه
+    RESERVATION_VIEW: 'reservation.view',
+    ROOM_UPDATE: 'room.update',
+    STAY_CHECKIN: 'stay.checkin',
+    STAY_CHECKOUT: 'stay.checkout',
+    HOUSEKEEPING_UPDATE: 'housekeeping.update',
+    NIGHT_AUDIT_RUN: 'nightaudit.run',
+    // موج ۱ — فاز ۵: صندوق، پرداخت و خزانه‌داری
+    TREASURY_VIEW: 'treasury.view',
+    TREASURY_TXN_CREATE: 'treasury.txn.create',
+    TREASURY_SHIFT_MANAGE: 'treasury.shift.manage',
+    TREASURY_VOID: 'treasury.void',
+    TREASURY_RECONCILE: 'treasury.reconcile',
+    // موج ۱ — فاز ۱۰: خانه‌داری کامل، تعمیرات، لاندری، اشیای جامانده، دارایی، خدمات جانبی
+    HOUSEKEEPING_TASK: 'housekeeping.task',
+    HOUSEKEEPING_INSPECT: 'housekeeping.inspect',
+    MAINTENANCE_REPORT: 'maintenance.report',
+    MAINTENANCE_MANAGE: 'maintenance.manage',
+    LAUNDRY_MANAGE: 'laundry.manage',
+    LOSTFOUND_MANAGE: 'lostfound.manage',
+    ASSET_VIEW: 'asset.view',
+    ASSET_MANAGE: 'asset.manage',
+    ASSET_DEPRECIATE: 'asset.depreciate',
+    ANCILLARY_ORDER: 'ancillary.order',
+    // موج ۲ — فاز ۶: رستوران، POS و آشپزخانه
+    RESTAURANT_VIEW: 'restaurant.view',
+    RESTAURANT_ORDER: 'restaurant.order',
+    RESTAURANT_KDS: 'restaurant.kds',
+    POS_DISCOUNT: 'pos.discount',
+    // موج ۲ — فاز ۷: خرید، انبار و کاست کنترل
+    PROC_VIEW: 'procurement.view',
+    PROC_CREATE: 'procurement.create',
+    PROC_MANAGE: 'procurement.manage',
+    PROC_RECEIVE: 'procurement.receive',
+    STORES_VIEW: 'stores.view',
+    STORES_MANAGE: 'stores.manage',
+    STORES_COUNT: 'stores.count',
+    // موج ۳ — فاز ۸/۹: دفاتر و بستن دوره + کتابخانه قوانین
+    PERIOD_CLOSE: 'accounting.period_close',
+    LAW_VIEW: 'compliance.law_view',
+    LAW_MANAGE: 'compliance.law_manage',
+    // موج ۳ — فاز ۹ (F9-T2): ادغام مؤدیان — صورتحساب الکترونیکی
+    INVOICE_VIEW: 'compliance.invoice_view',
+    INVOICE_MANAGE: 'compliance.invoice_manage',
+    INVOICE_SEND: 'compliance.invoice_send',
+    // موج ۳ — فاز ۸ (F8-T6): موتور گردش کار تأیید چندمرحله‌ای
+    WORKFLOW_VIEW: 'workflow.view',
+    WORKFLOW_ACT: 'workflow.act',
+    WORKFLOW_MANAGE: 'workflow.manage',
+    // موج ۳ — فاز ۹ (F9-T4): معاملات فصلی و فایل استاندارد دارایی
+    QUARTERLY_VIEW: 'compliance.quarterly_view',
+    QUARTERLY_MANAGE: 'compliance.quarterly_manage',
+    // موج ۳ — فاز ۹ (F9-T5): مالیات مستقیم
+    DIRECTTAX_VIEW: 'compliance.directtax_view',
+    DIRECTTAX_MANAGE: 'compliance.directtax_manage',
+    // موج ۴ — فاز ۱۱: BI و هوش مصنوعی
+    BI_VIEW: 'bi.view',
+    BI_MANAGE: 'bi.manage',
+    // موج ۵ — فاز ۱۲ (F12-T4): API Marketplace
+    MARKETPLACE_MANAGE: 'marketplace.manage',
+};
+exports.PERMISSION_CATALOG = [
+    { code: exports.PERMISSIONS.JOURNAL_VIEW, en: 'View journal entries', fa: 'مشاهده اسناد حسابداری' },
+    { code: exports.PERMISSIONS.JOURNAL_CREATE_DRAFT, en: 'Create draft journal entries', fa: 'ثبت پیش‌نویس سند' },
+    { code: exports.PERMISSIONS.JOURNAL_EDIT_DRAFT, en: 'Edit draft journal entries', fa: 'ویرایش سند پیش‌نویس' },
+    { code: exports.PERMISSIONS.JOURNAL_SUBMIT, en: 'Submit entries for approval', fa: 'ارسال سند به تأیید' },
+    { code: exports.PERMISSIONS.JOURNAL_APPROVE, en: 'Approve journal entries', fa: 'تأیید نهایی سند' },
+    { code: exports.PERMISSIONS.JOURNAL_REVERSE, en: 'Reverse posted entries', fa: 'برگشت سند قطعی' },
+    { code: exports.PERMISSIONS.SENSITIVE_ACCOUNTS_EDIT, en: 'Edit sensitive accounts', fa: 'ویرایش حساب‌های حساس' },
+    { code: exports.PERMISSIONS.PERIOD_LOCK, en: 'Lock/unlock fiscal periods', fa: 'قفل/بازگشایی دوره مالی' },
+    { code: exports.PERMISSIONS.RESERVATION_CREATE, en: 'Create reservations', fa: 'ثبت رزرو' },
+    { code: exports.PERMISSIONS.ROOM_VIEW, en: 'View rooms', fa: 'مشاهده اتاق‌ها' },
+    { code: exports.PERMISSIONS.POS_ORDER_CREATE, en: 'Create POS orders', fa: 'ثبت سفارش POS' },
+    { code: exports.PERMISSIONS.INTEGRATIONS_VIEW, en: 'View integrations', fa: 'مشاهده یکپارچگی‌ها' },
+    { code: exports.PERMISSIONS.DASHBOARD_CEO_VIEW, en: 'View CEO dashboard', fa: 'مشاهده داشبورد مدیرعامل' },
+    { code: exports.PERMISSIONS.AUDIT_VIEW, en: 'View audit logs', fa: 'مشاهده لاگ حسابرسی' },
+    { code: exports.PERMISSIONS.PERSONNEL_VIEW, en: 'View personnel records', fa: 'مشاهده پرونده پرسنلی' },
+    { code: exports.PERMISSIONS.PERSONNEL_EDIT, en: 'Create/edit personnel and decisions', fa: 'ثبت/ویرایش پرسنل و احکام' },
+    { code: exports.PERMISSIONS.PAYROLL_VIEW, en: 'View payroll runs and lists', fa: 'مشاهده دوره‌های حقوق و لیست‌ها' },
+    { code: exports.PERMISSIONS.PAYROLL_CALCULATE, en: 'Calculate payroll runs', fa: 'محاسبه دوره حقوق' },
+    { code: exports.PERMISSIONS.PAYROLL_APPROVE, en: 'Approve payroll runs and decisions', fa: 'تأیید احکام و دوره حقوق' },
+    // فاز ۴ — PMS
+    { code: exports.PERMISSIONS.RESERVATION_VIEW, en: 'View reservations and waitlist', fa: 'مشاهده رزروها و لیست انتظار' },
+    { code: exports.PERMISSIONS.ROOM_UPDATE, en: 'Update room status and maintenance', fa: 'تغییر وضعیت اتاق و تعمیرات' },
+    { code: exports.PERMISSIONS.STAY_CHECKIN, en: 'Check guests in', fa: 'ثبت ورود مهمان (پذیرش)' },
+    { code: exports.PERMISSIONS.STAY_CHECKOUT, en: 'Check guests out', fa: 'ثبت خروج مهمان (تسویه)' },
+    { code: exports.PERMISSIONS.HOUSEKEEPING_UPDATE, en: 'Update housekeeping status', fa: 'به‌روزرسانی وضعیت نظافت اتاق' },
+    { code: exports.PERMISSIONS.NIGHT_AUDIT_RUN, en: 'Run night audit', fa: 'اجرای حسابرسی شبانه' },
+    // موج ۱ — فاز ۵
+    { code: exports.PERMISSIONS.TREASURY_VIEW, en: 'View cash accounts, shifts and transactions', fa: 'مشاهده صندوق‌ها، شیفت‌ها و تراکنش‌ها' },
+    { code: exports.PERMISSIONS.TREASURY_TXN_CREATE, en: 'Post treasury transactions', fa: 'ثبت دریافت/پرداخت/انتقال' },
+    { code: exports.PERMISSIONS.TREASURY_SHIFT_MANAGE, en: 'Open/close cashier shifts', fa: 'باز/بستن شیفت صندوق' },
+    { code: exports.PERMISSIONS.TREASURY_VOID, en: 'Void treasury transactions', fa: 'ابطال تراکنش خزانه' },
+    { code: exports.PERMISSIONS.TREASURY_RECONCILE, en: 'Import bank statements and reconcile', fa: 'ورود صورت‌حساب بانک و مغایرت‌گیری' },
+    // موج ۱ — فاز ۱۰
+    { code: exports.PERMISSIONS.HOUSEKEEPING_TASK, en: 'Assign and complete housekeeping tasks', fa: 'تخصیص و انجام وظایف خانه‌داری' },
+    { code: exports.PERMISSIONS.HOUSEKEEPING_INSPECT, en: 'Record room inspections', fa: 'ثبت بازرسی اتاق' },
+    { code: exports.PERMISSIONS.MAINTENANCE_REPORT, en: 'Report maintenance issues', fa: 'ثبت درخواست تعمیر' },
+    { code: exports.PERMISSIONS.MAINTENANCE_MANAGE, en: 'Assign and close maintenance requests', fa: 'تخصیص و بستن درخواست تعمیر' },
+    { code: exports.PERMISSIONS.LAUNDRY_MANAGE, en: 'Manage laundry batches and linen', fa: 'مدیریت بچ‌های لاندری و ملحفه' },
+    { code: exports.PERMISSIONS.LOSTFOUND_MANAGE, en: 'Manage lost and found items', fa: 'مدیریت اشیای جامانده' },
+    { code: exports.PERMISSIONS.ASSET_VIEW, en: 'View fixed assets and depreciation', fa: 'مشاهده دارایی ثابت و استهلاک' },
+    { code: exports.PERMISSIONS.ASSET_MANAGE, en: 'Register/transfer/dispose assets', fa: 'ثبت/انتقال/اسقاط دارایی' },
+    { code: exports.PERMISSIONS.ASSET_DEPRECIATE, en: 'Run depreciation for a period', fa: 'ثبت استهلاک دوره' },
+    { code: exports.PERMISSIONS.ANCILLARY_ORDER, en: 'Confirm ancillary service orders', fa: 'ثبت سفارش خدمات جانبی' },
+    // موج ۲ — فاز ۶
+    { code: exports.PERMISSIONS.RESTAURANT_VIEW, en: 'View tables, menu and orders', fa: 'مشاهده میزها، منو و سفارش‌ها' },
+    { code: exports.PERMISSIONS.RESTAURANT_ORDER, en: 'Open/serve restaurant orders', fa: 'باز کردن و سرو سفارش رستوران' },
+    { code: exports.PERMISSIONS.RESTAURANT_KDS, en: 'Update kitchen tickets', fa: 'به‌روزرسانی بلیت‌های آشپزخانه' },
+    { code: exports.PERMISSIONS.POS_DISCOUNT, en: 'Apply order discount', fa: 'اعمال تخفیف سفارش' },
+    // موج ۲ — فاز ۷
+    { code: exports.PERMISSIONS.PROC_VIEW, en: 'View suppliers, POs and receipts', fa: 'مشاهده تأمین‌کنندگان، سفارش‌ها و رسیدها' },
+    { code: exports.PERMISSIONS.PROC_CREATE, en: 'Create requisitions and purchase orders', fa: 'ثبت درخواست و سفارش خرید' },
+    { code: exports.PERMISSIONS.PROC_MANAGE, en: 'Manage requisitions and purchase orders', fa: 'مدیریت درخواست و سفارش خرید' },
+    { code: exports.PERMISSIONS.PROC_RECEIVE, en: 'Record goods receipts', fa: 'ثبت رسید خرید' },
+    { code: exports.PERMISSIONS.STORES_VIEW, en: 'View stock items and movements', fa: 'مشاهده اقلام و گردش انبار' },
+    { code: exports.PERMISSIONS.STORES_MANAGE, en: 'Adjust stock and transfers', fa: 'اصلاح موجودی و انتقال انبار' },
+    { code: exports.PERMISSIONS.STORES_COUNT, en: 'Run stock counts', fa: 'اجرای انبارگردانی' },
+    { code: exports.PERMISSIONS.PERIOD_CLOSE, en: 'Close fiscal periods', fa: 'بستن دورهٔ مالی' },
+    { code: exports.PERMISSIONS.LAW_VIEW, en: 'View compliance law library', fa: 'مشاهدهٔ کتابخانهٔ قوانین' },
+    { code: exports.PERMISSIONS.LAW_MANAGE, en: 'Manage compliance law library', fa: 'مدیریت کتابخانهٔ قوانین' },
+    // موج ۳ — فاز ۹ (F9-T2): مؤدیان
+    { code: exports.PERMISSIONS.INVOICE_VIEW, en: 'View Moadian electronic invoices', fa: 'مشاهدهٔ صورتحساب‌های الکترونیکی مؤدیان' },
+    { code: exports.PERMISSIONS.INVOICE_MANAGE, en: 'Generate and retry Moadian invoices', fa: 'تولید و تلاش مجدد صورتحساب مؤدیان' },
+    { code: exports.PERMISSIONS.INVOICE_SEND, en: 'Cancel (storno) Moadian invoices', fa: 'لغو/استورنو صورتحساب مؤدیان' },
+    // موج ۳ — فاز ۸ (F8-T6): موتور گردش کار
+    { code: exports.PERMISSIONS.WORKFLOW_VIEW, en: 'View workflow instances and verify signatures', fa: 'مشاهدهٔ نمونه‌های گردش کار و راستی‌آزمایی امضاها' },
+    { code: exports.PERMISSIONS.WORKFLOW_ACT, en: 'Approve/reject workflow steps', fa: 'تأیید/رد مراحل گردش کار' },
+    { code: exports.PERMISSIONS.WORKFLOW_MANAGE, en: 'Define/edit workflow definitions', fa: 'تعریف/ویرایش گردش‌های کار' },
+    // موج ۳ — فاز ۹ (F9-T4): معاملات فصلی
+    { code: exports.PERMISSIONS.QUARTERLY_VIEW, en: 'View quarterly transactions and export file', fa: 'مشاهدهٔ معاملات فصلی و دریافت فایل استاندارد' },
+    { code: exports.PERMISSIONS.QUARTERLY_MANAGE, en: 'Register/derive quarterly transactions and request quarter close', fa: 'ثبت/استخراج معاملات فصلی و درخواست بستن فصل' },
+    // موج ۳ — فاز ۹ (F9-T5): مالیات مستقیم
+    { code: exports.PERMISSIONS.DIRECTTAX_VIEW, en: 'View direct tax plan/return and counterparty registry', fa: 'مشاهدهٔ برنامهٔ عملکرد، اظهارنامه و شناسهٔ طرف‌های معامله' },
+    { code: exports.PERMISSIONS.DIRECTTAX_MANAGE, en: 'Maintain plan, compute return and request submission', fa: 'نگهداری برنامهٔ عملکرد، محاسبهٔ اظهارنامه و درخواست ارسال' },
+    // موج ۴ — فاز ۱۱: BI و هوش مصنوعی
+    { code: exports.PERMISSIONS.BI_VIEW, en: 'View BI dashboards, assistant answers, forecasts and anomalies', fa: 'مشاهدهٔ تحلیل بخش‌ها، پاسخ دستیار، پیش‌بینی‌ها و ناهنجاری‌ها' },
+    { code: exports.PERMISSIONS.BI_MANAGE, en: 'Maintain budgets, generate AI document drafts and decide rate suggestions', fa: 'نگهداری بودجه، تولید پیش‌نویس سند هوشمند و تصمیم پیشنهاد نرخ' },
+    { code: exports.PERMISSIONS.MARKETPLACE_MANAGE, en: 'Manage marketplace API clients and keys', fa: 'مدیریت کلیدها و مشتریان API عمومی' },
+];
+/** ماتریس نقش‌ها — مرجع واحد ماتریس دسترسی */
+exports.ROLE_MATRIX = {
+    admin: {
+        en: 'Administrator',
+        fa: 'مدیر سیستم',
+        sensitiveMfa: true,
+        permissions: Object.values(exports.PERMISSIONS),
+    },
+    accountant: {
+        en: 'Accountant',
+        fa: 'حسابدار',
+        sensitiveMfa: true,
+        permissions: [
+            exports.PERMISSIONS.JOURNAL_VIEW,
+            exports.PERMISSIONS.JOURNAL_CREATE_DRAFT,
+            exports.PERMISSIONS.JOURNAL_EDIT_DRAFT,
+            exports.PERMISSIONS.JOURNAL_SUBMIT,
+            exports.PERMISSIONS.AUDIT_VIEW,
+            exports.PERMISSIONS.PERSONNEL_VIEW,
+            exports.PERMISSIONS.PERSONNEL_EDIT,
+            exports.PERMISSIONS.PAYROLL_VIEW,
+            exports.PERMISSIONS.PAYROLL_CALCULATE,
+            // موج ۱ — فاز ۵/۱۰
+            exports.PERMISSIONS.TREASURY_VIEW,
+            exports.PERMISSIONS.TREASURY_RECONCILE,
+            exports.PERMISSIONS.ASSET_VIEW,
+            exports.PERMISSIONS.ANCILLARY_ORDER,
+            // موج ۲ — فاز ۶/۷
+            exports.PERMISSIONS.RESTAURANT_VIEW,
+            exports.PERMISSIONS.PROC_VIEW,
+            exports.PERMISSIONS.STORES_VIEW,
+            // موج ۳ — فاز ۸/۹
+            exports.PERMISSIONS.PERIOD_CLOSE,
+            exports.PERMISSIONS.LAW_VIEW,
+            exports.PERMISSIONS.LAW_MANAGE,
+            exports.PERMISSIONS.INVOICE_VIEW,
+            exports.PERMISSIONS.INVOICE_MANAGE,
+            exports.PERMISSIONS.QUARTERLY_VIEW,
+            exports.PERMISSIONS.QUARTERLY_MANAGE,
+            exports.PERMISSIONS.DIRECTTAX_VIEW,
+            exports.PERMISSIONS.DIRECTTAX_MANAGE,
+            exports.PERMISSIONS.WORKFLOW_VIEW,
+            exports.PERMISSIONS.WORKFLOW_ACT,
+            // موج ۴ — فاز ۱۱
+            exports.PERMISSIONS.BI_VIEW,
+            exports.PERMISSIONS.BI_MANAGE,
+        ],
+    },
+    approver: {
+        en: 'Financial Approver',
+        fa: 'تأییدکننده مالی',
+        sensitiveMfa: true,
+        permissions: [
+            exports.PERMISSIONS.JOURNAL_VIEW,
+            exports.PERMISSIONS.JOURNAL_APPROVE,
+            exports.PERMISSIONS.JOURNAL_REVERSE,
+            exports.PERMISSIONS.AUDIT_VIEW,
+            exports.PERMISSIONS.PAYROLL_VIEW,
+            exports.PERMISSIONS.PAYROLL_APPROVE,
+            // موج ۱ — فاز ۵/۱۰
+            exports.PERMISSIONS.TREASURY_VIEW,
+            exports.PERMISSIONS.TREASURY_VOID,
+            exports.PERMISSIONS.ASSET_VIEW,
+            exports.PERMISSIONS.ASSET_DEPRECIATE,
+            // موج ۲ — فاز ۷ (تأیید خرید + ثبت سفارش)
+            exports.PERMISSIONS.PROC_VIEW,
+            exports.PERMISSIONS.PROC_CREATE,
+            exports.PERMISSIONS.PROC_MANAGE,
+            exports.PERMISSIONS.STORES_VIEW,
+            // موج ۳ — فاز ۸/۹
+            exports.PERMISSIONS.PERIOD_CLOSE,
+            exports.PERMISSIONS.LAW_VIEW,
+            exports.PERMISSIONS.INVOICE_VIEW,
+            exports.PERMISSIONS.INVOICE_SEND,
+            exports.PERMISSIONS.QUARTERLY_VIEW,
+            exports.PERMISSIONS.DIRECTTAX_VIEW,
+            exports.PERMISSIONS.WORKFLOW_VIEW,
+            exports.PERMISSIONS.WORKFLOW_ACT,
+            exports.PERMISSIONS.BI_VIEW,
+        ],
+    },
+    front_desk: {
+        en: 'Front Desk',
+        fa: 'پذیرش',
+        sensitiveMfa: false,
+        permissions: [
+            exports.PERMISSIONS.RESERVATION_CREATE,
+            exports.PERMISSIONS.RESERVATION_VIEW,
+            exports.PERMISSIONS.ROOM_VIEW,
+            exports.PERMISSIONS.ROOM_UPDATE,
+            exports.PERMISSIONS.STAY_CHECKIN,
+            exports.PERMISSIONS.STAY_CHECKOUT,
+            exports.PERMISSIONS.POS_ORDER_CREATE,
+            exports.PERMISSIONS.NIGHT_AUDIT_RUN,
+            // موج ۱ — فاز ۵/۱۰
+            exports.PERMISSIONS.TREASURY_VIEW,
+            exports.PERMISSIONS.TREASURY_TXN_CREATE,
+            exports.PERMISSIONS.TREASURY_SHIFT_MANAGE,
+            exports.PERMISSIONS.ANCILLARY_ORDER,
+            exports.PERMISSIONS.MAINTENANCE_REPORT,
+            exports.PERMISSIONS.LOSTFOUND_MANAGE,
+            // موج ۲ — فاز ۶ (گارسون/پذیرش — بلیت آشپزخانه فقط مشاهده)
+            exports.PERMISSIONS.RESTAURANT_VIEW,
+            exports.PERMISSIONS.RESTAURANT_ORDER,
+        ],
+    },
+    housekeeper: {
+        en: 'Housekeeping',
+        fa: 'خانه‌داری',
+        sensitiveMfa: false,
+        permissions: [
+            exports.PERMISSIONS.ROOM_VIEW,
+            exports.PERMISSIONS.HOUSEKEEPING_UPDATE,
+            // موج ۱ — فاز ۱۰
+            exports.PERMISSIONS.HOUSEKEEPING_TASK,
+            exports.PERMISSIONS.HOUSEKEEPING_INSPECT,
+            exports.PERMISSIONS.LAUNDRY_MANAGE,
+            exports.PERMISSIONS.MAINTENANCE_REPORT,
+            exports.PERMISSIONS.LOSTFOUND_MANAGE,
+        ],
+    },
+    cashier: {
+        en: 'Cashier',
+        fa: 'صندوق‌دار',
+        sensitiveMfa: false,
+        permissions: [
+            exports.PERMISSIONS.TREASURY_VIEW,
+            exports.PERMISSIONS.TREASURY_TXN_CREATE,
+            exports.PERMISSIONS.TREASURY_SHIFT_MANAGE,
+            exports.PERMISSIONS.RESTAURANT_VIEW,
+        ],
+    },
+    chef: {
+        en: 'Kitchen (KDS)',
+        fa: 'آشپزخانه',
+        sensitiveMfa: false,
+        permissions: [
+            exports.PERMISSIONS.RESTAURANT_VIEW,
+            exports.PERMISSIONS.RESTAURANT_KDS,
+            // موج ۲ — فاز ۷: مصرف/ضایعات آشپزخانه
+            exports.PERMISSIONS.STORES_VIEW,
+            exports.PERMISSIONS.STORES_MANAGE,
+        ],
+    },
+    storekeeper: {
+        en: 'Storekeeper',
+        fa: 'انباردار',
+        sensitiveMfa: false,
+        permissions: [
+            exports.PERMISSIONS.STORES_VIEW,
+            exports.PERMISSIONS.STORES_MANAGE,
+            exports.PERMISSIONS.STORES_COUNT,
+            exports.PERMISSIONS.PROC_VIEW,
+            exports.PERMISSIONS.PROC_CREATE,
+            exports.PERMISSIONS.PROC_RECEIVE,
+        ],
+    },
+};

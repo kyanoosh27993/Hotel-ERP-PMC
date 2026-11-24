@@ -18,6 +18,48 @@
     render: function (root) {
       root.appendChild(el('h2', null, 'تنظیمات و شخصی‌سازی ظاهر'));
 
+      // ── اتصال و ورود مرکزی (موج ۶ — یافتهٔ تست زندهٔ #۱) ──
+      var TOKEN_KEY = 'hotel-erp-token';
+      var API_BASE_KEY = 'hotel-erp-api-base';
+      var conn = el('div', 'panel');
+      conn.appendChild(el('h3', null, 'اتصال به سرور و ورود (همهٔ نقش‌ها)'));
+      var apiBase = el('input', 'input'); apiBase.placeholder = 'آدرس API'; apiBase.value = localStorage.getItem(API_BASE_KEY) || 'http://localhost:3000/api/v1';
+      var userIn = el('input', 'input'); userIn.placeholder = 'نام کاربری';
+      var passIn = el('input', 'input'); passIn.type = 'password'; passIn.placeholder = 'گذرواژه';
+      var totpIn = el('input', 'input'); totpIn.placeholder = 'کد TOTP (نقش حساس)';
+      var loginBtn = el('button', 'btn btn-primary', 'ورود و ذخیره توکن');
+      var logoutBtn = el('button', 'btn', 'خروج (پاک‌سازی توکن)');
+      var connMsg = el('div', 'muted', localStorage.getItem(TOKEN_KEY) ? 'وضعیت: وارد شده (توکن موجود).' : 'وضعیت: بدون توکن — برای ماژول‌ها وارد شوید.');
+      function crow(l, i) { var w = el('div', 'form-row'); w.appendChild(el('label', null, l)); w.appendChild(i); return w; }
+      conn.appendChild(crow('آدرس API', apiBase));
+      conn.appendChild(crow('کاربر', userIn));
+      conn.appendChild(crow('گذرواژه', passIn));
+      conn.appendChild(crow('TOTP', totpIn));
+      var cbtns = el('div', 'form-row'); cbtns.appendChild(loginBtn); cbtns.appendChild(logoutBtn);
+      conn.appendChild(cbtns);
+      conn.appendChild(connMsg);
+      loginBtn.onclick = function () {
+        localStorage.setItem(API_BASE_KEY, apiBase.value.trim());
+        var body = { username: userIn.value.trim(), password: passIn.value };
+        if (totpIn.value.trim()) body.totp = totpIn.value.trim();
+        fetch(apiBase.value.trim() + '/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+          .then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); })
+          .then(function (res) {
+            if ((res.s === 200 || res.s === 201) && res.j.accessToken) {
+              localStorage.setItem(TOKEN_KEY, res.j.accessToken);
+              connMsg.textContent = '✅ ورود موفق — نقش‌ها: ' + (res.j.user && res.j.user.roles ? res.j.user.roles.join('، ') : '—');
+              Modules.settings.render(root);
+            } else connMsg.textContent = '❌ ورود ناموفق: ' + ((res.j.error && res.j.error.message) || ('خطای ' + res.s));
+          })
+          .catch(function (e) { connMsg.textContent = '❌ عدم اتصال: ' + e.message; });
+      };
+      logoutBtn.onclick = function () {
+        localStorage.removeItem(TOKEN_KEY);
+        connMsg.textContent = 'توکن پاک شد.';
+        Modules.settings.render(root);
+      };
+      root.appendChild(conn);
+
       // تم‌ها
       var panel1 = el('div', 'panel');
       panel1.appendChild(el('h3', null, 'تم برنامه (حداقل ۳ تم — قانون ۱۱)'));

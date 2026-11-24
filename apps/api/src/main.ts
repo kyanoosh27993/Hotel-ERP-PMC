@@ -21,6 +21,32 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: false });
 
   app.setGlobalPrefix('api/v1');
+
+  // ── فاز ۱۳ / F13-T2: هدرهای امنیتی + محدودسازی تلاش ورود (بدون وابستگی جدید) ──
+  const expressApp = app.getHttpAdapter().getInstance() as { use: (...args: unknown[]) => void };
+  expressApp.use((_req: express.Request, res: express.Response, next: express.NextFunction) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+    next();
+  });
+  // محدودسازی نرخ ورود: ۱۵ تلاش در دقیقه به‌ازای IP — پاسخ 429
+  const loginHits = new Map<string, { count: number; start: number }>();
+  expressApp.use('/api/v1/auth/login', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const ip = req.ip ?? req.socket.remoteAddress ?? 'unknown';
+    const now = Date.now();
+    const bucket = loginHits.get(ip) ?? { count: 0, start: now };
+    if (now - bucket.start > 60_000) { bucket.count = 0; bucket.start = now; }
+    bucket.count++;
+    loginHits.set(ip, bucket);
+    if (bucket.count > 15) {
+      res.status(429).json({ error: { code: 'TOO_MANY_ATTEMPTS', message: 'تلاش‌های بیش از حد — یک دقیقه صبر کنید' } });
+      return;
+    }
+    next();
+  });
+
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }),
   );
@@ -46,7 +72,6 @@ async function bootstrap() {
 
   // نسخه دسکتاپ: وب استاتیک قبل از روتر Nest (درخواست‌های API به Nest می‌رسند، بقیه به وب)
   if (process.env.DESKTOP_WEB_DIR) {
-    const expressApp = app.getHttpAdapter().getInstance() as { use: (...args: unknown[]) => void };
     expressApp.use(express.static(process.env.DESKTOP_WEB_DIR));
     logger.log(`web UI: ${process.env.DESKTOP_WEB_DIR}`);
   }

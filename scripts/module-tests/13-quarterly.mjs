@@ -59,7 +59,7 @@ S.step('همان docRef در فصل دیگر → 201', [200, 201].includes(other
 // ── ۴. استخراج خودکار POS (فصل ۳ — امروز ۱۴۰۵/۰۹) ──
 // سفارش POS واقعی ثبت می‌کنیم (ماژول POS — جدول pos_orders) تا استخراج روی دادهٔ واقعی باشد
 const outlet = await req('GET', '/integrations', { token: T.accountant }); // فقط برای گرم شدن؛ outlet از DB می‌آید
-const OUTLET_ID = '7f1f2858-2e3e-4a55-bf36-f4795213bdf6'; // REST-MAIN (seed)
+const OUTLET_ID = (await c.query(`select id from pos_outlets where code='REST-MAIN' limit 1`)).rows[0].id; // پویا — وابسته به seed مشخص نیست
 const posOrd = await req('POST', '/pos/orders', {
   token: T.frontdesk,
   body: {

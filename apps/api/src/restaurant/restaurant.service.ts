@@ -273,8 +273,9 @@ export class RestaurantService {
   }
 
   /** افزودن قلم به سفارش باز */
-  async addItems(orderId: string, items: Array<{ menuItemCode: string; qty: number; note?: string | null }>) {
+  async addItems(orderIdOrNo: string, items: Array<{ menuItemCode: string; qty: number; note?: string | null }>) {
     if (!items.length) throw new BadRequestException('قلمی ارسال نشده است');
+    const orderId = await this.resolveOrderId(orderIdOrNo);
     return this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM "restaurant_orders" WHERE id = ${orderId}::uuid FOR UPDATE`;
       const order = await tx.restaurantOrder.findUnique({ where: { id: orderId } });
@@ -302,7 +303,16 @@ export class RestaurantService {
   }
 
   /** ارسال قلم به آشپزخانه — بلیت جدید با snapshot اقلام + رویداد KDS */
-  async sendItemToKitchen(orderId: string, itemId: string, _userId?: string) {
+  /** شناسهٔ سفارش: هم UUID و هم شمارهٔ ORD-… را می‌پذیرد (فرم وب با شماره کار می‌کند) */
+  private async resolveOrderId(idOrNo: string): Promise<string> {
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrNo)) return idOrNo;
+    const ord = await this.prisma.restaurantOrder.findUnique({ where: { orderNo: idOrNo }, select: { id: true } });
+    if (!ord) throw new NotFoundException(`سفارش ${idOrNo} یافت نشد`);
+    return ord.id;
+  }
+
+  async sendItemToKitchen(orderIdOrNo: string, itemId: string, _userId?: string) {
+    const orderId = await this.resolveOrderId(orderIdOrNo);
     return this.prisma.$transaction(async (tx) => {
       const item = await tx.orderItem.findUnique({ where: { id: itemId }, include: { menuItem: true, order: true } });
       if (!item || item.orderId !== orderId) throw new NotFoundException('قلم یافت نشد');
@@ -346,8 +356,9 @@ export class RestaurantService {
   }
 
   /** لغو قلم با دلیل اجباری — ردپای اصلاح، حذف فیزیکی ممنوع */
-  async cancelItem(orderId: string, itemId: string, reason: string) {
+  async cancelItem(orderIdOrNo: string, itemId: string, reason: string) {
     if (!reason || reason.trim().length < 3) throw new BadRequestException('دلیل لغو الزامی است');
+    const orderId = await this.resolveOrderId(orderIdOrNo);
     return this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM "order_items" WHERE id = ${itemId}::uuid FOR UPDATE`;
       const item = await tx.orderItem.findUnique({ where: { id: itemId }, include: { order: true } });
@@ -365,8 +376,9 @@ export class RestaurantService {
   }
 
   /** تخفیف سفارش — فقط با مجوز pos.discount (کنترل در کنترلر) */
-  async applyDiscount(orderId: string, amountRials: number, reason: string) {
+  async applyDiscount(orderIdOrNo: string, amountRials: number, reason: string) {
     if (!reason || reason.trim().length < 3) throw new BadRequestException('دلیل تخفیف الزامی است');
+    const orderId = await this.resolveOrderId(orderIdOrNo);
     return this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM "restaurant_orders" WHERE id = ${orderId}::uuid FOR UPDATE`;
       const order = await tx.restaurantOrder.findUnique({ where: { id: orderId } });
@@ -383,7 +395,8 @@ export class RestaurantService {
   }
 
   /** سرو قطعی سفارش — رویداد پولی فروش + رویداد مصرف انبار؛ آزادسازی میز */
-  async serveOrder(orderId: string, _userId?: string) {
+  async serveOrder(orderIdOrNo: string, _userId?: string) {
+    const orderId = await this.resolveOrderId(orderIdOrNo);
     const [order] = await this.prisma.$transaction(async (tx) => {
       await tx.$queryRaw`SELECT id FROM "restaurant_orders" WHERE id = ${orderId}::uuid FOR UPDATE`;
       const ord = await tx.restaurantOrder.findUnique({
