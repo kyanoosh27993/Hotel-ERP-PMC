@@ -17,6 +17,8 @@ jobs:
         shell: bash
     env:
       NODE_VERSION_BUNDLE: v22.20.0
+      # کپچا (U1) برای لاگین ماشینیِ smoke خاموش می‌شود؛ کاربر واقعی در نصب خودش کپچا دارد
+      AUTH_CAPTCHA_REQUIRED: 'false'
     steps:
       - uses: actions/checkout@v4
 
