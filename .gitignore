@@ -48,3 +48,7 @@ packaging/desktop/dist/
 packaging/mobile/node_modules/
 packaging/mobile/android/
 apps/api/build-exe/
+android/app/build/
+android/.gradle/
+android/local.properties
+cmdtools.zip

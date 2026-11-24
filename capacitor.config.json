@@ -1,0 +1,6 @@
+{
+  "appId": "ir.hotel.erp",
+  "appName": "Hotel ERP",
+  "webDir": "apps/web",
+  "android": { "allowMixedContent": true }
+}
