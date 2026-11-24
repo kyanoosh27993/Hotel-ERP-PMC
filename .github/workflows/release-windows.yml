@@ -125,6 +125,8 @@ jobs:
         run: |
           $env:HOTELERP_PORT = "3300"
           $env:HOTELERP_DATA_DIR = "$env:RUNNER_TEMP\smoke-data"
+          # U1 کپچای سرور در smoke ماشینی است — فقط برای این بوت خاموش می‌شود (کاربر واقعی کپچا دارد)
+          $env:AUTH_CAPTCHA_REQUIRED = "false"
           $p = Start-Process -FilePath "infrastructure\desktop\payload\node\node.exe" -ArgumentList "infrastructure\desktop\payload\server.js" -PassThru -WindowStyle Hidden -RedirectStandardOutput "$env:RUNNER_TEMP\smoke-out.log" -RedirectStandardError "$env:RUNNER_TEMP\smoke-err.log"
           $ok = $false
           for ($i = 0; $i -lt 150; $i++) {
