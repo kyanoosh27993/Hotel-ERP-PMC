@@ -99,6 +99,9 @@ async function deElevateIfNeeded() {
     `set "HOTELERP_DATA_DIR=${DATA_DIR}"`,
     `set "HOTELERP_PORT=${PORT}"`,
     `set "SEED_ADMIN_PASSWORD=${SEED_PASSWORD}"`,
+    // پیکربندی auth از والد به فرایند بازراه‌اندازی‌شده منتقل شود (U1: کپچا/MFA)
+    ...(process.env.AUTH_CAPTCHA_REQUIRED ? [`set "AUTH_CAPTCHA_REQUIRED=${process.env.AUTH_CAPTCHA_REQUIRED}"`] : []),
+    ...(process.env.JWT_ACCESS_SECRET ? [`set "JWT_ACCESS_SECRET=${process.env.JWT_ACCESS_SECRET}"`] : []),
     `"${process.execPath}" "${path.join(__dirname, 'server.js')}"`,
   ].join('\r\n');
   fs.writeFileSync(bootFile, boot, 'utf8');
