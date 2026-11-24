@@ -699,3 +699,10 @@
 - **بستهٔ دسکتاپ تک‌فایل**: `pkg-main.js` بوت‌استرپ کامل (APPDATA/HotelERP، استخراج pg+موتور پرisma+شل وب از snapshot، initdb/5434، اعمال ۳۴ مهاجرت، seed hash-wasm، اجرای API) — seed.ts از @node-rs/argon2 به hash-wasm منتقل شد؛ schema binaryTargets=windows. `Hotel-ERP-Windows-v0.12.0.exe` ساخته شد؛ **اجرا در ویندوز کارفرما باید UAT شود** (در سندباکس لینوکسی مسیر initdb باینری لینوکس ناتمام ماند — ادامه از saved files).
 - **سورس کامل**: `download/Hotel-ERP-Source-v0.12.0.zip` (git archive HEAD).
 - **ناتمام برای موج بعد:** APK Capacitor (نیازمند Android SDK/gradle در ماشین ساخت — config در packaging/mobile آماده)، تکمیل اجرای bootstrap لینوکس برای تست محلی، ویرایش گزارش docx تست زنده.
+
+### موج ۶ — تکمیل تحویل (ادامهٔ همان موج، سندباکس بازیافت‌شده)
+- بازیابی دوباره از origin (fb5f0b9) و بازایجاد کامل تغییرات؛ پوش نهایی: **0bbb565**.
+- **EXE ویندوز 487MB ساخته و تحویل شد**: بوت‌استرپ pkg سبز روی هدف لینوکس از صفر (استخراج pg/موتور/وب از snapshot، ساخت hotel_erp با کلاینت Node، ۱۷ مهاجرت، seed awaitable، خاموش‌سازی MFA دسکتاپ، ورود admin/Admin@Hotel1، health 0.12.0). دارایی‌ها در apps/api/assets-stage (گلوب ../ در pkg ناپایدار است). باینری‌ها از گیت خارج و ignored شدند.
+- **APK واقعی Capacitor 6 ساخته و تحویل شد** (3.7MB): Android SDK 34 + Temurin JDK17 (jlink) + میرور علی‌بابا برای دور زدن 429 مaven مرکزی (init script: scripts/gradle-mirrors.init.gradle). خروجی: download/Hotel-ERP-Android-v0.12.0.apk.
+- **گزارش تست زندهٔ v0.12 docx** تحویل شد (download/Hotel-ERP-Live-Test-Report-v0.12.docx — postcheck 9/9 + رندر PDF وارسی تصویری).
+- ابزار محلی: android-sdk/ و jdk-17 در ریشهٔ my-project (خارج از ریپو).
