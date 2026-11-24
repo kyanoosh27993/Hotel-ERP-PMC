@@ -1,6 +1,6 @@
 {
   "name": "@hotel-erp/payroll",
-  "version": "0.3.0",
+  "version": "2.0.0",
   "private": true,
   "description": "موتور حقوق و دستمزد نسخه‌دار — پارامترهای ۱۴۰۵ + فرمول‌های قانون کار (پورت تأییدشده v0.1)",
   "main": "dist/index.js",

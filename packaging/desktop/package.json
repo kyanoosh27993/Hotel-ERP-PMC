@@ -1,6 +1,6 @@
 {
   "name": "hotel-erp-desktop",
-  "version": "0.12.0",
+  "version": "2.0.0",
   "description": "Hotel ERP — Desktop shell (Electron) loading the bundled web app and local API",
   "main": "main.js",
   "author": "Hotel ERP Project",
