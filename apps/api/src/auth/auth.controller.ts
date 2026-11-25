@@ -24,7 +24,7 @@ export class LoginDto {
   @MaxLength(10)
   totp?: string;
 
-  /** U1 — کپچای تصویری (الگوی آسا): id + متن حروف امنیتی */
+  /** U1 — کپچای تصویری (الگوی مرجع): id + متن حروف امنیتی */
   @IsOptional()
   @IsString()
   @MaxLength(64)
@@ -53,7 +53,7 @@ export class MfaVerifyDto {
 export class AuthController {
   constructor(private readonly auth: AuthService, private readonly captchaSvc: CaptchaService) {}
 
-  /** U1 — تصویر حروف امنیتی صفحهٔ ورود (معادل simple-php-captcha.php آسا) */
+  /** U1 — تصویر حروف امنیتی صفحهٔ ورود (معادل الگوی کپچای تصویری) */
   @Public()
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @Get('captcha')

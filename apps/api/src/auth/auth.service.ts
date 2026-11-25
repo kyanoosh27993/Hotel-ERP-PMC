@@ -21,7 +21,7 @@ export interface AuthenticatedUser {
   mfaEnabled: boolean;
 }
 
-/** وضعیت ورود: توکن‌ها + اطلاعات آخرین ورود برای کادر صفحهٔ ورود آسا */
+/** وضعیت ورود: توکن‌ها + اطلاعات آخرین ورود برای کادر صفحهٔ ورود مرجع */
 export interface LoginResult {
   accessToken: string;
   refreshToken: string;
@@ -31,7 +31,7 @@ export interface LoginResult {
 
 const ACCESS_TTL_SECONDS = 900; // ۱۵ دقیقه
 const REFRESH_TTL_DAYS = 14;
-/** قفل‌شدگی پس از تلاش‌های ناموفق (مطابق پیام‌های آسا) */
+/** قفل‌شدگی پس از تلاش‌های ناموفق (مطابق پیام‌های مرجع) */
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_MS = 15 * 60_000;
 

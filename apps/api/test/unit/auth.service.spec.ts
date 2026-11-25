@@ -142,7 +142,7 @@ describe('AuthService — ورود و چرخش توکن', () => {
     });
   });
 
-  /* ── U1: کپچا و قفل‌شدگی (الگوی آسا) ── */
+  /* ── U1: کپچا و قفل‌شدگی (الگوی مرجع) ── */
 
   it('کپچا فعال + عدم تطابق → CAPTCHA_MISMATCH (بدون رساندن به بررسی گذرواژه)', async () => {
     process.env.AUTH_CAPTCHA_REQUIRED = 'true';

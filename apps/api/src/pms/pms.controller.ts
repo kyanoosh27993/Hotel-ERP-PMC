@@ -398,7 +398,7 @@ export class PmsController {
     return { data: await this.pms.deleteRoom(id) };
   }
 
-  // ───────── فولیو — اقلام اضافی و صورتحساب‌های باز (مرجع آسا 4.zip) ─────────
+  // ───────── فولیو — اقلام اضافی و صورتحساب‌های باز (مرجع 4.zip) ─────────
 
   @RequirePermissions(PERMISSIONS.RESERVATION_CREATE)
   @Post('stays/:id/folio-items')

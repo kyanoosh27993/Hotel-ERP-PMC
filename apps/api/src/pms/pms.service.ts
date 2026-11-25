@@ -605,7 +605,7 @@ export class PmsService {
     return { deleted: room.code };
   }
 
-  // ───────── فولیو — اقلام اضافی اتاق و صورتحساب‌های باز (مرجع آسا 4.zip) ─────────
+  // ───────── فولیو — اقلام اضافی اتاق و صورتحساب‌های باز (مرجع 4.zip) ─────────
 
   async addFolioItem(stayId: string, input: { desc: string; qty: number; unitRials: string; createdByUserId: string }) {
     const stay = await this.prisma.stay.findUnique({ where: { id: stayId } });
@@ -653,7 +653,7 @@ export class PmsService {
     };
   }
 
-  /** لیست صورتحساب‌های باز مهمان (Open Invoices Guests List — مرجع آسا) */
+  /** لیست صورتحساب‌های باز مهمان (Open Invoices Guests List — مرجع) */
   async openFolios() {
     const rows = await this.prisma.stay.findMany({
       where: { status: 'OPEN' },

@@ -33,7 +33,7 @@
   }
 
   var NAV = [
-    { id: 'home', title: 'صفحهٔ اصلی (آسا)', icon: '🏠' },
+    { id: 'home', title: 'صفحهٔ اصلی ', icon: '🏠' },
     { id: 'dashboard', title: 'داشبورد مدیر AI', icon: '▦' },
     { id: 'frontdesk', title: 'نقشه اتاق (فاز ۴)', icon: '🛏' },
     { id: 'treasury', title: 'خزانه‌داری و صندوق (فاز ۵)', icon: '💰' },
@@ -116,7 +116,7 @@
       if (mod) title.textContent = mod.title;
       else title.textContent = id === 'reception' ? 'نرم‌افزار پذیرش' : '';
       try {
-        if (id === 'home') AsaHome.render(content);
+        if (id === 'home') Home.render(content);
         else if (id === 'reception') AsaReception.render(content);
         else if (id === 'calendar') moduleCalendar(content);
         else Modules[id].render(content);
@@ -136,7 +136,7 @@
     }
     tick(); setInterval(tick, 30000);
 
-    go('home'); /* U2 — پس از ورود، صفحهٔ اصلی آسا */
+    go('home'); /* U2 — پس از ورود، صفحهٔ اصلی */
     global.App = {
       go: go, boot: boot,
       /* SSO — نوار وضعیت نشست مشترک ماژول‌ها: جایگزین فرم‌های ورود جداگانه (نسخهٔ ۳٫۳) */

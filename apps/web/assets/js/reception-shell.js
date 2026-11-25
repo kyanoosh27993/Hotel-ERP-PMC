@@ -1,12 +1,12 @@
 /**
- * reception-shell.js — U3 شل «نرم‌افزار پذیرش» به سبک دقیق recp1.php آسا (اسکرین‌شات کارفرما):
+ * reception-shell.js — U3 شل «نرم‌افزار پذیرش» به سبک دقیق recp1.php مرجع (اسکرین‌شات کارفرما):
  * سربرگ (تم‌ها + لوگو + تاریخ شمسی/میلادی + Home/Refresh/AskAI + جستجو) + ردیف تب‌های
  * «رک اتاق‌ها | رجیستر | عملیات | تور و شرکت | صندوق | گزارشات ماهانه | گزارشات روزانه |
  *  امکانات ۱ | امکانات ۲ | خروج» + پنل زرد «نرم‌افزار پذیرش — سال مالی جاری» با ۵ کارت بزرگ
  * (روم رک هتل، عملیات صندوق، دفترچه تلفن، صورت حساب، داشبورد) + نوار علاقه‌مندی‌ها عمودی
  * + نوار کاربر پایین صفحه (عکس + نام + سمت) و آیکن ثبت پلیس.
- * رفتار آسا: حالت نخست پنل = ۵ کارت؛ کلیک کارت/تب → محتوای همان تب (کارتها فقط در حالت نخست).
- * مراجع: docs/reference/asa/pages/*.html (۱۵ صفحهٔ واقعی آسا) — پیاده‌سازی کامل هر تب در فاز R.
+ * رفتار مرجع: حالت نخست پنل = ۵ کارت؛ کلیک کارت/تب → محتوای همان تب (کارتها فقط در حالت نخست).
+ * مراجع: docs/reference/legacy/pages/*.html (۱۵ صفحهٔ واقعی مرجع) — پیاده‌سازی کامل هر تب در فاز R.
  */
 (function (global) {
   'use strict';
@@ -20,9 +20,9 @@
     return e;
   }
 
-  var RICON = 'assets/icons/asa-reception/';
+  var RICON = 'assets/icons/reception/';
 
-  /* تب‌های ردیف بالا — به ترتیب اسکرین‌شات آسا */
+  /* تب‌های ردیف بالا — به ترتیب اسکرین‌شات مرجع */
   var TABS = [
     { id: 'rack',     label: 'رک اتاق‌ها',     icon: RICON + 'room_rack.png',       render: rackTab },
     { id: 'register', label: 'رجیستر',         icon: RICON + 'contacts.png',        render: registerTab },
@@ -36,7 +36,7 @@
     { id: 'exit',     label: 'خروج',           icon: RICON + 'home.png',            render: null },
   ];
 
-  /* ۵ کارت بزرگ پنل پذیرش — به ترتیب اسکرین‌شات آسا */
+  /* ۵ کارت بزرگ پنل پذیرش — به ترتیب اسکرین‌شات مرجع */
   var CARDS = [
     { label: 'روم رک هتل',   icon: RICON + 'room_rack.png',       tab: 'rack' },
     { label: 'عملیات صندوق', icon: RICON + 'cash_new.png',        tab: 'ops' },
@@ -49,7 +49,7 @@
 
   function stubNote(refFile, phase) {
     return 'پیاده‌سازی کامل با مرجع «' + refFile + '» در فاز ' + phase +
-      ' — فایل مرجع در docs/reference/asa/pages/ ذخیره شده است.';
+      ' — فایل مرجع در docs/reference/legacy/pages/ ذخیره شده است.';
   }
 
   function panelStub(panel, title, refFile, phase, bullets) {
@@ -76,7 +76,7 @@
   }
 
   function rackTab(panel) {
-    /* R1 — روم‌رک واقعی آسا (کاشی‌های پوشه‌ای + عملیات اتاق)؛ اگر ماژول نبود، پذیرش فعلی */
+    /* R1 — روم‌رک مرجع (کاشی‌های پوشه‌ای + عملیات اتاق)؛ اگر ماژول نبود، پذیرش فعلی */
     panel.innerHTML = '';
     if (global.Modules && global.Modules.roomrack) {
       var wrap = el('div', 'rec-module-mount');
@@ -124,7 +124,7 @@
     }
   }
   function registerTab(panel) {
-    /* R3 — فرم ثبت رجیستر جدید با فیلدهای دقیق آسا؛ ثبت به POST /pms/reservations یا پیش‌نویس */
+    /* R3 — فرم ثبت رجیستر جدید با فیلدهای مرجع؛ ثبت به POST /pms/reservations یا پیش‌نویس */
     panel.innerHTML = '';
     if (global.Modules && global.Modules.register) {
       var wrap = el('div', 'rec-module-mount');
@@ -141,7 +141,7 @@
 
   /* ── شل اصلی ── */
 
-  var currentTab = 'home'; /* home = پنل ۵ کارت (حالت نخست آسا) */
+  var currentTab = 'home'; /* home = پنل ۵ کارت (حالت نخست مرجع) */
 
   global.AsaReception = {
     render: function (root) {
@@ -185,18 +185,18 @@
       var head = el('div', 'rec-head');
       var hrow1 = el('div', 'rec-head-row');
 
-      var themes = el('div', 'asa-themes');
+      var themes = el('div', 'rx-themes');
       [['green', '#2e8b57'], ['blue', '#1d4ed8'], ['red', '#b91c1c']].forEach(function (t) {
-        var b = el('button', 'asa-theme asa-theme-' + t[0]);
+        var b = el('button', 'rx-theme rx-theme-' + t[0]);
         b.style.background = t[1];
         b.title = 'تم ' + t[0];
-        b.onclick = function () { document.body.dataset.asaTheme = t[0]; localStorage.setItem('hotel-erp-asa-theme', t[0]); };
+        b.onclick = function () { document.body.dataset.rxTheme = t[0]; localStorage.setItem('hotel-erp-theme', t[0]); };
         themes.appendChild(b);
       });
       hrow1.appendChild(themes);
 
       var brand = el('div', 'rec-brand');
-      brand.innerHTML = '<img class="asa-logo" src="assets/img/logo.svg" alt="لوگو">' +
+      brand.innerHTML = '<img class="rx-logo" src="assets/img/logo.svg" alt="لوگو">' +
         '<div><div class="rec-logotype">نرم‌افزار پذیرش</div><div class="rec-logotype-en">Reception — Hotel ERP</div></div>';
       hrow1.appendChild(brand);
 
@@ -265,7 +265,7 @@
       /* ── پنل زرد اصلی ── */
       shell.appendChild(panel);
 
-      /* ── نوار عمودی علاقه‌مندی‌ها (الگوی آسا: + / فهرست / منو) ── */
+      /* ── نوار عمودی علاقه‌مندی‌ها (الگوی مرجع: + / فهرست / منو) ── */
       var strip = el('div', 'rec-strip');
       var addBtn = el('button', 'rec-strip-btn rec-strip-add', '+');
       addBtn.title = 'اضافه کردن صفحه جدید';
@@ -299,7 +299,7 @@
       refreshStrip();
       shell.appendChild(strip);
 
-      /* ── نوار پایین: ثبت پلیس (چپ) + کاربر (راست) — الگوی آسا ── */
+      /* ── نوار پایین: ثبت پلیس (چپ) + کاربر (راست) — الگوی مرجع ── */
       var sess = Auth.session();
       var user = (sess && sess.user) || {};
       var foot = el('div', 'rec-foot');
@@ -308,15 +308,15 @@
       police.onclick = function () { panelStub(panel, 'ثبت پلیس (ادارهٔ اتباع)', '—', 'R3', ['ثبت اقامت بیگانگان برای ادارهٔ اتباع']); };
       foot.appendChild(police);
 
-      var uinfo = el('div', 'asa-userinfo rec-userinfo');
-      var img = el('img', 'asa-avatar');
+      var uinfo = el('div', 'rx-userinfo rec-userinfo');
+      var img = el('img', 'rx-avatar');
       img.src = user.photoUrl || 'data:image/svg+xml;utf8,' + encodeURIComponent(
         '<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44"><rect width="44" height="44" rx="8" fill="#dbe7fa"/><circle cx="22" cy="16" r="7" fill="#124a8f"/><path d="M8 38 q14 -14 28 0 z" fill="#124a8f"/></svg>'
       );
       uinfo.appendChild(img);
       var utext = el('div');
-      utext.appendChild(el('div', 'asa-username', 'کاربر : ' + (user.fullName || user.username || '—')));
-      utext.appendChild(el('div', 'asa-userpos', 'سمت : ' + (user.position || '—')));
+      utext.appendChild(el('div', 'rx-username', 'کاربر : ' + (user.fullName || user.username || '—')));
+      utext.appendChild(el('div', 'rx-userpos', 'سمت : ' + (user.position || '—')));
       uinfo.appendChild(utext);
       foot.appendChild(uinfo);
       shell.appendChild(foot);
@@ -324,8 +324,8 @@
       root.appendChild(shell);
       switchTab(currentTab);
 
-      var saved = localStorage.getItem('hotel-erp-asa-theme');
-      if (saved) document.body.dataset.asaTheme = saved;
+      var saved = localStorage.getItem('hotel-erp-theme');
+      if (saved) document.body.dataset.rxTheme = saved;
     },
   };
 })(window);

@@ -194,7 +194,7 @@ td .fit, th .fit, .kpi-value, .kpi-label { display: block; }
 }
 /* نقاب درخواست صندلی بزرگ‌تر جداول روی موبایل: اسکرول افقی داخل کانتینر (dt-scroll) */
 
-/* ═══════════════ U1/U2/U3 — بازطراحی سبک «هتلداری آسا» ═══════════════ */
+/* ═══════════════ U1/U2/U3 — بازطراحی مرجع ═══════════════ */
 
 /* ── U1 صفحهٔ ورود (اولین صفحه) ── */
 .login-page {
@@ -242,79 +242,79 @@ td .fit, th .fit, .kpi-value, .kpi-label { display: block; }
 .login-demo-note { font-size: .72rem; color: #b45309; background: #fef3c7; border-radius: 6px; padding: 5px 8px; }
 .login-last { margin-top: 12px; font-size: .78rem; color: #0f172a; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 8px; line-height: 1.9; }
 
-/* ── U2 صفحهٔ اصلی آسا ── */
-.asa-home { padding: 10px 14px 90px; }
-.asa-head {
+/* ── U2 صفحهٔ اصلی ── */
+.rx-home { padding: 10px 14px 90px; }
+.rx-head {
   display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
   background: linear-gradient(180deg, #ffffff, #eaf2fc); border: 1px solid #cbd5e1;
   border-radius: 12px; padding: 10px 14px; margin-bottom: 12px;
 }
-.asa-brand, .rec-brand { display: flex; align-items: center; gap: 10px; }
-.asa-logo { width: 46px; height: 46px; border-radius: 10px; }
-.asa-logotype {
+.rx-brand, .rec-brand { display: flex; align-items: center; gap: 10px; }
+.rx-logo { width: 46px; height: 46px; border-radius: 10px; }
+.rx-logotype {
   font-size: clamp(1.1rem, 3.2vw, 1.7rem); font-weight: 900; letter-spacing: .01em;
   background: linear-gradient(90deg, #0d3a70, #1d4ed8 60%, #e8a427);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
-.asa-logotype-en { font-size: .72rem; color: #64748b; letter-spacing: .14em; direction: ltr; text-align: right; }
-.asa-head-left, .rec-head-left { display: flex; align-items: center; gap: 14px; margin-inline-start: auto; }
-.asa-themes { display: flex; gap: 5px; }
-.asa-theme { width: 18px; height: 18px; border-radius: 4px; border: 2px solid rgba(255,255,255,.7); cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
-.asa-clock, .rec-clock { font-size: .82rem; color: #124a8f; text-align: left; line-height: 1.7; }
-.asa-clock-time, .rec-clock-time { font-weight: 700; color: #0f172a; }
-.asa-group { margin-bottom: 14px; }
-.asa-group-title {
+.rx-logotype-en { font-size: .72rem; color: #64748b; letter-spacing: .14em; direction: ltr; text-align: right; }
+.rx-head-left, .rec-head-left { display: flex; align-items: center; gap: 14px; margin-inline-start: auto; }
+.rx-themes { display: flex; gap: 5px; }
+.rx-theme { width: 18px; height: 18px; border-radius: 4px; border: 2px solid rgba(255,255,255,.7); cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.rx-clock, .rec-clock { font-size: .82rem; color: #124a8f; text-align: left; line-height: 1.7; }
+.rx-clock-time, .rec-clock-time { font-weight: 700; color: #0f172a; }
+.rx-group { margin-bottom: 14px; }
+.rx-group-title {
   font-size: .82rem; font-weight: 800; color: #124a8f; margin: 4px 2px 8px;
   display: inline-block; border-bottom: 2px solid #f2c14e; padding-bottom: 2px;
 }
-.asa-row { display: flex; flex-wrap: wrap; gap: 10px; }
-.asa-tile {
+.rx-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.rx-tile {
   width: 108px; background: linear-gradient(180deg, #ffffff, #f4f8fd);
   border: 1px solid #d7e3f4; border-radius: 12px; padding: 12px 6px 8px; text-align: center;
   cursor: pointer; position: relative; box-shadow: 0 2px 6px rgba(13,58,112,.08);
   transition: box-shadow .15s ease-in-out, border-color .15s ease-in-out;
 }
-.asa-tile:hover, .asa-tile:focus-visible {
+.rx-tile:hover, .rx-tile:focus-visible {
   border-color: #1d4ed8; box-shadow: 0 6px 18px rgba(29,78,216,.25); outline: none;
 }
-/* انیمیشن flip سه‌بعدی آسا — مقادیر استخراج‌شده از style2.php: rotateY(-80deg)→0، scale(.8)→1، .45s ease-in-out */
-.asa-tile .top { height: 66px; display: flex; align-items: center; justify-content: center; perspective: 600px; }
-.asa-tile .top img { width: 58px; height: 58px; object-fit: contain; transform-origin: left center; }
-.asa-tile:hover .top img, .asa-tile:focus-visible .top img { animation: asa-flip .45s ease-in-out; }
-@keyframes asa-flip {
+/* انیمیشن flip سه‌بعدی سیستم مرجع — مقادیر استخراج‌شده از style2.php: rotateY(-80deg)→0، scale(.8)→1، .45s ease-in-out */
+.rx-tile .top { height: 66px; display: flex; align-items: center; justify-content: center; perspective: 600px; }
+.rx-tile .top img { width: 58px; height: 58px; object-fit: contain; transform-origin: left center; }
+.rx-tile:hover .top img, .rx-tile:focus-visible .top img { animation: rx-flip .45s ease-in-out; }
+@keyframes rx-flip {
   from { transform: rotateY(-80deg) scale(.8); }
   to   { transform: rotateY(0deg) scale(1); }
 }
-.asa-tile .down { font-size: .82rem; font-weight: 700; color: #b91c1c; margin-top: 6px; }
-.asa-tile-stub { opacity: .82; }
-.asa-phase {
+.rx-tile .down { font-size: .82rem; font-weight: 700; color: #b91c1c; margin-top: 6px; }
+.rx-tile-stub { opacity: .82; }
+.rx-phase {
   position: absolute; top: 6px; inset-inline-end: 6px; font-size: .6rem; color: #64748b;
   background: #e2e8f0; border-radius: 4px; padding: 1px 5px;
 }
-.asa-userbar, .rec-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-.asa-userbar {
+.rx-userbar, .rec-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.rx-userbar {
   position: fixed; bottom: 0; inset-inline: 0; padding: 8px 16px; z-index: 30;
   background: linear-gradient(180deg, rgba(255,255,255,.97), #eaf2fc);
   border-top: 1px solid #cbd5e1;
 }
-.asa-userinfo { display: flex; align-items: center; gap: 10px; }
-.asa-avatar { width: 44px; height: 44px; border-radius: 10px; border: 2px solid #1d4ed8; object-fit: cover; }
-.asa-username { font-size: .9rem; font-weight: 800; color: #b91c1c; }
-.asa-userpos { font-size: .76rem; color: #475569; }
-.asa-useractions { display: flex; gap: 8px; }
-.asa-mini-btn {
+.rx-userinfo { display: flex; align-items: center; gap: 10px; }
+.rx-avatar { width: 44px; height: 44px; border-radius: 10px; border: 2px solid #1d4ed8; object-fit: cover; }
+.rx-username { font-size: .9rem; font-weight: 800; color: #b91c1c; }
+.rx-userpos { font-size: .76rem; color: #475569; }
+.rx-useractions { display: flex; gap: 8px; }
+.rx-mini-btn {
   border: 1px solid #cbd5e1; background: #fff; color: #124a8f; border-radius: 8px;
   padding: 6px 12px; font: inherit; font-size: .8rem; cursor: pointer;
 }
-.asa-mini-btn:hover { background: #dbe7fa; }
-.asa-logout { color: #b91c1c; border-color: #fca5a5; }
-.asa-logout:hover { background: #fee2e2; }
+.rx-mini-btn:hover { background: #dbe7fa; }
+.rx-logout { color: #b91c1c; border-color: #fca5a5; }
+.rx-logout:hover { background: #fee2e2; }
 
-/* تم‌های آسا روی بدنه */
-body[data-asa-theme="green"] { --asa-accent: #2e8b57; }
-body[data-asa-theme="blue"] { --asa-accent: #1d4ed8; }
-body[data-asa-theme="red"] { --asa-accent: #b91c1c; }
-body[data-asa-theme] .asa-tile:hover, body[data-asa-theme] .asa-tile:focus-visible { border-color: var(--asa-accent); box-shadow: 0 6px 18px color-mix(in srgb, var(--asa-accent) 30%, transparent); }
+/* تم‌های برنامه روی بدنه */
+body[data-rx-theme="green"] { --rx-accent: #2e8b57; }
+body[data-rx-theme="blue"] { --rx-accent: #1d4ed8; }
+body[data-rx-theme="red"] { --rx-accent: #b91c1c; }
+body[data-rx-theme] .rx-tile:hover, body[data-rx-theme] .rx-tile:focus-visible { border-color: var(--rx-accent); box-shadow: 0 6px 18px color-mix(in srgb, var(--rx-accent) 30%, transparent); }
 
 /* ── U3 شل پذیرش ── */
 body.reception-mode .sidebar, body.reception-mode .topbar { display: none; }
@@ -364,7 +364,7 @@ body.reception-mode .content { padding: 0; }
 }
 .rec-card-top { height: 92px; display: flex; align-items: center; justify-content: center; perspective: 700px; }
 .rec-card-top img { width: 84px; height: 84px; object-fit: contain; transform-origin: left center; }
-.rec-card:hover .rec-card-top img { animation: asa-flip .45s ease-in-out; }
+.rec-card:hover .rec-card-top img { animation: rx-flip .45s ease-in-out; }
 .rec-card:hover { border-color: #f2c14e; box-shadow: 0 8px 22px rgba(232,164,39,.3); transform: translateY(-3px); }
 .rec-card-down { font-size: .92rem; font-weight: 800; color: #b91c1c; margin-top: 10px; }
 .rec-strip {
@@ -398,17 +398,17 @@ body.reception-mode .content { padding: 0; }
 
 /* ── ریسپانسیو U1/U2/U3 ── */
 @media (max-width: 640px) {
-  .asa-tile { width: 92px; }
-  .asa-tile .top img { width: 46px; height: 46px; }
+  .rx-tile { width: 92px; }
+  .rx-tile .top img { width: 46px; height: 46px; }
   .rec-cards { gap: 10px; }
   .rec-card { width: 46%; min-width: 140px; }
   .rec-panel { margin: 10px; }
   .rec-search input { min-width: 90px; }
   .rec-strip { top: auto; bottom: 64px; }
-  .asa-clock, .rec-clock { display: none; }
+  .rx-clock, .rec-clock { display: none; }
 }
 
-/* ═══════════════ R1 — روم‌رک آسا (کاشی پوشه‌ای) ═══════════════ */
+/* ═══════════════ R1 — روم‌رک مرجع (کاشی پوشه‌ای) ═══════════════ */
 .rr-wrap { padding: 4px 2px; }
 .rr-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; background: linear-gradient(180deg, #ffffff, #eaf2fc); border: 1px solid #cbd5e1; border-radius: 10px; padding: 8px 12px; margin-bottom: 10px; }
 .rr-occ { font-size: .9rem; color: #124a8f; }
@@ -441,7 +441,7 @@ body.reception-mode .content { padding: 0; }
 .rr-green { background: linear-gradient(180deg, #66c26a, #1a9e56); }
 .rr-purple { background: linear-gradient(180deg, #c877e0, #b44fd8); }
 .rr-red { background: linear-gradient(180deg, #e04b4b, #c81e1e); }
-/* تول‌تیپ جزئیات — مثل آسا */
+/* تول‌تیپ جزئیات — مثل مرجع */
 .rr-tip {
   display: none; position: absolute; top: calc(100% + 10px); inset-inline-start: 0; z-index: 30;
   width: 300px; background: #fffef2; border: 1px solid #94a3b8; border-radius: 8px;
@@ -449,7 +449,7 @@ body.reception-mode .content { padding: 0; }
 }
 .rr-tile:hover .rr-tip, .rr-tile:focus .rr-tip { display: block; }
 .rr-tile:last-child .rr-tip { inset-inline-start: auto; inset-inline-end: 0; }
-/* راهنمای عمودی سمت راست — مثل اسکرین‌شات آسا */
+/* راهنمای عمودی سمت راست — مثل اسکرین‌شات مرجع */
 .rr-legend { width: 150px; background: linear-gradient(180deg, #ffffff, #eef4f2); border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 8px; }
 .rr-legend-row { display: flex; align-items: center; gap: 8px; font-size: .76rem; color: #334155; padding: 5px 2px; border-bottom: 1px dashed #e2e8f0; }
 .rr-legend-sq { width: 20px; height: 20px; border-radius: 4px; flex: 0 0 auto; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
@@ -465,7 +465,7 @@ body.reception-mode .content { padding: 0; }
 .rr-err { color: #b91c1c; font-size: .8rem; min-height: 1em; }
 .rr-panel h3 { color: #b91c1c; }
 
-/* ═══════════════ R3 — فرم ثبت رجیستر آسا ═══════════════ */
+/* ═══════════════ R3 — فرم ثبت رجیستر مرجع ═══════════════ */
 .reg-form { max-width: 980px; margin: 0 auto; }
 .reg-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-bottom: 2px solid #f2c14e; padding-bottom: 6px; margin-bottom: 10px; }
 .reg-head h3 { color: #b91c1c; font-size: 1.15rem; }

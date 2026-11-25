@@ -1,5 +1,5 @@
 /**
- * captcha.service.ts — کپچای تصویری SVG سمت سرور (معادل simple-php-captcha.php آسا)
+ * captcha.service.ts — کپچای تصویری SVG سمت سرور (معادل الگوی کپچای تصویری)
  * یک‌بارمصرف + TTL پنج دقیقه + ذخیرهٔ هش پاسخ (بدون نگه‌داشتن متن خام).
  * درخواستی که از سرویس‌های تست استفاده می‌کند با AUTH_CAPTCHA_REQUIRED=false غیرفعال می‌شود.
  */
@@ -61,7 +61,7 @@ export class CaptchaService {
     for (const [k, v] of this.store) if (v.expiresAt < now) this.store.delete(k);
   }
 
-  /** رندر SVG: پنج نویسهٔ چرخیده + خطوط نویز + رنگ آسا */
+  /** رندر SVG: پنج نویسهٔ چرخیده + خطوط نویز + رنگ مرجع */
   private render(code: string): string {
     const W = 160;
     const H = 48;

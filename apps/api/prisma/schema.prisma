@@ -22,10 +22,10 @@ model User {
   mfaSecret    String?
   mfaEnabled   Boolean  @default(false)
   isActive     Boolean  @default(true)
-  // U0 — نوار کاربر صفحهٔ اصلی: عکس پرسنلی و سمت شغلی (الگوی آسا)
+  // U0 — نوار کاربر صفحهٔ اصلی: عکس پرسنلی و سمت شغلی (الگوی مرجع)
   photoUrl     String?
   position     String?
-  // U1 — «اطلاعات آخرین ورود شما به سیستم» (الگوی آسا)
+  // U1 — «اطلاعات آخرین ورود شما به سیستم» (الگوی مرجع)
   lastLoginAt  DateTime?
   lastLoginIp  String?
   createdAt    DateTime @default(now())
@@ -316,7 +316,7 @@ model Stay {
   @@map("stays")
 }
 
-// اقلام اضافی فولیو اقامت — چارج اتاق (Room Additional Items — مرجع آسا 4.zip)
+// اقلام اضافی فولیو اقامت — چارج اتاق (Room Additional Items — مرجع 4.zip)
 model FolioItem {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   stayId      String   @db.Uuid

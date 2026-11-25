@@ -1,22 +1,22 @@
 /**
  * module-registry.js — U0/U2 رجیستری ماژول‌ها: تک منبع حقیقت گرید صفحهٔ اصلی
- * نگاشت یک‌به‌یک با صفحهٔ اصلی آسا (docs/PLAN-ui-asa.md §۱.۲):
- * دسته front (۸) | back (۶) | other (۷) — آیکن‌ها از apps/web/assets/icons/asa/
+ * نگاشت یک‌به‌یک با صفحهٔ اصلی (docs/PLAN-ui-legacy.md §۱.۲):
+ * دسته front (۸) | back (۶) | other (۷) — آیکن‌ها از apps/web/assets/icons/ui/
  * view: مقصد کلیک — ماژول موجود یا stub فاز بعدی.
  */
 (function (global) {
   'use strict';
 
-  var ICON = 'assets/icons/asa/';
+  var ICON = 'assets/icons/ui/';
 
   var REGISTRY = [
-    /* ── فرانت‌آفیس (۸) — ترتیب دقیق آسا ── */
+    /* ── فرانت‌آفیس (۸) — ترتیب مرجع ── */
     { id: 'reception',       cat: 'front', icon: 'reception.png',            label: 'پذیرش',            view: 'reception',      ready: true },
     { id: 'cashier',         cat: 'front', icon: 'cashier.png',              label: 'صندوق',            view: 'treasury',       ready: true },
     { id: 'reservation',     cat: 'front', icon: 'reservation.png',          label: 'رزرواسیون',        view: 'frontdesk',      ready: true },
     { id: 'restaurant',      cat: 'front', icon: 'resturant.png',            label: 'رستوران',          view: 'restaurant',     ready: true },
     { id: 'housekeeping',    cat: 'front', icon: 'housekeeping.png',         label: 'خانه داری',        view: 'housekeepingops', ready: true },
-    { id: 'roomssetup',      cat: 'front', icon: '../asa-reception/room_rack.png', label: 'تنظیم اتاق‌ها', view: 'roomssetup', ready: true },
+    { id: 'roomssetup',      cat: 'front', icon: '../rx-reception/room_rack.png', label: 'تنظیم اتاق‌ها', view: 'roomssetup', ready: true },
     { id: 'laundry',         cat: 'front', icon: 'lundary.png',              label: 'لاندری',           view: 'stub:laundry',   ready: false, phase: 'R-خدمات' },
     { id: 'telephone',       cat: 'front', icon: 'telephone.png',            label: 'تلفن',             view: 'stub:telephone', ready: false, phase: 'R-خدمات' },
     { id: 'ceremonies',      cat: 'front', icon: 'cermonism.png',            label: 'تشریفات',          view: 'stub:ceremonies', ready: false, phase: 'R-خدمات' },

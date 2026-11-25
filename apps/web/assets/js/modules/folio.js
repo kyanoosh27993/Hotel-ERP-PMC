@@ -1,5 +1,5 @@
 /**
- * modules/folio.js — فاز R4 بر اساس 4.zip (دو صفحهٔ واقعی آسا):
+ * modules/folio.js — فاز R4 بر اساس 4.zip (دو صفحهٔ واقعی مرجع):
  *  ۱) «ثبت اقلام اضافی اتاق» (Room Additional Items) — چارج اتاق به فولیو اقامت باز
  *  ۲) «لیست صورتحساب‌های باز مهمان» (Open Invoices Guests List) + پرینت فاکتور + تسویه/چک‌اوت
  * API: GET /pms/stays?status=OPEN، POST /pms/stays/:id/folio-items، GET /pms/folios/open، POST /pms/stays/:id/check-out
@@ -32,7 +32,7 @@
   }
   function rial(x) { return Num.toPersian(Number(x || 0).toLocaleString('en-US')); }
 
-  /* کاتالوگ اقلام اضافی — الگوی آسا؛ قیمت‌ها پیش‌فرض و قابل ویرایش */
+  /* کاتالوگ اقلام اضافی — الگوی مرجع؛ قیمت‌ها پیش‌فرض و قابل ویرایش */
   var CATALOG = [
     { desc: 'میان‌وعده', unit: 250000 },
     { desc: 'ناهار', unit: 450000 },

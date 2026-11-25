@@ -212,14 +212,14 @@ describe('نیاز یکتایی — ثبت مرکزی اشخاص/شرکت‌ها
     const p1 = await request(app.getHttpServer())
       .post('/api/v1/parties/ensure')
       .set('Authorization', auth())
-      .send({ kind: 'COUNTERPARTY', companyName: `طرف‌حساب آسا ${runTag}`, natIdentifier: LEGAL_OK_2, economicCode: ECON_OK_2 });
+      .send({ kind: 'COUNTERPARTY', companyName: `طرف‌حساب نمونه ${runTag}`, natIdentifier: LEGAL_OK_2, economicCode: ECON_OK_2 });
     expect(p1.status).toBe(201);
     expect(p1.body.data.created).toBe(true);
 
     const p2 = await request(app.getHttpServer())
       .post('/api/v1/parties/ensure')
       .set('Authorization', auth())
-      .send({ kind: 'COUNTERPARTY', companyName: `طرف‌حساب آسا ${runTag}`, natIdentifier: LEGAL_OK_2, economicCode: ECON_OK_2 });
+      .send({ kind: 'COUNTERPARTY', companyName: `طرف‌حساب نمونه ${runTag}`, natIdentifier: LEGAL_OK_2, economicCode: ECON_OK_2 });
     expect(p2.status).toBe(201);
     expect(p2.body.data.created).toBe(false);
     expect(p2.body.data.party.id).toBe(p1.body.data.party.id);

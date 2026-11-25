@@ -1,5 +1,5 @@
 /**
- * auth.js — U1 لایهٔ ورود: نشست، کپچا (API یا نمایشی)، خطاهای آسا، آخرین ورود
+ * auth.js — U1 لایهٔ ورود: نشست، کپچا (API یا نمایشی)، خطاهای مرجع، آخرین ورود
  * - حالت اصلی: GET /auth/captcha + POST /auth/login (کپچای SVG سرور، یک‌بارمصرف)
  * - حالت نمایشی: اگر سرور در دسترس نبود (پیش‌نمایش استاتیک)، کپچای محلی + حساب نمایشی
  * کلیدهای localStorage: hotel-erp-session | hotel-erp-api-base | hotel-erp-token (سازگار با ماژول‌ها)
@@ -195,7 +195,7 @@
     login: login,
     logout: logout,
     isDemo: function () { var s = session(); return !!(s && s.demo); },
-    /* U1 — صفحهٔ ورود (اولین صفحهٔ برنامه) — چیدمان مودال آسا */
+    /* U1 — صفحهٔ ورود (اولین صفحهٔ برنامه) — چیدمان مودال مرجع */
     renderLogin: function (root, onSuccess) {
       root.innerHTML = '';
       var page = document.createElement('div');

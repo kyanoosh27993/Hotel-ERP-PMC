@@ -1,5 +1,5 @@
 /**
- * modules/roomrack.js — فاز R1: روم‌رک واقعی به سبک آسا (مرجع: new_room_rack.html + اسکرین‌شات کارفرما)
+ * modules/roomrack.js — فاز R1: روم‌رک واقعی به سبک مرجع (مرجع: new_room_rack.html + اسکرین‌شات کارفرما)
  * کاشی‌های پوشه‌ای با رنگ‌بندی وضعیت | نوار راهنمای عمودی | درصد اشغالی | تول‌تیپ جزئیات |
  * دو حالت چیدمان (جریانی / ستونی طبقه‌ها) | فیلتر نوع اتاق و جستجو | پنل عملیات اتاق
  * داده از API واقعی GET /api/v1/pms/rooms/map — تغییر وضعیت با PATCH /pms/rooms/:id.
@@ -33,7 +33,7 @@
     return e;
   }
 
-  /* رنگ‌بندی آسا: اشغال=آبی، خالی تمیز=خاکستری، بازبینی=سبز، کثیف/نظافت=بنفش، بسته=قرمز */
+  /* رنگ‌بندی مرجع: اشغال=آبی، خالی تمیز=خاکستری، بازبینی=سبز، کثیف/نظافت=بنفش، بسته=قرمز */
   function roomVisual(room) {
     if (room.status === 'OCCUPIED') return { cls: 'rr-blue', label: 'پر' };
     if (room.status === 'OUT_OF_SERVICE') return { cls: 'rr-red', label: 'بسته' };
@@ -214,7 +214,7 @@
           panel.appendChild(b);
         }
 
-        /* عملیات آسا: بستن/باز کردن اتاق | نظافت کامل | شروع نظافت | بازبینی */
+        /* عملیات مرجع: بستن/باز کردن اتاق | نظافت کامل | شروع نظافت | بازبینی */
         if (room.status !== 'OCCUPIED') {
           act(room.status === 'OUT_OF_SERVICE' ? '🔓 باز کردن اتاق' : '🔒 بستن اتاق',
             { status: room.status === 'OUT_OF_SERVICE' ? 'AVAILABLE' : 'OUT_OF_SERVICE' });

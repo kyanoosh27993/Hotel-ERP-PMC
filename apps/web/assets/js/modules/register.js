@@ -1,5 +1,5 @@
 /**
- * modules/register.js — فاز R3: «ثبت رجیستر جدید» به سبک دقیق آسا
+ * modules/register.js — فاز R3: «ثبت رجیستر جدید» به سبک مرجع
  * (مراجع: New_Registration.html + اسکرین‌شات‌های جزئیات رجیستر کارت ۱ و ۲)
  * بخش‌ها: اقامت (رزرو/عضویت/آور/پلن/اتاق) | نرخات و تخفیفات و مبالغ | مشخصات میهمان
  * (کد ملی، شناسنامه، جنسیت، نام پدر، تولد، شغل، وسیله سفر، شهر مبدا/مقصد) | تماس و شرح
@@ -30,7 +30,7 @@
     return e;
   }
 
-  /* فیلد ساده با برچسب سمت راست (چیدمان آسا) */
+  /* فیلد ساده با برچسب سمت راست (چیدمان مرجع) */
   function field(label, input, opts) {
     var row = el('div', 'reg-row' + (opts && opts.tall ? ' reg-row-tall' : ''));
     var lab = el('label', 'reg-label', label + ' :');
@@ -206,7 +206,7 @@
       var fTravel = el('select');
       ['هوایی', 'زمینی', 'دریایی', 'ندارد'].forEach(function (o) { fTravel.appendChild(new Option(o)); });
       var fFromCity = textInp('شهر مبدا');
-      var fToCity = el('input'); fToCity.value = 'رفسنجان'; /* پیش‌فرض مرجع آسا */
+      var fToCity = el('input'); fToCity.value = 'رفسنجان'; /* پیش‌فرض مرجع */
       var fPurpose = textInp('قصد از سفر');
       var fIssuePlace = textInp('محل صدور');
       var fAddress = textInp('آدرس');
