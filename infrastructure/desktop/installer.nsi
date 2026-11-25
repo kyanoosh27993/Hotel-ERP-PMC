@@ -61,7 +61,10 @@ check_file:
 
 installed:
   IfSilent silent_uninstall
-  MessageBox MB_YESNOCANCEL|MB_ICONQUESTION "${APPNAME} روی این رایانه از قبل نصب شده است.$\n$\nبله — حذف کامل برنامه از رایانه$\nخیر — نصب مجدد روی نسخهٔ فعلی$\nانصراف — خروج از نصب‌کننده" IDYES run_uninstall IDNO continue_install IDCANCEL quit_setup /SD IDYES
+  ; محدودیت NSIS: MessageBox حداکثر دو جفت برچسب می‌پذیرد — «انصراف» با
+  ; fall-through به Quit می‌رسد (ادامهٔ اجرا بعد از MessageBox)
+  MessageBox MB_YESNOCANCEL|MB_ICONQUESTION "${APPNAME} روی این رایانه از قبل نصب شده است.$\n$\nبله — حذف کامل برنامه از رایانه$\nخیر — نصب مجدد روی نسخهٔ فعلی$\nانصراف — خروج از نصب‌کننده" IDYES run_uninstall IDNO continue_install /SD IDYES
+  Quit
 run_uninstall:
   ExecWait '"$R0"'
   Quit
@@ -71,8 +74,6 @@ silent_uninstall:
   Quit
 continue_install:
   Return
-quit_setup:
-  Quit
 not_installed:
   Return
 FunctionEnd
