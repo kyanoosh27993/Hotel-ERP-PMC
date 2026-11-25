@@ -247,6 +247,49 @@ export class RoomKindsService {
     };
   }
 
+  /** فهرست مدیریتی اتاق‌ها (فرم «اتاقها» مرجع) — همهٔ فیلدها + مشخصه‌ها */
+  async roomsAdmin() {
+    const rooms = await this.prisma.room.findMany({
+      orderBy: [{ floor: 'asc' }, { code: 'asc' }],
+      include: {
+        roomType: { select: { code: true, nameFa: true, nameLatin: true } },
+        amenities: { include: { amenity: true } },
+      },
+    });
+    return rooms.map((r) => ({
+      id: r.id,
+      code: r.code,
+      roomTypeId: r.roomTypeId,
+      roomTypeFa: r.roomType.nameFa,
+      nameFa: r.nameFa,
+      nameLatin: r.nameLatin,
+      bedCount: r.bedCount,
+      orderInFloor: r.orderInFloor,
+      extraBeds: r.extraBeds,
+      floor: r.floor,
+      status: r.status,
+      hkStatus: r.hkStatus,
+      rateSingleRials: String(r.rateSingleRials),
+      rateDoubleRials: String(r.rateDoubleRials),
+      rateTripleRials: String(r.rateTripleRials),
+      rateFullRials: String(r.rateFullRials),
+      rateSingleUsd: r.rateSingleUsd,
+      rateDoubleUsd: r.rateDoubleUsd,
+      rateTripleUsd: r.rateTripleUsd,
+      rateFullUsd: r.rateFullUsd,
+      saleBlocked: r.saleBlocked,
+      guestRequests: r.guestRequests,
+      registerNo: r.registerNo,
+      lastChargeAt: r.lastChargeAt,
+      outOfServiceFrom: r.outOfServiceFrom,
+      outOfServiceCancelAt: r.outOfServiceCancelAt,
+      blockCard: r.blockCard,
+      tourCompany: r.tourCompany,
+      note: r.note,
+      amenityIds: r.amenities.map((l) => l.amenityId),
+    }));
+  }
+
   /* ── مشخصه‌های اضافی اتاق ── */
 
   async listAmenities() {

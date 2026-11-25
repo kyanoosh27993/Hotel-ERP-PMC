@@ -355,6 +355,17 @@
 
       /* ── ثبت ── */
       var actions = el('div', 'reg-actions');
+      /* نسخهٔ ۳٫۴ — انتخاب پلان تور/شرکت */
+      var planSel = el('select');
+      planSel.appendChild(new Option('— بدون پلان (همهٔ هزینه‌ها با میهمان) —', ''));
+      fetch((localStorage.getItem('hotel-erp-api-base') || 'http://localhost:3000/api/v1') + '/pms/plans', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('hotel-erp-token') || '') } })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { (j.data || []).forEach(function (p) { if (p.isActive) planSel.appendChild(new Option(p.nameFa, p.id)); }); })
+        .catch(function () {});
+      var planRow = el('div');
+      planRow.style.cssText = 'display:flex;gap:6px;align-items:center;margin:4px 0;';
+      var planLbl = document.createElement('label'); planLbl.textContent = 'پلان تور/شرکت:'; planLbl.style.minWidth = '150px';
+      planRow.appendChild(planLbl); planRow.appendChild(planSel);
       var submit = el('button', 'submitbtn', 'ثبت شود');
       var toRack = el('button', 'rr-act-btn', 'Room Rack');
       toRack.type = 'button';
@@ -495,6 +506,7 @@
         };
         if (fNat.value) body.nationality = fNat.value;
         if (rateRial) body.rateOverrideRials = String(rateRial);
+        if (planSel.value) body.planId = planSel.value; /* نسخهٔ ۳٫۴ — پلان تور/شرکت */
 
         /* نیاز یکتایی کارفرما: ثبت یکتا — یا اصلاح رکورد قبلی (PATCH) یا ثبت جدید؛ ثبت دوباره ممنوع */
         var partyPayload = {

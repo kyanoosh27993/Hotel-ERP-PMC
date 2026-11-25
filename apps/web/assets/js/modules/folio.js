@@ -32,24 +32,35 @@
   }
   function rial(x) { return Num.toPersian(Number(x || 0).toLocaleString('en-US')); }
 
-  /* کاتالوگ اقلام اضافی — الگوی مرجع؛ قیمت‌ها پیش‌فرض و قابل ویرایش */
+  /* کاتالوگ اقلام اضافی — الگوی مرجع؛ قیمت‌ها پیش‌فرض و قابل ویرایش؛ rev = کد درآمدی پلان (v3.4) */
   var CATALOG = [
-    { desc: 'میان‌وعده', unit: 250000 },
-    { desc: 'ناهار', unit: 450000 },
-    { desc: 'شام', unit: 550000 },
-    { desc: 'لاندری (شست‌وشو)', unit: 200000 },
-    { desc: 'مینی‌بار', unit: 150000 },
-    { desc: 'اینترنت پرسرعت', unit: 100000 },
-    { desc: 'تلفن بین‌الملل', unit: 500000 },
-    { desc: 'تاکسی سرویس', unit: 300000 },
-    { desc: 'خسارت تجهیزات', unit: 800000 },
-    { desc: 'نوشیدنی اتاق', unit: 120000 },
+    { desc: 'میان‌وعده', unit: 250000, rev: 'سرویس اتاق' },
+    { desc: 'ناهار', unit: 450000, rev: 'ناهار' },
+    { desc: 'شام', unit: 550000, rev: 'شام' },
+    { desc: 'لاندری (شست‌وشو)', unit: 200000, rev: 'درآمد لاندری' },
+    { desc: 'مینی‌بار', unit: 150000, rev: 'مینی بار' },
+    { desc: 'اینترنت پرسرعت', unit: 100000, rev: 'اینترنت' },
+    { desc: 'تلفن بین‌الملل', unit: 500000, rev: 'تلفن هتل' },
+    { desc: 'تاکسی سرویس', unit: 300000, rev: 'ترانسفر' },
+    { desc: 'خسارت تجهیزات', unit: 800000, rev: 'عوارض خسارت' },
+    { desc: 'نوشیدنی اتاق', unit: 120000, rev: 'مینی بار' },
   ];
+  var REV_CODES = []; /* از سرور پر می‌شود: {id, code, nameFa} */
+  function revIdFor(desc) {
+    var item = CATALOG.filter(function (x) { return x.desc === desc; })[0];
+    if (!item) return undefined;
+    var rc = REV_CODES.filter(function (c) { return c.nameFa === item.rev; })[0];
+    return rc ? rc.id : undefined;
+  }
 
   global.Modules = global.Modules || {};
 
   global.Modules.folio = {
     render: function (root) {
+      fetch((localStorage.getItem('hotel-erp-api-base') || 'http://localhost:3000/api/v1') + '/pms/revenue-codes', { headers: { Authorization: 'Bearer ' + (localStorage.getItem('hotel-erp-token') || '') } })
+        .then(function (r) { return r.json(); })
+        .then(function (j) { REV_CODES = (j.data || []).filter(function (c) { return c.isActive !== false; }); })
+        .catch(function () {});
       root.innerHTML = '';
       var wrap = el('div', 'fo-wrap');
       var err = el('p', 'fo-err');
@@ -110,6 +121,7 @@
           desc: CATALOG[Number(itemSel.value)].desc,
           qty: qty,
           unitRials: String(parseInt(unitInp.value, 10) || 0),
+          revenueCodeId: revIdFor(CATALOG[Number(itemSel.value)].desc),
         }).then(function (res) {
           if (res.status >= 200 && res.status < 300) {
             ok('قلم «' + CATALOG[Number(itemSel.value)].desc + '» به فولیو اضافه شد.');
@@ -153,7 +165,9 @@
           }
           d.items.forEach(function (it) {
             var line = el('div', 'fo-item-line');
-            line.textContent = it.desc + ' × ' + Num.toPersian(it.qty) + ' = ' + rial(it.totalRials) + ' ریال';
+            var sideFa = it.chargeTo === 'COMPANY' ? ' [تور/شرکت]' : '';
+            line.textContent = it.desc + ' × ' + Num.toPersian(it.qty) + ' = ' + rial(it.totalRials) + ' ریال' +
+              (it.revenueCode ? ' (کد ' + Num.toPersian(String(it.revenueCode.code)) + ')' : '') + sideFa;
             area.appendChild(line);
           });
         });

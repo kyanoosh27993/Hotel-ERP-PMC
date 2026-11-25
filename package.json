@@ -1,6 +1,6 @@
 {
   "name": "hotel-erp",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "private": true,
   "description": "Hotel ERP/PMS — Modular Monolith (NestJS + Next.js + PostgreSQL) — فاز ۱ هسته",
   "workspaces": [

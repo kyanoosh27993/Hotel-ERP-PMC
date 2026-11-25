@@ -551,6 +551,13 @@ export class PmsController {
     return { data: await this.kinds.deleteKind(id) };
   }
 
+  /** فهرست مدیریتی اتاق‌ها (فرم «اتاقها») */
+  @RequirePermissions(PERMISSIONS.ROOM_VIEW)
+  @Get('rooms-admin')
+  async roomsAdmin() {
+    return { data: await this.kinds.roomsAdmin() };
+  }
+
   /** drill-down ستون‌های زنده: اتاق‌های نوع — ?occupied=1 برای «تعداد پر» و ?extraBeds=1 برای «تخت اضافه» */
   @RequirePermissions(PERMISSIONS.ROOM_VIEW)
   @Get('room-kinds/:id/rooms')

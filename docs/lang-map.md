@@ -29,6 +29,8 @@
 | ۸ | دارایی/خزانه/خدمات | `assets/` `treasury/` `ancillary/` | fixed_assets, cash_accounts, ancillary_orders | `08-treasury.mjs` |
 | ۹ | داشبوردها | `dashboard/` | (فقط خواندن) | `09-dashboards.mjs` |
 | ۱۷ | کاربران/گروه‌ها/ماتریس دسترسی (v3.3) | `admin/` `iam/` | users, roles, permissions, user_roles, role_permissions, audit_logs | `17-admin.mjs` |
+| ۱۸ | انواع اتاق/مشخصه‌ها/اتاق‌ها (v3.4) | `pms/roomkinds.service.ts` | room_types, rooms, room_amenities, room_amenity_links | `18-roomkinds.mjs` |
+| ۱۹ | پلان تور/شرکت + کدینگ درآمدی (v3.4) | `pms/plans.service.ts` | plans, plan_items, revenue_codes, folio_items, stays, reservations | `19-plans.mjs` |
 
 ## قانون طلایی هنگام تست
 

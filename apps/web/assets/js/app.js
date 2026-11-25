@@ -36,6 +36,8 @@
     { id: 'home', title: 'صفحهٔ اصلی ', icon: '🏠' },
     { id: 'dashboard', title: 'داشبورد مدیر AI', icon: '▦' },
     { id: 'frontdesk', title: 'نقشه اتاق (فاز ۴)', icon: '🛏' },
+    { id: 'roomkinds', title: 'انواع اتاق‌ها (فاز ۱۴)', icon: '🚪' },
+    { id: 'plans', title: 'پلان‌های تور و شرکت (فاز ۱۵)', icon: '🧳' },
     { id: 'treasury', title: 'خزانه‌داری و صندوق (فاز ۵)', icon: '💰' },
     { id: 'housekeepingops', title: 'خانه‌داری و تعمیرات (فاز ۱۰)', icon: '🧹' },
     { id: 'assets', title: 'دارایی ثابت (فاز ۱۰)', icon: '🏛️' },
@@ -73,7 +75,7 @@
       nav.appendChild(b);
     });
     sidebar.appendChild(nav);
-    var ver = el('div', 'sidebar-ver', 'نسخه ۳٫۳ — فارسی/RTL');
+    var ver = el('div', 'sidebar-ver', 'نسخه ۳٫۴ — فارسی/RTL');
     sidebar.appendChild(ver);
 
     var main = el('main', 'main');
