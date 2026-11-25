@@ -63,7 +63,7 @@ installed:
   IfSilent silent_uninstall
   ; محدودیت NSIS: MessageBox حداکثر دو جفت برچسب می‌پذیرد — «انصراف» با
   ; fall-through به Quit می‌رسد (ادامهٔ اجرا بعد از MessageBox)
-  MessageBox MB_YESNOCANCEL|MB_ICONQUESTION "${APPNAME} روی این رایانه از قبل نصب شده است.$\n$\nبله — حذف کامل برنامه از رایانه$\nخیر — نصب مجدد روی نسخهٔ فعلی$\nانصراف — خروج از نصب‌کننده" IDYES run_uninstall IDNO continue_install /SD IDYES
+  MessageBox MB_YESNOCANCEL|MB_ICONQUESTION "${APPNAME} روی این رایانه از قبل نصب شده است.$\n$\nبله — حذف کامل برنامه از رایانه$\nخیر — نصب مجدد روی نسخهٔ فعلی$\nانصراف — خروج از نصب‌کننده" /SD IDYES IDYES run_uninstall IDNO continue_install
   Quit
 run_uninstall:
   ExecWait '"$R0"'
@@ -128,7 +128,7 @@ Section "un.Uninstall"
 
   ; داده‌ها: در حالت خاموش حفظ می‌شود؛ در حالت تعاملی از کاربر پرسیده می‌شود
   IfSilent keep_data
-  MessageBox MB_YESNO|MB_ICONQUESTION "داده‌ها و پایگاه دادهٔ محلی (حساب‌ها، اتاق‌ها، اسناد) نیز از %APPDATA%\HotelERP حذف شود؟$\n$\n«خیر» = فقط برنامه حذف شود و داده‌ها بمانند" IDYES wipe_data IDNO keep_data /SD IDNO
+  MessageBox MB_YESNO|MB_ICONQUESTION "داده‌ها و پایگاه دادهٔ محلی (حساب‌ها، اتاق‌ها، اسناد) نیز از %APPDATA%\HotelERP حذف شود؟$\n$\n«خیر» = فقط برنامه حذف شود و داده‌ها بمانند" /SD IDNO IDYES wipe_data IDNO keep_data
 wipe_data:
   DetailPrint "حذف کامل داده‌ها (%APPDATA%\HotelERP)…"
   RMDir /r "$APPDATA\HotelERP"
