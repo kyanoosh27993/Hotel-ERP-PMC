@@ -243,7 +243,6 @@ describe('نیاز یکتایی — ثبت مرکزی اشخاص/شرکت‌ها
     const roomType = rts.body.data.find((t: { code: string }) => t.code === freeRoom0!.roomType.code);
     expect(roomType).toBeTruthy();
 
-    const today = new Date().toISOString().slice(0, 10);
     const from = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
     const to = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
     const resv = await request(app.getHttpServer())
