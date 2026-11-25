@@ -185,7 +185,12 @@
       var fLast = textInp('نام خانوادگی');
       var fFirst = textInp('نام میهمان');
       var fLatin = textInp('نام لاتین (اختیاری)', 'ltr');
-      var fNationalId = textInp('کد ملی', 'ltr');
+      var fPersonType = el('select'); /* نیاز کارفرما: نوع شخص — حقیقی/حقوقی */
+      fPersonType.appendChild(new Option('شخص حقیقی', 'NATURAL'));
+      fPersonType.appendChild(new Option('شخص حقوقی (شرکت)', 'LEGAL'));
+      var fNationalId = textInp('کد ملی (۱۰ رقم)', 'ltr'); /* شخص حقیقی */
+      var fNatIdentifier = textInp('شناسهٔ ملی (۱۱ رقم)', 'ltr'); /* شخص حقوقی */
+      var fEconCode = textInp('کد اقتصادی (۱۱ تا ۱۴ رقم)', 'ltr'); /* شخص حقوقی */
       var fIdDoc = textInp('شماره شناسنامه/پاسپورت', 'ltr');
       var fGender = el('select');
       fGender.appendChild(new Option('مرد'));
@@ -205,6 +210,7 @@
       var fPurpose = textInp('قصد از سفر');
       var fIssuePlace = textInp('محل صدور');
       var fAddress = textInp('آدرس');
+      var fPostal = textInp('کد پستی', 'ltr');
       var fEmail = textInp('ایمیل', 'ltr');
       fEmail.type = 'email';
       var fMobile = textInp('موبایل', 'ltr');
@@ -213,10 +219,97 @@
       fDesc1.rows = 2;
       var fDesc2 = textInp('شرح ۲');
 
+      /* نیاز یکتایی کارفرما: با تایپ هر کاراکتر در فیلدهای هوشمند، رکوردهای قبلی پیشنهاد می‌شود */
+      var uniqBar = el('div', 'uniq-banner');
+      uniqBar.style.display = 'none';
+      var partyId = ''; /* خالی = مهمان جدید؛ مقدار = رکورد قبلی (فقط اصلاح) */
+      function loadParty(p) {
+        partyId = p.id;
+        fFirst.value = p.firstName || fFirst.value;
+        fLast.value = p.lastName || fLast.value;
+        fNationalId.value = p.nationalId || '';
+        fNatIdentifier.value = p.natIdentifier || '';
+        fEconCode.value = p.economicCode || '';
+        fIdDoc.value = p.idDocNo || '';
+        fMobile.value = p.mobile || '';
+        fPhone.value = p.phone || '';
+        fPostal.value = p.postalCode || '';
+        fAddress.value = p.address || '';
+        fEmail.value = p.email || '';
+        if (p.nationality) fNat.value = p.nationality;
+        fPersonType.value = (p.natIdentifier || p.economicCode) ? 'LEGAL' : 'NATURAL';
+        applyPersonType();
+        uniqBar.className = 'uniq-banner';
+        uniqBar.textContent = '⚠️ اطلاعات این ' + (p.kindFa || Uniq.KIND_FA[p.kind] || 'شخص') +
+          ' قبلاً در برنامه ثبت شده است (' + Uniq.displayName(p) + ') — اطلاعات قبلی در فرم بارگذاری شد. ' +
+          'در صورت نیاز همان اطلاعات قبلی را اصلاح کنید و «ثبت تغییرات رکورد موجود» را بزنید؛ ثبت دوباره مجاز نیست.';
+        uniqBar.style.display = 'block';
+        submit.textContent = 'ثبت تغییرات رکورد موجود';
+      }
+      function resetParty() {
+        partyId = '';
+        uniqBar.style.display = 'none';
+        submit.textContent = 'ثبت شود';
+      }
+      var uniqFields = [[fFirst, 'firstName'], [fLast, 'lastName'], [fNationalId, 'nationalId'],
+        [fNatIdentifier, 'natIdentifier'], [fEconCode, 'economicCode'], [fMobile, 'mobile'], [fPostal, 'postalCode']];
+      var KEY_FIELDS = ['nationalId', 'natIdentifier', 'economicCode', 'mobile', 'postalCode'];
+      uniqFields.forEach(function (pair) {
+        var inp = pair[0];
+        var prev = inp.value;
+        Uniq.suggest(inp, {
+          onPick: loadParty,
+          onFound: function (list, q) {
+            /* فقط هشدار مشابه‌ها؛ بارگذاری خودکار فقط با انتخاب کاربر */
+            void list; void q;
+          },
+        });
+        inp.addEventListener('input', function () {
+          /* اگر کاربر مقدار فیلد کلیدی را پاک/تغییر داد و از انتخاب قبلی خارج شد، حالت جدید فعال شود */
+          if (partyId && inp.value.trim() !== prev.trim() && KEY_FIELDS.indexOf(pair[1]) >= 0) {
+            var sameKey = KEY_FIELDS.some(function (k) {
+              var elx = { nationalId: fNationalId, natIdentifier: fNatIdentifier, economicCode: fEconCode, mobile: fMobile, postalCode: fPostal }[k];
+              return elx.value.trim();
+            });
+            if (!sameKey) resetParty();
+          }
+        });
+      });
+
+      /* نوع شخص: حقیقی → کد ملی/کد پستی | حقوقی → شناسهٔ ملی/کد اقتصادی (الزام کامل در گیت چک‌این) */
+      var rowMelli = field('کد ملی', fNationalId).row;
+      var rowNatId = field('شناسهٔ ملی', fNatIdentifier).row;
+      var rowEcon = field('کد اقتصادی', fEconCode).row;
+      function applyPersonType() {
+        var legal = fPersonType.value === 'LEGAL';
+        rowMelli.style.display = legal ? 'none' : '';
+        rowNatId.style.display = legal ? '' : 'none';
+        rowEcon.style.display = legal ? '' : 'none';
+      }
+      fPersonType.addEventListener('change', applyPersonType);
+      applyPersonType();
+
+      /* اعتبارسنجی ساختاری لحظه‌ای کدها — جلوگیری از ورود کد ملی/شناسهٔ ملی فیک (وارنینگ مرز قرمز) */
+      function bindValidator(inp, fn, msg) {
+        inp.addEventListener('change', function () {
+          var v = Uniq.latinDigits(inp.value).trim();
+          if (!v || fn(v)) { inp.style.borderColor = ''; inp.title = ''; return; }
+          inp.style.borderColor = '#cf222e';
+          inp.title = msg;
+        });
+      }
+      bindValidator(fNationalId, Uniq.mellicodeOk, 'کد ملی نامعتبر است (۱۰ رقم + رقم کنترل)');
+      bindValidator(fNatIdentifier, Uniq.legalIdOk, 'شناسهٔ ملی نامعتبر است (۱۱ رقم + رقم کنترل)');
+      bindValidator(fEconCode, Uniq.econOk, 'کد اقتصادی باید ۱۱ تا ۱۴ رقم باشد');
+      bindValidator(fPostal, Uniq.postalOk, 'کد پستی باید ۱۰ رقم معتبر باشد');
+
       g3.appendChild(field('نام خانوادگی *', fLast).row);
       g3.appendChild(field('نام *', fFirst).row);
       g3.appendChild(field('نام لاتین', fLatin).row);
-      g3.appendChild(field('کد ملی', fNationalId).row);
+      g3.appendChild(field('نوع شخص', fPersonType).row);
+      g3.appendChild(rowMelli);
+      g3.appendChild(rowNatId);
+      g3.appendChild(rowEcon);
       g3.appendChild(field('شناسنامه/پاسپورت', fIdDoc).row);
       g3.appendChild(field('جنسیت', fGender).row);
       g3.appendChild(field('ملت', fNat).row);
@@ -232,8 +325,10 @@
       g3.appendChild(field('تلفن', fPhone).row);
       g3.appendChild(field('ایمیل', fEmail).row);
       g3.appendChild(field('آدرس', fAddress).row);
+      g3.appendChild(field('کد پستی', fPostal).row);
       g3.appendChild(field('شرح ۱', fDesc1, { tall: true }).row);
       g3.appendChild(field('شرح ۲', fDesc2).row);
+      s3.appendChild(uniqBar);
       s3.appendChild(g3);
       form.appendChild(s3);
 
@@ -361,6 +456,32 @@
           err.textContent = 'تاریخ ورود باید به شکل ۱۴۰۵/۰۹/۰۳ باشد.';
           return;
         }
+        /* نیاز کارفرما: اعتبارسنجی ساختاری کدها — هیچ کد ملی/شناسهٔ ملی فیک ذخیره نمی‌شود */
+        var nid = Uniq.latinDigits(fNationalId.value).replace(/\D/g, '');
+        var npost = Uniq.latinDigits(fPostal.value).replace(/\D/g, '');
+        var nidn = Uniq.latinDigits(fNatIdentifier.value).replace(/\D/g, '');
+        var neco = Uniq.latinDigits(fEconCode.value).replace(/\D/g, '');
+        var legal = fPersonType.value === 'LEGAL';
+        if (!legal && nid && !Uniq.mellicodeOk(nid)) {
+          err.textContent = 'کد ملی واردشده معتبر نیست — ساختار و رقم کنترل کد ملی (۱۰ رقم) رعایت نشده است.';
+          fNationalId.focus();
+          return;
+        }
+        if (!legal && npost && !Uniq.postalOk(npost)) {
+          err.textContent = 'کد پستی باید ۱۰ رقم معتبر باشد.';
+          fPostal.focus();
+          return;
+        }
+        if (legal && nidn && !Uniq.legalIdOk(nidn)) {
+          err.textContent = 'شناسهٔ ملی معتبر نیست — ساختار و رقم کنترل شناسهٔ ملی (۱۱ رقم) رعایت نشده است.';
+          fNatIdentifier.focus();
+          return;
+        }
+        if (legal && neco && !Uniq.econOk(neco)) {
+          err.textContent = 'کد اقتصادی باید ۱۱ تا ۱۴ رقم باشد.';
+          fEconCode.focus();
+          return;
+        }
         var rateRial = Number(tbody.rows[1].querySelectorAll('input')[0].value.replace(/[^\d]/g, '')) || null;
         var body = {
           roomTypeId: roomTypeId || '',
@@ -374,6 +495,54 @@
         };
         if (fNat.value) body.nationality = fNat.value;
         if (rateRial) body.rateOverrideRials = String(rateRial);
+
+        /* نیاز یکتایی کارفرما: ثبت یکتا — یا اصلاح رکورد قبلی (PATCH) یا ثبت جدید؛ ثبت دوباره ممنوع */
+        var partyPayload = {
+          kind: 'GUEST',
+          firstName: fFirst.value.trim(),
+          lastName: fLast.value.trim(),
+          nationalId: nid || undefined,
+          natIdentifier: nidn || undefined,
+          economicCode: neco || undefined,
+          idDocNo: fIdDoc.value.trim() || undefined,
+          mobile: Uniq.latinDigits(fMobile.value).replace(/\D/g, '') || undefined,
+          phone: fPhone.value.trim() || undefined,
+          postalCode: npost || undefined,
+          address: fAddress.value.trim() || undefined,
+          email: fEmail.value.trim() || undefined,
+          nationality: fNat.value || undefined,
+        };
+        function saveParty() {
+          if (partyId) {
+            return api('PATCH', '/parties/' + partyId, partyPayload).then(function (res) {
+              if (res.status >= 200 && res.status < 300) return { blocked: false };
+              if (res.status === 409) {
+                var ex = res.body && res.body.error && res.body.error.details && res.body.error.details.existing;
+                if (ex) loadParty(ex);
+                err.textContent = (res.body && res.body.error && res.body.error.message) || 'رکورد تکراری است.';
+                return { blocked: true };
+              }
+              err.textContent = (res.body && res.body.error && res.body.error.message) || ('خطای ' + res.status);
+              return { blocked: true };
+            }).catch(function () { return { blocked: false }; /* شبکه قطع → ادامه با پیش‌نویس */ });
+          }
+          return api('POST', '/parties', partyPayload).then(function (res) {
+            if (res.status >= 200 && res.status < 300) {
+              partyId = res.body.data.id;
+              return { blocked: false };
+            }
+            if (res.status === 409) {
+              /* قبلاً ثبت شده — رکورد قبلی در فرم بارگذاری می‌شود؛ کاربر اصلاح می‌کند و دوباره ثبت می‌زند */
+              var ex = res.body && res.body.error && res.body.error.details && res.body.error.details.existing;
+              if (ex) loadParty(ex);
+              err.textContent = (res.body && res.body.error && res.body.error.message) || 'این مهمان قبلاً ثبت شده است.';
+              return { blocked: true };
+            }
+            err.textContent = (res.body && res.body.error && res.body.error.message) || ('خطای ' + res.status);
+            return { blocked: true };
+          }).catch(function () { return { blocked: false }; /* شبکه قطع → پیش‌نویس */ });
+        }
+
         /* roomTypeId از انتخاب اتاق (کد نوع) — اگر خالی بود اولین نوع از API */
         function send(typeId) {
           body.roomTypeId = typeId;
@@ -382,6 +551,8 @@
             var drafts = JSON.parse(localStorage.getItem('hotel-erp-register-drafts') || '[]');
             drafts.push(Object.assign({ savedAt: new Date().toISOString() }, body, {
               nationalId: fNationalId.value, idDoc: fIdDoc.value, mobile: fMobile.value,
+              natIdentifier: fNatIdentifier.value, economicCode: fEconCode.value, personType: fPersonType.value,
+              postalCode: fPostal.value,
               gender: fGender.value, fatherName: fFather.value, birthDate: fBirth.value,
               nationality: fNat.value || null, toCity: fToCity.value, job: fJob.value,
               travel: fTravel.value, fromCity: fFromCity.value, purpose: fPurpose.value,
@@ -390,19 +561,24 @@
             ok.textContent = 'سرور در دسترس نیست — رجیستر به‌عنوان پیش‌نویس ذخیره شد (پس از اتصال، از اینجا ثبت نهایی می‌شود).';
             return;
           }
-          api('POST', '/pms/reservations', body).then(function (res) {
-            if (res.status >= 200 && res.status < 300) {
-              ok.textContent = '✅ رجیستر ثبت شد — رزرو ' + (res.body.data && res.body.data.code ? Num.toPersian(res.body.data.code) : '') +
-                ' ایجاد شد. برای پذیرش (چک‌این) به تب «رک اتاق‌ها» بروید.';
-            } else {
-              err.textContent = (res.body && res.body.error && res.body.error.message) || ('خطای ' + res.status);
-            }
-          }).catch(function (e) {
-            /* شبکه قطع → پیش‌نویس */
-            var drafts = JSON.parse(localStorage.getItem('hotel-erp-register-drafts') || '[]');
-            drafts.push(Object.assign({ savedAt: new Date().toISOString() }, body));
-            localStorage.setItem('hotel-erp-register-drafts', JSON.stringify(drafts));
-            ok.textContent = 'اتصال قطع شد — پیش‌نویس ذخیره شد.';
+          saveParty().then(function (r) {
+            if (r && r.blocked) return; /* ثبت دوباره مسدود شد — اطلاعات قبلی بارگذاری شد */
+            if (partyId) body.partyId = partyId;
+            api('POST', '/pms/reservations', body).then(function (res) {
+              if (res.status >= 200 && res.status < 300) {
+                ok.textContent = '✅ رجیستر ثبت شد — رزرو ' + (res.body.data && res.body.data.code ? Num.toPersian(res.body.data.code) : '') +
+                  ' ایجاد شد. برای پذیرش (چک‌این) به تب «رک اتاق‌ها» بروید.';
+              } else {
+                err.textContent = (res.body && res.body.error && res.body.error.message) || ('خطای ' + res.status);
+              }
+            }).catch(function (e) {
+              /* شبکه قطع → پیش‌نویس */
+              void e;
+              var drafts = JSON.parse(localStorage.getItem('hotel-erp-register-drafts') || '[]');
+              drafts.push(Object.assign({ savedAt: new Date().toISOString() }, body));
+              localStorage.setItem('hotel-erp-register-drafts', JSON.stringify(drafts));
+              ok.textContent = 'اتصال قطع شد — پیش‌نویس ذخیره شد.';
+            });
           });
         }
         /* پیدا کردن roomTypeId: از select؛ اگر خالی بود اولین نوع از API */

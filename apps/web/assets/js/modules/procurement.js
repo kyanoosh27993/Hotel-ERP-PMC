@@ -99,6 +99,154 @@
       };
       root.appendChild(conn);
 
+      // ── فروشندگان — ثبت یکتا (نیاز کارفرما): جستجوی زنده + اصلاح رکورد قبلی، ثبت دوباره ممنوع ──
+      var supPanel = el('div', 'panel');
+      supPanel.appendChild(el('h3', null, 'فروشندگان — ثبت یکتا (شخص حقوقی: شناسهٔ ملی و کد اقتصادی الزامی)'));
+      var supSearch = el('input', 'input'); supSearch.placeholder = 'جستجوی زندهٔ فروشنده/شخص قبلی… (نام، شناسه ملی، کد اقتصادی، موبایل)';
+      var supBanner = el('div', 'uniq-banner');
+      supBanner.style.display = 'none';
+      var sNameFa = el('input', 'input'); sNameFa.placeholder = 'نام فروشنده (فارسی) *';
+      var sNameEn = el('input', 'input'); sNameEn.placeholder = 'نام لاتین *';
+      var sNatId = el('input', 'input'); sNatId.placeholder = 'شناسهٔ ملی (۱۱ رقم) *'; sNatId.dir = 'ltr';
+      var sEcon = el('input', 'input'); sEcon.placeholder = 'کد اقتصادی (۱۱ تا ۱۴ رقم) *'; sEcon.dir = 'ltr';
+      var sMobile = el('input', 'input'); sMobile.placeholder = 'موبایل'; sMobile.dir = 'ltr';
+      var sPhone = el('input', 'input'); sPhone.placeholder = 'تلفن'; sPhone.dir = 'ltr';
+      var sPostal = el('input', 'input'); sPostal.placeholder = 'کد پستی (۱۰ رقم)'; sPostal.dir = 'ltr';
+      var sAddr = el('input', 'input'); sAddr.placeholder = 'آدرس';
+      var supSave = el('button', 'btn btn-primary', 'ثبت فروشنده جدید');
+      var supMsg = el('div', 'muted');
+      var supPartyId = '';
+      var supList = el('div');
+
+      function resetSupParty() {
+        supPartyId = '';
+        supBanner.style.display = 'none';
+        supSave.textContent = 'ثبت فروشنده جدید';
+      }
+      function loadSupParty(p) {
+        supPartyId = p.id;
+        sNameFa.value = p.companyName || p.displayName || sNameFa.value;
+        sNameEn.value = sNameEn.value || (p.companyName || '');
+        sNatId.value = p.natIdentifier || '';
+        sEcon.value = p.economicCode || '';
+        sMobile.value = p.mobile || '';
+        sPhone.value = p.phone || '';
+        sPostal.value = p.postalCode || '';
+        sAddr.value = p.address || '';
+        supBanner.className = 'uniq-banner';
+        supBanner.textContent = '⚠️ این ' + (p.kindFa || Uniq.KIND_FA[p.kind] || 'فروشنده') +
+          ' قبلاً ثبت شده است (' + Uniq.displayName(p) + ') — اطلاعات قبلی بارگذاری شد؛ فقط «ثبت تغییرات رکورد موجود» مجاز است.';
+        supBanner.style.display = 'block';
+        supSave.textContent = 'ثبت تغییرات رکورد موجود';
+      }
+      Uniq.suggest(supSearch, { onPick: loadSupParty });
+      [sNatId, sEcon, sPostal].forEach(function (inp) {
+        inp.addEventListener('change', function () {
+          var v = Uniq.latinDigits(inp.value).replace(/\D/g, '');
+          var fn = inp === sNatId ? Uniq.legalIdOk : (inp === sEcon ? Uniq.econOk : Uniq.postalOk);
+          if (!v || fn(v)) { inp.style.borderColor = ''; return; }
+          inp.style.borderColor = '#cf222e';
+        });
+      });
+
+      function loadSuppliers() {
+        return api('GET', '/procurement/suppliers').then(function (res) {
+          if (res.status !== 200 || !Array.isArray(res.body)) { supList.textContent = failText(res); return; }
+          supList.innerHTML = '';
+          if (!res.body.length) { supList.appendChild(el('div', 'muted', 'فروشنده‌ای ثبت نشده است.')); return; }
+          var tbl = tableOf(['کد', 'نام', 'موبایل/تلفن', ''], res.body.map(function (s) {
+            var tr = document.createElement('tr');
+            [s.code, s.nameFa, s.phone || '—', ''].forEach(function (c) { var td = el('td', null, c); tr.appendChild(td); });
+            var editBtn = el('button', 'btn', 'اصلاح');
+            editBtn.onclick = function () {
+              resetSupParty();
+              sNameFa.value = s.nameFa; sNameEn.value = s.nameEn || s.nameFa; sPhone.value = s.phone || '';
+              if (s.partyId) {
+                api('GET', '/parties/' + s.partyId).then(function (r2) {
+                  if (r2.status === 200 && r2.body.data) loadSupParty(r2.body.data);
+                });
+              }
+            };
+            tr.lastChild.appendChild(editBtn);
+            return tr;
+          }));
+          supList.appendChild(tbl);
+        });
+      }
+
+      supSave.onclick = function () {
+        supMsg.textContent = '';
+        var natId = Uniq.latinDigits(sNatId.value).replace(/\D/g, '');
+        var econ = Uniq.latinDigits(sEcon.value).replace(/\D/g, '');
+        var post = Uniq.latinDigits(sPostal.value).replace(/\D/g, '');
+        if (!sNameFa.value.trim() || !sNameEn.value.trim()) { supMsg.textContent = '❌ نام فارسی و لاتین فروشنده الزامی است.'; return; }
+        if (!Uniq.legalIdOk(natId)) { supMsg.textContent = '❌ شناسهٔ ملی نامعتبر است — باید ۱۱ رقم با رقم کنترل صحیح باشد.'; sNatId.focus(); return; }
+        if (!Uniq.econOk(econ)) { supMsg.textContent = '❌ کد اقتصادی باید ۱۱ تا ۱۴ رقم باشد.'; sEcon.focus(); return; }
+        if (post && !Uniq.postalOk(post)) { supMsg.textContent = '❌ کد پستی باید ۱۰ رقم معتبر باشد.'; sPostal.focus(); return; }
+        var payload = {
+          kind: 'SUPPLIER',
+          companyName: sNameFa.value.trim(),
+          natIdentifier: natId,
+          economicCode: econ,
+          mobile: Uniq.latinDigits(sMobile.value).replace(/\D/g, '') || undefined,
+          phone: sPhone.value.trim() || undefined,
+          postalCode: post || undefined,
+          address: sAddr.value.trim() || undefined,
+        };
+        function syncSupplier(party) {
+          return api('GET', '/procurement/suppliers').then(function (res) {
+            var rows = (res.status === 200 && Array.isArray(res.body)) ? res.body : [];
+            var linked = rows.find(function (s) { return s.partyId === party.id; });
+            var supBody = { code: linked ? linked.code : 'SUP-' + Date.now().toString(36).slice(-6).toUpperCase(), nameEn: sNameEn.value.trim(), nameFa: sNameFa.value.trim(), phone: sPhone.value.trim() || null, partyId: party.id };
+            var call = linked
+              ? api('PATCH', '/procurement/suppliers/' + linked.code, supBody)
+              : api('POST', '/procurement/suppliers', supBody);
+            return call.then(function (r2) {
+              if (r2.status >= 200 && r2.status < 300) {
+                supMsg.textContent = '✅ اطلاعات فروشنده ذخیره شد (' + (supPartyId ? 'اصلاح رکورد موجود' : 'ثبت جدید') + ') — کد تأمین‌کننده: ' + r2.body.code;
+                resetSupParty();
+                supSearch.value = ''; sNameFa.value = ''; sNameEn.value = ''; sNatId.value = ''; sEcon.value = '';
+                sMobile.value = ''; sPhone.value = ''; sPostal.value = ''; sAddr.value = '';
+                loadSuppliers();
+              } else supMsg.textContent = '❌ ' + failText(r2);
+            });
+          });
+        }
+        if (supPartyId) {
+          api('PATCH', '/parties/' + supPartyId, payload).then(function (res) {
+            if (res.status >= 200 && res.status < 300) syncSupplier(res.body.data);
+            else if (res.status === 409) { var ex = res.body.error && res.body.error.details && res.body.error.details.existing; if (ex) loadSupParty(ex); supMsg.textContent = '❌ ' + (res.body.error ? res.body.error.message : 'رکورد تکراری'); }
+            else supMsg.textContent = '❌ ' + failText(res);
+          }).catch(function () { supMsg.textContent = '❌ خطای شبکه.'; });
+        } else {
+          api('POST', '/parties', payload).then(function (res) {
+            if (res.status >= 200 && res.status < 300) syncSupplier(res.body.data);
+            else if (res.status === 409) {
+              var ex2 = res.body.error && res.body.error.details && res.body.error.details.existing;
+              if (ex2) loadSupParty(ex2);
+              supMsg.textContent = '⚠️ ' + (res.body.error ? res.body.error.message : 'قبلاً ثبت شده') + ' — اطلاعات قبلی بارگذاری شد؛ پس از اصلاح «ثبت تغییرات رکورد موجود» را بزنید.';
+            } else supMsg.textContent = '❌ ' + failText(res);
+          }).catch(function () { supMsg.textContent = '❌ خطای شبکه.'; });
+        }
+      };
+
+      supPanel.appendChild(row('جستجوی یکتا', supSearch));
+      supPanel.appendChild(supBanner);
+      supPanel.appendChild(row('نام فارسی *', sNameFa));
+      supPanel.appendChild(row('نام لاتین *', sNameEn));
+      supPanel.appendChild(row('شناسهٔ ملی *', sNatId));
+      supPanel.appendChild(row('کد اقتصادی *', sEcon));
+      supPanel.appendChild(row('موبایل', sMobile));
+      supPanel.appendChild(row('تلفن', sPhone));
+      supPanel.appendChild(row('کد پستی', sPostal));
+      supPanel.appendChild(row('آدرس', sAddr));
+      supPanel.appendChild(supSave);
+      supPanel.appendChild(supMsg);
+      supPanel.appendChild(el('h4', null, 'فروشنده‌های ثبت‌شده'));
+      supPanel.appendChild(supList);
+      root.appendChild(supPanel);
+      loadSuppliers();
+
       // ── سفارش خرید ──
       var poPanel = el('div', 'panel');
       poPanel.appendChild(el('h3', null, 'سفارش خرید جدید + تأیید (F7-T1)'));

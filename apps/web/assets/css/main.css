@@ -573,3 +573,59 @@ body.reception-mode .content { padding: 0; }
 
 
 
+
+/* ── نیاز یکتایی کارفرما: پیشنهاددهندهٔ زندهٔ مشابه‌ها (uniq.js) ── */
+.uniq-box {
+  position: absolute;
+  z-index: 9999;
+  background: var(--panel, #fff);
+  color: var(--text, #1f2328);
+  border: 1px solid var(--border, #d0d7de);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+  max-height: 280px;
+  overflow-y: auto;
+  font-size: 13px;
+  direction: rtl;
+}
+.uniq-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 7px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(125, 125, 125, .12);
+  flex-wrap: wrap;
+}
+.uniq-row:hover, .uniq-active { background: rgba(9, 105, 218, .08); }
+.uniq-badge {
+  flex: 0 0 auto;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  color: #fff;
+}
+.uniq-k-GUEST { background: #0969da; }
+.uniq-k-SUPPLIER { background: #1a7f37; }
+.uniq-k-COUNTERPARTY { background: #8250df; }
+.uniq-k-OTHER { background: #6e7781; }
+.uniq-name { font-weight: 600; }
+.uniq-name mark { background: #fff8c5; color: inherit; padding: 0 1px; }
+.uniq-meta { color: var(--muted, #656d76); font-size: 12px; flex: 1 1 auto; text-align: left; }
+.uniq-foot {
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--muted, #656d76);
+  background: rgba(125, 125, 125, .06);
+}
+/* نوار «قبلاً ثبت شده» در فرم‌ها */
+.uniq-banner {
+  border: 1px solid #d4a72c;
+  background: #fff8c5;
+  color: #4d2d00;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 6px 0;
+  font-size: 13px;
+}
+.uniq-banner.green { border-color: #1a7f37; background: #dafbe1; color: #116329; }

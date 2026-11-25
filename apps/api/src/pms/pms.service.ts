@@ -25,6 +25,7 @@ export interface PmsReservationInput {
   note?: string;
   nationality?: 'IRANIAN' | 'FOREIGNER'; // تفکیک مهمان ایرانی/خارجی
   rateOverrideRials?: string; // ارقام — نرخ توافقی (گروهی)
+  partyId?: string; // پیوند با ثبت یکتای اشخاص (نیاز یکتایی کارفرما)
 }
 
 export interface CheckInInput {
@@ -184,6 +185,7 @@ export class PmsService {
           children: input.children ?? 0,
           note: input.note,
           nationality: input.nationality ?? null,
+          partyId: input.partyId ?? null,
         },
       });
       await this.outbox.enqueue(tx, {
@@ -367,6 +369,32 @@ export class PmsService {
         for (const r of rooms) {
           if (r.roomTypeId !== reservation.roomTypeId) {
             throw new ConflictException({ code: 'BUSINESS_RULE', message: `Room ${r.code} type does not match reserved room type` });
+          }
+        }
+        // نیاز یکتایی کارفرما — گیت هویتی در گذار رزرو (فعال) → اقامت (آمده):
+        // شخص حقیقی: کد ملی ۱۰ رقم + کد پستی ۱۰ رقم | شخص حقوقی: شناسهٔ ملی + کد اقتصادی | خارجی: سند شناسایی.
+        if (reservation.partyId) {
+          const party = await tx.party.findUnique({ where: { id: reservation.partyId } });
+          if (party) {
+            const missing: string[] = [];
+            const legal = !!(party.natIdentifier || party.economicCode);
+            if (party.nationality === 'FOREIGNER') {
+              if (!party.idDocNo) missing.push('شماره شناسنامه/پاسپورت');
+              if (!party.postalCode) missing.push('کد پستی (۱۰ رقم)');
+            } else if (legal) {
+              if (!party.natIdentifier) missing.push('شناسهٔ ملی (۱۱ رقم)');
+              if (!party.economicCode) missing.push('کد اقتصادی (۱۱ تا ۱۴ رقم)');
+            } else {
+              if (!party.nationalId) missing.push('کد ملی (۱۰ رقم)');
+              if (!party.postalCode) missing.push('کد پستی (۱۰ رقم)');
+            }
+            if (missing.length) {
+              throw new ConflictException({
+                code: 'IDENTITY_INCOMPLETE',
+                message: `برای تبدیل رزرو به اقامت، تکمیل اطلاعات هویتی مهمان الزامی است: ${missing.join('، ')} — در فرم «ثبت مهمان» با تایپ نام/کد ملی، رکورد قبلی را از پیشنهادها بارگذاری کنید، اطلاعات را تکمیل و «ثبت تغییرات» را بزنید.`,
+                details: { partyId: party.id, missing },
+              });
+            }
           }
         }
       }

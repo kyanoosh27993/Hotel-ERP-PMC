@@ -146,6 +146,28 @@
       ['SALE', 'PURCHASE'].forEach(function (t) { var o = el('option'); o.value = t; o.textContent = t === 'SALE' ? 'فروش' : 'خرید'; typeSel.appendChild(o); });
       var nameIn = el('input'); nameIn.placeholder = 'نام طرف معامله';
       var tinIn = el('input'); tinIn.placeholder = 'شناسهٔ ملی/کد اقتصادی (یا - )';
+      /* نیاز یکتایی کارفرما: پیشنهاد زندهٔ طرف‌حساب‌های قبلی با تایپ هر کاراکتر */
+      var cpPartyId = '';
+      Uniq.suggest(nameIn, {
+        onPick: function (p) {
+          cpPartyId = p.id;
+          nameIn.value = p.displayName || nameIn.value;
+          var tin = p.natIdentifier || p.economicCode || p.nationalId || '';
+          if (tin) tinIn.value = tin;
+          regMsg.style.color = '#8250df';
+          regMsg.textContent = '⚠️ این ' + (p.kindFa || 'شخص') + ' قبلاً ثبت شده — اطلاعات قبلی بارگذاری شد؛ ثبت دوباره رکورد انجام نمی‌شود.';
+        },
+      });
+      Uniq.suggest(tinIn, {
+        onPick: function (p) {
+          cpPartyId = p.id;
+          var tin = p.natIdentifier || p.economicCode || p.nationalId || '';
+          if (tin) tinIn.value = tin;
+          nameIn.value = p.displayName || nameIn.value;
+          regMsg.style.color = '#8250df';
+          regMsg.textContent = '⚠️ این ' + (p.kindFa || 'شخص') + ' قبلاً ثبت شده — اطلاعات قبلی بارگذاری شد؛ ثبت دوباره رکورد انجام نمی‌شود.';
+        },
+      });
       var amountIn = el('input'); amountIn.placeholder = 'مبلغ (ریال)';
       var vatIn = el('input'); vatIn.placeholder = 'مالیات (ریال — اختیاری)';
       var dateIn = el('input'); dateIn.placeholder = 'تاریخ میلادی YYYY-MM-DD (داخل بازهٔ فصل)';
@@ -163,6 +185,17 @@
           regBtn.disabled = false;
           if ([200, 201].includes(res.status)) {
             regMsg.style.color = '#1a7f37'; regMsg.textContent = 'ثبت شد ✓';
+            /* نیاز یکتایی کارفرما: طرف معامله در ثبت یکتا هم نگهداری می‌شود (یافتن-یا-ایجاد بی‌صدا) */
+            var tin = Uniq.latinDigits(tinIn.value).replace(/\D/g, '');
+            var cpPayload = { kind: 'COUNTERPARTY', companyName: nameIn.value.trim() };
+            if (tin.length === 11) cpPayload.natIdentifier = tin;
+            else if (tin.length >= 12 && tin.length <= 14) cpPayload.economicCode = tin;
+            else if (tin.length === 10) cpPayload.nationalId = tin;
+            if (nameIn.value.trim()) {
+              api('POST', '/parties/ensure', cpPayload).then(function (r2) {
+                if (r2.status >= 200 && r2.status < 300 && r2.body.data) cpPartyId = r2.body.data.party.id;
+              }).catch(function () { /* ثبت یکتا بی‌صدا — معامله اصلی ثبت شده است */ });
+            }
             loadSummary(); loadList();
           } else { regMsg.style.color = '#cf222e'; regMsg.textContent = failText(res); }
         });

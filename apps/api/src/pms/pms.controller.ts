@@ -161,6 +161,10 @@ export class PmsReservationDto {
   @IsOptional()
   @IsIn(['IRANIAN', 'FOREIGNER'])
   nationality!: 'IRANIAN' | 'FOREIGNER';
+
+  @IsOptional()
+  @IsString()
+  partyId!: string; // پیوند با ثبت یکتای اشخاص (نیاز یکتایی کارفرما)
 }
 
 export class WaitlistDto {
@@ -274,6 +278,7 @@ export class PmsController {
       note: dto.note,
       rateOverrideRials: dto.rateOverrideRials,
       nationality: dto.nationality,
+      partyId: dto.partyId,
     };
     return { data: await this.pms.createReservation(input) };
   }

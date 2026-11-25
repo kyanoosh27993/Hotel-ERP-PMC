@@ -26,7 +26,7 @@ export class ProcurementService {
 
   // ───────────── تأمین‌کننده ─────────────
 
-  async createSupplier(input: { code: string; nameEn: string; nameFa: string; phone?: string | null; ledgerCode?: string }) {
+  async createSupplier(input: { code: string; nameEn: string; nameFa: string; phone?: string | null; ledgerCode?: string; partyId?: string | null }) {
     const row = await this.prisma.supplier.create({
       data: {
         code: input.code,
@@ -34,6 +34,7 @@ export class ProcurementService {
         nameFa: input.nameFa,
         phone: input.phone ?? null,
         ledgerCode: input.ledgerCode ?? '2101',
+        partyId: input.partyId ?? null,
       },
     }).catch((e: { code?: string }) => {
       if (e.code === 'P2002') throw new BadRequestException('کد تأمین‌کننده تکراری است');
@@ -42,15 +43,35 @@ export class ProcurementService {
     return { id: row.id, code: row.code, ledgerCode: row.ledgerCode };
   }
 
+  /** اصلاح فروشندهٔ موجود — نیاز یکتایی: به‌جای ثبت دوباره، رکورد قبلی اصلاح می‌شود */
+  async updateSupplier(code: string, input: { code?: string; nameEn?: string; nameFa?: string; phone?: string | null; ledgerCode?: string; partyId?: string | null }) {
+    const row = await this.prisma.supplier.update({
+      where: { code },
+      data: {
+        ...(input.nameEn ? { nameEn: input.nameEn } : {}),
+        ...(input.nameFa ? { nameFa: input.nameFa } : {}),
+        ...(input.phone !== undefined ? { phone: input.phone ?? null } : {}),
+        ...(input.ledgerCode ? { ledgerCode: input.ledgerCode } : {}),
+        ...(input.partyId !== undefined ? { partyId: input.partyId ?? null } : {}),
+      },
+    }).catch((e: { code?: string }) => {
+      if (e.code === 'P2025') throw new NotFoundException('تأمین‌کننده یافت نشد');
+      throw e;
+    });
+    return { id: row.id, code: row.code, ledgerCode: row.ledgerCode, partyId: row.partyId };
+  }
+
   async listSuppliers() {
     const rows = await this.prisma.supplier.findMany({ orderBy: { code: 'asc' } });
     return rows.map((s) => ({
       id: s.id,
       code: s.code,
       nameFa: s.nameFa,
+      nameEn: s.nameEn,
       phone: s.phone,
       ledgerCode: s.ledgerCode,
       active: s.active,
+      partyId: s.partyId,
     }));
   }
 

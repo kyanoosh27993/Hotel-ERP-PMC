@@ -84,6 +84,9 @@ export const PERMISSIONS = {
   BI_MANAGE: 'bi.manage',
   // موج ۵ — فاز ۱۲ (F12-T4): API Marketplace
   MARKETPLACE_MANAGE: 'marketplace.manage',
+  // نیاز یکتایی کارفرما: ثبت مرکزی اشخاص/شرکت‌ها
+  PARTY_VIEW: 'party.view',
+  PARTY_EDIT: 'party.edit',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -166,6 +169,9 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   { code: PERMISSIONS.BI_VIEW, en: 'View BI dashboards, assistant answers, forecasts and anomalies', fa: 'مشاهدهٔ تحلیل بخش‌ها، پاسخ دستیار، پیش‌بینی‌ها و ناهنجاری‌ها' },
   { code: PERMISSIONS.BI_MANAGE, en: 'Maintain budgets, generate AI document drafts and decide rate suggestions', fa: 'نگهداری بودجه، تولید پیش‌نویس سند هوشمند و تصمیم پیشنهاد نرخ' },
   { code: PERMISSIONS.MARKETPLACE_MANAGE, en: 'Manage marketplace API clients and keys', fa: 'مدیریت کلیدها و مشتریان API عمومی' },
+  // نیاز یکتایی کارفرما — ثبت مرکزی اشخاص/شرکت‌ها
+  { code: PERMISSIONS.PARTY_VIEW, en: 'Search and view unified party registry (guests/suppliers/counterparties)', fa: 'جستجو و مشاهدهٔ ثبت یکتای اشخاص و شرکت‌ها' },
+  { code: PERMISSIONS.PARTY_EDIT, en: 'Create/edit unified party records (duplicate registration is blocked)', fa: 'ثبت/اصلاح رکورد یکتای اشخاص و شرکت‌ها (ثبت دوباره ممنوع است)' },
 ];
 
 /** ماتریس نقش‌ها — مرجع واحد ماتریس دسترسی */
@@ -217,6 +223,9 @@ export const ROLE_MATRIX: Record<
       // موج ۴ — فاز ۱۱
       PERMISSIONS.BI_VIEW,
       PERMISSIONS.BI_MANAGE,
+      // نیاز یکتایی — ثبت مرکزی اشخاص/شرکت‌ها
+      PERMISSIONS.PARTY_VIEW,
+      PERMISSIONS.PARTY_EDIT,
     ],
   },
   approver: {
@@ -275,6 +284,9 @@ export const ROLE_MATRIX: Record<
       // موج ۲ — فاز ۶ (گارسون/پذیرش — بلیت آشپزخانه فقط مشاهده)
       PERMISSIONS.RESTAURANT_VIEW,
       PERMISSIONS.RESTAURANT_ORDER,
+      // نیاز یکتایی — پذیرش کاربر اصلی فرم ثبت مهمان است (جستجوی زنده + اصلاح رکورد)
+      PERMISSIONS.PARTY_VIEW,
+      PERMISSIONS.PARTY_EDIT,
     ],
   },
   housekeeper: {
@@ -326,6 +338,9 @@ export const ROLE_MATRIX: Record<
       PERMISSIONS.PROC_VIEW,
       PERMISSIONS.PROC_CREATE,
       PERMISSIONS.PROC_RECEIVE,
+      // نیاز یکتایی — ثبت مرکزی فروشنده‌ها (تأیید PO همچنان فقط تأییدکننده — تفکیک وظایف حفظ می‌شود)
+      PERMISSIONS.PARTY_VIEW,
+      PERMISSIONS.PARTY_EDIT,
     ],
   },
 };

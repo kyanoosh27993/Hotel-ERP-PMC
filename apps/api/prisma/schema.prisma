@@ -232,6 +232,7 @@ model Reservation {
   children  Int               @default(0)
   note      String?
   nationality String?         // IRANIAN | FOREIGNER — تفکیک مهمان ایرانی/خارجی (درخواست کارفرما)
+  partyId     String?         @db.Uuid // پیوند با ثبت یکتای اشخاص (Party) — گیت هویتی در گذار رزرو→اقامت
   stays     Stay[]
 
   @@index([roomTypeId, checkIn, checkOut, status])
@@ -1426,9 +1427,11 @@ model Supplier {
   phone      String?
   ledgerCode String  @default("2101")
   active     Boolean @default(true)
+  partyId    String? @db.Uuid // پیوند با ثبت یکتای اشخاص (Party kind=SUPPLIER)
 
   orders PurchaseOrder[]
 
+  @@index([partyId])
   @@map("suppliers")
 }
 
@@ -1817,4 +1820,49 @@ model ApiClient {
   updatedAt      DateTime  @updatedAt
 
   @@map("api_clients")
+}
+
+// ── نیاز یکتایی کارفرما: ثبت مرکزی اشخاص و شرکت‌ها (مهمان / فروشنده / طرف حساب / …) ──
+// هر شخص یا شرکت فقط یک بار در کل برنامه ثبت می‌شود؛ ثبت دوباره ممنوع و فقط اصلاح ممکن است.
+enum PartyKind {
+  GUEST
+  SUPPLIER
+  COUNTERPARTY
+  OTHER
+
+  @@map("party_kind")
+}
+
+model Party {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  kind          PartyKind @default(OTHER)
+  firstName     String? // نام
+  lastName      String? // نام خانوادگی
+  companyName   String? // نام شرکت/فروشنده/طرف معامله
+  nationalId    String? // کد ملی (۱۰ رقم)
+  idDocNo       String? // شماره شناسنامه / پاسپورت
+  natIdentifier String? // شناسهٔ ملی شرکت (۱۱ رقم)
+  economicCode  String? // کد اقتصادی (۱۲ رقم)
+  mobile        String? // شماره موبایل
+  phone         String? // تلفن ثابت
+  postalCode    String? // کد پستی
+  address       String?
+  email         String?
+  nationality   String? // IRANIAN | FOREIGNER
+  note          String?
+  active        Boolean   @default(true)
+  createdById   String?   @db.Uuid
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([lastName])
+  @@index([firstName])
+  @@index([companyName])
+  @@index([nationalId])
+  @@index([natIdentifier])
+  @@index([economicCode])
+  @@index([mobile])
+  @@index([postalCode])
+  @@index([kind])
+  @@map("parties")
 }

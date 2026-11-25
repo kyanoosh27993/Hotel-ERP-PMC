@@ -2,7 +2,7 @@
  * procurement.controller.ts — فاز ۷ (موج ۲): مسیرهای نسخه‌دار /api/v1/procurement/...
  * تأیید سفارش خرید فقط با procurement.manage؛ رسید با procurement.receive.
  */
-import { Body, Controller, Get, Param, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { IsArray, IsIn, IsInt, IsNumber, IsOptional, IsString, MaxLength, Min, MinLength } from 'class-validator';
 import { RequirePermissions } from '../iam/permissions.guard';
@@ -35,6 +35,10 @@ export class CreateSupplierDto {
   @IsString()
   @MaxLength(16)
   ledgerCode?: string;
+
+  @IsOptional()
+  @IsString()
+  partyId?: string; // پیوند با ثبت یکتای اشخاص (Party kind=SUPPLIER)
 }
 
 export class RequisitionLineDto {
@@ -121,7 +125,7 @@ export class ProcurementController {
   constructor(private readonly svc: ProcurementService) {}
 
   @Post('suppliers')
-  @RequirePermissions(PERMISSIONS.PROC_MANAGE)
+  @RequirePermissions(PERMISSIONS.PROC_CREATE) // ثبت فروشنده — دادهٔ پایه؛ تأیید PO جدا می‌ماند (تفکیک وظایف)
   createSupplier(@Body() dto: CreateSupplierDto) {
     return this.svc.createSupplier(dto);
   }
@@ -130,6 +134,13 @@ export class ProcurementController {
   @RequirePermissions(PERMISSIONS.PROC_VIEW)
   suppliers() {
     return this.svc.listSuppliers();
+  }
+
+  /** اصلاح فروشندهٔ موجود — ثبت دوباره ممنوع است (نیاز یکتایی) — دادهٔ پایه با PROC_CREATE */
+  @Patch('suppliers/:code')
+  @RequirePermissions(PERMISSIONS.PROC_CREATE)
+  updateSupplier(@Param('code') code: string, @Body() dto: CreateSupplierDto) {
+    return this.svc.updateSupplier(code, dto);
   }
 
   @Post('requisitions')
