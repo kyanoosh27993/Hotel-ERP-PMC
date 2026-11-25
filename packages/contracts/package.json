@@ -1,6 +1,6 @@
 {
   "name": "@hotel-erp/contracts",
-  "version": "2.0.0",
+  "version": "3.1.0",
   "private": true,
   "description": "قراردادهای بین‌ماژولی: رویدادهای دامنه‌ای، payloadها و درگاه‌های سرویس (نسخه‌دار)",
   "main": "dist/index.js",
