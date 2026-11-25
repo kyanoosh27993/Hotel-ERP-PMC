@@ -60,33 +60,7 @@
   }
 
   function connPanel(root, rerender) {
-    var panel = el('div', 'panel');
-    panel.appendChild(el('h3', null, 'اتصال به سرور (مدیر/حسابدار)'));
-    var baseIn = el('input', 'input'); baseIn.placeholder = 'آدرس API'; baseIn.value = apiBase();
-    var userIn = el('input', 'input'); userIn.placeholder = 'نام کاربری (admin/accountant)';
-    var passIn = el('input', 'input'); passIn.type = 'password'; passIn.placeholder = 'گذرواژه';
-    var totpIn = el('input', 'input'); totpIn.placeholder = 'کد TOTP (نقش حساس)';
-    var btn = el('button', 'btn btn-primary', 'ورود و ذخیره توکن');
-    var msg = el('div', 'muted', 'ورود با نقش مدیر/حسابدار — توکن در حافظهٔ مرورگر ذخیره می‌شود.');
-    panel.appendChild(row('آدرس API', baseIn));
-    panel.appendChild(row('کاربر', userIn));
-    panel.appendChild(row('گذرواژه', passIn));
-    panel.appendChild(row('TOTP', totpIn));
-    panel.appendChild(btn);
-    panel.appendChild(msg);
-    btn.onclick = function () {
-      localStorage.setItem(API_BASE_KEY, baseIn.value.trim());
-      var body = { username: userIn.value.trim(), password: passIn.value };
-      if (totpIn.value.trim()) body.totp = totpIn.value.trim();
-      api('POST', '/auth/login', body).then(function (res) {
-        if (res.status === 200 || res.status === 201) {
-          localStorage.setItem(TOKEN_KEY, res.body.accessToken);
-          msg.textContent = '✅ ورود موفق — توکن ذخیره شد.';
-          rerender();
-        } else msg.textContent = '❌ ورود ناموفق: ' + failText(res);
-      });
-    };
-    root.appendChild(panel);
+    root.appendChild(App.sessionPanel());
   }
 
   function budgetPanel(root) {

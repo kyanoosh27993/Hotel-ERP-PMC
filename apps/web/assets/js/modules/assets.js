@@ -69,34 +69,7 @@
       var self = this;
 
       // ── اتصال ──
-      var conn = el('div', 'panel');
-      conn.appendChild(el('h3', null, 'اتصال به سرور (نقش مدیر/حسابدار)'));
-      var baseIn = el('input', 'input'); baseIn.value = apiBase();
-      var userIn = el('input', 'input'); userIn.placeholder = 'نام کاربری (admin)';
-      var passIn = el('input', 'input'); passIn.type = 'password'; passIn.placeholder = 'گذرواژه';
-      var totpIn = el('input', 'input'); totpIn.placeholder = 'کد TOTP (نقش حساس)';
-      var loginBtn = el('button', 'btn btn-primary', 'ورود و ذخیره توکن');
-      var connMsg = el('div', 'muted');
-      conn.appendChild(row('آدرس API', baseIn));
-      conn.appendChild(row('کاربر', userIn));
-      conn.appendChild(row('گذرواژه', passIn));
-      conn.appendChild(row('TOTP', totpIn));
-      conn.appendChild(loginBtn);
-      conn.appendChild(connMsg);
-      loginBtn.onclick = function () {
-        localStorage.setItem(API_BASE_KEY, baseIn.value.trim());
-        var body = { username: userIn.value.trim(), password: passIn.value };
-        if (totpIn.value.trim()) body.totp = totpIn.value.trim();
-        api('POST', '/auth/login', body).then(function (res) {
-          if (res.status === 200 || res.status === 201) {
-            localStorage.setItem(TOKEN_KEY, res.body.accessToken);
-            connMsg.textContent = '✅ ورود موفق.';
-            root.innerHTML = '';
-            self.render(root);
-          } else connMsg.textContent = '❌ ' + failText(res);
-        });
-      };
-      root.appendChild(conn);
+      root.appendChild(App.sessionPanel());
 
       // ── ثبت دارایی ──
       var regPanel = el('div', 'panel');

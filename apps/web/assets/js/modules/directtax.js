@@ -49,34 +49,7 @@
 
   /** فرم ورود خودِ ماژول — کاربر مالی بدون رفتن به ماژول دیگر وارد می‌شود */
   function connPanel(root, rerender) {
-    var panel = el('div', 'panel');
-    panel.appendChild(el('h3', '', 'اتصال به سرور (حسابدار/تأییدکننده/مدیر)'));
-    var baseIn = el('input'); baseIn.placeholder = 'آدرس API'; baseIn.value = apiBase();
-    var userIn = el('input'); userIn.placeholder = 'نام کاربری (admin/accountant/approver)';
-    var passIn = el('input'); passIn.type = 'password'; passIn.placeholder = 'گذرواژه';
-    var totpIn = el('input'); totpIn.placeholder = 'کد TOTP (نقش حساس)';
-    var btn = el('button', 'btn btn-primary', 'ورود و ذخیره توکن');
-    var msg = el('div', 'muted', 'توکن در حافظهٔ مرورگر ذخیره می‌شود.');
-    function rw(l, i) { var w = el('div'); w.style.cssText = 'display:flex;gap:8px;align-items:center;margin:6px 0;'; w.appendChild(el('label', null, l)); w.appendChild(i); return w; }
-    panel.appendChild(rw('آدرس API', baseIn));
-    panel.appendChild(rw('کاربر', userIn));
-    panel.appendChild(rw('گذرواژه', passIn));
-    panel.appendChild(rw('TOTP', totpIn));
-    panel.appendChild(btn);
-    panel.appendChild(msg);
-    btn.onclick = function () {
-      localStorage.setItem(API_BASE_KEY, baseIn.value.trim());
-      var body = { username: userIn.value.trim(), password: passIn.value };
-      if (totpIn.value.trim()) body.totp = totpIn.value.trim();
-      api('POST', '/auth/login', body).then(function (res) {
-        if (res.status === 200 || res.status === 201) {
-          localStorage.setItem(TOKEN_KEY, res.body.accessToken);
-          msg.textContent = '✅ ورود موفق — توکن ذخیره شد.';
-          rerender();
-        } else msg.textContent = '❌ ورود ناموفق: ' + failText(res);
-      });
-    };
-    root.appendChild(panel);
+    root.appendChild(App.sessionPanel());
   }
 
   Modules.directtax = {

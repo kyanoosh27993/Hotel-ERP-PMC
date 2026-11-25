@@ -129,12 +129,11 @@
   function renderLive(root) {
     var panel = el('div', 'panel');
     panel.appendChild(el('h3', null, 'پنل زنده سرور — KPI از کوئری واقعی (فاز ۳)'));
+    /* SSO (نسخهٔ ۳٫۳): توکن و آدرس از نشست مشترک شل — بدون فرم دستی */
     var row = el('div', 'live-controls');
     row.style.display = 'flex'; row.style.gap = '8px'; row.style.flexWrap = 'wrap'; row.style.margin = '8px 0';
-    var baseIn = el('input', 'input'); baseIn.value = apiBase(); baseIn.placeholder = 'آدرس API';
-    var tokIn = el('input', 'input'); tokIn.value = apiToken(); tokIn.placeholder = 'توکن JWT'; tokIn.type = 'password';
-    var btn = el('button', 'btn', 'بارگذاری پنل‌ها');
-    row.appendChild(baseIn); row.appendChild(tokIn); row.appendChild(btn);
+    var btn = el('button', 'btn', 'بارگذاری مجدد پنل‌ها');
+    row.appendChild(btn);
     panel.appendChild(row);
     var status = el('div', 'muted', 'مقادیر از GET /dashboards/{ceo,finance,restaurant,housekeeping} خوانده می‌شود — هیچ عددی هاردکد نیست.');
     panel.appendChild(status);
@@ -143,8 +142,6 @@
     root.appendChild(panel);
 
     btn.addEventListener('click', function () {
-      localStorage.setItem(API_BASE_KEY, baseIn.value.trim());
-      localStorage.setItem(TOKEN_KEY, tokIn.value.trim());
       load();
     });
 
@@ -218,6 +215,7 @@
     title: 'داشبورد مدیر AI',
     render: function (root) {
       renderLive(root);
+      if (apiToken()) load(); /* SSO — بارگذاری خودکار با نشست مشترک */
       seedReports();
       root.appendChild(el('h2', null, 'داشبورد مدیریتی — تحلیل هوش مصنوعی آفلاین'));
       root.appendChild(el('p', 'muted', 'مدیر (AI) گزارش روزانه بخش‌ها (کارمندان) را دریافت، تجزیه‌وتحلیل و به‌صورت KPI و پیشنهاد بهبود ارائه می‌کند.'));

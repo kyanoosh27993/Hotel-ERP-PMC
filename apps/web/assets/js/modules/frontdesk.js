@@ -53,35 +53,7 @@
       root.appendChild(el('h2', null, 'پذیرش و رزرواسیون — فاز ۴'));
 
       // ── اتصال و ورود ──
-      var conn = el('div', 'panel');
-      conn.appendChild(el('h3', null, 'اتصال به سرور'));
-      var baseIn = el('input', 'input'); baseIn.value = apiBase();
-      var userIn = el('input', 'input'); userIn.placeholder = 'نام کاربری (مثلاً frontdesk)';
-      var passIn = el('input', 'input'); passIn.type = 'password'; passIn.placeholder = 'گذرواژه';
-      var totpIn = el('input', 'input'); totpIn.placeholder = 'کد TOTP (فقط نقش حساس)';
-      var loginBtn = el('button', 'btn btn-primary', 'ورود و ذخیره توکن');
-      var connMsg = el('div', 'muted', 'ورود با نقش پذیرش/خانه‌دار/مدیر — توکن در حافظه مرورگر ذخیره می‌شود.');
-      conn.appendChild(row('آدرس API', baseIn));
-      conn.appendChild(row('کاربر', userIn));
-      conn.appendChild(row('گذرواژه', passIn));
-      conn.appendChild(row('TOTP', totpIn));
-      conn.appendChild(loginBtn);
-      conn.appendChild(connMsg);
-      loginBtn.onclick = function () {
-        localStorage.setItem(API_BASE_KEY, baseIn.value.trim());
-        var body = { username: userIn.value.trim(), password: passIn.value };
-        if (totpIn.value.trim()) body.totp = totpIn.value.trim();
-        api('POST', '/auth/login', body).then(function (res) {
-          if (res.status === 200 || res.status === 201) {
-            localStorage.setItem(TOKEN_KEY, res.body.accessToken);
-            connMsg.textContent = '✅ ورود موفق — توکن ذخیره شد.';
-            Modules.frontdesk.render(rootClear(root));
-          } else {
-            connMsg.textContent = '❌ ورود ناموفق: ' + failText(res);
-          }
-        });
-      };
-      root.appendChild(conn);
+      root.appendChild(App.sessionPanel());
 
       var status = el('div', 'muted', '');
       root.appendChild(status);

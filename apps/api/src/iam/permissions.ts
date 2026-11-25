@@ -87,9 +87,111 @@ export const PERMISSIONS = {
   // نیاز یکتایی کارفرما: ثبت مرکزی اشخاص/شرکت‌ها
   PARTY_VIEW: 'party.view',
   PARTY_EDIT: 'party.edit',
+  // نسخهٔ ۳٫۳ — مدیریت کاربران، گروه‌های کاربری و ماتریس دسترسی (درخواست کارفرما)
+  USERS_MANAGE: 'users.manage',
 } as const;
 
 export type PermissionCode = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
+
+/**
+ * گروه‌بندی ماژول‌ها برای ماتریس دسترسی UI (الگوی کارفرما — عکس ۲-۲: انتخاب ماژول، تنظیم دسترسی هر جزء).
+ * ترتیب آرایه = ترتیب نمایش در شل وب.
+ */
+export const MODULE_GROUPS: Array<{ key: string; fa: string; en: string; codes: PermissionCode[] }> = [
+  {
+    key: 'frontdesk', fa: 'پذیرش و رزرواسیون', en: 'Front Desk & Reservations', codes: [
+      PERMISSIONS.RESERVATION_VIEW, PERMISSIONS.RESERVATION_CREATE, PERMISSIONS.ROOM_VIEW, PERMISSIONS.ROOM_UPDATE,
+      PERMISSIONS.STAY_CHECKIN, PERMISSIONS.STAY_CHECKOUT, PERMISSIONS.NIGHT_AUDIT_RUN,
+    ],
+  },
+  {
+    key: 'restaurant', fa: 'رستوران و POS', en: 'Restaurant & POS', codes: [
+      PERMISSIONS.RESTAURANT_VIEW, PERMISSIONS.RESTAURANT_ORDER, PERMISSIONS.RESTAURANT_KDS,
+      PERMISSIONS.POS_ORDER_CREATE, PERMISSIONS.POS_DISCOUNT,
+    ],
+  },
+  {
+    key: 'treasury', fa: 'خزانه‌داری و صندوق', en: 'Treasury', codes: [
+      PERMISSIONS.TREASURY_VIEW, PERMISSIONS.TREASURY_TXN_CREATE, PERMISSIONS.TREASURY_SHIFT_MANAGE,
+      PERMISSIONS.TREASURY_VOID, PERMISSIONS.TREASURY_RECONCILE,
+    ],
+  },
+  {
+    key: 'housekeeping', fa: 'خانه‌داری، تعمیرات و لاندری', en: 'Housekeeping & Maintenance', codes: [
+      PERMISSIONS.HOUSEKEEPING_UPDATE, PERMISSIONS.HOUSEKEEPING_TASK, PERMISSIONS.HOUSEKEEPING_INSPECT,
+      PERMISSIONS.MAINTENANCE_REPORT, PERMISSIONS.MAINTENANCE_MANAGE,
+      PERMISSIONS.LAUNDRY_MANAGE, PERMISSIONS.LOSTFOUND_MANAGE,
+    ],
+  },
+  {
+    key: 'assets', fa: 'دارایی ثابت و خدمات جانبی', en: 'Fixed Assets & Ancillary', codes: [
+      PERMISSIONS.ASSET_VIEW, PERMISSIONS.ASSET_MANAGE, PERMISSIONS.ASSET_DEPRECIATE, PERMISSIONS.ANCILLARY_ORDER,
+    ],
+  },
+  {
+    key: 'procurement', fa: 'خرید و تدارکات', en: 'Procurement', codes: [
+      PERMISSIONS.PROC_VIEW, PERMISSIONS.PROC_CREATE, PERMISSIONS.PROC_MANAGE, PERMISSIONS.PROC_RECEIVE,
+    ],
+  },
+  {
+    key: 'stores', fa: 'انبار و کاست کنترل', en: 'Stores & Inventory', codes: [
+      PERMISSIONS.STORES_VIEW, PERMISSIONS.STORES_MANAGE, PERMISSIONS.STORES_COUNT,
+    ],
+  },
+  {
+    key: 'accounting', fa: 'حسابداری مالی', en: 'Financial Accounting', codes: [
+      PERMISSIONS.JOURNAL_VIEW, PERMISSIONS.JOURNAL_CREATE_DRAFT, PERMISSIONS.JOURNAL_EDIT_DRAFT,
+      PERMISSIONS.JOURNAL_SUBMIT, PERMISSIONS.JOURNAL_APPROVE, PERMISSIONS.JOURNAL_REVERSE,
+      PERMISSIONS.SENSITIVE_ACCOUNTS_EDIT, PERMISSIONS.PERIOD_LOCK, PERMISSIONS.PERIOD_CLOSE,
+    ],
+  },
+  {
+    key: 'payroll', fa: 'حقوق و دستمزد', en: 'Payroll & HR', codes: [
+      PERMISSIONS.PERSONNEL_VIEW, PERMISSIONS.PERSONNEL_EDIT, PERMISSIONS.PAYROLL_VIEW,
+      PERMISSIONS.PAYROLL_CALCULATE, PERMISSIONS.PAYROLL_APPROVE,
+    ],
+  },
+  {
+    key: 'compliance', fa: 'انطباق ایران (مؤدیان، مالیات)', en: 'Iran Compliance', codes: [
+      PERMISSIONS.LAW_VIEW, PERMISSIONS.LAW_MANAGE, PERMISSIONS.INVOICE_VIEW, PERMISSIONS.INVOICE_MANAGE,
+      PERMISSIONS.INVOICE_SEND, PERMISSIONS.QUARTERLY_VIEW, PERMISSIONS.QUARTERLY_MANAGE,
+      PERMISSIONS.DIRECTTAX_VIEW, PERMISSIONS.DIRECTTAX_MANAGE,
+    ],
+  },
+  {
+    key: 'bi', fa: 'BI و هوش مصنوعی', en: 'BI & AI', codes: [
+      PERMISSIONS.BI_VIEW, PERMISSIONS.BI_MANAGE,
+    ],
+  },
+  {
+    key: 'workflow', fa: 'گردش کار تأیید', en: 'Approval Workflow', codes: [
+      PERMISSIONS.WORKFLOW_VIEW, PERMISSIONS.WORKFLOW_ACT, PERMISSIONS.WORKFLOW_MANAGE,
+    ],
+  },
+  {
+    key: 'parties', fa: 'ثبت یکتای اشخاص و شرکت‌ها', en: 'Unified Party Registry', codes: [
+      PERMISSIONS.PARTY_VIEW, PERMISSIONS.PARTY_EDIT,
+    ],
+  },
+  {
+    key: 'oversight', fa: 'مدیریت و نظارت', en: 'Management & Oversight', codes: [
+      PERMISSIONS.DASHBOARD_CEO_VIEW, PERMISSIONS.AUDIT_VIEW, PERMISSIONS.INTEGRATIONS_VIEW,
+      PERMISSIONS.MARKETPLACE_MANAGE,
+    ],
+  },
+  {
+    key: 'users', fa: 'کاربران و گروه‌های کاربری', en: 'Users & Groups', codes: [
+      PERMISSIONS.USERS_MANAGE,
+    ],
+  },
+];
+
+/** همهٔ مجوزهای کاتالوگ باید در گروه‌های ماژول هم باشند (سوییچ تست‌ها این را چک می‌کند) */
+export function assertCatalogCovered(): void {
+  const grouped = new Set(MODULE_GROUPS.flatMap((g) => g.codes));
+  const missing = PERMISSION_CATALOG.filter((p) => !grouped.has(p.code)).map((p) => p.code);
+  if (missing.length) throw new Error('Permissions missing from MODULE_GROUPS: ' + missing.join(', '));
+}
 
 export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: string }> = [
   { code: PERMISSIONS.JOURNAL_VIEW, en: 'View journal entries', fa: 'مشاهده اسناد حسابداری' },
@@ -172,6 +274,8 @@ export const PERMISSION_CATALOG: Array<{ code: PermissionCode; en: string; fa: s
   // نیاز یکتایی کارفرما — ثبت مرکزی اشخاص/شرکت‌ها
   { code: PERMISSIONS.PARTY_VIEW, en: 'Search and view unified party registry (guests/suppliers/counterparties)', fa: 'جستجو و مشاهدهٔ ثبت یکتای اشخاص و شرکت‌ها' },
   { code: PERMISSIONS.PARTY_EDIT, en: 'Create/edit unified party records (duplicate registration is blocked)', fa: 'ثبت/اصلاح رکورد یکتای اشخاص و شرکت‌ها (ثبت دوباره ممنوع است)' },
+  // نسخهٔ ۳٫۳ — مدیریت کاربران/گروه‌ها/ماتریس دسترسی
+  { code: PERMISSIONS.USERS_MANAGE, en: 'Manage users, user groups and the permission matrix', fa: 'مدیریت کاربران، گروه‌های کاربری و ماتریس دسترسی' },
 ];
 
 /** ماتریس نقش‌ها — مرجع واحد ماتریس دسترسی */

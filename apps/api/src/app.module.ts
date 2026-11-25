@@ -25,6 +25,7 @@ import { WorkflowModule } from './workflow/workflow.module';
 import { BiModule } from './bi/bi.module';
 import { MarketplaceModule } from './marketplace/marketplace.controller';
 import { PartiesModule } from './parties/parties.module';
+import { AdminModule } from './admin/admin.module';
 import { IntegrationHubService, AttendanceSimAdapter } from './integration/integration-hub.service';
 import { IntegrationController } from './integration/integration.controller';
 import { HealthController } from './health/health.controller';
@@ -55,6 +56,7 @@ import { MetricsController } from './health/metrics.controller';
     BiModule,
     MarketplaceModule,
     PartiesModule,
+    AdminModule,
   ],
   controllers: [HealthController, MetricsController, IntegrationController],
   providers: [

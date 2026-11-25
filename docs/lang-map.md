@@ -28,6 +28,7 @@
 | ۷ | حقوق/دستمزد | `payroll/` | personnel, pay_orders, payslips | `07-payroll.mjs` |
 | ۸ | دارایی/خزانه/خدمات | `assets/` `treasury/` `ancillary/` | fixed_assets, cash_accounts, ancillary_orders | `08-treasury.mjs` |
 | ۹ | داشبوردها | `dashboard/` | (فقط خواندن) | `09-dashboards.mjs` |
+| ۱۷ | کاربران/گروه‌ها/ماتریس دسترسی (v3.3) | `admin/` `iam/` | users, roles, permissions, user_roles, role_permissions, audit_logs | `17-admin.mjs` |
 
 ## قانون طلایی هنگام تست
 

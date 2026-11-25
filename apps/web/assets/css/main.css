@@ -629,3 +629,23 @@ body.reception-mode .content { padding: 0; }
   font-size: 13px;
 }
 .uniq-banner.green { border-color: #1a7f37; background: #dafbe1; color: #116329; }
+
+/* ── نسخهٔ ۳٫۳ — SSO نشست مشترک + مدیریت کاربران/گروه‌ها ── */
+.topbar-user { display: flex; gap: 8px; align-items: center; }
+.user-chip {
+  font-size: .8rem; color: var(--header-text); background: rgba(125, 125, 125, .14);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 4px 10px; max-width: 320px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.btn-logout { padding: 4px 10px; font-size: .8rem; }
+.session-panel { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: .88rem; }
+.users-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.login-totp { letter-spacing: 2px; font-family: var(--font-number, monospace); }
+.matrix-module h4 { margin-bottom: 4px; color: var(--primary); }
+.matrix-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); font-size: .86rem; }
+.matrix-check { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+.matrix-check input { width: auto; }
+@media (max-width: 640px) {
+  .user-chip { max-width: 150px; }
+  .topbar-clock { display: none; }
+}

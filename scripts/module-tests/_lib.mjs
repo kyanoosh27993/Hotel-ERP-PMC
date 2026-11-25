@@ -65,9 +65,24 @@ export async function ensureParty(token, name = 'مهمان تست') {
 }
 
 export async function login(username, withTotp) {
-  const r = await req('POST', '/auth/login', { body: { username, password: PASSWORD, ...(withTotp ? { totp: totp() } : {}) } });
-  if (r.status !== 200 && r.status !== 201) throw new Error(`login failed ${username}: ${r.status} ${JSON.stringify(r.json)}`);
-  return r.json.accessToken;
+  // محدودسازی نرخ ورود (۱۵/دقیقه) — در رگرسیون مکرر، روی 429 تا باز شدن پنجره تلاش مجدد می‌شود
+  for (let i = 0; i < 6; i++) {
+    const r = await req('POST', '/auth/login', { body: { username, password: PASSWORD, ...(withTotp ? { totp: totp() } : {}) } });
+    if (r.status === 429) { await sleep(20000); continue; }
+    if (r.status !== 200 && r.status !== 201) throw new Error(`login failed ${username}: ${r.status} ${JSON.stringify(r.json)}`);
+    return r.json.accessToken;
+  }
+  throw new Error(`login rate-limited repeatedly: ${username}`);
+}
+
+/** ورود خام برای سناریوهای «انتظار خطا» — 429 را با صبر حل می‌کند */
+export async function tryLogin(username, password) {
+  for (let i = 0; i < 6; i++) {
+    const r = await req('POST', '/auth/login', { body: { username, password } });
+    if (r.status === 429) { await sleep(20000); continue; }
+    return r;
+  }
+  return { status: 429, json: null };
 }
 
 // انتظار سند خودکار از صف outbox

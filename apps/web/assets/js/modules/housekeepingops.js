@@ -71,30 +71,7 @@
       var self = this;
 
       // ── اتصال ──
-      var conn = el('div', 'panel');
-      conn.appendChild(el('h3', null, 'اتصال به سرور (نقش خانه‌دار/پذیرش/مدیر)'));
-      var baseIn = el('input', 'input'); baseIn.value = apiBase();
-      var userIn = el('input', 'input'); userIn.placeholder = 'نام کاربری (مثلاً housekeeper)';
-      var passIn = el('input', 'input'); passIn.type = 'password'; passIn.placeholder = 'گذرواژه';
-      var loginBtn = el('button', 'btn btn-primary', 'ورود و ذخیره توکن');
-      var connMsg = el('div', 'muted');
-      conn.appendChild(row('آدرس API', baseIn));
-      conn.appendChild(row('کاربر', userIn));
-      conn.appendChild(row('گذرواژه', passIn));
-      conn.appendChild(loginBtn);
-      conn.appendChild(connMsg);
-      loginBtn.onclick = function () {
-        localStorage.setItem(API_BASE_KEY, baseIn.value.trim());
-        api('POST', '/auth/login', { username: userIn.value.trim(), password: passIn.value }).then(function (res) {
-          if (res.status === 200 || res.status === 201) {
-            localStorage.setItem(TOKEN_KEY, res.body.accessToken);
-            connMsg.textContent = '✅ ورود موفق.';
-            root.innerHTML = '';
-            self.render(root);
-          } else connMsg.textContent = '❌ ' + failText(res);
-        });
-      };
-      root.appendChild(conn);
+      root.appendChild(App.sessionPanel());
 
       // ── وظایف ──
       var taskPanel = el('div', 'panel');

@@ -6,7 +6,7 @@
 import { PrismaClient, Prisma } from '@prisma/client';
 import { randomBytes } from 'node:crypto';
 import { argon2id } from 'hash-wasm';
-import { PERMISSIONS, PERMISSION_CATALOG, ROLE_MATRIX } from '../src/iam/permissions';
+import { PERMISSIONS, PERMISSION_CATALOG, ROLE_MATRIX, assertCatalogCovered } from '../src/iam/permissions';
 
 const prisma = new PrismaClient();
 
@@ -24,6 +24,8 @@ async function hash(plain: string): Promise<string> {
 }
 
 async function main() {
+  assertCatalogCovered(); // هر مجوز کاتالوگ باید در گروه‌های ماژول (ماتریس UI نسخهٔ ۳٫۳) پوشش داده شود
+
   // ── مجوزها ──
   for (const p of PERMISSION_CATALOG) {
     await prisma.permission.upsert({
@@ -40,8 +42,8 @@ async function main() {
   for (const [name, def] of Object.entries(ROLE_MATRIX)) {
     const role = await prisma.role.upsert({
       where: { name },
-      update: { displayNameEn: def.en, displayNameFa: def.fa, sensitiveMfa: def.sensitiveMfa },
-      create: { name, displayNameEn: def.en, displayNameFa: def.fa, sensitiveMfa: def.sensitiveMfa },
+      update: { displayNameEn: def.en, displayNameFa: def.fa, sensitiveMfa: def.sensitiveMfa, isSystem: true },
+      create: { name, displayNameEn: def.en, displayNameFa: def.fa, sensitiveMfa: def.sensitiveMfa, isSystem: true },
     });
     for (const code of def.permissions) {
       const permissionId = permByCode.get(code);
@@ -55,9 +57,13 @@ async function main() {
     }
   }
   // حذف تخصیص‌هایی که دیگر در ماتریس نیستند (مثلاً نقش تغییر یافته در نسخهٔ جدید)
+  // نسخهٔ ۳٫۳: ماتریسِ دستکاری‌شده از UI (matrixOverridden) هرگز با seed بازنویسی نمی‌شود
+  const overriddenRoleIds = new Set(
+    (await prisma.role.findMany({ where: { matrixOverridden: true }, select: { id: true } })).map((r) => r.id),
+  );
   const allRolePerms = await prisma.rolePermission.findMany({ select: { roleId: true, permissionId: true } });
   for (const rp of allRolePerms) {
-    if (!expectedPairs.has(`${rp.roleId}:${rp.permissionId}`)) {
+    if (!expectedPairs.has(`${rp.roleId}:${rp.permissionId}`) && !overriddenRoleIds.has(rp.roleId)) {
       await prisma.rolePermission.delete({
         where: { roleId_permissionId: { roleId: rp.roleId, permissionId: rp.permissionId } },
       });

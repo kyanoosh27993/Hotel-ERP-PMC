@@ -1,27 +1,39 @@
 // 01-auth.mjs — لایه ۱ / ماژول ۱: احراز هویت، MFA، چرخش refresh، RBAC
-import { Suite, req, login, db, PASSWORD, totp } from './_lib.mjs';
+import { Suite, req, login, tryLogin, db, PASSWORD, totp } from './_lib.mjs';
 
 const S = new Suite('01-auth');
 
 // ── ورود موفق همهٔ کاربران seed (۳ نقش حساس با TOTP) ──
 const tokens = {};
 for (const [u, t] of [['admin', true], ['accountant', true], ['approver', true], ['frontdesk', false], ['cashier', false], ['chef', false], ['storekeeper', false], ['housekeeper', false]]) {
-  const r = await req('POST', '/auth/login', { body: { username: u, password: PASSWORD, ...(t ? { totp: totp() } : {}) } });
-  S.step(`ورود ${u} (${t ? 'با TOTP' : 'بدون TOTP'})`, r.status === 200 || r.status === 201, `status=${r.status}`);
-  tokens[u] = r.json?.accessToken;
-  if (t) S[`refresh_${u}`] = r.json?.refreshToken;
+  // مقاوم به 429: tryLogin روی محدودسازی نرخ صبر و تلاش مجدد می‌کند؛ نقش حساس در همان حلقه با TOTP
+  let res = null;
+  for (let i = 0; i < 6; i++) {
+    const r = await req('POST', '/auth/login', { body: { username: u, password: PASSWORD, ...(t ? { totp: totp() } : {}) } });
+    if (r.status === 429) { await new Promise((x) => setTimeout(x, 20000)); continue; }
+    res = r;
+    break;
+  }
+  S.step(`ورود ${u} (${t ? 'با TOTP' : 'بدون TOTP'})`, res && (res.status === 200 || res.status === 201), `status=${res?.status}`);
+  tokens[u] = res?.json?.accessToken;
+  if (t) S[`refresh_${u}`] = res?.json?.refreshToken;
 }
 
 // ── رمز غلط → 401 ──
-const bad = await req('POST', '/auth/login', { body: { username: 'frontdesk', password: 'totally-wrong-pass' } });
+const bad = await tryLogin('frontdesk', 'totally-wrong-pass');
 S.step('رمز نادرست → 401', bad.status === 401, `status=${bad.status}`);
 
 // ── نقش حساس بدون TOTP → رد ──
-const noTotp = await req('POST', '/auth/login', { body: { username: 'admin', password: PASSWORD } });
+const noTotp = await tryLogin('admin', PASSWORD);
 S.step('مدیرعامل بدون TOTP → رد (400/401/403)', [400, 401, 403].includes(noTotp.status), `status=${noTotp.status}`);
 
 // ── TOTP اشتباه → رد ──
-const wrongTotp = await req('POST', '/auth/login', { body: { username: 'admin', password: PASSWORD, totp: '000000' } });
+let wrongTotp = null;
+for (let i = 0; i < 6; i++) {
+  wrongTotp = await req('POST', '/auth/login', { body: { username: 'admin', password: PASSWORD, totp: '000000' } });
+  if (wrongTotp.status === 429) { await new Promise((x) => setTimeout(x, 20000)); continue; }
+  break;
+}
 S.step('TOTP اشتباه → رد', [400, 401, 403].includes(wrongTotp.status), `status=${wrongTotp.status}`);
 
 // ── /auth/me با توکن معتبر و بدون توکن ──
@@ -41,7 +53,12 @@ S.step('استفادهٔ مجدد از توکن مصرف‌شده → 401 + اب
 const r3 = await req('POST', '/auth/refresh', { body: { refreshToken: r1.json?.refreshToken } });
 S.step('توکن تازهٔ زنجیرهٔ ابطال‌شده هم رد می‌شود (سیاست ضدسرقت)', [401, 403].includes(r3.status), `status=${r3.status}`);
 // چرخش عادی: ورود تازه → refresh → موفق
-const freshLogin = await req('POST', '/auth/login', { body: { username: 'admin', password: PASSWORD, totp: totp() } });
+let freshLogin = null;
+for (let i = 0; i < 6; i++) {
+  freshLogin = await req('POST', '/auth/login', { body: { username: 'admin', password: PASSWORD, totp: totp() } });
+  if (freshLogin.status === 429) { await new Promise((x) => setTimeout(x, 20000)); continue; }
+  break;
+}
 const r4 = await req('POST', '/auth/refresh', { body: { refreshToken: freshLogin.json?.refreshToken } });
 S.step('چرخش عادی با زنجیرهٔ تازه → موفق', [200, 201].includes(r4.status) && !!r4.json?.refreshToken, `status=${r4.status}`);
 

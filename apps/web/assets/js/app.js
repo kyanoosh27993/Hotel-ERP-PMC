@@ -50,6 +50,7 @@
     { id: 'workflow', title: 'گردش کار تأیید (فاز ۸)', icon: '✅' },
     { id: 'calendar', title: 'تقویم شمسی', icon: '📅' },
     { id: 'payroll', title: 'حقوق و دستمزد', icon: '₪' },
+    { id: 'users', title: 'کاربران و گروه‌ها', icon: '👥' },
     { id: 'settings', title: 'تنظیمات', icon: '⚙' }
   ];
 
@@ -72,7 +73,7 @@
       nav.appendChild(b);
     });
     sidebar.appendChild(nav);
-    var ver = el('div', 'sidebar-ver', 'نسخه ۰.۱۲ — فارسی/RTL');
+    var ver = el('div', 'sidebar-ver', 'نسخه ۳٫۳ — فارسی/RTL');
     sidebar.appendChild(ver);
 
     var main = el('main', 'main');
@@ -80,10 +81,30 @@
     var burger = el('button', 'burger', '☰');
     burger.onclick = function () { document.body.classList.toggle('sidebar-open'); };
     var title = el('h1', 'topbar-title fit', '');
+    var userChip = el('div', 'topbar-user');
     var clock = el('div', 'topbar-clock');
-    topbar.appendChild(burger); topbar.appendChild(title); topbar.appendChild(clock);
+    topbar.appendChild(burger); topbar.appendChild(title); topbar.appendChild(userChip); topbar.appendChild(clock);
     var content = el('section', 'content');
     main.appendChild(topbar); main.appendChild(content);
+
+    /* SSO — نوار نشست واحد: نام کاربر + نقش‌ها + خروج (نسخهٔ ۳٫۳) */
+    function renderUserChip() {
+      userChip.innerHTML = '';
+      var s = global.Auth && global.Auth.session();
+      if (!s || !s.user) return;
+      var chip = el('span', 'user-chip fit');
+      var roleFa = { admin: 'مدیر سیستم', accountant: 'حسابدار', approver: 'تأییدکننده', front_desk: 'پذیرش', housekeeper: 'خانه‌داری', cashier: 'صندوق‌دار', chef: 'آشپزخانه', storekeeper: 'انباردار' };
+      var roles = (s.user.roles || []).map(function (r) { return roleFa[r] || r; }).join('، ');
+      chip.textContent = (s.user.fullName || s.user.username) + (roles ? ' (' + roles + ')' : '');
+      var out = el('button', 'btn btn-logout', 'خروج');
+      out.onclick = function () {
+        global.Auth.logout();
+        global.location.reload();
+      };
+      userChip.appendChild(chip);
+      userChip.appendChild(out);
+    }
+    renderUserChip();
 
     shell.appendChild(sidebar); shell.appendChild(main);
 
@@ -116,7 +137,28 @@
     tick(); setInterval(tick, 30000);
 
     go('home'); /* U2 — پس از ورود، صفحهٔ اصلی آسا */
-    global.App = { go: go, boot: boot };
+    global.App = {
+      go: go, boot: boot,
+      /* SSO — نوار وضعیت نشست مشترک ماژول‌ها: جایگزین فرم‌های ورود جداگانه (نسخهٔ ۳٫۳) */
+      sessionPanel: function () {
+        var bar = el('div', 'panel session-panel');
+        var s = global.Auth && global.Auth.session();
+        var roleFa = { admin: 'مدیر سیستم', accountant: 'حسابدار', approver: 'تأییدکننده', front_desk: 'پذیرش', housekeeper: 'خانه‌داری', cashier: 'صندوق‌دار', chef: 'آشپزخانه', storekeeper: 'انباردار' };
+        if (s && s.user) {
+          var roles = (s.user.roles || []).map(function (r) { return roleFa[r] || r; }).join('، ');
+          bar.appendChild(el('span', 'fit', '✅ وارد شده به‌عنوان «' + (s.user.fullName || s.user.username) + '»' + (roles ? ' — نقش: ' + roles : '') + ' (نشست مشترک همهٔ ماژول‌ها — ورود مجدد لازم نیست)'));
+          var out = el('button', 'btn btn-logout', 'خروج از حساب');
+          out.onclick = function () { global.Auth.logout(); global.location.reload(); };
+          bar.appendChild(out);
+        } else {
+          bar.appendChild(el('span', 'fit', '⚠️ بدون نشست — برای استفاده از ماژول‌ها وارد شوید.'));
+          var goLogin = el('button', 'btn btn-primary', 'رفتن به صفحهٔ ورود');
+          goLogin.onclick = function () { global.location.reload(); };
+          bar.appendChild(goLogin);
+        }
+        return bar;
+      },
+    };
   }
 
   /* U1 — ورودی برنامه: اولین صفحه همیشه ورود است؛ پس از موفقیت، شل اصلی */

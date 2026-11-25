@@ -47,6 +47,9 @@ model Role {
   displayNameEn String
   displayNameFa String
   sensitiveMfa  Boolean @default(false) // ورود این نقش نیاز به MFA دارد
+  // نسخهٔ ۳٫۳ — مدیریت کاربران/گروه‌ها از UI: نقش‌های seed سیستمی‌اند؛ ماتریسِ دستکاری‌شده از UI دیگر با seed بازنویسی نمی‌شود
+  isSystem         Boolean @default(false)
+  matrixOverridden Boolean @default(false)
 
   users       UserRole[]
   permissions RolePermission[]

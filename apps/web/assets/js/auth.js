@@ -127,6 +127,67 @@
     }
   }
 
+  /* ── SSO (نسخهٔ ۳٫۳): نشست واحد برای همهٔ ماژول‌ها ──
+     توکن دسترسی ۱۵ دقیقه عمر دارد؛ تایمر و رهگیر ۴۰۱ آن را بی‌صدا با refresh چرخشی تازه می‌کند —
+     کاربر فقط یک بار در صفحهٔ ورود شل، وارد می‌شود و هیچ ماژولی دوباره نام کاربری/رمز نمی‌خواهد. */
+  var refreshing = null;
+  function refreshSession() {
+    var s = session();
+    if (!s || s.demo || !s.refreshToken) return Promise.resolve(false);
+    if (refreshing) return refreshing;
+    refreshing = fetch(apiBase() + '/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: s.refreshToken }),
+    }).then(function (r) {
+      if (r.status !== 200 && r.status !== 201) throw new Error('refresh ' + r.status);
+      return r.json();
+    }).then(function (j) {
+      saveSession(j);
+      return true;
+    }).catch(function () {
+      // نشست منقضی/مسروق شده → خروج تمیز و بازگشت به صفحهٔ ورود
+      clearSession();
+      return false;
+    }).then(function (ok) {
+      refreshing = null;
+      return ok;
+    });
+    return refreshing;
+  }
+  function startAutoRefresh() {
+    setInterval(function () {
+      if (session() && !document.hidden) refreshSession();
+    }, 10 * 60 * 1000);
+  }
+  startAutoRefresh();
+
+  /* رهگیر fetch: هر ۴۰۱ از API با توکن بِرر → یک بار تازه‌سازی و تکرار درخواست */
+  var origFetch = global.fetch;
+  global.fetch = function (input, init) {
+    init = init || {};
+    var url = typeof input === 'string' ? input : (input && input.url) || '';
+    var base = apiBase();
+    var authOnly = !init.headers || typeof init.headers.Authorization !== 'string' ||
+      init.headers.Authorization.indexOf('Bearer ') !== 0;
+    var isAuthPath = /\/auth\/(login|refresh|logout|captcha)/.test(url);
+    if (!base || url.indexOf(base) !== 0 || authOnly || isAuthPath || typeof init.body === 'object') {
+      return origFetch.apply(this, arguments);
+    }
+    return origFetch.call(this, url, init).then(function (res) {
+      if (res.status !== 401) return res;
+      return refreshSession().then(function (ok) {
+        if (!ok) return res;
+        var s = session();
+        if (!s || !s.accessToken) return res;
+        var headers = {};
+        for (var k in (init.headers || {})) headers[k] = init.headers[k];
+        headers.Authorization = 'Bearer ' + s.accessToken;
+        return origFetch.call(this, url, Object.assign({}, init, { headers: headers }));
+      });
+    });
+  };
+
   global.Auth = {
     session: session,
     apiBase: apiBase,
@@ -209,6 +270,16 @@
       capInput.autocomplete = 'off';
       capInput.maxLength = 8;
 
+      /* SSO — کد دومرحله‌ای نقش‌های حساس: فقط پس از پاسخ MFA_REQUIRED نمایش داده می‌شود */
+      var totpInput = document.createElement('input');
+      totpInput.type = 'text';
+      totpInput.placeholder = 'کد دومرحله‌ای (TOTP)';
+      totpInput.dir = 'ltr';
+      totpInput.autocomplete = 'off';
+      totpInput.maxLength = 10;
+      totpInput.className = 'login-totp';
+      totpInput.hidden = true;
+
       var demoNote = document.createElement('p');
       demoNote.className = 'login-demo-note';
       demoNote.hidden = true;
@@ -227,6 +298,7 @@
       form.appendChild(passInput);
       form.appendChild(capRow);
       form.appendChild(capInput);
+      form.appendChild(totpInput);
       form.appendChild(demoNote);
       form.appendChild(submit);
       form.appendChild(hint);
@@ -271,7 +343,8 @@
         hideAll();
         show(loader, true);
         lastError = null;
-        Auth.login(userInput.value, passInput.value, captchaId, capInput.value).then(function (sess) {
+        Auth.login(userInput.value, passInput.value, captchaId, capInput.value,
+          totpInput.hidden ? undefined : totpInput.value).then(function (sess) {
           show(loader, false);
           if (sess.lastLogin) {
             lastLoginBox.hidden = false;
@@ -289,6 +362,15 @@
             return;
           }
           if (e.code === 'CAPTCHA_MISMATCH') { show(errCaptcha, true); refreshCaptcha(); }
+          else if (e.code === 'MFA_REQUIRED' || e.code === 'MFA_INVALID') {
+            errUser.textContent = e.code === 'MFA_REQUIRED'
+              ? 'این نقش نیازمند کد دومرحله‌ای است — کد TOTP را وارد کنید.'
+              : 'کد دومرحله‌ای معتبر نیست — کد جدید را وارد کنید.';
+            show(errUser, true);
+            totpInput.hidden = false;
+            totpInput.focus();
+            refreshCaptcha();
+          }
           else if (e.code === 'LOCKED') show(errLock, true);
           else if (e.code === 'EXPIRED') show(errExp, true);
           else { show(errUser, true); refreshCaptcha(); }

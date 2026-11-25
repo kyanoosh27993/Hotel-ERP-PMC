@@ -706,3 +706,30 @@
 - **APK واقعی Capacitor 6 ساخته و تحویل شد** (3.7MB): Android SDK 34 + Temurin JDK17 (jlink) + میرور علی‌بابا برای دور زدن 429 مaven مرکزی (init script: scripts/gradle-mirrors.init.gradle). خروجی: download/Hotel-ERP-Android-v0.12.0.apk.
 - **گزارش تست زندهٔ v0.12 docx** تحویل شد (download/Hotel-ERP-Live-Test-Report-v0.12.docx — postcheck 9/9 + رندر PDF وارسی تصویری).
 - ابزار محلی: android-sdk/ و jdk-17 در ریشهٔ my-project (خارج از ریپو).
+
+### موج ۷ — SSO + کاربران/گروه‌ها/ماتریس دسترسی — ۲۵ نوامبر ۲۰۲۶ (v3.3.0)
+- **درخواست کارفرما:** ① ورود یک‌بار در برنامه — بدون تکرار یوزر/پسورد در بخش‌های هتل؛ ② گروه کاربری با عضوگیری
+  (عکس ۱/۲-۱)؛ ③ ماتریس دسترسی به‌تفکیک ماژول و هر جزء (عکس ۲-۲)؛ ④ ویرایش مشخصات هر کاربر حتی نام کاربری/رمز (عکس ۳-۱/۳-۲).
+- **چرا این طراحی:** مدل داده از فاز ۱ (User↔UserRole→Role←RolePermission→Permission) چند‌مجموعه‌ای و آماده بود؛
+  PermissionsGuard از DB می‌خواند ⇒ تغییر ماتریس از UI بدون ری‌استارت اعمال می‌شود. تنها گلوگاه، «فرم ورود جداگانهٔ
+  هر ماژول» و «همگام‌سازی کامل seed» بود.
+- **SSO (apps/web):** ۱۳ فرم «اتصال به سرور» از frontdesk/treasury/restaurant/procurement/stores/housekeepingops/
+  assets/ancillary/settings/dashboard/bi/directtax/quarterly حذف و با `App.sessionPanel()` جایگزین شد (اسکریپت
+  scripts/sso-strip-modules.py قابل بازتولید). auth.js: فیلد TOTP در صفحهٔ ورود (فقط پس از MFA_REQUIRED)،
+  تایمر تازه‌سازی ۱۰ دقیقه‌ای + رهگیر 401 با تکرار بی‌صدا از مسیر /auth/refresh چرخشی، نوار کاربر + خروج در topbar.
+- **API src/admin (جدید):** users (list/create/PATCH شامل username+password+roleIds/DELETE=غیرفعال‌سازی)؛
+  roles (CRUD + members + PUT permissions)؛ permission-catalog گروه‌بندی ۱۵ ماژولی با برچسب فارسی
+  (MODULE_GROUPS در iam/permissions.ts + assertCatalogCovered). مجوز جدید users.manage فقط مدیر.
+- **حفاظت‌ها:** SELF_DEACTIVATE، LAST_ADMIN (غیرفعال‌سازی/حذف عضو)، LOCKOUT_GUARD (ماتریس admin بدون users.manage)،
+  SYSTEM_ROLE (حذف/تغییر نام سیستمی)، ROLE_IN_USE (حذف گروه با عضو)، رمز ≥۸ نویسه، ابطال refreshها در تغییر رمز/غیرفعال‌سازی،
+  حسابرسی: USER_CREATED/USER_USERNAME_CHANGED/USER_PASSWORD_RESET/USER_DEACTIVATED/ROLE_CREATED/ROLE_MATRIX_CHANGED/ROLE_MEMBER_*.
+- **seed:** نقش‌های ماتریس isSystem=true؛ اگر matrixOverridden=true (تغییر از UI) ماتریس همان نقش با seed بازنویسی نمی‌شود —
+  شخصی‌سازی مدیر ماندگار؛ کاتالوگ مجوزها همیشه sync.
+- **UI ماژول users.js (سه تب):** کاربران با DataTable استاندارد (سورت/جستجو/فیلتر + آخرین ورود جلالی) و فرم کامل ویرایش؛
+  گروه‌ها با اعضا و افزودن/حذف عضو؛ ماتریس با چک‌باکس هر مجوز + «همه/هیچ» هر ماژول + ذخیرهٔ فوری.
+- **درس‌های این موج:** ① مهاجرت‌های اسمال‌ادитив (دو ستون) کافی بود — قاعدهٔ «ماتریس از DB» فاز ۱ سرمایهٔ بزرگ بود؛
+  ② نرخ‌ورود ۱۵/دقیقه در رگرسیون کامل شکست ساختگی می‌ساخت — tryLogin با retry 429 در _lib و 01-auth (الگوی تکرارپذیر
+  برای تست‌های آینده)؛ ③ حذف بلاک‌ها با اسکریپت باید با node --check تک‌تک فایل‌ها صحه‌گذاری شود (دو آکولاد اضافه در
+  سه فایل connPanel توسط چک گرفته و رفع شد).
+- **گیت:** 17-admin ۴۰/۴۰ | لایه۱ ۳۵۹/۳۵۹ (۱۶ ماژول) | لایه۲ ۳۰/۳۰ | unit ۴۷/۴۷ | e2e jest ۹۱/۹۱ | syntax وب همهٔ فایل‌ها سبز.
+  دروازهٔ M-UI1 منتظر تست کارفرما.
