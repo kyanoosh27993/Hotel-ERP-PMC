@@ -38,6 +38,21 @@ async function req(method, path, { token, body, label } = {}) {
   try { json = await r.json(); } catch { /* empty body */ }
   return { status: r.status, json, ms: Date.now() - t0, label };
 }
+
+/** گیت هویتی سخت‌گیرانه — رکورد یکتا با کد ملی معتبر برای چک‌این (journey-deep) */
+async function ensureParty(token, name) {
+  const base9 = '551' + String(Date.now() % 100000).padStart(5, '0') + String(Math.floor(Math.random() * 10));
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += Number(base9[i]) * (10 - i);
+  const r = sum % 11;
+  const nationalId = base9 + String(r < 2 ? r : 11 - r);
+  const r2 = await req('POST', '/parties', { token, body: {
+    kind: 'GUEST', firstName: name, lastName: `${name}-${Date.now().toString(36)}`,
+    nationalId, mobile: '0913' + String(Date.now() % 10000000).padStart(7, '0'), postalCode: '7719175571',
+  } });
+  if (r2.status === 409) return r2.json?.error?.details?.existing?.id;
+  return r2.json?.data?.id;
+}
 async function login(username, withTotp) {
   const r = await req('POST', '/auth/login', { body: { username, password: 'ChangeMe_Str0ng!', ...(withTotp ? { totp: totp() } : {}) } });
   if (!(r.status === 200 || r.status === 201)) throw new Error(`login failed ${username}: ${r.status}`);
@@ -122,7 +137,7 @@ async function phaseNoDuplicateInput() {
   // چک‌این از رزرو: بدون ورود مجدد مهمان/نرخ
   const room = (await req('GET', '/pms/rooms/map', { token: T.frontdesk })).json?.data?.floors
     .flatMap((f) => f.rooms ?? []).find((r) => r.code === '101');
-  const ci = await req('POST', '/pms/stays/check-in', { token: T.frontdesk, body: { reservationId: S.resId, roomIds: [room.id], plannedCheckOut: day(2), idempotencyKey: `deep-ci-${Date.now()}` } });
+  const ci = await req('POST', '/pms/stays/check-in', { token: T.frontdesk, body: { reservationId: S.resId, roomIds: [room.id], plannedCheckOut: day(2), idempotencyKey: `deep-ci-${Date.now()}`, partyId: await ensureParty(T.frontdesk, 'مهمان deep') } });
   step('B3 چک‌این فقط با شناسه‌ها (بدون تکرار مهمان/نرخ)', ci.status === 201, `status=${ci.status}`);
   S.stayId = ci.json?.data?.stayId;
 

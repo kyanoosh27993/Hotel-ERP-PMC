@@ -1,5 +1,5 @@
 // 03-restaurant.mjs — لایه ۱ / ماژول ۳: منو، سفارش POS، KDS، سند فروش، مصرف رسپی، سرویس اتاق
-import { Suite, req, login, db, TODAY, sleep } from './_lib.mjs';
+import { Suite, req, login, db, TODAY, sleep, ensureParty } from './_lib.mjs';
 
 const S = new Suite('03-restaurant');
 const T = { admin: await login('admin', true), frontdesk: await login('frontdesk', false), chef: await login('chef', false) };
@@ -89,7 +89,7 @@ const res = await req('POST', '/pms/reservations', { token: T.frontdesk, body: {
 const resId = res.json?.data?.reservationId ?? res.json?.data?.id;
 const map2 = (await req('GET', '/pms/rooms/map', { token: T.frontdesk })).json?.data;
 const freeRoom = (map2?.floors ?? []).flatMap((f) => f.rooms ?? []).find((r) => r.status === 'AVAILABLE');
-const ci = await req('POST', '/pms/stays/check-in', { token: T.frontdesk, body: { reservationId: resId, roomIds: [freeRoom.id], plannedCheckOut: `${new Date(Date.now() + 86400000).toISOString().slice(0, 10)}`, idempotencyKey: jKey() } });
+const ci = await req('POST', '/pms/stays/check-in', { token: T.frontdesk, body: { reservationId: resId, roomIds: [freeRoom.id], plannedCheckOut: `${new Date(Date.now() + 86400000).toISOString().slice(0, 10)}`, idempotencyKey: jKey(), partyId: await ensureParty(T.frontdesk, 'مهمان رستوران') } });
 const stayCode = ci.json?.data?.code ?? ci.json?.code;
 const rs = await req('POST', '/restaurant/orders', { token: T.frontdesk, body: { outletCode: 'REST-MAIN', mode: 'ROOM_SERVICE', stayCode, items: [{ menuItemCode: 'MI-KABAB', qty: 1 }], idempotencyKey: jKey() } });
 S.step('سفارش سرویس اتاق ثبت شد', rs.status === 201, `status=${rs.status} ${JSON.stringify(rs.json?.error ?? {}).slice(0, 100)}`);

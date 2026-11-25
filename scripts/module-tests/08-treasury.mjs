@@ -1,5 +1,5 @@
 // 08-treasury.mjs — لایه ۱ / ماژول ۸: صندوق و شیفت، دارایی و استهلاک، خدمات جانبی
-import { Suite, req, login, db, day, TODAY, sleep } from './_lib.mjs';
+import { Suite, req, login, db, day, TODAY, sleep, ensureParty } from './_lib.mjs';
 
 const S = new Suite('08-treasury');
 const T = { admin: await login('admin', true), cashier: await login('cashier', false), frontdesk: await login('frontdesk', false) };
@@ -71,7 +71,7 @@ S.step('خدمات seed (پارکینگ)', !!parking, `n=${services.length} park
 const res = await req('POST', '/pms/reservations', { token: T.frontdesk, body: { roomTypeId: (await req('GET', '/room-types', { token: T.frontdesk })).json?.data?.find((x) => x.code === 'STD')?.id, guestName: 'مهمان خدمات', checkInDate: TODAY, checkOutDate: day(1), idempotencyKey: jKey() } });
 const map = (await req('GET', '/pms/rooms/map', { token: T.frontdesk })).json?.data;
 const freeRoom = (map?.floors ?? []).flatMap((f) => f.rooms ?? []).find((r) => r.status === 'AVAILABLE');
-const ci = await req('POST', '/pms/stays/check-in', { token: T.frontdesk, body: { reservationId: res.json?.data?.reservationId ?? res.json?.data?.id, roomIds: [freeRoom.id], plannedCheckOut: day(1), idempotencyKey: jKey() } });
+const ci = await req('POST', '/pms/stays/check-in', { token: T.frontdesk, body: { reservationId: res.json?.data?.reservationId ?? res.json?.data?.id, roomIds: [freeRoom.id], plannedCheckOut: day(1), idempotencyKey: jKey(), partyId: await ensureParty(T.frontdesk, 'مهمان خزانه') } });
 const stayId = ci.json?.data?.stayId ?? ci.json?.stayId;
 const stayCode = ci.json?.data?.code ?? ci.json?.code;
 const ord = await req('POST', '/ancillary/orders', { token: T.frontdesk, body: { serviceCode: 'SVC-PARKING', quantity: 2, stayCode, idempotencyKey: jKey() } });

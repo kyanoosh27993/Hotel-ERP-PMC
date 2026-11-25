@@ -39,6 +39,30 @@ async function login(username: string, withTotp: boolean): Promise<string> {
 }
 
 const auth = (token: string): string => `Bearer ${token}`;
+/** گیت هویتی سخت‌گیرانه — هر چک‌این به رکورد یکتای دارای کد ملی معتبر نیاز دارد */
+let partySeq = 0;
+async function ensureParty(name: string, token: string): Promise<string> {
+  const base9 = '551' + String(Date.now() % 100000).padStart(5, '0') + String(++partySeq % 10);
+  let s = 0;
+  for (let i = 0; i < 9; i++) s += Number(base9[i]) * (10 - i);
+  const r = s % 11;
+  const nationalId = base9 + String(r < 2 ? r : 11 - r);
+  const res = await request(app.getHttpServer())
+    .post('/api/v1/parties')
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      kind: 'GUEST',
+      firstName: name,
+      lastName: `${name}-${Date.now().toString(36)}-${partySeq}`,
+      nationalId,
+      mobile: '0913' + String(Date.now() % 10000000).padStart(7, '0'),
+      postalCode: '7719175571',
+    });
+  if (res.status === 409) return res.body.error.details.existing.id;
+  expect([200, 201]).toContain(res.status);
+  return res.body.data.id;
+}
+
 const today = (): string => new Date().toISOString().slice(0, 10);
 
 beforeAll(async () => {
@@ -282,7 +306,7 @@ describe('فاز ۸ — موتور نگاشت پارامتریک (F8-T2) + دف�
       .find((r: { code: string }) => r.code === '101');
     const ci = await request(app.getHttpServer())
       .post('/api/v1/pms/stays/check-in').set('Authorization', auth(tokens.frontdesk))
-      .send({ reservationId: res.body.data.reservationId, roomIds: [room.id], plannedCheckOut: dayOffset(3), idempotencyKey: `w3-ci-${Date.now()}` });
+      .send({ reservationId: res.body.data.reservationId, roomIds: [room.id], plannedCheckOut: dayOffset(3), idempotencyKey: `w3-ci-${Date.now()}`, partyId: await ensureParty('مهمان نگاشت', tokens.frontdesk) });
     expect(ci.status).toBe(201);
 
     const na = await request(app.getHttpServer())

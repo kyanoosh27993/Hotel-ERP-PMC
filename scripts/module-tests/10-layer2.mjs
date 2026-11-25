@@ -1,6 +1,6 @@
 // 10-layer2.mjs — لایهٔ ۲: مسیرهای متقاطع بین ماژول‌ها (هر گام خروجی گام بعد)
 // هر سناریو با محاسبهٔ مستقیم DB راستی‌آزمایی می‌شود.
-import { Suite, req, login, db, day, TODAY, sleep, buildIranIban, ibanValid } from './_lib.mjs';
+import { Suite, req, login, db, day, TODAY, sleep, buildIranIban, ibanValid, ensureParty } from './_lib.mjs';
 
 const S = new Suite('10-layer2 (مسیرهای متقاطع)');
 const T = {
@@ -43,7 +43,7 @@ const res1 = await req('POST', '/pms/reservations', { token: T.frontdesk, body: 
 const res1Id = res1.json?.data?.reservationId;
 const map = (await req('GET', '/pms/rooms/map', { token: T.frontdesk })).json?.data;
 const room101 = (map?.floors ?? []).flatMap((f) => f.rooms ?? []).find((r) => r.code === '101');
-const ci1 = await req('POST', '/pms/stays/check-in', { token: T.frontdesk, body: { reservationId: res1Id, roomIds: [room101.id], plannedCheckOut: day(2), idempotencyKey: jKey() } });
+const ci1 = await req('POST', '/pms/stays/check-in', { token: T.frontdesk, body: { reservationId: res1Id, roomIds: [room101.id], plannedCheckOut: day(2), idempotencyKey: jKey(), partyId: await ensureParty(T.frontdesk, 'مهمان لایه۲') } });
 const stay1Id = ci1.json?.data?.stayId;
 const stay1Code = ci1.json?.data?.code;
 S.step('S1: رزرو و پذیرش اتاق ۱۰۱', res1.status === 201 && ci1.status === 201 && !!stay1Code, `stay=${stay1Code}`);
@@ -180,7 +180,7 @@ const res6 = await req('POST', '/pms/reservations', { token: T.frontdesk, body: 
 const res6Id = res6.json?.data?.reservationId;
 const map6 = (await req('GET', '/pms/rooms/map', { token: T.frontdesk })).json?.data;
 const free6 = (map6?.floors ?? []).flatMap((f) => f.rooms ?? []).find((r) => r.status === 'AVAILABLE' && r.code !== '101');
-const ci6 = await req('POST', '/pms/stays/check-in', { token: T.frontdesk, body: { reservationId: res6.json?.data?.reservationId, roomIds: [free6.id], plannedCheckOut: day(1), idempotencyKey: jKey() } });
+const ci6 = await req('POST', '/pms/stays/check-in', { token: T.frontdesk, body: { reservationId: res6.json?.data?.reservationId, roomIds: [free6.id], plannedCheckOut: day(1), idempotencyKey: jKey(), partyId: await ensureParty(T.frontdesk, 'مهمان لایه۲ دوم') } });
 const stay6Id = ci6.json?.data?.stayId;
 const stay6Code = ci6.json?.data?.code;
 const ord6 = await req('POST', '/ancillary/orders', { token: T.frontdesk, body: { serviceCode: 'SVC-PARKING', quantity: 2, stayCode: stay6Code, idempotencyKey: jKey() } });

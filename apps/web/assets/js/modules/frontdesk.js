@@ -98,6 +98,28 @@
       ciPanel.appendChild(el('h3', null, 'پذیرش مهمان (F4-T3)'));
       var resvIn = el('input', 'input'); resvIn.placeholder = 'شناسه رزرو (اختیاری — برای ورود حضوری خالی)';
       var guestIn = el('input', 'input'); guestIn.placeholder = 'نام مهمان حضوری (در صورت نبود رزرو)';
+      /* نیاز یکتایی کارفرما: گیت هویتی سخت‌گیرانه — چک‌این فقط با رکورد یکتای دارای کد ملی/شناسهٔ ملی معتبر */
+      var partyIn = el('input', 'input'); partyIn.placeholder = 'رکورد یکتای مهمان (الزامی) — جستجوی زنده با نام/کد ملی';
+      var ciPartyId = '';
+      var ciPartyName = '';
+      var ciPartyMsg = el('div', 'muted');
+      Uniq.suggest(partyIn, {
+        onPick: function (p) {
+          ciPartyId = p.id;
+          ciPartyName = Uniq.displayName(p);
+          partyIn.value = ciPartyName;
+          ciPartyMsg.style.color = '#1a7f37';
+          ciPartyMsg.textContent = '✅ رکورد انتخاب‌شده: ' + ciPartyName + ' (' + (p.kindFa || Uniq.KIND_FA[p.kind] || '—') + ')' +
+            (p.nationalId ? ' — کد ملی: ' + p.nationalId : '') + (p.natIdentifier ? ' — شناسهٔ ملی: ' + p.natIdentifier : '') +
+            (p.postalCode ? ' — کد پستی: ' + p.postalCode : '');
+        },
+      });
+      partyIn.addEventListener('input', function () {
+        if (partyIn.value.trim() !== ciPartyName) {
+          ciPartyId = '';
+          ciPartyMsg.textContent = '';
+        }
+      });
       var roomsIn = el('input', 'input'); roomsIn.placeholder = 'کد اتاق‌ها با کاما: 302,303';
       var pcoIn = el('input', 'input'); pcoIn.placeholder = 'تاریخ خروج برنامه‌ریزی YYYY-MM-DD';
       pcoIn.value = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
@@ -106,6 +128,8 @@
       var ciMsg = el('div', 'muted');
       ciPanel.appendChild(row('رزرو', resvIn));
       ciPanel.appendChild(row('مهمان', guestIn));
+      ciPanel.appendChild(row('رکورد یکتای مهمان', partyIn));
+      ciPanel.appendChild(ciPartyMsg);
       ciPanel.appendChild(row('اتاق‌ها', roomsIn));
       ciPanel.appendChild(row('خروج', pcoIn));
       ciPanel.appendChild(row('نرخ', rateIn));
@@ -196,6 +220,10 @@
       }
 
       ciBtn.onclick = function () {
+        if (!ciPartyId) {
+          ciMsg.textContent = '❌ انتخاب رکورد یکتای مهمان الزامی است — با تایپ نام یا کد ملی از جستجوی زنده انتخاب کنید (رزروهای قدیمی هم باید پیش از چک‌این به رکورد یکتا با کد ملی/شناسهٔ ملی معتبر متصل شوند).';
+          return;
+        }
         var roomCodes = roomsIn.value.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
         var roomIdsPromises = api('GET', '/pms/rooms/map').then(function (res) {
           var ids = [];
@@ -209,6 +237,7 @@
             idempotencyKey: 'web-ci-' + Date.now() + '-' + Math.floor(Math.random() * 1e6),
             roomIds: ids,
             plannedCheckOut: pcoIn.value.trim(),
+            partyId: ciPartyId, /* گیت هویتی: رکورد یکتا — رزرو قدیمی هم در همین لحظه پیوند می‌خورد */
           };
           if (resvIn.value.trim()) body.reservationId = resvIn.value.trim();
           if (guestIn.value.trim()) body.guestName = guestIn.value.trim();

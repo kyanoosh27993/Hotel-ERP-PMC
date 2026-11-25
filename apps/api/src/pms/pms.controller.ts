@@ -232,6 +232,15 @@ export class CheckInDto {
   @IsOptional()
   @Matches(/^\d+$/, { message: 'rateOverrideRials must be integer digits (Rials)' })
   rateOverrideRials!: string;
+
+  @IsOptional()
+  @IsString()
+  partyId!: string; // رکورد یکتای مهمان — الزامی در گیت هویتی سخت‌گیرانه
+}
+
+export class AttachPartyDto {
+  @IsString()
+  partyId!: string; // اتصال رکورد یکتا به رزرو (قدیمی/جدید)
 }
 
 export class NightAuditDto {
@@ -333,8 +342,16 @@ export class PmsController {
       adults: dto.adults,
       children: dto.children,
       rateOverrideRials: dto.rateOverrideRials,
+      partyId: dto.partyId,
     };
     return { data: await this.pms.checkIn(input) };
+  }
+
+  /** اتصال رکورد یکتای مهمان به رزرو — الزام کارفرما: رزروهای قدیمی هم باید رکورد با کد معتبر داشته باشند */
+  @RequirePermissions(PERMISSIONS.STAY_CHECKIN)
+  @Post('reservations/:id/party')
+  async attachParty(@Param('id') id: string, @Body() dto: AttachPartyDto) {
+    return { data: await this.pms.attachParty(id, dto.partyId) };
   }
 
   @RequirePermissions(PERMISSIONS.RESERVATION_VIEW)

@@ -69,6 +69,8 @@ beforeAll(async () => {
   runTag = Date.now().toString(36);
   // پاکسازی اجراهای قبلی همین spec (اجرای تکراری محلی — در CI پایگاه تازه است)
   await prisma.reservation.deleteMany({ where: { idempotencyKey: { startsWith: 'uniq-gate-' } } });
+  await prisma.reservation.deleteMany({ where: { idempotencyKey: { startsWith: 'uniq-legacy-' } } });
+  await prisma.reservation.deleteMany({ where: { idempotencyKey: { startsWith: 'uniq-fake-' } } });
   await prisma.party.deleteMany({
     where: {
       OR: [
@@ -304,5 +306,147 @@ describe('نیاز یکتایی — ثبت مرکزی اشخاص/شرکت‌ها
     const after = await prisma.reservation.findUnique({ where: { id: reservationId } });
     expect(after?.status).toBe('CHECKED_IN');
     expect(after?.partyId).toBe(partyId);
+  });
+
+  it('U7 — گیت سخت‌گیرانه: رزرو قدیمی بدون رکورد یکتا مسدود است؛ با اتصال رکورد و تکمیل کد معتبر مجاز می‌شود', async () => {
+    const rts = await request(app.getHttpServer()).get('/api/v1/pms/room-types').set('Authorization', auth());
+    const map0 = await request(app.getHttpServer()).get('/api/v1/pms/rooms/map').set('Authorization', auth());
+    const allRooms = (map0.body.data.floors as Array<{ rooms: Array<{ id: string; status: string; roomType: { code: string } }> }>).flatMap((f) => f.rooms);
+    const freeRoom = allRooms.find((r) => r.status === 'AVAILABLE');
+    expect(freeRoom).toBeTruthy();
+    const roomType = rts.body.data.find((t: { code: string }) => t.code === freeRoom!.roomType.code);
+    expect(roomType).toBeTruthy();
+
+    // شبیه‌سازی رزرو قدیمی: بدون partyId
+    const from = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    const to = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
+    const legacy = await request(app.getHttpServer())
+      .post('/api/v1/pms/reservations')
+      .set('Authorization', auth())
+      .send({
+        roomTypeId: roomType!.id, guestName: `مهمان قدیمی ${runTag}`,
+        checkInDate: from, checkOutDate: to,
+        idempotencyKey: `uniq-legacy-${runTag}`, source: 'PHONE',
+      });
+    expect(legacy.status).toBe(201);
+    const legacyId = legacy.body.data.reservationId;
+
+    const mapA = await request(app.getHttpServer()).get('/api/v1/pms/rooms/map').set('Authorization', auth());
+    const roomA = (mapA.body.data.floors as Array<{ rooms: Array<{ id: string; status: string; roomType: { code: string } }> }>).flatMap((f) => f.rooms)
+      .find((r) => r.status === 'AVAILABLE' && r.roomType.code === roomType!.code);
+
+    // چک‌این بدون هیچ رکورد یکتا → 409 IDENTITY_REQUIRED
+    const blocked = await request(app.getHttpServer())
+      .post('/api/v1/pms/stays/check-in')
+      .set('Authorization', auth())
+      .send({ idempotencyKey: `uniq-legacy-ci-${runTag}`, reservationId: legacyId, roomIds: [roomA!.id], plannedCheckOut: to });
+    expect(blocked.status).toBe(409);
+    expect(blocked.body.error.code).toBe('IDENTITY_REQUIRED');
+
+    // مهمانِ بدون کدها + اتصال با endpoint اتصال
+    const noCodes = await request(app.getHttpServer())
+      .post('/api/v1/parties')
+      .set('Authorization', auth())
+      .send({ kind: 'GUEST', firstName: 'قدیمی', lastName: `بدون‌کد${runTag}`, mobile: '09135558877' });
+    expect(noCodes.status).toBe(201);
+    const noCodesId = noCodes.body.data.id;
+
+    const gate = await request(app.getHttpServer())
+      .post('/api/v1/pms/stays/check-in')
+      .set('Authorization', auth())
+      .send({ idempotencyKey: `uniq-legacy-ci-${runTag}`, reservationId: legacyId, roomIds: [roomA!.id], plannedCheckOut: to, partyId: noCodesId });
+    expect(gate.status).toBe(409);
+    expect(gate.body.error.code).toBe('IDENTITY_INCOMPLETE');
+    expect(gate.body.error.message).toContain('کد ملی');
+
+    // اتصال رسمی رکورد به رزرو قدیمی — هشدار ناقص‌ها برگشت می‌خورد
+    const attach = await request(app.getHttpServer())
+      .post(`/api/v1/pms/reservations/${legacyId}/party`)
+      .set('Authorization', auth())
+      .send({ partyId: noCodesId });
+    expect([200, 201]).toContain(attach.status);
+    expect(attach.body.data.incomplete).toContain('کد ملی (۱۰ رقم)');
+
+    // تکمیل کد ملی معتبر (تولید رقم کنترل) → چک‌این بدون partyId در بدنه هم مجاز می‌شود (رزرو متصل شده)
+    const base9 = '552' + String(Date.now() % 100000).padStart(5, '0') + '1';
+    let sum = 0;
+    for (let i = 0; i < 9; i++) sum += Number(base9[i]) * (10 - i);
+    const rr = sum % 11;
+    const validMelli = base9 + String(rr < 2 ? rr : 11 - rr);
+    const fix = await request(app.getHttpServer())
+      .patch(`/api/v1/parties/${noCodesId}`)
+      .set('Authorization', auth())
+      .send({ kind: 'GUEST', firstName: 'قدیمی', lastName: `بدون‌کد${runTag}`, mobile: '09135558877', nationalId: validMelli, postalCode: '7719175575' });
+    expect(fix.status).toBe(200);
+
+    const mapB = await request(app.getHttpServer()).get('/api/v1/pms/rooms/map').set('Authorization', auth());
+    const roomB = (mapB.body.data.floors as Array<{ rooms: Array<{ id: string; status: string; roomType: { code: string } }> }>).flatMap((f) => f.rooms)
+      .find((r) => r.status === 'AVAILABLE' && r.roomType.code === roomType!.code);
+    const ci = await request(app.getHttpServer())
+      .post('/api/v1/pms/stays/check-in')
+      .set('Authorization', auth())
+      .send({ idempotencyKey: `uniq-legacy-ci-${runTag}`, reservationId: legacyId, roomIds: [roomB!.id], plannedCheckOut: to });
+    expect(ci.status).toBe(201);
+    const after = await prisma.reservation.findUnique({ where: { id: legacyId } });
+    expect(after?.partyId).toBe(noCodesId);
+    expect(after?.status).toBe('CHECKED_IN');
+  });
+
+  it('U8 — دادهٔ قدیمی با کد فیک از گیت عبور نمی‌کند (IDENTITY_INVALID)', async () => {
+    // رکورد با کد ملی غلط — شبیه‌سازی دادهٔ قدیمیِ پیش از اعتبارسنجی (مستقیم در DB)
+    const bad = await prisma.party.create({
+      data: {
+        kind: 'GUEST', firstName: 'فیک', lastName: `قدیمی${runTag}`,
+        nationalId: '1234567890', postalCode: '7719175576', mobile: '09135559988',
+      },
+    });
+    const from = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
+    const to = new Date(Date.now() + 4 * 86400000).toISOString().slice(0, 10);
+    const rtList8 = await request(app.getHttpServer()).get('/api/v1/pms/room-types').set('Authorization', auth());
+    const mapPre8 = await request(app.getHttpServer()).get('/api/v1/pms/rooms/map').set('Authorization', auth());
+    const preRoom = (mapPre8.body.data.floors as Array<{ rooms: Array<{ id: string; status: string; roomType: { code: string } }> }>).flatMap((f) => f.rooms)
+      .find((r) => r.status === 'AVAILABLE');
+    const rt8 = rtList8.body.data.find((t: { code: string }) => t.code === preRoom!.roomType.code);
+    const resv = await request(app.getHttpServer())
+      .post('/api/v1/pms/reservations')
+      .set('Authorization', auth())
+      .send({
+        roomTypeId: rt8.id,
+        guestName: `فیک قدیمی ${runTag}`, checkInDate: from, checkOutDate: to,
+        idempotencyKey: `uniq-fake-${runTag}`, source: 'PHONE',
+      });
+    expect(resv.status).toBe(201);
+
+    const mapC = await request(app.getHttpServer()).get('/api/v1/pms/rooms/map').set('Authorization', auth());
+    const roomC = (mapC.body.data.floors as Array<{ rooms: Array<{ id: string; status: string; roomType: { code: string } }> }>).flatMap((f) => f.rooms)
+      .find((r) => r.status === 'AVAILABLE' && r.roomType.code === rt8.code);
+    const gate = await request(app.getHttpServer())
+      .post('/api/v1/pms/stays/check-in')
+      .set('Authorization', auth())
+      .send({ idempotencyKey: `uniq-fake-ci-${runTag}`, reservationId: resv.body.data.reservationId, roomIds: [roomC!.id], plannedCheckOut: to, partyId: bad.id });
+    expect(gate.status).toBe(409);
+    expect(gate.body.error.code).toBe('IDENTITY_INVALID');
+    expect(gate.body.error.message).toContain('کد ملی ثبت‌شده معتبر نیست');
+
+    // اصلاح رکورد قدیمی با کد معتبر → گیت می‌گذرد
+    const base9b = '553' + String(Date.now() % 100000).padStart(5, '0') + '1';
+    let sum2 = 0;
+    for (let i = 0; i < 9; i++) sum2 += Number(base9b[i]) * (10 - i);
+    const r2 = sum2 % 11;
+    const okMelli = base9b + String(r2 < 2 ? r2 : 11 - r2);
+    const fixed = await request(app.getHttpServer())
+      .patch(`/api/v1/parties/${bad.id}`)
+      .set('Authorization', auth())
+      .send({ kind: 'GUEST', firstName: 'فیک', lastName: `قدیمی${runTag}`, nationalId: okMelli, postalCode: '7719175576', mobile: '09135559988' });
+    expect(fixed.status).toBe(200);
+
+    const mapD = await request(app.getHttpServer()).get('/api/v1/pms/rooms/map').set('Authorization', auth());
+    const roomD = (mapD.body.data.floors as Array<{ rooms: Array<{ id: string; status: string; roomType: { code: string } }> }>).flatMap((f) => f.rooms)
+      .find((r) => r.status === 'AVAILABLE' && r.roomType.code === rt8.code);
+    const ci = await request(app.getHttpServer())
+      .post('/api/v1/pms/stays/check-in')
+      .set('Authorization', auth())
+      .send({ idempotencyKey: `uniq-fake-ci-${runTag}`, reservationId: resv.body.data.reservationId, roomIds: [roomD!.id], plannedCheckOut: to, partyId: bad.id });
+    expect(ci.status).toBe(201);
   });
 });

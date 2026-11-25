@@ -46,6 +46,22 @@ async function req(method, path, { token, body, label } = {}) {
   if (label) report.timings.push({ label, ms, status: res.status });
   return { status: res.status, json, ms };
 }
+
+/** گیت هویتی سخت‌گیرانه — رکورد یکتا با کد ملی معتبر برای چک‌این */
+async function ensurePartyJourney(token, name) {
+  const base9 = '551' + String(Date.now() % 100000).padStart(5, '0') + String(Math.floor(Math.random() * 10));
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += Number(base9[i]) * (10 - i);
+  const r = sum % 11;
+  const nationalId = base9 + String(r < 2 ? r : 11 - r);
+  const r2 = await req('POST', '/parties', { token, body: {
+    kind: 'GUEST', firstName: name, lastName: `${name}-${Date.now().toString(36)}`,
+    nationalId, mobile: '0913' + String(Date.now() % 10000000).padStart(7, '0'), postalCode: '7719175571',
+  } });
+  if (r2.status === 409) return r2.json?.error?.details?.existing?.id;
+  return r2.json?.data?.id;
+}
+
 const T = {}; const S = {};
 const TODAY = () => new Date().toISOString().slice(0, 10);
 const dayFromNow = (n) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
@@ -188,16 +204,17 @@ async function phasePms() {
   });
   step('رزرو با چک‌این امروز', resv.status === 201, `status=${resv.status}`);
 
+  const jrParty = await ensurePartyJourney(T.frontdesk, 'مهمان journey');
   const ciResp = await req('POST', '/pms/stays/check-in', {
     token: T.frontdesk,
-    body: { reservationId: resv.json?.data?.reservationId, roomIds: [S.roomId], plannedCheckOut: co, idempotencyKey: 'jr-ci-01' },
+    body: { reservationId: resv.json?.data?.reservationId, roomIds: [S.roomId], plannedCheckOut: co, idempotencyKey: 'jr-ci-01', partyId: jrParty },
     label: 'checkin',
   });
   step('چک‌این مهمان رزروشده', ciResp.status === 201, `status=${ciResp.status} stay=${ciResp.json?.data?.code} body=${JSON.stringify(ciResp.json ?? {}).slice(0, 180)}`);
   S.stayId = ciResp.json?.data?.stayId; S.stayCode = ciResp.json?.data?.code;
   const replayCi = await req('POST', '/pms/stays/check-in', {
     token: T.frontdesk,
-    body: { reservationId: resv.json?.data?.reservationId, roomIds: [S.roomId], plannedCheckOut: co, idempotencyKey: 'jr-ci-01' },
+    body: { reservationId: resv.json?.data?.reservationId, roomIds: [S.roomId], plannedCheckOut: co, idempotencyKey: 'jr-ci-01', partyId: jrParty },
     label: 'checkin-replay',
   });
   step('Idempotency چک‌این', replayCi.status === 201 && replayCi.json?.data?.replayed === true, `replayed=${replayCi.json?.data?.replayed}`);

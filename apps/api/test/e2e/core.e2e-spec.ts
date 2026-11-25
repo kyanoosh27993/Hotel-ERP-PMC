@@ -28,6 +28,31 @@ let journal: JournalService;
 
 const tokens: Record<string, string> = {};
 
+
+/** گیت هویتی سخت‌گیرانه — هر چک‌این به رکورد یکتای دارای کد ملی معتبر نیاز دارد */
+let partySeq = 0;
+async function ensureParty(name: string, token: string): Promise<string> {
+  const base9 = '551' + String(Date.now() % 100000).padStart(5, '0') + String(++partySeq % 10);
+  let s = 0;
+  for (let i = 0; i < 9; i++) s += Number(base9[i]) * (10 - i);
+  const r = s % 11;
+  const nationalId = base9 + String(r < 2 ? r : 11 - r);
+  const res = await request(app.getHttpServer())
+    .post('/api/v1/parties')
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      kind: 'GUEST',
+      firstName: name,
+      lastName: `${name}-${Date.now().toString(36)}-${partySeq}`,
+      nationalId,
+      mobile: '0913' + String(Date.now() % 10000000).padStart(7, '0'),
+      postalCode: '7719175571',
+    });
+  if (res.status === 409) return res.body.error.details.existing.id;
+  expect([200, 201]).toContain(res.status);
+  return res.body.data.id;
+}
+
 async function login(username: string, withTotp: boolean): Promise<string> {
   if (tokens[username]) return tokens[username];
   const res = await request(app.getHttpServer())
@@ -605,6 +630,7 @@ describe('فاز ۳ — داشبوردها (F3-T1…T3 — همه اعداد ا�
       .send({
         reservationId: rsv.body.data.reservationId, roomIds: [freeRoom.id],
         plannedCheckOut: plusDays(2), idempotencyKey: 'e2e-stay-d3',
+        partyId: await ensureParty('مهمان داشبورد', await login('frontdesk', false)),
       });
     expect(checkin.status).toBe(201);
     await drainOutbox();

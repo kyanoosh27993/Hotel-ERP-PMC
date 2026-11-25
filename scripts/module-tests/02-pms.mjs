@@ -1,5 +1,5 @@
 // 02-pms.mjs — لایه ۱ / ماژول ۲: رزرو، اقامت، شب‌گردی، چک‌اوت
-import { Suite, req, login, db, day, TODAY, sleep } from './_lib.mjs';
+import { Suite, req, login, db, day, TODAY, sleep, ensureParty } from './_lib.mjs';
 
 const S = new Suite('02-pms');
 const T = {
@@ -53,7 +53,8 @@ S.step('لغو رزرو لغوشده → 400/409', [400, 409].includes(recancel.
 // ── چک‌این: فقط با شناسه‌ها (بدون تکرار مهمان/نرخ) ──
 const map = (await req('GET', '/pms/rooms/map', { token: T.frontdesk })).json?.data;
 const room101 = (map?.floors ?? []).flatMap((f) => f.rooms ?? []).find((r) => r.code === '101');
-const ci = await req('POST', '/pms/stays/check-in', { token: T.frontdesk, body: { reservationId: res1Id, roomIds: [room101.id], plannedCheckOut: day(2), idempotencyKey: jKey() } });
+const gateParty = await ensureParty(T.frontdesk, 'مهمان pms');
+const ci = await req('POST', '/pms/stays/check-in', { token: T.frontdesk, body: { reservationId: res1Id, roomIds: [room101.id], plannedCheckOut: day(2), idempotencyKey: jKey(), partyId: gateParty } });
 S.step('چک‌این موفق', ci.status === 201, `status=${ci.status} ${JSON.stringify(ci.json?.error ?? {}).slice(0, 100)}`);
 const stayId = ci.json?.data?.stayId ?? ci.json?.stayId;
 const stay = (await c.query(`select code, "folioRials"::text as folio, status from stays where id=$1`, [stayId])).rows[0];

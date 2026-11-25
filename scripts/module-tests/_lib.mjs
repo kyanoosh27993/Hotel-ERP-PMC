@@ -44,6 +44,26 @@ export async function req(method, path, { token, body } = {}) {
   return { status: r.status, json, raw };
 }
 
+/**
+ * گیت هویتی سخت‌گیرانه — هر چک‌این به رکورد یکتای مهمان با کد ملی معتبر نیاز دارد.
+ * رکورد با رقم کنترلِ محاسبه‌شده می‌سازد؛ 409 (قبلاً ثبت‌شده) → همان رکورد قبلی برگشت داده می‌شود.
+ */
+let partySeq = 0;
+export async function ensureParty(token, name = 'مهمان تست') {
+  const base9 = '551' + String(Date.now() % 100000).padStart(5, '0') + String(++partySeq % 10);
+  let s = 0;
+  for (let i = 0; i < 9; i++) s += Number(base9[i]) * (10 - i);
+  const r = s % 11;
+  const nationalId = base9 + String(r < 2 ? r : 11 - r);
+  const res = await req('POST', '/parties', { token, body: {
+    kind: 'GUEST', firstName: name, lastName: `${name}-${Date.now().toString(36)}-${partySeq}`,
+    nationalId, mobile: '0913' + String(Date.now() % 10000000).padStart(7, '0'), postalCode: '7719175571',
+  } });
+  if (res.status === 409) return res.json?.error?.details?.existing?.id;
+  if (![200, 201].includes(res.status)) throw new Error('ensureParty failed: ' + res.status + ' ' + JSON.stringify(res.json).slice(0, 200));
+  return res.json?.data?.id;
+}
+
 export async function login(username, withTotp) {
   const r = await req('POST', '/auth/login', { body: { username, password: PASSWORD, ...(withTotp ? { totp: totp() } : {}) } });
   if (r.status !== 200 && r.status !== 201) throw new Error(`login failed ${username}: ${r.status} ${JSON.stringify(r.json)}`);

@@ -39,6 +39,30 @@ async function login(username: string, withTotp: boolean): Promise<string> {
 }
 
 const auth = (token: string): string => `Bearer ${token}`;
+/** گیت هویتی سخت‌گیرانه — هر چک‌این به رکورد یکتای دارای کد ملی معتبر نیاز دارد */
+let partySeq = 0;
+async function ensureParty(name: string, token: string): Promise<string> {
+  const base9 = '551' + String(Date.now() % 100000).padStart(5, '0') + String(++partySeq % 10);
+  let s = 0;
+  for (let i = 0; i < 9; i++) s += Number(base9[i]) * (10 - i);
+  const r = s % 11;
+  const nationalId = base9 + String(r < 2 ? r : 11 - r);
+  const res = await request(app.getHttpServer())
+    .post('/api/v1/parties')
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      kind: 'GUEST',
+      firstName: name,
+      lastName: `${name}-${Date.now().toString(36)}-${partySeq}`,
+      nationalId,
+      mobile: '0913' + String(Date.now() % 10000000).padStart(7, '0'),
+      postalCode: '7719175571',
+    });
+  if (res.status === 409) return res.body.error.details.existing.id;
+  expect([200, 201]).toContain(res.status);
+  return res.body.data.id;
+}
+
 const dayOffset = (n: number): string => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
 
 /** انتظار برای سند خودکار موتور حسابداری (publisher هر ثانیه تیک می‌زند) */
@@ -161,6 +185,7 @@ describe('فاز ۵ — صندوق، پرداخت و خزانه‌داری', () 
       .send({
         guestName: 'مهمان فاز ۵', roomIds: [room!.id], plannedCheckOut: dayOffset(2),
         idempotencyKey: `wave1-ci-${Date.now()}`,
+        partyId: await ensureParty('مهمان فاز ۵', tokens.frontdesk),
       });
     expect(ci.status).toBe(201);
     state.stayId = ci.body.data.stayId;
@@ -391,6 +416,7 @@ describe('فاز ۱۰ — خانه‌داری، تعمیرات، لاندری، 
       .send({
         guestName: 'مهمان خدمات جانبی', roomIds: [room!.id], plannedCheckOut: dayOffset(2),
         idempotencyKey: `wave1-ci2-${Date.now()}`,
+        partyId: await ensureParty('مهمان خدمات جانبی', tokens.frontdesk),
       });
     state.stay2 = ci.body.data.stayId;
     state.stay2code = ci.body.data.code;

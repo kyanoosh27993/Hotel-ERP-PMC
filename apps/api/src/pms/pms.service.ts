@@ -4,12 +4,14 @@
  * قواعد: پول فقط BigInt ریال؛ کنترل هم‌زمانی با قفل مشورتی؛ رویدادها با Outbox هم‌تراکنشی.
  */
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Party } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 import { OutboxService } from '../outbox/outbox.service';
 import { EVENT_NAMES } from '@hotel-erp/contracts';
 import { mulRial } from '@hotel-erp/shared';
 import { ReservationService } from '../reservations/reservation.service';
 import { nextDocSeq } from '../common/doc-seq';
+import { legalIdOk, mellicodeOk } from '../parties/parties.service';
 
 export interface PmsReservationInput {
   roomTypeId: string;
@@ -38,6 +40,7 @@ export interface CheckInInput {
   adults?: number;
   children?: number;
   rateOverrideRials?: string;
+  partyId?: string; // رکورد یکتای مهمان — الزامی در گیت هویتی (رزروی و ورود حضوری)
 }
 
 /** شب‌های اقامت از دو تاریخ — حداقل ۱ شب */
@@ -371,32 +374,24 @@ export class PmsService {
             throw new ConflictException({ code: 'BUSINESS_RULE', message: `Room ${r.code} type does not match reserved room type` });
           }
         }
-        // نیاز یکتایی کارفرما — گیت هویتی در گذار رزرو (فعال) → اقامت (آمده):
-        // شخص حقیقی: کد ملی ۱۰ رقم + کد پستی ۱۰ رقم | شخص حقوقی: شناسهٔ ملی + کد اقتصادی | خارجی: سند شناسایی.
-        if (reservation.partyId) {
-          const party = await tx.party.findUnique({ where: { id: reservation.partyId } });
-          if (party) {
-            const missing: string[] = [];
-            const legal = !!(party.natIdentifier || party.economicCode);
-            if (party.nationality === 'FOREIGNER') {
-              if (!party.idDocNo) missing.push('شماره شناسنامه/پاسپورت');
-              if (!party.postalCode) missing.push('کد پستی (۱۰ رقم)');
-            } else if (legal) {
-              if (!party.natIdentifier) missing.push('شناسهٔ ملی (۱۱ رقم)');
-              if (!party.economicCode) missing.push('کد اقتصادی (۱۱ تا ۱۴ رقم)');
-            } else {
-              if (!party.nationalId) missing.push('کد ملی (۱۰ رقم)');
-              if (!party.postalCode) missing.push('کد پستی (۱۰ رقم)');
-            }
-            if (missing.length) {
-              throw new ConflictException({
-                code: 'IDENTITY_INCOMPLETE',
-                message: `برای تبدیل رزرو به اقامت، تکمیل اطلاعات هویتی مهمان الزامی است: ${missing.join('، ')} — در فرم «ثبت مهمان» با تایپ نام/کد ملی، رکورد قبلی را از پیشنهادها بارگذاری کنید، اطلاعات را تکمیل و «ثبت تغییرات» را بزنید.`,
-                details: { partyId: party.id, missing },
-              });
-            }
-          }
-        }
+      }
+
+      // گیت هویتی سختگیرانه (نیاز کارفرما) — برای همهٔ چک‌این‌ها: رزروی و ورود حضوری، قدیمی و جدید.
+      // شخص حقیقی: کد ملی ۱۰ رقم معتبر + کد پستی ۱۰ رقم | حقوقی: شناسهٔ ملی + کد اقتصادی | خارجی: سند شناسایی.
+      const effectivePartyId = input.partyId ?? reservation?.partyId ?? null;
+      if (!effectivePartyId) {
+        throw new ConflictException({
+          code: 'IDENTITY_REQUIRED',
+          message: 'چک‌این بدون رکورد یکتای مهمان مجاز نیست — در پنل «پذیرش» فیلد «رکورد یکتای مهمان» را با جستجوی زنده (نام/کد ملی) انتخاب کنید. رزروهای قدیمی هم باید پیش از چک‌این به رکورد یکتا با کد ملی/شناسهٔ ملی معتبر متصل شوند.',
+          details: { needParty: true, reservationId: reservation?.id ?? null },
+        });
+      }
+      const identityParty = await tx.party.findUnique({ where: { id: effectivePartyId } });
+      if (!identityParty) throw new NotFoundException({ code: 'NOT_FOUND', message: 'رکورد یکتای مهمان یافت نشد' });
+      this.assertPartyIdentity(identityParty);
+      if (reservation && !reservation.partyId) {
+        // رزرو قدیمی با انتخاب رکورد یکتا در چک‌این، برای همیشه پیوند می‌خورد
+        await tx.reservation.update({ where: { id: reservation.id }, data: { partyId: effectivePartyId } });
       }
 
       const seq = await nextDocSeq(tx, 'stay');
@@ -786,5 +781,70 @@ export class PmsService {
       arrivalsNotCheckedIn: r.arrivalsNotCheckedIn,
       closedAt: r.closedAt.toISOString(),
     }));
+  }
+
+  /**
+   * اتصال رکورد یکتای مهمان به رزرو — مسیر اصلاح رزروهای قدیمیِ بدون party.
+   * الزام «کد معتبر» در گیت چک‌این نهایی اعمال می‌شود؛ اینجا فهرست ناقص‌ها هشدار داده می‌شود.
+   */
+  async attachParty(reservationId: string, partyId: string) {
+    const reservation = await this.prisma.reservation.findUnique({ where: { id: reservationId } });
+    if (!reservation) throw new NotFoundException({ code: 'NOT_FOUND', message: 'Reservation not found' });
+    if (reservation.status !== 'CONFIRMED') {
+      throw new ConflictException({ code: 'CONFLICT', message: `Reservation is ${reservation.status}, not CONFIRMED` });
+    }
+    const party = await this.prisma.party.findUnique({ where: { id: partyId } });
+    if (!party) throw new NotFoundException({ code: 'NOT_FOUND', message: 'رکورد یکتای مهمان یافت نشد' });
+    const updated = await this.prisma.reservation.update({ where: { id: reservationId }, data: { partyId } });
+    const missing: string[] = [];
+    const legal = !!(party.natIdentifier || party.economicCode);
+    if (party.nationality === 'FOREIGNER') {
+      if (!party.idDocNo) missing.push('شماره شناسنامه/پاسپورت');
+      if (!party.postalCode) missing.push('کد پستی (۱۰ رقم)');
+    } else if (legal) {
+      if (!party.natIdentifier) missing.push('شناسهٔ ملی (۱۱ رقم)');
+      if (!party.economicCode) missing.push('کد اقتصادی (۱۱ تا ۱۴ رقم)');
+    } else {
+      if (!party.nationalId) missing.push('کد ملی (۱۰ رقم)');
+      if (!party.postalCode) missing.push('کد پستی (۱۰ رقم)');
+    }
+    return { reservationId: updated.id, partyId, code: updated.code, incomplete: missing };
+  }
+
+  /**
+   * گیت هویتی (نیاز کارفرما — سخت‌گیری کامل): هم کامل بودن، هم معتبر بودنِ ساختاری کدها.
+   * دادهٔ قدیمی با کد فیک/ناقص از گیت عبور نمی‌کند — پذیرش باید رکورد یکتا را تکمیل/اصلاح کند.
+   */
+  private assertPartyIdentity(party: Party): void {
+    const problems: string[] = [];
+    const legal = !!(party.natIdentifier || party.economicCode);
+    if (party.nationality === 'FOREIGNER') {
+      if (!party.idDocNo) problems.push('شماره شناسنامه/پاسپورت');
+      if (!party.postalCode) problems.push('کد پستی (۱۰ رقم)');
+    } else if (legal) {
+      if (!party.natIdentifier) problems.push('شناسهٔ ملی (۱۱ رقم)');
+      if (!party.economicCode) problems.push('کد اقتصادی (۱۱ تا ۱۴ رقم)');
+    } else {
+      if (!party.nationalId) problems.push('کد ملی (۱۰ رقم)');
+      if (!party.postalCode) problems.push('کد پستی (۱۰ رقم)');
+    }
+    if (problems.length) {
+      throw new ConflictException({
+        code: 'IDENTITY_INCOMPLETE',
+        message: `برای تبدیل رزرو به اقامت، تکمیل اطلاعات هویتی مهمان الزامی است: ${problems.join('، ')} — در فرم «ثبت مهمان» با تایپ نام/کد ملی، رکورد قبلی را از پیشنهادها بارگذاری کنید، اطلاعات را تکمیل و «ثبت تغییرات» را بزنید.`,
+        details: { partyId: party.id, missing: problems },
+      });
+    }
+    const invalid: string[] = [];
+    if (party.nationalId && !mellicodeOk(party.nationalId)) invalid.push('کد ملی ثبت‌شده معتبر نیست (رقم کنترل غلط است)');
+    if (party.natIdentifier && !legalIdOk(party.natIdentifier)) invalid.push('شناسهٔ ملی ثبت‌شده معتبر نیست (رقم کنترل غلط است)');
+    if (party.postalCode && !/^\d{10}$/.test(party.postalCode)) invalid.push('کد پستی ثبت‌شده باید ۱۰ رقم باشد');
+    if (invalid.length) {
+      throw new ConflictException({
+        code: 'IDENTITY_INVALID',
+        message: `اطلاعات هویتی ثبت‌شده معتبر نیست: ${invalid.join('، ')} — رکورد قبلی را در فرم «ثبت مهمان» اصلاح کنید؛ کدهای فیک و دادهٔ قدیمیِ ناسازگار پذیرفته نمی‌شود.`,
+        details: { partyId: party.id, invalid },
+      });
+    }
   }
 }
