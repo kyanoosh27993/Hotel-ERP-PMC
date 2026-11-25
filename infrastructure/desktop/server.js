@@ -27,6 +27,14 @@ const SEED_PASSWORD = process.env.SEED_ADMIN_PASSWORD || 'Admin@Hotel1';
 
 fs.mkdirSync(LOG_DIR, { recursive: true });
 
+// باگ #۱۲-نمایش: پنجرهٔ کنسولِ ساخته‌شدهٔ schtasks (اجرای محدود) با صفحه‌کد پیش‌فرض
+// OEM بالا می‌آید و فارسی به‌صورت «Ø³ÛŒØ³ØªÙ…» نمایش داده می‌شود. chcp را خودِ
+// برنامه در همان ابتدا روی 65001 می‌گذارد تا همهٔ مسیرهای اجرا (مستقیم، boot.cmd،
+// run-server.cmd) UTF-8 نشان دهند.
+if (IS_WIN) {
+  try { require('child_process').execSync('chcp 65001', { stdio: 'ignore' }); } catch (e) { /* ناکامی حیاتی نیست */ }
+}
+
 // ── لاگر: کنسول + فایل (چرخش: حداکثر ۲۰ فایل) ──
 const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
 // لاگ فرزندِ اجرای محدود جدا از والد — خواناتر در دیاگ
@@ -95,6 +103,8 @@ async function deElevateIfNeeded() {
   const bootFile = path.join(DATA_DIR, 'boot.cmd');
   const boot = [
     '@echo off',
+    // فارسیِ پنجرهٔ فرزند — بدون chcp صفحه‌کد OEM باقی می‌ماند و متن خراب می‌شود (باگ #۱۲)
+    'chcp 65001 >nul',
     'set "HOTELERP_DEELEVATED=1"',
     `set "HOTELERP_DATA_DIR=${DATA_DIR}"`,
     `set "HOTELERP_PORT=${PORT}"`,
@@ -225,10 +235,29 @@ async function waitForHttp(url, timeoutMs) {
   throw new Error('Server did not become ready in time: ' + url);
 }
 
+/** نسخهٔ اصلی PostgreSQL باندل‌شده از خروجی pg_ctl --version («pg_ctl (PostgreSQL) 19.0 …») */
+async function pgBundledMajor() {
+  try {
+    const r = await runBin('pg_ctl', ['--version']);
+    const m = String(r.stdout).match(/PostgreSQL\)\s+(\d+)/);
+    return m ? Number(m[1]) : null;
+  } catch (e) { return null; }
+}
+
+/** اگر سروری روی پورت داده‌شده زنده است true می‌دهد */
+function portAlive(p) {
+  return new Promise((res) => {
+    const s = net.connect({ host: '127.0.0.1', port: p });
+    s.once('connect', () => { s.destroy(); res(true); });
+    s.once('error', () => res(false));
+    s.setTimeout(1200, () => { s.destroy(); res(false); });
+  });
+}
+
 async function main() {
   console.log('\n==============================================');
   console.log('   Hotel ERP — سامانه یکپارچه هتلداری');
-  console.log('   نسخهٔ دسکتاپ v0.8.4 — در حال راه‌اندازی…');
+  console.log('   نسخهٔ دسکتاپ v3.2.1 — در حال راه‌اندازی…');
   console.log('==============================================\n');
   log('data dir: ' + DATA_DIR);
   log('log file: ' + LOG_FILE);
@@ -244,13 +273,43 @@ async function main() {
   // ── ۱) دیتابیس جاسازی‌شده PostgreSQL ──
   step('۱/۴ پایگاه داده جاسازی‌شده (PostgreSQL embedded)');
   const pgPort = await freePort(port + 1);
+  // ── باگ #۱۲: ناسازگاری نسخهٔ خوشهٔ موجود با باینری همراه ──
+  // خوشهٔ ساخته‌شده با PostgreSQL 19 با باندلِ ۱۸٫۷ باز نمی‌شود
+  // («database files are incompatible with server») و برنامه می‌میرد.
+  // ریکاوری خودکار: بکاپ کامل پوشهٔ داده با نام pgdata-old-PG<major>-<زمان>
+  // (هیچ داده‌ای حذف نمی‌شود) + ساخت خوشهٔ تازه با نسخهٔ همراه.
+  const bundledMajor = await pgBundledMajor();
+  const versionFile = path.join(PG_DIR, 'PG_VERSION');
+  if (bundledMajor && fs.existsSync(versionFile)) {
+    const dirMajor = parseInt(String(fs.readFileSync(versionFile, 'utf8')).trim(), 10);
+    if (Number.isFinite(dirMajor) && dirMajor !== bundledMajor) {
+      const backup = `${PG_DIR}-old-PG${dirMajor}-${stamp}`;
+      fs.renameSync(PG_DIR, backup);
+      log(`خوشهٔ موجود با PostgreSQL ${dirMajor} ساخته شده ولی نسخهٔ همراه ${bundledMajor} است — بکاپ: ${backup}`);
+      console.log('\n⚠️  خوشهٔ دیتابیس قدیمی با نسخهٔ متفاوت PostgreSQL ساخته شده بود و با نسخهٔ همراه برنامه سازگار نیست.');
+      console.log('    داده‌های قبلی کامل نگه داشته شد در: ' + backup);
+      console.log('    برنامه با خوشهٔ تازه ادامه می‌دهد (دادهٔ اولیهٔ استاندارد بازسازی می‌شود).\n');
+    }
+  }
   // initdb مستقیم با UTF-8 — روی ویندوز locale پیش‌فرض (WIN1252) متن فارسی را می‌شکند (خطای 22P05)
-  if (fs.existsSync(path.join(PG_DIR, 'PG_VERSION'))) {
+  if (fs.existsSync(versionFile)) {
     log('خوشهٔ دیتابیس موجود است — از اجرای قبل ادامه می‌دهیم');
   } else {
     const r = await runBin('initdb', ['-D', PG_DIR, '--username=hotel', '--encoding=UTF8', '--locale=C', '--auth=trust']);
     if (r.code !== 0) throw new Error('initdb ناموفق (کد ' + r.code + '): ' + String(r.stderr).trim().slice(-400));
     log('خوشهٔ دیتابیس با کدگذاری UTF-8 ساخته شد (اجرای اول)');
+  }
+  // پاک‌سازی postmaster.pid قدیمی: اگر postgres روی پورتِ ثبت‌شده زنده نبود، فایل stale است و
+  // pg_ctl با «control file appears to be corrupt / another server might be running» شکست می‌خورد
+  const pidFile = path.join(PG_DIR, 'postmaster.pid');
+  if (fs.existsSync(pidFile)) {
+    try {
+      const pidPort = Number(String(fs.readFileSync(pidFile, 'utf8')).split(/\r?\n/)[3]);
+      if (Number.isFinite(pidPort) && !(await portAlive(pidPort))) {
+        fs.unlinkSync(pidFile);
+        log('postmaster.pid قدیمی پاک شد (سروری روی پورت ' + pidPort + ' زنده نبود)');
+      }
+    } catch (e) { log('بررسی postmaster.pid ناموفق بود — ادامه می‌دهیم: ' + e.message); }
   }
   // شروع مستقیم با pg_ctl (به‌جای pg.start که در خروج زودهنگام postgres، reject بی‌پیام می‌زد)
   // -l logfile: خطای واقعی postgres را ثبت می‌کند؛ -w: تا آماده‌شدن صبر می‌کند.

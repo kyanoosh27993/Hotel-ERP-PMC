@@ -36,6 +36,13 @@ jobs:
             }
             Write-Host "BOM OK — $f"
           }
+          # باگ #۱۲ — فارسی کنسول: run-server.cmd و boot.cmd (داخل server.js) باید chcp 65001 بگذارند
+          $cmd = Get-Content "infrastructure\desktop\run-server.cmd" -Raw
+          if ($cmd -notmatch 'chcp 65001') { throw "GATE FAILED: run-server.cmd is missing chcp 65001 — Persian console output would be garbled" }
+          $srv = Get-Content "infrastructure\desktop\server.js" -Raw
+          if ($srv -notmatch 'chcp 65001 >nul') { throw "GATE FAILED: server.js boot.cmd (deElevated console) is missing chcp 65001 >nul" }
+          if ($srv -notmatch "execSync\('chcp 65001'") { throw "GATE FAILED: server.js boot-time chcp 65001 missing" }
+          Write-Host "CODEPAGE GATE OK — Persian console rendering guarded"
 
       - uses: actions/setup-node@v4
         with:
@@ -74,7 +81,9 @@ jobs:
         run: |
           node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('../../../../apps/api/package.json','utf8'));fs.writeFileSync('package.json',JSON.stringify({name:'hotel-erp-runtime',version:'0.5.0',private:true,dependencies:p.dependencies},null,2))"
           npm install --omit=dev --no-audit --no-fund
-          npm install --no-save --no-audit --no-fund embedded-postgres@18.7.0-beta.19 prisma@5.22.0
+          # پین PostgreSQL 19 — باگ #۱۲: خوشهٔ datadir کارفرما با PG19 ساخته شده بود و
+          # باندل ۱۸٫۷ آن را باز نمی‌کرد (database files are incompatible with server).
+          npm install --no-save --no-audit --no-fund embedded-postgres@19.0.0-beta.20 prisma@5.22.0
           # تولید کلاینت Prisma داخل payload (بدون این، seed و API خطای
           # "@prisma/client did not initialize yet" می‌دهند)
           node node_modules/prisma/build/index.js generate --schema prisma/schema.prisma
@@ -88,6 +97,17 @@ jobs:
             test -f "node_modules/@hotel-erp/$p/package.json" || { echo "GATE FAILED: @hotel-erp/$p is missing from payload"; exit 1; }
           done
           echo "PAYLOAD PACKAGES OK — @hotel-erp/{shared,contracts,payroll} present"
+
+      # ── گیت نسخهٔ PG (باگ #۱۲): نسخهٔ واقعی باینری باندل‌شده باید با پین یکی باشد ──
+      - name: Gate — bundled PostgreSQL major must match the pin
+        shell: pwsh
+        run: |
+          $pgctl = "infrastructure\desktop\payload\api\node_modules\@embedded-postgres\windows-x64\native\bin\pg_ctl.exe"
+          if (-not (Test-Path $pgctl)) { throw "pg_ctl.exe missing from payload" }
+          $v = & $pgctl --version
+          Write-Host "bundled: $v"
+          if ($v -notmatch "PostgreSQL\) 19\.") { throw "GATE FAILED: bundled PostgreSQL major is not 19 (pin: embedded-postgres@19.0.0-beta.20) — version drift breaks existing customer datadirs" }
+          Write-Host "PG MAJOR GATE OK — 19"
 
       - name: Download portable node.exe
         run: |
@@ -162,6 +182,40 @@ jobs:
           Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force
           schtasks /delete /tn "HotelERP Limited Run" /f 2>$null | Out-Null
           Write-Host "SMOKE TEST PASSED — boot + login + PMS + web shell on real Windows"
+
+      # ── تست ریکاوری (باگ #۱۲): خوشهٔ موجود با نسخهٔ متفاوت PostgreSQL → بکاپ خودکار + بوت موفق ──
+      # شبیه‌سازی دقیق دستگاه کارفرما: datadir ساخته‌شده با PG دیگر؛ سرور باید خودش را
+      # بازسازی کند (بکاپ pgdata-old-PG17-* + initdb تازه) نه اینکه با FATAL بمیرد.
+      - name: Recovery test — incompatible datadir version self-heals
+        shell: pwsh
+        run: |
+          $vf = "$env:RUNNER_TEMP\smoke-data\pgdata\PG_VERSION"
+          if (-not (Test-Path $vf)) { throw "smoke datadir missing from previous step" }
+          Set-Content -Path $vf -Value "17" -NoNewline
+          $env:HOTELERP_PORT = "3300"
+          $env:HOTELERP_DATA_DIR = "$env:RUNNER_TEMP\smoke-data"
+          $env:AUTH_CAPTCHA_REQUIRED = "false"
+          $p = Start-Process -FilePath "infrastructure\desktop\payload\node\node.exe" -ArgumentList "infrastructure\desktop\payload\server.js" -PassThru -WindowStyle Hidden -RedirectStandardOutput "$env:RUNNER_TEMP\rec-out.log" -RedirectStandardError "$env:RUNNER_TEMP\rec-err.log"
+          $ok = $false
+          for ($i = 0; $i -lt 150; $i++) {
+            Start-Sleep -Seconds 2
+            try {
+              $h = Invoke-RestMethod -Uri "http://localhost:3300/api/v1/health" -TimeoutSec 3
+              if ($h.status -eq "ok") { $ok = $true; break }
+            } catch {}
+          }
+          if (-not $ok) {
+            Get-Content "$env:RUNNER_TEMP\rec-out.log","$env:RUNNER_TEMP\rec-err.log" -ErrorAction SilentlyContinue | Select-Object -Last 30
+            Get-ChildItem "$env:RUNNER_TEMP\smoke-data\logs" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "--- $($_.Name) ---"; Get-Content $_.FullName -ErrorAction SilentlyContinue | Select-Object -Last 30 }
+            Write-Host "--- pg-server.log ---"; Get-Content "$env:RUNNER_TEMP\smoke-data\pgdata\pg-server.log" -ErrorAction SilentlyContinue | Select-Object -Last 20
+            Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force
+            throw "recovery boot failed after datadir version-mismatch simulation"
+          }
+          $bak = Get-ChildItem "$env:RUNNER_TEMP\smoke-data" -Directory -Filter "pgdata-old-PG17-*"
+          if (-not $bak) { throw "recovery backup (pgdata-old-PG17-*) was not created — self-heal logic missing" }
+          Write-Host "RECOVERY OK — backup: $($bak.Name) — server healthy after version-mismatch self-heal"
+          taskkill /PID $($p.Id) /T /F 2>$null
+          Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force
 
       # ── تست نصب واقعی + معادل دابل‌کلیک (باگ #۹): Setup را روی Program Files نصب
       #    می‌کنیم و سپس دقیقاً همان exe نصب‌شده (مسیر دابل‌کلیک کاربر) را اجرا می‌کنیم ──
