@@ -33,6 +33,23 @@ jobs:
       - name: Unit tests
         run: npm run test:unit -w packages/shared && npm run test:unit -w packages/payroll && npm run test:unit -w apps/api
 
+  desktop:
+    name: Desktop launcher — schema-sync self-heal (embedded PostgreSQL)
+    runs-on: ubuntu-latest
+    needs: quality
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      # ماژول اعمال مهاجرت‌های دسکتاپ (باگ #۱۵) روی همان باینری embedded-postgres لینوکس
+      # فقط روی شاخه‌هایی که پروژهٔ دسکتاپ را دارند اجرا می‌شود (شاخهٔ main پروژهٔ دیگری است)
+      - name: schema-sync integration (fresh / upgrade / P3009 heal / P3005 baseline / broken-migration)
+        if: hashFiles('infrastructure/desktop/schema-sync.js') != ''
+        run: node scripts/test-schema-sync.mjs
+
   e2e:
     name: E2E (PostgreSQL service) — core acceptance
     runs-on: ubuntu-latest

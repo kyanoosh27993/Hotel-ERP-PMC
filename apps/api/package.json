@@ -1,6 +1,6 @@
 {
   "name": "@hotel-erp/api",
-  "version": "3.2.2",
+  "version": "3.2.3",
   "private": true,
   "description": "هسته NestJS — فاز ۱: auth، RBAC، outbox، PoC رزرو/POS/سند، رصد",
   "main": "dist/main.js",

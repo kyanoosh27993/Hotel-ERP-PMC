@@ -3,7 +3,7 @@ chcp 65001 >nul
 title Hotel ERP — سرور برنامه (بستن این پنجره = خاموش شدن برنامه)
 cd /d "%~dp0"
 echo ==================================================
-echo    Hotel ERP - Samane Yekparche Hoteldari (v3.2.2)
+echo    Hotel ERP - Samane Yekparche Hoteldari (v3.2.3)
 echo    در حال راه‌اندازی... اولین اجرا کمی طول می‌کشد
 echo    (ساخت پایگاه داده + دادهٔ اولیه ~۳۰ ثانیه)
 echo ==================================================
@@ -18,7 +18,9 @@ if not exist "node\node.exe" (
 "node\node.exe" server.js
 echo.
 echo ==================================
-echo   برنامه متوقف شد — Tozihate khataye age bood: %APPDATA%\HotelERP\logs
+echo   برنامه متوقف شد.
+echo   اگر خطایی مشاهده کردید، فایل‌های لاگ در این مسیر هستند:
+echo   %APPDATA%\HotelERP\logs
 echo   برای بستن این پنجره کلیدی بزنید…
 echo ==================================
 pause >nul

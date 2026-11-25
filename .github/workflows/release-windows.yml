@@ -43,6 +43,14 @@ jobs:
           if ($srv -notmatch 'chcp 65001 >nul') { throw "GATE FAILED: server.js boot.cmd (deElevated console) is missing chcp 65001 >nul" }
           if ($srv -notmatch "execSync\('chcp 65001'") { throw "GATE FAILED: server.js boot-time chcp 65001 missing" }
           Write-Host "CODEPAGE GATE OK — Persian console rendering guarded"
+          # باگ #۱۴/#۱۵/#۱۶ — فایل‌های جدیدِ لانچر باید در سورس موجود باشند
+          foreach ($f in @("infrastructure\desktop\schema-sync.js", "infrastructure\desktop\stop-app.ps1")) {
+            if (-not (Test-Path $f)) { throw "GATE FAILED: $f missing — launcher cannot boot/uninstall correctly" }
+          }
+          $sync = Get-Content "infrastructure\desktop\server.js" -Raw
+          if ($sync -notmatch "schema-sync\.js") { throw "GATE FAILED: server.js does not load schema-sync.js" }
+          if ($sync -notmatch "stopPgFast") { throw "GATE FAILED: server.js missing stopPgFast (bug #14 — orphan PG)" }
+          Write-Host "LAUNCHER FILES GATE OK — schema-sync.js + stop-app.ps1 present, server.js wired"
 
       - uses: actions/setup-node@v4
         with:
@@ -69,6 +77,9 @@ jobs:
           cp -r apps/web/. infrastructure/desktop/payload/web/
           cp infrastructure/desktop/server.js infrastructure/desktop/payload/server.js
           cp infrastructure/desktop/run-server.cmd infrastructure/desktop/payload/run-server.cmd
+          cp infrastructure/desktop/schema-sync.js infrastructure/desktop/payload/schema-sync.js
+          test -f infrastructure/desktop/payload/schema-sync.js || { echo "GATE FAILED: schema-sync.js missing from payload"; exit 1; }
+          test -f infrastructure/desktop/stop-app.ps1 || { echo "GATE FAILED: stop-app.ps1 missing from source (needed at NSIS compile time)"; exit 1; }
           mkdir -p infrastructure/desktop/payload/api/node_modules/@hotel-erp/shared infrastructure/desktop/payload/api/node_modules/@hotel-erp/contracts infrastructure/desktop/payload/api/node_modules/@hotel-erp/payroll
           cp -r packages/shared/dist packages/shared/package.json infrastructure/desktop/payload/api/node_modules/@hotel-erp/shared/
           cp -r packages/contracts/dist packages/contracts/package.json infrastructure/desktop/payload/api/node_modules/@hotel-erp/contracts/
@@ -161,7 +172,7 @@ jobs:
           if (-not $ok) {
             Get-Content "$env:RUNNER_TEMP\smoke-out.log","$env:RUNNER_TEMP\smoke-err.log" -ErrorAction SilentlyContinue | Select-Object -Last 40
             Get-ChildItem "$env:RUNNER_TEMP\smoke-data\logs" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "--- $($_.Name) ---"; Get-Content $_.FullName -ErrorAction SilentlyContinue | Select-Object -Last 35 }
-            Write-Host "--- pg-server.log ---"; Get-Content "$env:RUNNER_TEMP\smoke-data\pgdata\pg-server.log" -ErrorAction SilentlyContinue | Select-Object -Last 25
+            Write-Host "--- pg-server.log ---"; Get-Content "$env:RUNNER_TEMP\smoke-data\logs\pg-server.log" -ErrorAction SilentlyContinue | Select-Object -Last 25
             Write-Host "--- boot.cmd ---"; Get-Content "$env:RUNNER_TEMP\smoke-data\boot.cmd" -ErrorAction SilentlyContinue
             Write-Host "--- schtasks status ---"; schtasks /query /tn "HotelERP Limited Run" /v /fo list 2>$null | Select-Object -Last 12
             taskkill /PID $($p.Id) /T /F 2>$null
@@ -207,7 +218,7 @@ jobs:
           if (-not $ok) {
             Get-Content "$env:RUNNER_TEMP\rec-out.log","$env:RUNNER_TEMP\rec-err.log" -ErrorAction SilentlyContinue | Select-Object -Last 30
             Get-ChildItem "$env:RUNNER_TEMP\smoke-data\logs" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "--- $($_.Name) ---"; Get-Content $_.FullName -ErrorAction SilentlyContinue | Select-Object -Last 30 }
-            Write-Host "--- pg-server.log ---"; Get-Content "$env:RUNNER_TEMP\smoke-data\pgdata\pg-server.log" -ErrorAction SilentlyContinue | Select-Object -Last 20
+            Write-Host "--- pg-server.log ---"; Get-Content "$env:RUNNER_TEMP\smoke-data\logs\pg-server.log" -ErrorAction SilentlyContinue | Select-Object -Last 20
             Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force
             throw "recovery boot failed after datadir version-mismatch simulation"
           }
@@ -245,7 +256,7 @@ jobs:
           }
           if (-not $ok) {
             Get-ChildItem "$env:APPDATA\HotelERP\logs" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "--- $($_.Name) ---"; Get-Content $_.FullName -ErrorAction SilentlyContinue | Select-Object -Last 35 }
-            Write-Host "--- pg-server.log ---"; Get-Content "$env:APPDATA\HotelERP\pgdata\pg-server.log" -ErrorAction SilentlyContinue | Select-Object -Last 25
+            Write-Host "--- pg-server.log ---"; Get-Content "$env:APPDATA\HotelERP\logs\pg-server.log" -ErrorAction SilentlyContinue | Select-Object -Last 25
             Write-Host "--- boot.cmd ---"; Get-Content "$env:APPDATA\HotelERP\boot.cmd" -ErrorAction SilentlyContinue
             Write-Host "--- schtasks ---"; schtasks /query /tn "HotelERP Limited Run" /v /fo list 2>$null | Select-Object -Last 12
             Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force
@@ -308,6 +319,92 @@ jobs:
           $key = Get-ItemProperty "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\HotelERP" -ErrorAction SilentlyContinue
           if ($key) { throw "BUG13 FAILED: uninstall registry key still present after detection-uninstall" }
           Write-Host "DETECTION OK — installed machine + silent Setup = complete uninstall (bug #13 rule)"
+
+      # ── باگ #۱۴/#۱۵/#۱۶ — رگرسیون چرخهٔ حیات روی ویندوز واقعی ──
+      # ۱) PG یتیم: کشتنِ فقط node و نگه‌داشتن postgres → اجرای دوباره باید همان PG را
+      #    بازاستفاده کند (نه شروعِ دومین سرور و نه «another server might be running»).
+      # ۲) مهاجرت ناتمام (P3009): ردیف unfinished + ستون‌های حذف‌شده → اجرای دوباره باید
+      #    خودشان را ترمیم و بازسازی کند (schema-sync).
+      # ۳) حذف حین اجرا: برنامه در حال اجرا → Setup /S باید با stop-app.ps1 آن را متوقف
+      #    و کامل حذف کند (کد ۰).
+      - name: Lifecycle regression — orphan PG reuse, faulted migration heal, uninstall while running
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $inst = "C:\Program Files\HotelERP"
+          $data = "$env:APPDATA\HotelERP"
+          $setup = "infrastructure\desktop\out\Hotel-ERP-Setup.exe"
+
+          function Dump-Diag {
+            Get-ChildItem "$data\logs" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "--- $($_.Name) ---"; Get-Content $_.FullName -ErrorAction SilentlyContinue | Select-Object -Last 30 }
+            Write-Host "--- pg-server.log ---"; Get-Content "$data\logs\pg-server.log" -ErrorAction SilentlyContinue | Select-Object -Last 25
+            Write-Host "--- schtasks ---"; schtasks /query /tn "HotelERP Limited Run" /v /fo list 2>$null | Select-Object -Last 12
+          }
+          function Wait-Healthy($port,$sec){
+            for($i=0;$i -lt [int]($sec/2);$i++){ Start-Sleep -Seconds 2; try{ $h=Invoke-RestMethod -Uri "http://localhost:$port/api/v1/health" -TimeoutSec 3; if($h.status -eq 'ok'){return $true} }catch{} }
+            return $false
+          }
+          function Stop-NodeOnly{
+            Get-CimInstance Win32_Process | Where-Object { $_.ExecutablePath -and $_.ExecutablePath.ToLower().StartsWith($inst.ToLower()) -and $_.Name -eq 'node.exe' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+          }
+
+          # ۱) نصب خاموش تازه
+          $p = Start-Process -FilePath $setup -ArgumentList "/S" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "lifecycle: fresh Setup /S exited $($p.ExitCode)" }
+          if (-not (Test-Path "$inst\HotelERP.exe")) { throw "lifecycle: install missing" }
+
+          # ابزارِ دسترسی مستقیم به PG (پورت از postmaster.pid خوانده می‌شود)
+          $pgjs = Join-Path $env:RUNNER_TEMP "pg-probe.js"
+          @'
+          const fs=require('fs'),{Client}=require(process.argv[2]+'/api/node_modules/pg');
+          const pid=fs.readFileSync(process.argv[3]+'/pgdata/postmaster.pid','utf8').split(/\r?\n/);
+          const port=Number(pid[3]); const action=process.argv[4];
+          const c=new Client({host:'127.0.0.1',port,user:'hotel',password:'hotel_local_pass',database:'hotel_erp',connectionTimeoutMillis:5000});
+          (async()=>{ await c.connect();
+            if(action==='fault'){ await c.query("UPDATE _prisma_migrations SET finished_at=NULL, rolled_back_at=NULL WHERE migration_name='20261202000000_user_profile_fields'");
+              for(const col of ['photoUrl','position','lastLoginAt','lastLoginIp']) await c.query('ALTER TABLE "users" DROP COLUMN IF EXISTS "'+col+'"'); }
+            else if(action==='checkcols'){ const r=await c.query("SELECT column_name FROM information_schema.columns WHERE table_name='users' AND column_name IN ('photoUrl','position','lastLoginAt','lastLoginIp')"); console.log('COLS='+r.rows.length); }
+            await c.end(); })().catch(e=>{console.error('PGERR',e.message);process.exit(2)});
+          '@ | Set-Content -Path $pgjs -Encoding UTF8
+
+          # ۲) اجرا + سلامتی اولیه
+          Start-Process -FilePath "$inst\HotelERP.exe"
+          if(-not (Wait-Healthy 3000 150)){ Dump-Diag; Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force; throw "lifecycle: app did not become healthy" }
+          Write-Host "LIFECYCLE boot OK"
+
+          # ۳) مهاجرت ناتمام (P3009) → ترمیم خودکار + بازسازی ستون‌ها
+          & "$inst\node\node.exe" $pgjs $inst $data fault
+          Stop-NodeOnly; Start-Sleep -Seconds 3
+          Start-Process -FilePath "$inst\HotelERP.exe"
+          if(-not (Wait-Healthy 3000 120)){ Dump-Diag; Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force; throw "lifecycle: heal relaunch failed" }
+          $cols = & "$inst\node\node.exe" $pgjs $inst $data checkcols
+          if($cols -notmatch 'COLS=4'){ Dump-Diag; throw "lifecycle: faulted migration not healed (cols=$cols)" }
+          Write-Host "LIFECYCLE faulted-migration heal OK (P3009 self-heal + columns restored)"
+
+          # ۴) PG یتیم: فقط node را بکش، postgres را نگه‌دار → اجرای دوباره باید همان PG را بازاستفاده کند
+          Stop-NodeOnly; Start-Sleep -Seconds 3
+          $orphan = (Get-Process -Name postgres -ErrorAction SilentlyContinue | Measure-Object).Count
+          if($orphan -lt 1){ throw "lifecycle: no orphan postgres after killing node (PG died with node?)" }
+          Start-Process -FilePath "$inst\HotelERP.exe"
+          if(-not (Wait-Healthy 3000 90)){ Dump-Diag; Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force; throw "lifecycle: orphan-PG reuse relaunch failed" }
+          Write-Host "LIFECYCLE orphan-PG reuse OK"
+          Stop-NodeOnly; Start-Sleep -Seconds 3
+
+          # ۵) حذف حین اجرا: برنامه دوباره بالا → Setup /S باید با stop-app.ps1 متوقف و کامل حذف کند
+          Start-Process -FilePath "$inst\HotelERP.exe"
+          if(-not (Wait-Healthy 3000 90)){ Dump-Diag; Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force; throw "lifecycle: pre-uninstall boot failed" }
+          $p2 = Start-Process -FilePath $setup -ArgumentList "/S" -Wait -PassThru
+          if($p2.ExitCode -ne 0){ Dump-Diag; Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force; throw "lifecycle: Setup /S on running app exited $($p2.ExitCode)" }
+          Start-Sleep -Seconds 3
+          if(Test-Path $inst){ Get-ChildItem $inst -Recurse -ErrorAction SilentlyContinue | Select-Object -First 20 -ExpandProperty FullName; throw "lifecycle: uninstall-while-running left files behind in $inst" }
+          $key = Get-ItemProperty "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\HotelERP" -ErrorAction SilentlyContinue
+          if($key){ throw "lifecycle: uninstall registry key still present" }
+          Write-Host "LIFECYCLE uninstall-while-running OK — stop-app.ps1 stopped the running server, complete removal, exit 0"
+          Get-Process -Name node,postgres -ErrorAction SilentlyContinue | Stop-Process -Force
+          schtasks /delete /tn "HotelERP Limited Run" /f 2>$null | Out-Null
+          # همهٔ چک‌ها سبز شدند؛ exit صریح تا کد خروجِ دستورِ پاک‌سازیِ انتهایی (schtasks
+          # روی وظیفهٔ ازقبل‌حذف‌شده) رنگ این استپ را قرمز نکند.
+          exit 0
 
       - name: Upload artifact (always)
         if: always()

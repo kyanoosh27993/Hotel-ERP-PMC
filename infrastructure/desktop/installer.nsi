@@ -3,13 +3,17 @@
 ; لوگوی سپر و ترازو در آیکون، هدر و صفحهٔ خوش‌آمد
 ; مراحل نصب به فارسی با DetailPrint برای کاربر نمایش داده می‌شود
 ;
-; باگ #۱۳ — تشخیص نصب قبلی:
+; باگ #۱۳ + باگ #۱۶ — تشخیص نصب قبلی و حذف کامل:
 ;   اگر برنامه از قبل نصب باشد، نصب‌کننده آن را تشخیص می‌دهد (رجیستری + وجود
-;   واقعی Uninstall.exe) و پیام انتخاب نمایش می‌دهد:
-;     بله   = حذف کامل برنامه از رایانه (اجرای Uninstall.exe)
-;     خیر   = نصب مجدد روی نسخهٔ فعلی (مسیر ارتقا)
+;   واقعی Uninstall.exe / HotelERP.exe) و پیام انتخاب نمایش می‌دهد:
+;     بله   = حذف کامل برنامه از رایانه (اجرای Uninstall.exe تعاملی)
+;     خیر   = نصب مجدد روی نسخهٔ فعلی (ارتقا؛ اول برنامهٔ در حال اجرا متوقف می‌شود)
 ;     انصراف = خروج
-;   در حالت خاموش (/S): نصب‌نشده → نصب | نصب‌شده → حذف خودکار همان نسخه
+;   حالت خاموش (/S): نصب‌نشده → نصب | نصب‌شده → حذف کامل برنامه (داده‌ها حفظ می‌شوند)
+;     و کد خروج ۰.
+;   رفع باگ #۱۶: Quit دیگر کد ۲ نمی‌دهد (SetErrorLevel ۰)؛ باقی‌ماندهٔ _?= پاک می‌شود؛
+;   مسیر نصب قبلی (نه $INSTDIR پیش‌فرض) به‌کار می‌رود؛ فرایندهای در حال اجرا پیش از
+;   بازنویسی فایل‌ها با stop-app.ps1 تمیز متوقف می‌شوند (شامل توقف تمیز PostgreSQL).
 ; ============================================================
 Unicode true
 
@@ -33,7 +37,6 @@ SetCompressor /SOLID lzma
 !define MUI_WELCOMEFINISHPAGE_BITMAP "assets\welcome.bmp"
 !define MUI_ABORTWARNING
 
-; ── متن‌های فارسی مراحل نصب ──
 !define FINISH_RUN_TEXT "اجرای برنامه پس از اتمام نصب"
 
 !insertmacro MUI_PAGE_WELCOME
@@ -47,32 +50,92 @@ SetCompressor /SOLID lzma
 
 !insertmacro MUI_LANGUAGE "Farsi"
 
-; ── باگ #۱۳ — تشخیص نصب قبلی پیش از هر صفحه‌ای ──
-Function .onInit
-  ; اول رجیستری حذف استاندارد ویندوز؛ اگر نبود کلید InstallDir خودِ برنامه
-  ReadRegStr $R0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${UNINSTKEY}" "UninstallString"
-  IfErrors 0 check_file
-  ReadRegStr $R0 HKLM "Software\${UNINSTKEY}" "InstallDir"
-  IfErrors not_installed 0
-  StrCpy $R0 "$R0\Uninstall.exe"
-check_file:
-  ; رجیستری بدون فایل یعنی نصب ناقص/خراب — مثل نصب‌نشده رفتار کن (نصب تازه)
-  IfFileExists "$R0" installed not_installed
+Var PreDir
+Var PreUninst
 
-installed:
-  IfSilent silent_uninstall
-  ; محدودیت NSIS: MessageBox حداکثر دو جفت برچسب می‌پذیرد — «انصراف» با
-  ; fall-through به Quit می‌رسد (ادامهٔ اجرا بعد از MessageBox)
-  MessageBox MB_YESNOCANCEL|MB_ICONQUESTION "${APPNAME} روی این رایانه از قبل نصب شده است.$\n$\nبله — حذف کامل برنامه از رایانه$\nخیر — نصب مجدد روی نسخهٔ فعلی$\nانصراف — خروج از نصب‌کننده" /SD IDYES IDYES run_uninstall IDNO continue_install
+; ── ماکروی توقف تمیز برنامه (پیش از بازنویسی فایل‌ها در ارتقا یا حذف) ──
+; stop-app.ps1 را از $PLUGINSDIR اجرا می‌کند؛ PG تمیز متوقف می‌شود تا یتیم نمانَد.
+!macro STOP_APP DIR
+  DetailPrint "توقف برنامهٔ در حال اجرا (سرور و پایگاه دادهٔ جاسازی‌شده)…"
+  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "$PLUGINSDIR\stop-app.ps1" -InstallDir "${DIR}" -DataDir "$APPDATA\HotelERP"'
+  Pop $0
+  Sleep 1500
+!macroend
+
+; ── ماکروی حذف کاملِ برنامه (فایل‌ها + میان‌برها + فایروال + رجیستری + وظیفه) ──
+; داده‌های %APPDATA% دست نمی‌خورد (در حالت خاموش حفظ می‌شوند؛ در حالت تعاملی
+; uninstaller از کاربر می‌پرسد). Setup خودش این ماکرو را در مسیر خاموش صدا می‌زند
+; چون از بیرونِ $PreDir اجرا می‌شود و محدودیتِ «uninstaller نمی‌تواند خودش را
+; پاک کند» و مشکلِ فاصله در `_?=` را ندارد.
+!macro REMOVE_ALL DIR
+  !insertmacro STOP_APP "${DIR}"
+  DetailPrint "حذف وظیفهٔ زمان‌بندی‌شدهٔ اجرای محدود…"
+  nsExec::Exec 'schtasks /delete /tn "HotelERP Limited Run" /f'
+  Pop $0
+  DetailPrint "حذف میان‌برها و قانون فایروال…"
+  Delete "$DESKTOP\${APPNAME}.lnk"
+  RMDir /r "$SMPROGRAMS\${APPNAME}"
+  nsExec::Exec 'netsh advfirewall firewall delete rule name="HotelERP Server"'
+  Pop $0
+  DetailPrint "حذف فایل‌های برنامه از ${DIR}…"
+  RMDir /r "${DIR}"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${UNINSTKEY}"
+  DeleteRegKey HKLM "Software\${UNINSTKEY}"
+!macroend
+
+; ── باگ #۱۳/#۱۶ — تشخیص نصب قبلی پیش از هر صفحه‌ای ──
+Function .onInit
+  InitPluginsDir
+  ; stop-app.ps1 برای مسیر ارتقا و حذف خاموش از داخل Setup
+  SetOutPath "$PLUGINSDIR"
+  File "stop-app.ps1"
+
+  StrCpy $PreDir ""
+  StrCpy $PreUninst ""
+
+  ; اول مسیر نصب از رجیستری خودِ برنامه
+  ReadRegStr $R0 HKLM "Software\${UNINSTKEY}" "InstallDir"
+  IfErrors 0 have_dir
+    ; وگرنه از کلید حذف استاندارد ویندوز
+    ReadRegStr $R0 HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${UNINSTKEY}" "UninstallString"
+    IfErrors not_installed 0
+    StrCpy $PreUninst $R0
+    ; مسیر دایرکتوری = دایرکتوری فایل Uninstall.exe (حذفِ «\Uninstall.exe» از انتها)
+    StrLen $1 $R0
+    IntOp $1 $1 - 14
+    StrCpy $PreDir $R0 $1
+    Goto check_file
+  have_dir:
+    StrCpy $PreDir $R0
+    StrCpy $PreUninst "$R0\Uninstall.exe"
+check_file:
+  IfFileExists "$PreUninst" prev_found 0
+  ; نصب خراب: Uninstall.exe نیست ولی HotelERP.exe هست — مثل نصب‌شده رفتار کن (بدون uninstaller)
+  IfFileExists "$PreDir\HotelERP.exe" prev_found not_installed
+
+prev_found:
+  ; مسیر نصب قبلی را به‌عنوان $INSTDIR پیش‌فرض بگذار (ارتقا روی همان مسیر)
+  StrCpy $INSTDIR $PreDir
+  IfSilent silent_prev
+  MessageBox MB_YESNOCANCEL|MB_ICONQUESTION "${APPNAME} روی این رایانه از قبل نصب شده است.$\n$\nبله — حذف کامل برنامه از رایانه$\nخیر — نصب مجدد روی نسخهٔ فعلی$\nانصراف — خروج از نصب‌کننده" /SD IDYES IDYES run_uninstall IDNO reinstall_over
+  SetErrorLevel 2
   Quit
 run_uninstall:
-  ExecWait '"$R0"'
+  ; حذف تعاملی: Uninstall.exe خودش دربارهٔ داده‌ها می‌پرسد
+  ExecWait '"$PreUninst"' $0
+  SetErrorLevel $0
   Quit
-silent_uninstall:
-  ; حالت خاموش: قانون «نصب‌شده = حذف» بدون دیالوگ؛ داده‌های %APPDATA% حفظ می‌شود
-  ExecWait '"$R0" /S _?=$INSTDIR'
+silent_prev:
+  ; حالت خاموش: حذف کامل برنامه (داده‌ها حفظ می‌شوند)، کد خروج ۰.
+  ; حذف را خودِ Setup مستقیم انجام می‌دهد (نه از طریق Uninstall.exe با _?=) تا
+  ; هم محدودیتِ «uninstaller نمی‌تواند خودش را پاک کند» نباشد و هم مشکلِ فاصله
+  ; در مسیرِ «C:\Program Files\HotelERP» برای _?= پیش نیاید.
+  !insertmacro REMOVE_ALL "$PreDir"
+  SetErrorLevel 0
   Quit
-continue_install:
+reinstall_over:
+  ; ارتقا روی نسخهٔ فعلی: اول برنامهٔ در حال اجرا را تمیز متوقف کن، بعد نصب کن
+  !insertmacro STOP_APP "$PreDir"
   Return
 not_installed:
   Return
@@ -106,12 +169,11 @@ Section "نصب Hotel ERP" SecMain
 SectionEnd
 
 Section "un.Uninstall"
-  ; کامل بودن حذف: اول فرایندهای در حال اجرا بسته شوند تا هیچ فایلی قفل نماند
-  DetailPrint "بستن برنامهٔ در حال اجرا (سرور و پایگاه دادهٔ جاسازی‌شده)…"
-  nsExec::Exec 'powershell -NoProfile -Command "Get-Process node,postgres -ErrorAction SilentlyContinue | Where-Object { $$_.Path -like $\"$INSTDIR\*\" } | ForEach-Object { Stop-Process -Id $($_.Id) -Force -ErrorAction SilentlyContinue }"'
-  Pop $0
-  nsExec::Exec 'powershell -NoProfile -Command "Get-CimInstance Win32_Process | Where-Object { $$_.Name -eq $\"cmd.exe\" -and $$_.CommandLine -like $\"*run-server.cmd*\" } | ForEach-Object { Stop-Process -Id $($_.ProcessId) -Force -ErrorAction SilentlyContinue }"'
-  Pop $0
+  ; stop-app.ps1 را از داخل Uninstall.exe استخراج کن (در $PLUGINSDIR)
+  InitPluginsDir
+  SetOutPath "$PLUGINSDIR"
+  File "stop-app.ps1"
+  !insertmacro STOP_APP "$INSTDIR"
 
   DetailPrint "حذف وظیفهٔ زمان‌بندی‌شدهٔ اجرای محدود (در صورت وجود)…"
   nsExec::Exec 'schtasks /delete /tn "HotelERP Limited Run" /f'
@@ -137,4 +199,5 @@ wipe_data:
 keep_data:
   DetailPrint "توجه: داده‌های شما در %APPDATA%\HotelERP حفظ شد."
 un_done:
+  SetErrorLevel 0
 SectionEnd
