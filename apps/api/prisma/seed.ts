@@ -168,6 +168,85 @@ async function main() {
     }
   }
 
+  // ── نسخهٔ ۳٫۴ — مشخصه‌های اضافی اتاق (فرم «لیست مشخصه های اضافی اتاق» مرجع) ──
+  for (const [code, nameFa, shortName] of [
+    ['STREET', 'رو به خیابان', null],
+    ['TEA', 'چای ساز', null],
+    ['WESTERN', 'سرویس فرنگی', 'F'],
+    ['PERSIAN', 'سرویس ایرانی', 'I'],
+  ] as Array<[string, string, string | null]>) {
+    await prisma.roomAmenity.upsert({
+      where: { code },
+      update: { nameFa, shortName },
+      create: { code, nameFa, shortName },
+    });
+  }
+
+  // ── نسخهٔ ۳٫۴ — دیکشنری کدینگ درآمدی + پلان‌های تور/شرکت (الگوی «لیست انواع پلانی هتل» مرجع) ──
+  const revenueCodes: Array<[number, string, string]> = [
+    [1, 'درآمد فروش اتاق‌های تور', 'Tour Room Revenue'],
+    [2, 'درآمد فروش اتاق میهمان', 'Guest Room Revenue'],
+    [3, 'مالیات بر ارزش افزوده', 'VAT'],
+    [4, 'پیش دریافت میهمان', 'Guest Prepayment'],
+    [5, 'دریافت نقد', 'Cash Receipt'],
+    [6, 'پرداخت نقد', 'Cash Payment'],
+    [7, 'دریافتی نقد از تلفن', 'Phone Cash'],
+    [8, 'درآمد لاندری', 'Laundry Revenue'],
+    [9, 'دریافتی از رزرواسیون', 'Booking Revenue'],
+    [10, 'اینترنت', 'Internet'],
+    [11, 'دریافتی نقد از رستورانها', 'Restaurant Cash'],
+    [12, 'درآمد متفرقه', 'Misc Revenue'],
+    [13, 'واریزی بانک', 'Bank Deposit'],
+    [14, 'سرویس اتاق', 'Room Service'],
+    [15, 'تلفن هتل', 'Hotel Phone'],
+    [16, 'فکس', 'Fax'],
+    [17, 'صبحانه اتاق', 'Room Breakfast'],
+    [18, 'ناهار', 'Lunch'],
+    [19, 'شام', 'Dinner'],
+    [20, 'مینی بار', 'Minibar'],
+    [21, 'کانتر استخر', 'Pool Counter'],
+    [22, 'بیلیارد', 'Billiard'],
+    [23, 'ترانسفر', 'Transfer'],
+    [24, 'عوارض خسارت', 'Damage Charges'],
+  ];
+  const rcByCode = new Map<number, string>();
+  for (const [code, nameFa, nameEn] of revenueCodes) {
+    const rc = await prisma.revenueCode.upsert({
+      where: { code },
+      update: { nameFa, nameEn },
+      create: { code, nameFa, nameEn },
+    });
+    rcByCode.set(code, rc.id);
+  }
+  const planDefs: Array<{
+    code: number; nameFa: string; nameLatin: string; companyCodes: number[];
+  }> = [
+    { code: 1, nameFa: 'کلیه هزینه ها بعهده تور/شرکت', nameLatin: 'All Charge To', companyCodes: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 15, 16, 23] },
+    { code: 2, nameFa: 'اتاق و صبحانه بعهده تور/شرکت', nameLatin: 'Room & Breakfast Ch To', companyCodes: [1, 2, 3, 17] },
+    { code: 3, nameFa: 'کلیه هزینه ها بعهده میهمان', nameLatin: 'Cash Payment', companyCodes: [] },
+  ];
+  for (const def of planDefs) {
+    const plan = await prisma.plan.upsert({
+      where: { code: def.code },
+      update: { nameFa: def.nameFa, nameLatin: def.nameLatin },
+      create: { code: def.code, nameFa: def.nameFa, nameLatin: def.nameLatin },
+    });
+    // بازسازی اقلام پلان با seed فقط برای پلان‌های پیش‌فرض (دستکاری‌شدهٔ UI ماندگار است)
+    if (plan.nameFa === def.nameFa) {
+      await prisma.planItem.deleteMany({ where: { planId: plan.id } });
+      const companySet = new Set(def.companyCodes);
+      for (const [code] of revenueCodes) {
+        await prisma.planItem.create({
+          data: {
+            planId: plan.id,
+            revenueCodeId: rcByCode.get(code) as string,
+            chargeTo: companySet.has(code) ? 'COMPANY' : 'GUEST',
+          },
+        });
+      }
+    }
+  }
+
   // ── اوتلت POS ──
   await prisma.posOutlet.upsert({
     where: { code: 'REST-MAIN' },

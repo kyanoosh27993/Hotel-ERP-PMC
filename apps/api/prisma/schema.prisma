@@ -2,7 +2,7 @@
 // ریال = BigInt صحیح (قاعده ۷) | UUID پایه (قاعده ۱) | اسناد مالی حذف فیزیکی ندارند (قاعده ۳)
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "windows"]
 }
 
@@ -14,22 +14,22 @@ datasource db {
 // ───────────────────────── IAM ─────────────────────────
 
 model User {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  username     String   @unique
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username     String    @unique
   passwordHash String
   fullName     String
-  email        String?  @unique
+  email        String?   @unique
   mfaSecret    String?
-  mfaEnabled   Boolean  @default(false)
-  isActive     Boolean  @default(true)
+  mfaEnabled   Boolean   @default(false)
+  isActive     Boolean   @default(true)
   // U0 — نوار کاربر صفحهٔ اصلی: عکس پرسنلی و سمت شغلی (الگوی مرجع)
   photoUrl     String?
   position     String?
   // U1 — «اطلاعات آخرین ورود شما به سیستم» (الگوی مرجع)
   lastLoginAt  DateTime?
   lastLoginIp  String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   roles           UserRole[]
   refreshTokens   RefreshToken[]
@@ -42,11 +42,11 @@ model User {
 }
 
 model Role {
-  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name          String  @unique // admin | accountant | approver | front_desk | ...
-  displayNameEn String
-  displayNameFa String
-  sensitiveMfa  Boolean @default(false) // ورود این نقش نیاز به MFA دارد
+  id               String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String  @unique // admin | accountant | approver | front_desk | ...
+  displayNameEn    String
+  displayNameFa    String
+  sensitiveMfa     Boolean @default(false) // ورود این نقش نیاز به MFA دارد
   // نسخهٔ ۳٫۳ — مدیریت کاربران/گروه‌ها از UI: نقش‌های seed سیستمی‌اند؛ ماتریسِ دستکاری‌شده از UI دیگر با seed بازنویسی نمی‌شود
   isSystem         Boolean @default(false)
   matrixOverridden Boolean @default(false)
@@ -159,13 +159,34 @@ model InboxEvent {
 
 // ───────────────────────── رزرو و اتاق (PoC) ─────────────────────────
 
+// نسخهٔ ۳٫۴ — «انواع اتاق» طبق فرم مرجع کارفرما: نرخ‌های ۴گانهٔ ریالی/دلاری + فصلی + تخت اضافه
 model RoomType {
-  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code          String @unique
-  nameEn        String
-  nameFa        String
-  capacity      Int    @default(2)
-  baseRateRials BigInt
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code            String  @unique
+  nameEn          String
+  nameFa          String
+  capacity        Int     @default(2)
+  baseRateRials   BigInt
+  // فیلدهای فرم «لیست انواع اتاقها» (اتاقها.zip)
+  nameLatin       String? // نام لاتین
+  bedCount        Int     @default(2) // تخت
+  rateSingleRials BigInt  @default(0) // یک نفره
+  rateDoubleRials BigInt  @default(0) // دوئبل
+  rateTripleRials BigInt  @default(0) // سه نفره
+  rateFullRials   BigInt  @default(0) // نرخ کامل (نرخ متناسب با تعداد تخت)
+  rateSingleUsd   Float   @default(0)
+  rateDoubleUsd   Float   @default(0)
+  rateTripleUsd   Float   @default(0)
+  rateFullUsd     Float   @default(0)
+  ratePeak1Rials  BigInt  @default(0) // نوع پیک
+  ratePeak2Rials  BigInt  @default(0) // نوع دو
+  ratePeak3Rials  BigInt  @default(0) // نوع سه
+  fullBoardRials  BigInt  @default(0) // فول برد
+  extraBedCount   Int     @default(0) // تخت اضافه (سقف مجاز نوع)
+  extraBedRials   BigInt  @default(0) // نرخ تخت اضافه
+  pictureUrl      String? // تصویر
+  isActive        Boolean @default(true) // فعالیت
+  syncCode        Int     @default(0) // کد یکسان‌سازی
 
   rooms           Room[]
   reservations    Reservation[]
@@ -174,16 +195,64 @@ model RoomType {
   @@map("room_types")
 }
 
+// مشخصه‌های اضافی اتاق (رو به خیابان، چای ساز، سرویس فرنگی/ایرانی، ...) — چند‌به‌چند با اتاق
+model RoomAmenity {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code      String  @unique
+  nameFa    String
+  nameLatin String?
+  shortName String? // نام خلاصه
+  isActive  Boolean @default(true)
+
+  rooms RoomAmenityLink[]
+
+  @@map("room_amenities")
+}
+
+model RoomAmenityLink {
+  roomId    String @db.Uuid
+  amenityId String @db.Uuid
+
+  room    Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  amenity RoomAmenity @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([roomId, amenityId])
+  @@map("room_amenity_links")
+}
+
 model Room {
-  id         String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code       String             @unique
-  roomTypeId String             @db.Uuid
-  floor      Int                @default(1)
-  status     RoomStatus         @default(AVAILABLE)
-  hkStatus   HousekeepingStatus @default(CLEAN) // F4-T7 وضعیت نظافت
-  note       String? // یادداشت تعمیر/نگهداری (F4-T1)
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                 String             @unique
+  roomTypeId           String             @db.Uuid
+  floor                Int                @default(1)
+  status               RoomStatus         @default(AVAILABLE)
+  hkStatus             HousekeepingStatus @default(CLEAN) // F4-T7 وضعیت نظافت
+  note                 String? // یادداشت تعمیر/نگهداری (F4-T1) = توضیحات اتاق
+  // فیلدهای فرم «تصحیح مشخصات اتاق» (اتاقها.zip)
+  nameFa               String? // نام فارسی اتاق
+  nameLatin            String? // نام لاتین اتاق
+  bedCount             Int                @default(2) // تعداد تخت
+  orderInFloor         Int                @default(0) // ردیف در طبقه
+  extraBeds            Int                @default(0) // تخت اضافهٔ داده‌شده در لحظه
+  rateSingleRials      BigInt             @default(0) // نرخ اختصاصی — 0 یعنی ارث‌بری از نوع اتاق
+  rateDoubleRials      BigInt             @default(0)
+  rateTripleRials      BigInt             @default(0)
+  rateFullRials        BigInt             @default(0)
+  rateSingleUsd        Float              @default(0)
+  rateDoubleUsd        Float              @default(0)
+  rateTripleUsd        Float              @default(0)
+  rateFullUsd          Float              @default(0)
+  saleBlocked          Boolean            @default(false) // فروش: قابل فروش / غیرقابل فروش
+  guestRequests        Int                @default(0) // درخواست مهمان
+  registerNo           Int? // رجیستر فعال
+  lastChargeAt         DateTime? // آخرین تاریخ شارژ
+  outOfServiceFrom     DateTime? // تاریخ اتمام خارج سرویس
+  outOfServiceCancelAt DateTime? // تاریخ لغو خارج سرویس
+  blockCard            String? // کارت بلوک
+  tourCompany          String? // تور/شرکت مهمان اقامت جاری (نمایشی)
 
   roomType            RoomType             @relation(fields: [roomTypeId], references: [id])
+  amenities           RoomAmenityLink[]
   stayRooms           StayRoom[]
   tasks               RoomTask[]
   inspections         RoomInspection[]
@@ -228,15 +297,17 @@ model Reservation {
   createdAt      DateTime          @default(now())
   cancelledAt    DateTime?
 
-  roomType  RoomType          @relation(fields: [roomTypeId], references: [id])
-  source    ReservationSource @default(PHONE) // F4-T2 کانال رزرو
-  groupName String?
-  adults    Int               @default(1)
-  children  Int               @default(0)
-  note      String?
-  nationality String?         // IRANIAN | FOREIGNER — تفکیک مهمان ایرانی/خارجی (درخواست کارفرما)
-  partyId     String?         @db.Uuid // پیوند با ثبت یکتای اشخاص (Party) — گیت هویتی در گذار رزرو→اقامت
-  stays     Stay[]
+  roomType    RoomType          @relation(fields: [roomTypeId], references: [id])
+  source      ReservationSource @default(PHONE) // F4-T2 کانال رزرو
+  groupName   String?
+  adults      Int               @default(1)
+  children    Int               @default(0)
+  note        String?
+  nationality String? // IRANIAN | FOREIGNER — تفکیک مهمان ایرانی/خارجی (درخواست کارفرما)
+  partyId     String?           @db.Uuid // پیوند با ثبت یکتای اشخاص (Party) — گیت هویتی در گذار رزرو→اقامت
+  planId      String?           @db.Uuid // نسخهٔ ۳٫۴ — پلان تور/شرکت: تفکیک هزینهٔ شرکت/مهمان
+  plan        Plan?             @relation(fields: [planId], references: [id])
+  stays       Stay[]
 
   @@index([roomTypeId, checkIn, checkOut, status])
   @@map("reservations")
@@ -304,6 +375,8 @@ model Stay {
   idempotencyKey   String     @unique
   createdById      String?    @db.Uuid
   createdAt        DateTime   @default(now())
+  planId           String?    @db.Uuid // نسخهٔ ۳٫۴ — پلان اقامت (پیش‌فرض: پلان رزرو مبدأ)
+  plan             Plan?      @relation(fields: [planId], references: [id])
 
   reservation      Reservation?      @relation(fields: [reservationId], references: [id])
   rooms            StayRoom[]
@@ -317,21 +390,72 @@ model Stay {
 }
 
 // اقلام اضافی فولیو اقامت — چارج اتاق (Room Additional Items — مرجع 4.zip)
+// نسخهٔ ۳٫۴: هر قلم به کد درآمدی گره می‌خورد و مسیر صورت‌حسابش (مهمان یا تور/شرکت) از پلان اقامت تعیین می‌شود
 model FolioItem {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  stayId      String   @db.Uuid
-  desc        String   @db.VarChar(120)
-  qty         Int      @default(1)
-  unitRials   BigInt   @default(0)
-  totalRials  BigInt   @default(0)
-  postedAt    DateTime @default(now())
-  createdById String?  @db.Uuid
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  stayId        String   @db.Uuid
+  desc          String   @db.VarChar(120)
+  qty           Int      @default(1)
+  unitRials     BigInt   @default(0)
+  totalRials    BigInt   @default(0)
+  postedAt      DateTime @default(now())
+  createdById   String?  @db.Uuid
+  revenueCodeId String?  @db.Uuid // کد درآمدی
+  chargeTo      String? // GUEST | COMPANY — مسیر صورتحساب (NULL = اقلام قدیمی، مهمان)
 
-  stay    Stay @relation(fields: [stayId], references: [id])
-  creator User? @relation(fields: [createdById], references: [id])
+  stay    Stay         @relation(fields: [stayId], references: [id])
+  creator User?        @relation(fields: [createdById], references: [id])
+  revenue RevenueCode? @relation(fields: [revenueCodeId], references: [id])
 
   @@index([stayId])
   @@map("folio_items")
+}
+
+// ── نسخهٔ ۳٫۴ — پلان تور/شرکت (الگوی «لیست انواع پلانی هتل» مرجع کارفرما) ──
+// دیکشنری کدینگ درآمدی — مشترک بین پلان‌ها و اقلام فولیو
+model RevenueCode {
+  id       String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code     Int     @unique
+  nameFa   String
+  nameEn   String?
+  isActive Boolean @default(true)
+
+  planItems  PlanItem[]
+  folioItems FolioItem[]
+
+  @@map("revenue_codes")
+}
+
+model Plan {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code        Int      @unique // کد پلان
+  nameFa      String // نام پلان (مثلاً «کلیه هزینه ها بعهده تور/شرکت»)
+  nameLatin   String? // نام لاتین (مثلاً All Charge To)
+  isActive    Boolean  @default(true) // فعالیت
+  createdById String?  @db.Uuid
+  createdAt   DateTime @default(now()) // تاریخ ثبت
+
+  items        PlanItem[]
+  reservations Reservation[]
+  stays        Stay[]
+
+  @@map("plans")
+}
+
+// قلم پلان: هر کد درآمدی در این پلان به چه صورت‌حسابی می‌رود؟ میهمان یا تور/شرکت («درص درصورتحساب» مرجع)
+model PlanItem {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  planId        String   @db.Uuid
+  revenueCodeId String   @db.Uuid
+  chargeTo      String   @default("GUEST") // GUEST | COMPANY
+  createdById   String?  @db.Uuid
+  createdAt     DateTime @default(now())
+
+  plan        Plan        @relation(fields: [planId], references: [id], onDelete: Cascade)
+  revenueCode RevenueCode @relation(fields: [revenueCodeId], references: [id], onDelete: Restrict)
+
+  @@unique([planId, revenueCodeId])
+  @@map("plan_items")
 }
 
 enum StayStatus {
@@ -1593,29 +1717,29 @@ model StockCountLine {
 
 // ── موج ۳ — فاز ۹ (F9-T2): ادغام مؤدیان — صورتحساب الکترونیکی ──
 model MoadianInvoice {
-  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  invoiceNumber   String    @unique // INV-YY-NNNNNN — از توالی seq_invoice_number
-  journalEntryId  String    @db.Uuid // سند فروش مبدأ (قطعی، POSTED)
-  sellerTaxId     String
-  buyerTaxId      String    @default("")
-  buyerName       String    @default("")
-  issueDate       DateTime  @db.Date
-  status          String    @default("DRAFT") // DRAFT|QUEUED|SENT|ACCEPTED|REJECTED|CANCELLED
-  header          Json      @default("{}") // پاکت هدر مؤدیان
-  body            Json      @default("[]") // سطرهای صورتحساب
-  totalRials      BigInt    @default(0)
-  vatRials        BigInt    @default(0)
-  discountRials   BigInt    @default(0)
-  uid             String?   // شمارهٔ مرجع مؤدیان
-  idempotencyKey  String    @unique // کلید ارسال تکرارپذیر
-  attempts        Int       @default(0)
-  lastError       String?
-  lastResponse    Json?
-  submittedAt     DateTime?
-  cancelledAt     DateTime?
-  cancelReason    String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invoiceNumber  String    @unique // INV-YY-NNNNNN — از توالی seq_invoice_number
+  journalEntryId String    @db.Uuid // سند فروش مبدأ (قطعی، POSTED)
+  sellerTaxId    String
+  buyerTaxId     String    @default("")
+  buyerName      String    @default("")
+  issueDate      DateTime  @db.Date
+  status         String    @default("DRAFT") // DRAFT|QUEUED|SENT|ACCEPTED|REJECTED|CANCELLED
+  header         Json      @default("{}") // پاکت هدر مؤدیان
+  body           Json      @default("[]") // سطرهای صورتحساب
+  totalRials     BigInt    @default(0)
+  vatRials       BigInt    @default(0)
+  discountRials  BigInt    @default(0)
+  uid            String? // شمارهٔ مرجع مؤدیان
+  idempotencyKey String    @unique // کلید ارسال تکرارپذیر
+  attempts       Int       @default(0)
+  lastError      String?
+  lastResponse   Json?
+  submittedAt    DateTime?
+  cancelledAt    DateTime?
+  cancelReason   String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@index([status, issueDate])
   @@index([journalEntryId])
@@ -1624,12 +1748,12 @@ model MoadianInvoice {
 
 // ── موج ۳ — فاز ۸ (F8-T6): موتور گردش کار تأیید چندمرحله‌ای + امضای الکترونیکی ──
 model WorkflowDef {
-  id      String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  code    String  @unique // WF-JOURNAL-POST
-  title   String
-  steps   Json // آرایهٔ [{order, title, permission, minApprovers, selfApproval}]
-  version Int     @default(1)
-  active  Boolean @default(true)
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code      String   @unique // WF-JOURNAL-POST
+  title     String
+  steps     Json // آرایهٔ [{order, title, permission, minApprovers, selfApproval}]
+  version   Int      @default(1)
+  active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -1639,19 +1763,19 @@ model WorkflowDef {
 }
 
 model WorkflowInstance {
-  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  defId          String    @db.Uuid
-  entityType     String // journal_entry | payroll_run | moadian_invoice | purchase_order | ...
-  entityId       String    @db.Uuid
-  title          String
-  status         String    @default("IN_PROGRESS") // IN_PROGRESS|APPROVED|REJECTED|CANCELLED
-  currentStep    Int       @default(1)
-  initiatedById  String?   @db.Uuid
-  finishedAt     DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  defId         String    @db.Uuid
+  entityType    String // journal_entry | payroll_run | moadian_invoice | purchase_order | ...
+  entityId      String    @db.Uuid
+  title         String
+  status        String    @default("IN_PROGRESS") // IN_PROGRESS|APPROVED|REJECTED|CANCELLED
+  currentStep   Int       @default(1)
+  initiatedById String?   @db.Uuid
+  finishedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  def    WorkflowDef      @relation(fields: [defId], references: [id])
+  def     WorkflowDef      @relation(fields: [defId], references: [id])
   actions WorkflowAction[]
 
   @@unique([entityType, entityId])
@@ -1663,7 +1787,7 @@ model WorkflowAction {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   instanceId String   @db.Uuid
   stepNo     Int
-  action     String   // APPROVE | REJECT
+  action     String // APPROVE | REJECT
   actorId    String?  @db.Uuid
   actorName  String   @default("")
   comment    String   @default("")
@@ -1793,34 +1917,34 @@ model AiRateSuggestion {
 }
 
 model AiDocDraft {
-  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sourceText        String    @db.Text // متن استخراج‌شدهٔ فاکتور/سند
-  extractedJson     Json      @default("{}") // مبلغ/مالیات/فروشنده/تاریخ — خروجی قواعد
-  suggestedLinesJson Json     @default("[]") // سطرهای پیشنهادی سند
-  status            String    @default("DRAFT") // DRAFT | DRAFTED | DISCARDED — هیچ‌گاه قطعی نمی‌شود
-  draftEntryId      String?   @db.Uuid // سند پیش‌نویس حسابداری (تأیید انسانی لازم دارد)
-  createdById       String?   @db.Uuid
-  approvedById      String?   @db.Uuid
-  approvedAt        DateTime?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceText         String    @db.Text // متن استخراج‌شدهٔ فاکتور/سند
+  extractedJson      Json      @default("{}") // مبلغ/مالیات/فروشنده/تاریخ — خروجی قواعد
+  suggestedLinesJson Json      @default("[]") // سطرهای پیشنهادی سند
+  status             String    @default("DRAFT") // DRAFT | DRAFTED | DISCARDED — هیچ‌گاه قطعی نمی‌شود
+  draftEntryId       String?   @db.Uuid // سند پیش‌نویس حسابداری (تأیید انسانی لازم دارد)
+  createdById        String?   @db.Uuid
+  approvedById       String?   @db.Uuid
+  approvedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   @@map("ai_doc_drafts")
 }
 
 // ── موج ۵ — فاز ۱۲ (F12-T4): API Marketplace — کلیدهای مشتریان ──
 model ApiClient {
-  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           String // نام مشتری/پارتنر
-  keyPrefix      String    @unique // ۸ نویسهٔ اول کلید — نمایش و جستجو (کلید کامل هرگز ذخیره نمی‌شود)
-  apiKeyHash     String // SHA-256 کلید — تطبیق بدون ذخیرهٔ متن آشکار
-  scopes         Json      @default("[]") // ["availability","rates","reservations"]
-  rateLimitPerMin Int      @default(60) // محدودسازی نرخ در هر دقیقه
-  active         Boolean   @default(true)
-  lastUsedAt     DateTime?
-  createdById    String?   @db.Uuid
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String // نام مشتری/پارتنر
+  keyPrefix       String    @unique // ۸ نویسهٔ اول کلید — نمایش و جستجو (کلید کامل هرگز ذخیره نمی‌شود)
+  apiKeyHash      String // SHA-256 کلید — تطبیق بدون ذخیرهٔ متن آشکار
+  scopes          Json      @default("[]") // ["availability","rates","reservations"]
+  rateLimitPerMin Int       @default(60) // محدودسازی نرخ در هر دقیقه
+  active          Boolean   @default(true)
+  lastUsedAt      DateTime?
+  createdById     String?   @db.Uuid
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@map("api_clients")
 }

@@ -4,10 +4,12 @@
  */
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { IsArray, IsIn, IsNumber, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsArray, IsBoolean, IsIn, IsNumber, IsOptional, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 import { RequirePermissions, RequireAnyPermissions } from '../iam/permissions.guard';
 import { PERMISSIONS } from '../iam/permissions';
 import { PmsService, CheckInInput, PmsReservationInput } from './pms.service';
+import { RoomKindsService, RoomKindInput } from './roomkinds.service';
+import { PlansService } from './plans.service';
 import { AuthenticatedRequest } from '../common/authenticated.request';
 
 export class UpdateRoomDto {
@@ -38,6 +40,29 @@ export class UpdateRoomDto {
   @IsOptional()
   @IsString()
   roomTypeId!: string;
+
+  // فرم «تصحیح مشخصات اتاق» (نسخهٔ ۳٫۴)
+  @IsOptional() @IsString() @MaxLength(60) nameFa!: string | null;
+  @IsOptional() @IsString() @MaxLength(60) nameLatin!: string | null;
+  @IsOptional() @IsNumber() bedCount!: number;
+  @IsOptional() @IsNumber() orderInFloor!: number;
+  @IsOptional() @IsNumber() extraBeds!: number;
+  @IsOptional() @Matches(/^\d+$/) rateSingleRials!: string;
+  @IsOptional() @Matches(/^\d+$/) rateDoubleRials!: string;
+  @IsOptional() @Matches(/^\d+$/) rateTripleRials!: string;
+  @IsOptional() @Matches(/^\d+$/) rateFullRials!: string;
+  @IsOptional() @IsNumber() rateSingleUsd!: number;
+  @IsOptional() @IsNumber() rateDoubleUsd!: number;
+  @IsOptional() @IsNumber() rateTripleUsd!: number;
+  @IsOptional() @IsNumber() rateFullUsd!: number;
+  @IsOptional() @IsBoolean() saleBlocked!: boolean;
+  @IsOptional() @IsNumber() guestRequests!: number;
+  @IsOptional() @IsNumber() registerNo!: number | null;
+  @IsOptional() @IsString() lastChargeAt!: string | null;
+  @IsOptional() @IsString() outOfServiceFrom!: string | null;
+  @IsOptional() @IsString() outOfServiceCancelAt!: string | null;
+  @IsOptional() @IsString() @MaxLength(80) blockCard!: string | null;
+  @IsOptional() @IsArray() @IsString({ each: true }) amenityIds!: string[];
 }
 
 export class CreateRoomDto {
@@ -51,6 +76,25 @@ export class CreateRoomDto {
 
   @IsString()
   roomTypeId!: string;
+
+  // فرم «ثبت اتاق جدید» (نسخهٔ ۳٫۴)
+  @IsOptional() @IsString() @MaxLength(60) nameFa!: string;
+  @IsOptional() @IsString() @MaxLength(60) nameLatin!: string;
+  @IsOptional() @IsNumber() bedCount!: number;
+  @IsOptional() @IsNumber() orderInFloor!: number;
+  @IsOptional() @IsNumber() extraBeds!: number;
+  @IsOptional() @Matches(/^\d+$/) rateSingleRials!: string;
+  @IsOptional() @Matches(/^\d+$/) rateDoubleRials!: string;
+  @IsOptional() @Matches(/^\d+$/) rateTripleRials!: string;
+  @IsOptional() @Matches(/^\d+$/) rateFullRials!: string;
+  @IsOptional() @IsNumber() rateSingleUsd!: number;
+  @IsOptional() @IsNumber() rateDoubleUsd!: number;
+  @IsOptional() @IsNumber() rateTripleUsd!: number;
+  @IsOptional() @IsNumber() rateFullUsd!: number;
+  @IsOptional() @IsString() @MaxLength(240) note!: string;
+  @IsOptional() @IsNumber() registerNo!: number;
+  @IsOptional() @IsBoolean() saleBlocked!: boolean;
+  @IsOptional() @IsArray() @IsString({ each: true }) amenityIds!: string[];
 }
 
 export class CreateRoomTypeDto {
@@ -59,6 +103,7 @@ export class CreateRoomTypeDto {
   @MaxLength(20)
   code!: string;
 
+  @IsOptional()
   @IsString()
   @MinLength(2)
   @MaxLength(60)
@@ -73,8 +118,30 @@ export class CreateRoomTypeDto {
   @IsNumber()
   capacity!: number;
 
+  @IsOptional()
   @Matches(/^\d+$/, { message: 'baseRateRials must be integer digits (Rials)' })
   baseRateRials!: string;
+
+  // ── فرم کامل «انواع اتاق» (نسخهٔ ۳٫۴) ──
+  @IsOptional() @IsString() @MaxLength(60) nameLatin!: string;
+  @IsOptional() @IsNumber() bedCount!: number;
+  @IsOptional() @Matches(/^\d+$/) rateSingleRials!: string;
+  @IsOptional() @Matches(/^\d+$/) rateDoubleRials!: string;
+  @IsOptional() @Matches(/^\d+$/) rateTripleRials!: string;
+  @IsOptional() @Matches(/^\d+$/) rateFullRials!: string;
+  @IsOptional() @IsNumber() rateSingleUsd!: number;
+  @IsOptional() @IsNumber() rateDoubleUsd!: number;
+  @IsOptional() @IsNumber() rateTripleUsd!: number;
+  @IsOptional() @IsNumber() rateFullUsd!: number;
+  @IsOptional() @Matches(/^\d+$/) ratePeak1Rials!: string;
+  @IsOptional() @Matches(/^\d+$/) ratePeak2Rials!: string;
+  @IsOptional() @Matches(/^\d+$/) ratePeak3Rials!: string;
+  @IsOptional() @Matches(/^\d+$/) fullBoardRials!: string;
+  @IsOptional() @IsNumber() extraBedCount!: number;
+  @IsOptional() @Matches(/^\d+$/) extraBedRials!: string;
+  @IsOptional() @IsString() @MaxLength(240) pictureUrl!: string;
+  @IsOptional() @IsBoolean() isActive!: boolean;
+  @IsOptional() @IsNumber() syncCode!: number;
 }
 
 export class UpdateRoomTypeDto {
@@ -97,6 +164,26 @@ export class UpdateRoomTypeDto {
   @IsOptional()
   @Matches(/^\d+$/, { message: 'baseRateRials must be integer digits (Rials)' })
   baseRateRials!: string;
+
+  @IsOptional() @IsString() @MaxLength(60) nameLatin!: string;
+  @IsOptional() @IsNumber() bedCount!: number;
+  @IsOptional() @Matches(/^\d+$/) rateSingleRials!: string;
+  @IsOptional() @Matches(/^\d+$/) rateDoubleRials!: string;
+  @IsOptional() @Matches(/^\d+$/) rateTripleRials!: string;
+  @IsOptional() @Matches(/^\d+$/) rateFullRials!: string;
+  @IsOptional() @IsNumber() rateSingleUsd!: number;
+  @IsOptional() @IsNumber() rateDoubleUsd!: number;
+  @IsOptional() @IsNumber() rateTripleUsd!: number;
+  @IsOptional() @IsNumber() rateFullUsd!: number;
+  @IsOptional() @Matches(/^\d+$/) ratePeak1Rials!: string;
+  @IsOptional() @Matches(/^\d+$/) ratePeak2Rials!: string;
+  @IsOptional() @Matches(/^\d+$/) ratePeak3Rials!: string;
+  @IsOptional() @Matches(/^\d+$/) fullBoardRials!: string;
+  @IsOptional() @IsNumber() extraBedCount!: number;
+  @IsOptional() @Matches(/^\d+$/) extraBedRials!: string;
+  @IsOptional() @IsString() @MaxLength(240) pictureUrl!: string;
+  @IsOptional() @IsBoolean() isActive!: boolean;
+  @IsOptional() @IsNumber() syncCode!: number;
 }
 
 export class FolioItemDto {
@@ -110,6 +197,11 @@ export class FolioItemDto {
 
   @Matches(/^\d+$/, { message: 'unitRials must be integer digits (Rials)' })
   unitRials!: string;
+
+  /** نسخهٔ ۳٫۴ — کد درآمدی قلم؛ مسیر صورت‌حساب (مهمان/شرکت) از پلان اقامت تعیین می‌شود */
+  @IsOptional()
+  @IsString()
+  revenueCodeId!: string;
 }
 
 export class PmsReservationDto {
@@ -165,6 +257,11 @@ export class PmsReservationDto {
   @IsOptional()
   @IsString()
   partyId!: string; // پیوند با ثبت یکتای اشخاص (نیاز یکتایی کارفرما)
+
+  /** نسخهٔ ۳٫۴ — پلان تور/شرکت */
+  @IsOptional()
+  @IsString()
+  planId!: string;
 }
 
 export class WaitlistDto {
@@ -236,6 +333,11 @@ export class CheckInDto {
   @IsOptional()
   @IsString()
   partyId!: string; // رکورد یکتای مهمان — الزامی در گیت هویتی سخت‌گیرانه
+
+  /** نسخهٔ ۳٫۴ — پلان اقامت؛ پیش‌فرض پلان رزرو مبدأ */
+  @IsOptional()
+  @IsString()
+  planId!: string;
 }
 
 export class AttachPartyDto {
@@ -253,7 +355,7 @@ export class NightAuditDto {
 @ApiBearerAuth()
 @Controller('pms')
 export class PmsController {
-  constructor(private readonly pms: PmsService) {}
+  constructor(private readonly pms: PmsService, private readonly kinds: RoomKindsService, private readonly plans: PlansService) {}
 
   // ── F4-T1 نقشه اتاق ──
   @RequirePermissions(PERMISSIONS.ROOM_VIEW)
@@ -266,7 +368,7 @@ export class PmsController {
   @RequireAnyPermissions(PERMISSIONS.ROOM_UPDATE, PERMISSIONS.HOUSEKEEPING_UPDATE)
   @Patch('rooms/:id')
   async updateRoom(@Param('id') id: string, @Body() dto: UpdateRoomDto) {
-    return { data: await this.pms.updateRoom(id, { status: dto.status, hkStatus: dto.hkStatus, note: dto.note }) };
+    return { data: await this.pms.updateRoom(id, { ...dto }) };
   }
 
   // ── F4-T2 رزرواسیون توسعه‌یافته ──
@@ -288,6 +390,7 @@ export class PmsController {
       rateOverrideRials: dto.rateOverrideRials,
       nationality: dto.nationality,
       partyId: dto.partyId,
+      planId: dto.planId,
     };
     return { data: await this.pms.createReservation(input) };
   }
@@ -343,6 +446,7 @@ export class PmsController {
       children: dto.children,
       rateOverrideRials: dto.rateOverrideRials,
       partyId: dto.partyId,
+      planId: dto.planId,
     };
     return { data: await this.pms.checkIn(input) };
   }
@@ -377,13 +481,14 @@ export class PmsController {
   @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
   @Post('room-types')
   async createRoomType(@Body() dto: CreateRoomTypeDto) {
-    return { data: await this.pms.createRoomType(dto) };
+    const kindInput: RoomKindInput = { ...dto };
+    return { data: await this.kinds.createKind(kindInput) };
   }
 
   @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
   @Patch('room-types/:id')
   async updateRoomType(@Param('id') id: string, @Body() dto: UpdateRoomTypeDto) {
-    return { data: await this.pms.updateRoomType(id, dto) };
+    return { data: await this.kinds.updateKind(id, dto) };
   }
 
   @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
@@ -403,7 +508,7 @@ export class PmsController {
   @RequirePermissions(PERMISSIONS.RESERVATION_CREATE)
   @Post('stays/:id/folio-items')
   async addFolioItem(@Param('id') stayId: string, @Body() dto: FolioItemDto, @Req() req: AuthenticatedRequest) {
-    return { data: await this.pms.addFolioItem(stayId, { desc: dto.desc, qty: dto.qty, unitRials: dto.unitRials, createdByUserId: req.user.id }) };
+    return { data: await this.pms.addFolioItem(stayId, { desc: dto.desc, qty: dto.qty, unitRials: dto.unitRials, createdByUserId: req.user.id, revenueCodeId: dto.revenueCodeId }) };
   }
 
   @RequirePermissions(PERMISSIONS.RESERVATION_VIEW)
@@ -429,5 +534,141 @@ export class PmsController {
   @Get('night-audit')
   async listNightAudits() {
     return { data: await this.pms.listNightAudits() };
+  }
+
+  // ───────── نسخهٔ ۳٫۴ — انواع اتاق، مشخصه‌های اضافی، پلان تور/شرکت ─────────
+
+  /** لیست انواع اتاق — با ستون‌های زندهٔ تعداد اتاق/تعداد پر/تخت اضافه */
+  @RequirePermissions(PERMISSIONS.ROOM_VIEW)
+  @Get('room-kinds')
+  async listRoomKinds() {
+    return { data: await this.kinds.listKinds() };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Delete('room-kinds/:id')
+  async deleteRoomKind(@Param('id') id: string) {
+    return { data: await this.kinds.deleteKind(id) };
+  }
+
+  /** drill-down ستون‌های زنده: اتاق‌های نوع — ?occupied=1 برای «تعداد پر» و ?extraBeds=1 برای «تخت اضافه» */
+  @RequirePermissions(PERMISSIONS.ROOM_VIEW)
+  @Get('room-kinds/:id/rooms')
+  async roomKindRooms(@Param('id') id: string, @Query('occupied') occupied?: string, @Query('extraBeds') extraBeds?: string) {
+    return { data: await this.kinds.kindRooms(id, { occupiedOnly: occupied === '1', extraBedsOnly: extraBeds === '1' }) };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_VIEW)
+  @Get('room-amenities')
+  async listRoomAmenities() {
+    return { data: await this.kinds.listAmenities() };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Post('room-amenities')
+  async createRoomAmenity(@Body() dto: { code: string; nameFa: string; nameLatin?: string; shortName?: string }) {
+    return { data: await this.kinds.createAmenity(dto) };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Patch('room-amenities/:id')
+  async updateRoomAmenity(@Param('id') id: string, @Body() dto: { nameFa?: string; nameLatin?: string; shortName?: string; isActive?: boolean }) {
+    return { data: await this.kinds.updateAmenity(id, dto) };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Delete('room-amenities/:id')
+  async deleteRoomAmenity(@Param('id') id: string) {
+    return { data: await this.kinds.deleteAmenity(id) };
+  }
+
+  /** لیست انواع پلانی هتل */
+  @RequirePermissions(PERMISSIONS.ROOM_VIEW)
+  @Get('plans')
+  async listPlans() {
+    return { data: await this.plans.listPlans() };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Post('plans')
+  async createPlan(@Body() dto: { code?: number; nameFa: string; nameLatin?: string; isActive?: boolean }, @Req() req: AuthenticatedRequest) {
+    return { data: await this.plans.createPlan({ ...dto, createdById: req.user.id }) };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Patch('plans/:id')
+  async updatePlan(@Param('id') id: string, @Body() dto: { nameFa?: string; nameLatin?: string; isActive?: boolean }) {
+    return { data: await this.plans.updatePlan(id, dto) };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Delete('plans/:id')
+  async deletePlan(@Param('id') id: string) {
+    return { data: await this.plans.deletePlan(id) };
+  }
+
+  /** جزئيات پلان — ریز اقلام با سهم میهمان/شرکت + «نمایش تفکیکی پلان» */
+  @RequirePermissions(PERMISSIONS.ROOM_VIEW)
+  @Get('plans/:id/items')
+  async listPlanItems(@Param('id') id: string) {
+    return { data: await this.plans.listPlanItems(id) };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Post('plans/:id/items')
+  async addPlanItem(@Param('id') id: string, @Body() dto: { revenueCodeId: string; chargeTo?: string }, @Req() req: AuthenticatedRequest) {
+    return { data: await this.plans.addPlanItem(id, { ...dto, createdById: req.user.id }) };
+  }
+
+  /** تصحیح کدینگ درآمدی پلان — تغییر سهم قلم (میهمان ↔ تور/شرکت) */
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Patch('plan-items/:id')
+  async updatePlanItem(@Param('id') id: string, @Body() dto: { chargeTo?: string }) {
+    return { data: await this.plans.updatePlanItem(id, dto) };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Delete('plan-items/:id')
+  async deletePlanItem(@Param('id') id: string) {
+    return { data: await this.plans.deletePlanItem(id) };
+  }
+
+  /** دیکشنری کدینگ درآمدی */
+  @RequirePermissions(PERMISSIONS.ROOM_VIEW)
+  @Get('revenue-codes')
+  async listRevenueCodes() {
+    return { data: await this.plans.listRevenueCodes() };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Post('revenue-codes')
+  async createRevenueCode(@Body() dto: { code?: number; nameFa: string; nameEn?: string }) {
+    return { data: await this.plans.createRevenueCode(dto) };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Patch('revenue-codes/:id')
+  async updateRevenueCode(@Param('id') id: string, @Body() dto: { nameFa?: string; nameEn?: string; isActive?: boolean }) {
+    return { data: await this.plans.updateRevenueCode(id, dto) };
+  }
+
+  @RequirePermissions(PERMISSIONS.ROOM_UPDATE)
+  @Delete('revenue-codes/:id')
+  async deleteRevenueCode(@Param('id') id: string) {
+    return { data: await this.plans.deleteRevenueCode(id) };
+  }
+
+  /** تفکیک فولیو اقامت به دو صورت‌حساب: میهمان و تور/شرکت */
+  @RequirePermissions(PERMISSIONS.ROOM_VIEW)
+  @Get('stays/:id/folio-split')
+  async folioSplit(@Param('id') id: string) {
+    return { data: await this.plans.folioSplit(id) };
+  }
+
+  /** صدور فاکتور رسمی به نام میهمان یا تور/شرکت (پیش‌نویس مؤدیان — ارسال از مسیر موجود compliance) */
+  @RequireAnyPermissions(PERMISSIONS.ROOM_UPDATE, PERMISSIONS.INVOICE_MANAGE)
+  @Post('stays/:id/invoice')
+  async issueStayInvoice(@Param('id') id: string, @Body() dto: { debtor: 'GUEST' | 'COMPANY'; buyerTaxId?: string; buyerName?: string }, @Req() req: AuthenticatedRequest) {
+    return { data: await this.plans.issueInvoice(id, dto.debtor, { buyerTaxId: dto.buyerTaxId, buyerName: dto.buyerName, userId: req.user.id }) };
   }
 }
