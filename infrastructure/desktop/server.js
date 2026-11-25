@@ -257,7 +257,7 @@ function portAlive(p) {
 async function main() {
   console.log('\n==============================================');
   console.log('   Hotel ERP — سامانه یکپارچه هتلداری');
-  console.log('   نسخهٔ دسکتاپ v3.2.1 — در حال راه‌اندازی…');
+  console.log('   نسخهٔ دسکتاپ v3.2.2 — در حال راه‌اندازی…');
   console.log('==============================================\n');
   log('data dir: ' + DATA_DIR);
   log('log file: ' + LOG_FILE);

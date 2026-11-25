@@ -293,6 +293,22 @@ jobs:
             Write-Host "UNINSTALL OK — INSTALL / DOUBLE-CLICK / FUNCTIONAL / UNINSTALL all passed"
           }
 
+          # ── باگ #۱۳ — تشخیص نصب قبلی: Setup خاموش روی ماشین نصب‌شده باید «حذف کامل» کند ──
+          # ۱) نصب خاموش تازه (ماشین اکنون تمیز است) → باید نصب شود
+          # ۲) اجرای دوبارهٔ Setup /S روی همان ماشین → باید نصب قبلی را کامل حذف کند
+          Write-Host "BUG13 — reinstall-detection regression: fresh silent install, then silent Setup on installed machine must uninstall"
+          $p3 = Start-Process -FilePath "infrastructure\desktop\out\Hotel-ERP-Setup.exe" -ArgumentList "/S" -Wait -PassThru
+          if ($p3.ExitCode -ne 0) { throw "bug13 fresh Setup /S exited $($p3.ExitCode)" }
+          if (-not (Test-Path "$inst\Uninstall.exe")) { throw "bug13 fresh install is missing Uninstall.exe" }
+          Write-Host "BUG13 fresh silent install OK — machine is now 'installed'"
+          $p4 = Start-Process -FilePath "infrastructure\desktop\out\Hotel-ERP-Setup.exe" -ArgumentList "/S" -Wait -PassThru
+          if ($p4.ExitCode -ne 0) { throw "bug13 detection Setup /S exited $($p4.ExitCode)" }
+          Start-Sleep -Seconds 3
+          if (Test-Path $inst) { throw "BUG13 FAILED: second silent Setup on installed machine did NOT uninstall it" }
+          $key = Get-ItemProperty "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\HotelERP" -ErrorAction SilentlyContinue
+          if ($key) { throw "BUG13 FAILED: uninstall registry key still present after detection-uninstall" }
+          Write-Host "DETECTION OK — installed machine + silent Setup = complete uninstall (bug #13 rule)"
+
       - name: Upload artifact (always)
         if: always()
         uses: actions/upload-artifact@v4

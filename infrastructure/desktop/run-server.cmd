@@ -3,7 +3,7 @@ chcp 65001 >nul
 title Hotel ERP — سرور برنامه (بستن این پنجره = خاموش شدن برنامه)
 cd /d "%~dp0"
 echo ==================================================
-echo    Hotel ERP - Samane Yekparche Hoteldari (v3.2.1)
+echo    Hotel ERP - Samane Yekparche Hoteldari (v3.2.2)
 echo    در حال راه‌اندازی... اولین اجرا کمی طول می‌کشد
 echo    (ساخت پایگاه داده + دادهٔ اولیه ~۳۰ ثانیه)
 echo ==================================================
